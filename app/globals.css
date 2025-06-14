@@ -1,12 +1,41 @@
 @import "tailwindcss";
 
-/* Vergil Design Tokens */
+/* Vergil Brand Design Tokens */
 :root {
+  /* Primary Palette */
+  --cosmic-purple: #6366F1;
+  --electric-violet: #A78BFA;
+  --luminous-indigo: #818CF8;
+  
+  /* Accent Colors */
+  --phosphor-cyan: #10B981;
+  --synaptic-blue: #3B82F6;
+  --neural-pink: #F472B6;
+  
+  /* Foundation Colors */
+  --pure-light: #FFFFFF;
+  --soft-light: #FAFAFA;
+  --whisper-gray: #F8F9FA;
+  --mist-gray: #E5E7EB;
+  --stone-gray: #9CA3AF;
+  --deep-space: #0F172A;
+  
+  /* Legacy tokens for backward compatibility */
   --vergil-purple-500: #6366F1;
   --vergil-violet-500: #A78BFA;
   --vergil-indigo-500: #818CF8;
   --vergil-cyan-500: #10B981;
   --vergil-blue-500: #3B82F6;
+  
+  /* Typography scale */
+  --font-display: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  
+  /* Timing functions */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-natural: cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 body {
@@ -24,15 +53,53 @@ body {
 }
 
 .vergil-gradient {
-  background: linear-gradient(135deg, var(--vergil-purple-500), var(--vergil-violet-500), var(--vergil-indigo-500));
+  background: linear-gradient(135deg, var(--cosmic-purple), var(--electric-violet), var(--luminous-indigo));
   background-size: 200% 200%;
   animation: gradient-shift 8s ease infinite;
 }
 
-/* Keyframe Animations */
+/* Brand Gradient System */
+.consciousness-gradient {
+  background: linear-gradient(135deg, var(--cosmic-purple) 0%, var(--electric-violet) 50%, var(--luminous-indigo) 100%);
+}
+
+.awakening-gradient {
+  background: linear-gradient(90deg, var(--cosmic-purple) 0%, var(--synaptic-blue) 100%);
+}
+
+.synaptic-gradient {
+  background: linear-gradient(135deg, var(--electric-violet) 0%, var(--neural-pink) 100%);
+}
+
+.light-ray-gradient {
+  background: radial-gradient(circle at center, rgba(99,102,241,0.2) 0%, transparent 70%);
+}
+
+/* Iris Pattern */
+.iris-pattern {
+  background: radial-gradient(
+    circle at center,
+    transparent 30%,
+    rgba(99, 102, 241, 0.1) 40%,
+    transparent 50%,
+    rgba(167, 139, 250, 0.05) 60%,
+    transparent 70%
+  );
+  animation: iris-pulse 6s ease-in-out infinite;
+}
+
+/* Neural Network Background */
+.neural-bg {
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(129, 140, 248, 0.1) 0%, transparent 50%);
+}
+
+/* Brand Keyframe Animations */
 @keyframes breathing {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.03); opacity: 1; }
 }
 
 @keyframes pulse-glow {
@@ -44,4 +111,79 @@ body {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes synaptic-pulse {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.3; transform: scale(0.8); }
+}
+
+@keyframes neural-flow {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  50% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes iris-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  33% { transform: scale(1.05); opacity: 0.8; }
+  66% { transform: scale(1.02); opacity: 1; }
+}
+
+/* Card Design System */
+.brand-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 24px rgba(99, 102, 241, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.brand-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 32px rgba(99, 102, 241, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--cosmic-purple) 0%, var(--electric-violet) 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.3s var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Typography Classes */
+.gradient-text {
+  background: linear-gradient(135deg, var(--cosmic-purple), var(--electric-violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
