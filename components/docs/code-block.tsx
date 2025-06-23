@@ -30,7 +30,7 @@ export function CodeBlock({
     }
   }
 
-  const lines = children.trim().split('\n')
+  const lines = (children || '').trim().split('\n')
 
   return (
     <div className={cn("relative group", className)}>
@@ -77,7 +77,7 @@ export function CodeBlock({
               </tbody>
             </table>
           ) : (
-            <span className="text-gray-800">{children.trim()}</span>
+            <span className="text-gray-800">{(children || '').trim()}</span>
           )}
         </code>
       </pre>

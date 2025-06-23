@@ -1,0 +1,469 @@
+{
+  "nodes": [
+    {
+      "id": "company_1",
+      "label": "Tech Corp",
+      "type": "Company",
+      "animationStage": 0,
+      "animationOrder": 0,
+      "properties": {
+        "industry": "Technology",
+        "size": "large",
+        "founded": 2010,
+        "revenue": 50000000
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "department_1",
+      "label": "Engineering",
+      "type": "Department",
+      "animationStage": 0,
+      "animationOrder": 1,
+      "animationDelay": 200,
+      "properties": {
+        "size": 45,
+        "budget": 15000000
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "department_2",
+      "label": "Marketing",
+      "type": "Department",
+      "animationStage": 0,
+      "animationOrder": 2,
+      "animationDelay": 400,
+      "properties": {
+        "size": 20,
+        "budget": 5000000
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "person_3",
+      "label": "Mike Wilson",
+      "type": "Person",
+      "animationStage": 1,
+      "animationOrder": 0,
+      "properties": {
+        "age": 41,
+        "department": "Engineering",
+        "role": "Engineering Manager",
+        "location": "Austin",
+        "status": "active"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "person_1",
+      "label": "John Smith",
+      "type": "Person",
+      "animationStage": 1,
+      "animationOrder": 1,
+      "animationDelay": 300,
+      "properties": {
+        "age": 34,
+        "department": "Engineering",
+        "role": "Senior Developer",
+        "location": "New York",
+        "status": "active"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "person_5",
+      "label": "David Brown",
+      "type": "Person",
+      "animationStage": 1,
+      "animationOrder": 2,
+      "animationDelay": 600,
+      "properties": {
+        "age": 38,
+        "department": "Engineering",
+        "role": "DevOps Engineer",
+        "location": "Seattle",
+        "status": "active"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "person_4",
+      "label": "Emily Chen",
+      "type": "Person",
+      "animationStage": 1,
+      "animationOrder": 3,
+      "animationDelay": 900,
+      "properties": {
+        "age": 27,
+        "department": "Marketing",
+        "role": "Product Marketing Manager",
+        "location": "Los Angeles",
+        "status": "active"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "project_1",
+      "label": "AI Platform",
+      "type": "Project",
+      "animationStage": 2,
+      "animationOrder": 0,
+      "properties": {
+        "status": "active",
+        "priority": "high",
+        "budget": 500000,
+        "startDate": "2024-01-15",
+        "deadline": "2025-12-31"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "project_2",
+      "label": "Mobile App",
+      "type": "Project",
+      "animationStage": 2,
+      "animationOrder": 1,
+      "animationDelay": 400,
+      "properties": {
+        "status": "active",
+        "priority": "medium",
+        "budget": 200000,
+        "startDate": "2024-03-01",
+        "deadline": "2024-12-31"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "skill_1",
+      "label": "React Development",
+      "type": "Skill",
+      "animationStage": 3,
+      "animationOrder": 0,
+      "properties": {
+        "category": "Frontend",
+        "level": "expert",
+        "demand": "high"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "skill_3",
+      "label": "DevOps",
+      "type": "Skill",
+      "animationStage": 3,
+      "animationOrder": 1,
+      "animationDelay": 300,
+      "properties": {
+        "category": "Infrastructure",
+        "level": "expert",
+        "demand": "medium"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    },
+    {
+      "id": "skill_4",
+      "label": "Product Marketing",
+      "type": "Skill",
+      "animationStage": 3,
+      "animationOrder": 2,
+      "animationDelay": 600,
+      "properties": {
+        "category": "Marketing",
+        "level": "intermediate",
+        "demand": "high"
+      },
+      "position": {
+        "x": null,
+        "y": null,
+        "fixed": false
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel_dept_1",
+      "source": "department_1",
+      "target": "company_1",
+      "type": "BELONGS_TO",
+      "animationStage": 0,
+      "animationOrder": 3,
+      "properties": {}
+    },
+    {
+      "id": "rel_dept_2",
+      "source": "department_2",
+      "target": "company_1",
+      "type": "BELONGS_TO",
+      "animationStage": 0,
+      "animationOrder": 4,
+      "properties": {}
+    },
+    {
+      "id": "rel_3",
+      "source": "person_3",
+      "target": "department_1",
+      "type": "WORKS_IN",
+      "animationStage": 1,
+      "animationOrder": 4,
+      "properties": {
+        "since": "2018-06-15",
+        "salary": 120000,
+        "remote": true
+      }
+    },
+    {
+      "id": "rel_1",
+      "source": "person_1",
+      "target": "department_1",
+      "type": "WORKS_IN",
+      "animationStage": 1,
+      "animationOrder": 5,
+      "properties": {
+        "since": "2020-01-15",
+        "salary": 95000,
+        "remote": true
+      }
+    },
+    {
+      "id": "rel_5",
+      "source": "person_5",
+      "target": "department_1",
+      "type": "WORKS_IN",
+      "animationStage": 1,
+      "animationOrder": 6,
+      "properties": {
+        "since": "2019-11-20",
+        "salary": 110000,
+        "remote": true
+      }
+    },
+    {
+      "id": "rel_4",
+      "source": "person_4",
+      "target": "department_2",
+      "type": "WORKS_IN",
+      "animationStage": 1,
+      "animationOrder": 7,
+      "properties": {
+        "since": "2022-09-01",
+        "salary": 85000,
+        "remote": false
+      }
+    },
+    {
+      "id": "rel_6",
+      "source": "person_3",
+      "target": "person_1",
+      "type": "MANAGES",
+      "animationStage": 1,
+      "animationOrder": 8,
+      "animationDelay": 200,
+      "properties": {
+        "since": "2022-01-01",
+        "directReport": true
+      }
+    },
+    {
+      "id": "rel_7",
+      "source": "person_3",
+      "target": "person_5",
+      "type": "MANAGES",
+      "animationStage": 1,
+      "animationOrder": 9,
+      "animationDelay": 400,
+      "properties": {
+        "since": "2020-06-15",
+        "directReport": true
+      }
+    },
+    {
+      "id": "rel_8",
+      "source": "person_1",
+      "target": "project_1",
+      "type": "ASSIGNED_TO",
+      "animationStage": 2,
+      "animationOrder": 2,
+      "properties": {
+        "role": "Lead Developer",
+        "allocation": 100,
+        "startDate": "2024-01-15"
+      }
+    },
+    {
+      "id": "rel_11",
+      "source": "person_5",
+      "target": "project_1",
+      "type": "ASSIGNED_TO",
+      "animationStage": 2,
+      "animationOrder": 3,
+      "properties": {
+        "role": "Infrastructure",
+        "allocation": 30,
+        "startDate": "2024-02-01"
+      }
+    },
+    {
+      "id": "rel_10",
+      "source": "person_4",
+      "target": "project_1",
+      "type": "ASSIGNED_TO",
+      "animationStage": 2,
+      "animationOrder": 4,
+      "properties": {
+        "role": "Product Marketing",
+        "allocation": 50,
+        "startDate": "2024-03-01"
+      }
+    },
+    {
+      "id": "rel_12",
+      "source": "person_1",
+      "target": "project_2",
+      "type": "ASSIGNED_TO",
+      "animationStage": 2,
+      "animationOrder": 5,
+      "properties": {
+        "role": "Tech Lead",
+        "allocation": 50,
+        "startDate": "2024-03-01"
+      }
+    },
+    {
+      "id": "rel_13",
+      "source": "person_1",
+      "target": "skill_1",
+      "type": "HAS_SKILL",
+      "animationStage": 3,
+      "animationOrder": 3,
+      "properties": {
+        "proficiency": "expert",
+        "yearsExperience": 8,
+        "certified": true
+      }
+    },
+    {
+      "id": "rel_15",
+      "source": "person_5",
+      "target": "skill_3",
+      "type": "HAS_SKILL",
+      "animationStage": 3,
+      "animationOrder": 4,
+      "properties": {
+        "proficiency": "expert",
+        "yearsExperience": 10,
+        "certified": false
+      }
+    },
+    {
+      "id": "rel_17",
+      "source": "person_4",
+      "target": "skill_4",
+      "type": "HAS_SKILL",
+      "animationStage": 3,
+      "animationOrder": 5,
+      "properties": {
+        "proficiency": "intermediate",
+        "yearsExperience": 3,
+        "certified": true
+      }
+    },
+    {
+      "id": "rel_16",
+      "source": "project_1",
+      "target": "skill_1",
+      "type": "REQUIRES_SKILL",
+      "animationStage": 3,
+      "animationOrder": 6,
+      "properties": {
+        "importance": "critical",
+        "minimumLevel": "intermediate"
+      }
+    },
+    {
+      "id": "rel_18",
+      "source": "project_1",
+      "target": "skill_3",
+      "type": "REQUIRES_SKILL",
+      "animationStage": 3,
+      "animationOrder": 7,
+      "properties": {
+        "importance": "high",
+        "minimumLevel": "intermediate"
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-06-21T10:30:00Z",
+    "description": "Staged animation graph showing organizational structure building in 4 stages",
+    "stages": [
+      {
+        "stage": 0,
+        "title": "Company Foundation",
+        "description": "Company and department structure"
+      },
+      {
+        "stage": 1,
+        "title": "Team Formation",
+        "description": "People join the organization"
+      },
+      {
+        "stage": 2,
+        "title": "Project Assignment",
+        "description": "Teams are assigned to projects"
+      },
+      {
+        "stage": 3,
+        "title": "Skills & Requirements",
+        "description": "Skills are mapped to people and projects"
+      }
+    ],
+    "nodeTypes": ["Company", "Department", "Person", "Project", "Skill"],
+    "relationshipTypes": ["BELONGS_TO", "WORKS_IN", "MANAGES", "ASSIGNED_TO", "HAS_SKILL", "REQUIRES_SKILL"]
+  }
+}

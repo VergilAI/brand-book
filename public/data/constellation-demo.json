@@ -1,0 +1,146 @@
+{
+  "nodes": [
+    {
+      "id": "ai_core",
+      "label": "AI Core",
+      "type": "System",
+      "properties": {
+        "version": "4.2.1",
+        "status": "active",
+        "performance": "98%"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    },
+    {
+      "id": "learning_engine",
+      "label": "Learning Engine",
+      "type": "System",
+      "properties": {
+        "model": "Neural-X",
+        "accuracy": "96.5%",
+        "updates": "real-time"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    },
+    {
+      "id": "data_lake",
+      "label": "Data Lake",
+      "type": "Infrastructure",
+      "properties": {
+        "size": "2.5 PB",
+        "type": "distributed",
+        "encryption": "AES-256"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    },
+    {
+      "id": "api_gateway",
+      "label": "API Gateway",
+      "type": "Infrastructure",
+      "properties": {
+        "requests": "10M/day",
+        "latency": "12ms",
+        "uptime": "99.99%"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    },
+    {
+      "id": "user_interface",
+      "label": "User Interface",
+      "type": "Application",
+      "properties": {
+        "framework": "React",
+        "users": "50K+",
+        "satisfaction": "4.8/5"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics Dashboard",
+      "type": "Application",
+      "properties": {
+        "metrics": "200+",
+        "refresh": "real-time",
+        "visualizations": "dynamic"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    },
+    {
+      "id": "security",
+      "label": "Security Layer",
+      "type": "Protection",
+      "properties": {
+        "protocol": "Zero Trust",
+        "monitoring": "24/7",
+        "compliance": "SOC2, GDPR"
+      },
+      "position": { "x": null, "y": null, "fixed": false }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel_1",
+      "source": "ai_core",
+      "target": "learning_engine",
+      "type": "POWERS",
+      "properties": { "bandwidth": "10 Gbps" }
+    },
+    {
+      "id": "rel_2",
+      "source": "learning_engine",
+      "target": "data_lake",
+      "type": "READS_FROM",
+      "properties": { "frequency": "continuous" }
+    },
+    {
+      "id": "rel_3",
+      "source": "api_gateway",
+      "target": "ai_core",
+      "type": "CONNECTS_TO",
+      "properties": { "protocol": "REST/GraphQL" }
+    },
+    {
+      "id": "rel_4",
+      "source": "user_interface",
+      "target": "api_gateway",
+      "type": "QUERIES",
+      "properties": { "auth": "OAuth 2.0" }
+    },
+    {
+      "id": "rel_5",
+      "source": "analytics",
+      "target": "data_lake",
+      "type": "ANALYZES",
+      "properties": { "processing": "stream/batch" }
+    },
+    {
+      "id": "rel_6",
+      "source": "security",
+      "target": "api_gateway",
+      "type": "PROTECTS",
+      "properties": { "layers": "3" }
+    },
+    {
+      "id": "rel_7",
+      "source": "security",
+      "target": "data_lake",
+      "type": "ENCRYPTS",
+      "properties": { "standard": "AES-256" }
+    },
+    {
+      "id": "rel_8",
+      "source": "ai_core",
+      "target": "analytics",
+      "type": "FEEDS",
+      "properties": { "data": "insights" }
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-06-17T14:00:00Z",
+    "description": "AI Platform Architecture Visualization",
+    "nodeTypes": ["System", "Infrastructure", "Application", "Protection"],
+    "relationshipTypes": ["POWERS", "READS_FROM", "CONNECTS_TO", "QUERIES", "ANALYZES", "PROTECTS", "ENCRYPTS", "FEEDS"]
+  }
+}

@@ -9,30 +9,62 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Primary Palette
-        'cosmic-purple': '#6366F1',
-        'electric-violet': '#A78BFA', 
-        'luminous-indigo': '#818CF8',
-        
-        // Accent Colors
-        'phosphor-cyan': '#10B981',
-        'synaptic-blue': '#3B82F6',
-        'neural-pink': '#F472B6',
-        
-        // Foundation Colors
-        'pure-light': '#FFFFFF',
-        'soft-light': '#FAFAFA',
-        'whisper-gray': '#F8F9FA',
-        'mist-gray': '#E5E7EB',
-        'stone-gray': '#9CA3AF',
-        'deep-space': '#0F172A',
-        
-        // Legacy aliases for backward compatibility
-        'vergil-purple-500': '#6366F1',
-        'vergil-violet-500': '#A78BFA',
-        'vergil-indigo-500': '#818CF8',
-        'vergil-cyan-500': '#10B981',
-        'vergil-blue-500': '#3B82F6',
+        // shadcn/ui theme integration - these use CSS variables
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        chart: {
+          '1': 'hsl(var(--chart-1))',
+          '2': 'hsl(var(--chart-2))',
+          '3': 'hsl(var(--chart-3))',
+          '4': 'hsl(var(--chart-4))',
+          '5': 'hsl(var(--chart-5))',
+        },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       fontSize: {
         // Display sizes
