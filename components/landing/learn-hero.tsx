@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { RadialHeatmap } from '@/components/vergil/radial-heatmap'
 import { Play, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 interface LearnHeroProps {
   onVideoClick?: () => void
@@ -32,12 +33,14 @@ export function LearnHero({ onVideoClick }: LearnHeroProps) {
 
             {/* CTA Button */}
             <div>
-              <Button
-                size="lg"
-                className="bg-cosmic-purple hover:bg-electric-violet text-pure-light px-8 py-3 text-base font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                Book a Demo
-              </Button>
+              <Link href="/contact">
+                <Button
+                  size="lg"
+                  className="bg-cosmic-purple hover:bg-electric-violet text-pure-light px-8 py-3 text-base font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                >
+                  Book a Demo
+                </Button>
+              </Link>
             </div>
           </div>
 

@@ -213,7 +213,7 @@ export default function LandingPage() {
         }}
         secondaryCTA={{
           text: "Book a Demo",
-          href: "/demo"
+          href: "/contact"
         }}
         variant="gradient"
         size="lg"

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, FileText, Video, FileImage, FileSpreadsheet, Presentation, BookOpen, Globe, Users, User, BarChart3, HardHat, FileCheck, TrendingUp, DollarSign, Shield, Award, UserCheck, Zap, ArrowRight, Check } from 'lucide-react'
 import { GraphConstellationPersistent } from '@/components/vergil/graph-constellation-persistent'
@@ -115,16 +116,11 @@ const journeySteps = [
     description: 'Monitor learning outcomes',
     header: 'Real-Time Learning Analytics',
     subheader: ''
-  },
-  { 
-    title: 'Generate Reports', 
-    description: 'Compliance and insights',
-    header: 'Automated Compliance Reporting',
-    subheader: 'Generate detailed reports for stakeholders and regulatory requirements'
   }
 ]
 
 export function UserJourneyCarousel() {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
   const [showGraph, setShowGraph] = useState(false)
@@ -138,6 +134,7 @@ export function UserJourneyCarousel() {
   const [windowDimensions, setWindowDimensions] = useState({ width: 1200, height: 800 })
   const [showScrollIndicator, setShowScrollIndicator] = useState(false)
   const [disableFloatingMotion, setDisableFloatingMotion] = useState(false)
+  const [showFinalScrollHint, setShowFinalScrollHint] = useState(false)
 
   // Load graph data on component mount
   useEffect(() => {
@@ -168,6 +165,19 @@ export function UserJourneyCarousel() {
 
   // Remove the automatic graph initialization effect to prevent restarts
   // The graph should only be initialized through the handleNext function
+
+  // Show scroll hint when reaching last slide
+  useEffect(() => {
+    if (currentStep === journeySteps.length - 1) {
+      // Show hint after 2 seconds
+      const timer = setTimeout(() => {
+        setShowFinalScrollHint(true)
+      }, 2000)
+      return () => clearTimeout(timer)
+    } else {
+      setShowFinalScrollHint(false)
+    }
+  }, [currentStep])
 
   // Simple scroll lock at carousel bottom
   useEffect(() => {
@@ -306,7 +316,6 @@ export function UserJourneyCarousel() {
       case 2:
       case 3:
       case 4:
-      case 5:
         return (
           <div className="w-full h-full flex items-center justify-center relative">
             {/* Content Upload Slide */}
@@ -1073,28 +1082,6 @@ export function UserJourneyCarousel() {
                 </div>
               </div>
             </div>
-
-            {/* Step 5: Generate Reports - Only visible on slide 5 */}
-            <div 
-              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                currentStep === 5 ? 'transform translate-x-0 opacity-100' : 'transform translate-x-full opacity-0'
-              }`}
-              style={{ zIndex: currentStep === 5 ? 20 : 1 }}
-            >
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center">
-                  <h3 className="text-3xl font-display font-bold text-deep-space mb-4">
-                    Generate Reports
-                  </h3>
-                  <p className="text-xl text-stone-gray">
-                    Compliance and insights reporting
-                  </p>
-                  <div className="mt-8 p-8 bg-white rounded-xl shadow-lg border border-mist-gray">
-                    <p className="text-stone-gray">Reporting features coming soon...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         )
 
@@ -1118,18 +1105,21 @@ export function UserJourneyCarousel() {
   }
 
   return (
+    <>
     <section className="min-h-screen bg-soft-light flex flex-col relative overflow-visible scroll-smooth" data-carousel-section style={{ scrollBehavior: 'smooth' }}>
-      {/* Scroll Boundary Indicator */}
+      {/* Scroll Hint for Final Slide */}
       <div 
         className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
-          showScrollIndicator && currentStep < journeySteps.length - 1 
+          showFinalScrollHint && currentStep === journeySteps.length - 1 
             ? 'opacity-100 transform translate-y-0' 
             : 'opacity-0 transform translate-y-4 pointer-events-none'
         }`}
       >
-        <div className="bg-cosmic-purple/90 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
-          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium">Complete the journey to continue scrolling</span>
+        <div className="bg-cosmic-purple/90 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 animate-pulse">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+          <span className="text-sm font-medium">Scroll down to continue</span>
         </div>
       </div>
       
@@ -1316,5 +1306,26 @@ export function UserJourneyCarousel() {
           </div>
         </div>
     </section>
+    
+    {/* Call to Action Section */}
+    <section className="py-24 bg-pure-light">
+      <div className="container mx-auto px-4 text-center">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-6 text-deep-space">
+          Ready to unlock the true potential of your organization?
+        </h2>
+        <p className="text-lg md:text-xl text-stone-gray max-w-3xl mx-auto mb-10">
+          Transform your workforce with AI-powered learning that adapts, evolves, and delivers measurable results.
+        </p>
+        <Button
+          size="lg"
+          className="bg-cosmic-purple hover:bg-electric-violet text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg px-8 py-6"
+          onClick={() => router.push('/contact')}
+        >
+          Book a Demo
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
+      </div>
+    </section>
+    </>
   )
 }

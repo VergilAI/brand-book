@@ -65,12 +65,14 @@ export function Navigation({ className }: NavigationProps) {
             </Link>
 
             {/* CTA Button */}
-            <Button 
-              size="sm" 
-              className="bg-cosmic-purple hover:bg-electric-violet text-pure-light rounded-full px-5 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105"
-            >
-              Book Demo
-            </Button>
+            <Link href="/contact">
+              <Button 
+                size="sm" 
+                className="bg-cosmic-purple hover:bg-electric-violet text-pure-light rounded-full px-5 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105"
+              >
+                Book Demo
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -117,13 +119,15 @@ export function Navigation({ className }: NavigationProps) {
           {isOpen && (
             <div className="border-t border-mist-gray/30 bg-pure-light/98 backdrop-blur-xl">
               <div className="px-6 py-6">
-                <Button 
-                  size="sm" 
-                  className="w-full bg-cosmic-purple hover:bg-electric-violet text-pure-light rounded-full py-3"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Book Demo
-                </Button>
+                <Link href="/contact" className="block w-full">
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-cosmic-purple hover:bg-electric-violet text-pure-light rounded-full py-3"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Book Demo
+                  </Button>
+                </Link>
               </div>
             </div>
           )}
