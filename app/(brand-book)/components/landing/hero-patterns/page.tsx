@@ -33,8 +33,8 @@ export default function HeroPatternsPage() {
                 size="lg"
                 title="Unlock Human Potential with AI"
                 subtitle="Transform your organization's learning capabilities with personalized AI-driven education that adapts to every individual's unique growth journey."
-                primaryAction={{ text: "Start Free Trial", href: "#" }}
-                secondaryAction={{ text: "Watch Demo", href: "#" }}
+                primaryCta={{ text: "Start Free Trial", href: "#" }}
+                secondaryCta={{ text: "Watch Demo", href: "#" }}
                 backgroundPattern={true}
               />
             </div>
@@ -67,8 +67,8 @@ export default function HeroPatternsPage() {
   size="lg"
   title="Unlock Human Potential with AI"
   subtitle="Transform your organization's learning capabilities..."
-  primaryAction={{ text: "Start Free Trial", href: "/signup" }}
-  secondaryAction={{ text: "Watch Demo", href: "/demo" }}
+  primaryCta={{ text: "Start Free Trial", href: "/signup" }}
+  secondaryCta={{ text: "Watch Demo", href: "/demo" }}
   backgroundPattern={true}
 />`}
             </CodeBlock>
@@ -90,7 +90,7 @@ export default function HeroPatternsPage() {
                 size="md"
                 title="AI That Understands Learning"
                 subtitle="Our neural network adapts to individual learning patterns, creating personalized pathways that maximize retention and engagement."
-                primaryAction={{ text: "Explore Technology", href: "#" }}
+                primaryCta={{ text: "Explore Technology", href: "#" }}
                 backgroundPattern={true}
               />
             </div>
@@ -112,7 +112,7 @@ export default function HeroPatternsPage() {
   size="md"
   title="AI That Understands Learning"
   subtitle="Our neural network adapts to individual learning patterns..."
-  primaryAction={{ text: "Explore Technology", href: "/tech" }}
+  primaryCta={{ text: "Explore Technology", href: "/tech" }}
   backgroundPattern={true}
 />`}
             </CodeBlock>
@@ -134,8 +134,8 @@ export default function HeroPatternsPage() {
                 size="xl"
                 title="The Future of Learning is Here"
                 subtitle="Step into a new era of education where AI and human intelligence converge to create unprecedented learning experiences."
-                primaryAction={{ text: "Join the Future", href: "#" }}
-                secondaryAction={{ text: "Learn More", href: "#" }}
+                primaryCta={{ text: "Join the Future", href: "#" }}
+                secondaryCta={{ text: "Learn More", href: "#" }}
                 backgroundPattern={true}
               />
             </div>
@@ -157,8 +157,8 @@ export default function HeroPatternsPage() {
   size="xl"
   title="The Future of Learning is Here"
   subtitle="Step into a new era of education..."
-  primaryAction={{ text: "Join the Future", href: "/signup" }}
-  secondaryAction={{ text: "Learn More", href: "/about" }}
+  primaryCta={{ text: "Join the Future", href: "/signup" }}
+  secondaryCta={{ text: "Learn More", href: "/about" }}
   backgroundPattern={true}
 />`}
             </CodeBlock>
@@ -180,7 +180,7 @@ export default function HeroPatternsPage() {
                 size="md"
                 title="Clean, Focused Messaging"
                 subtitle="Sometimes the most powerful message is the simplest one. Clean typography and focused content drive action."
-                primaryAction={{ text: "Get Started", href: "#" }}
+                primaryCta={{ text: "Get Started", href: "#" }}
                 backgroundPattern={false}
               />
             </div>
@@ -202,7 +202,7 @@ export default function HeroPatternsPage() {
   size="md"
   title="Clean, Focused Messaging"
   subtitle="Sometimes the most powerful message is the simplest one..."
-  primaryAction={{ text: "Get Started", href: "/start" }}
+  primaryCta={{ text: "Get Started", href: "/start" }}
   backgroundPattern={false}
 />`}
             </CodeBlock>
@@ -263,13 +263,13 @@ export default function HeroPatternsPage() {
                       <td className="p-2 text-muted-foreground">Supporting description</td>
                     </tr>
                     <tr>
-                      <td className="p-2 font-mono">primaryAction</td>
+                      <td className="p-2 font-mono">primaryCta</td>
                       <td className="p-2 text-muted-foreground">{'{ text: string, href: string }'}</td>
                       <td className="p-2 text-muted-foreground">-</td>
                       <td className="p-2 text-muted-foreground">Primary CTA button</td>
                     </tr>
                     <tr>
-                      <td className="p-2 font-mono">secondaryAction</td>
+                      <td className="p-2 font-mono">secondaryCta</td>
                       <td className="p-2 text-muted-foreground">{'{ text: string, href: string } | undefined'}</td>
                       <td className="p-2 text-muted-foreground">undefined</td>
                       <td className="p-2 text-muted-foreground">Optional secondary CTA</td>

@@ -86,12 +86,42 @@ const loadCarouselGraphData = async () => {
 
 
 const journeySteps = [
-  { title: 'Upload Content', description: 'Choose your materials' },
-  { title: 'Generate Knowledge Graph', description: 'AI analyzes and connects concepts' },
-  { title: 'Create Courses', description: 'Automated course generation' },
-  { title: 'Learn & Progress', description: 'Interactive learning experience' },
-  { title: 'Track Analytics', description: 'Monitor learning outcomes' },
-  { title: 'Generate Reports', description: 'Compliance and insights' }
+  { 
+    title: 'Upload Content', 
+    description: 'Choose your materials',
+    header: 'Transform Any Content Into Intelligent Learning',
+    subheader: 'Follow the complete user journey from content upload to advanced analytics'
+  },
+  { 
+    title: 'Generate Knowledge Graph', 
+    description: 'AI analyzes and connects concepts',
+    header: 'AI-Powered Knowledge Mapping',
+    subheader: 'Watch as your content transforms into an interconnected learning ecosystem'
+  },
+  { 
+    title: 'Create Courses', 
+    description: 'Automated course generation',
+    header: 'Instant Course Generation',
+    subheader: 'From raw materials to structured learning paths in seconds'
+  },
+  { 
+    title: 'Learn & Progress', 
+    description: 'Interactive learning experience',
+    header: 'Personalized Learning Journeys',
+    subheader: 'Adaptive pathways that evolve with each learner\'s progress'
+  },
+  { 
+    title: 'Track Analytics', 
+    description: 'Monitor learning outcomes',
+    header: 'Real-Time Learning Analytics',
+    subheader: 'Comprehensive insights into engagement, progress, and outcomes'
+  },
+  { 
+    title: 'Generate Reports', 
+    description: 'Compliance and insights',
+    header: 'Automated Compliance Reporting',
+    subheader: 'Generate detailed reports for stakeholders and regulatory requirements'
+  }
 ]
 
 export function UserJourneyCarousel() {
@@ -267,6 +297,9 @@ export function UserJourneyCarousel() {
       case 0:
       case 1:
       case 2:
+      case 3:
+      case 4:
+      case 5:
         return (
           <div className="w-full h-full flex items-center justify-center relative">
             {/* Content Upload Slide */}
@@ -352,16 +385,16 @@ export function UserJourneyCarousel() {
                   </div>
                   
                   {/* Left Side - Animated Content */}
-                  <div className="space-y-4">
+                  <div className="flex flex-col h-[450px]">
                     <h3 
-                      className={`text-lg md:text-xl font-display font-bold text-deep-space transition-all duration-700 ${
+                      className={`text-lg md:text-xl font-display font-bold text-deep-space transition-all duration-700 mb-4 ${
                         currentStep === 1 ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-y-4'
                       }`}
                       style={{ transitionDelay: currentStep === 1 ? '500ms' : '0ms' }}
                     >
                       Your Materials
                     </h3>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                    <div className="space-y-2 flex-1 overflow-y-auto">
                       {[...premadeContent.slice(0, 2), ...userContent.slice(0, 4)].map((item, index) => (
                         <div
                           key={`materials-${index}`}
@@ -389,7 +422,7 @@ export function UserJourneyCarousel() {
 
                   {/* Right Side - Knowledge Graph slides in */}
                   <div 
-                    className={`flex flex-col min-h-0 transition-all duration-700 ${
+                    className={`flex flex-col h-[450px] transition-all duration-700 ${
                       currentStep === 1 ? 'opacity-100 transform translate-x-0' : 
                       currentStep === 2 ? 'opacity-0 transform -translate-x-12' :
                       'opacity-0 transform translate-x-12'
@@ -397,9 +430,12 @@ export function UserJourneyCarousel() {
                     style={{ transitionDelay: currentStep === 1 ? '800ms' : '0ms' }}
                   >
                     {/* Knowledge Graph header */}
-                    <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-3">
+                    <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-4">
                       Knowledge Graph
                     </h3>
+                    <div className="flex-1 overflow-y-auto">
+                      {/* Graph content area */}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -408,37 +444,52 @@ export function UserJourneyCarousel() {
             {/* Step 2: Generate Courses - Only visible on slide 2 */}
             <div 
               className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                currentStep === 2 ? 'transform translate-x-0 opacity-100' : 'transform translate-x-full opacity-0'
+                currentStep === 2 ? 'transform translate-x-0 opacity-100' : 
+                currentStep > 2 ? 'transform -translate-x-full opacity-0' :
+                'transform translate-x-full opacity-0'
               }`}
               style={{ zIndex: currentStep === 2 ? 20 : 1 }}
             >
               <div className="w-full h-full flex items-center justify-center">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full max-w-6xl mx-auto">
-              {/* Left Side - Knowledge Graph (moved from right) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full max-w-6xl mx-auto relative">
+                  {/* Arrow between columns */}
+                  <div 
+                    className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-700 hidden lg:flex items-center justify-center ${
+                      currentStep === 2 ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+                    }`}
+                    style={{ transitionDelay: currentStep === 2 ? '1200ms' : '0ms' }}
+                  >
+                    <ArrowRight className="w-8 h-8 text-cosmic-purple animate-pulse" />
+                  </div>
+                  
+                  {/* Left Side - Knowledge Graph (moved from right) */}
               <div 
-                className={`flex flex-col space-y-3 transition-all duration-700 ${
+                className={`flex flex-col h-[450px] transition-all duration-700 ${
                   currentStep === 2 ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-12'
                 }`}
                 style={{ transitionDelay: currentStep === 2 ? '300ms' : '0ms' }}
               >
-                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-3">
+                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-4">
                   Knowledge Graph
                 </h3>
+                <div className="flex-1 overflow-y-auto">
+                  {/* Graph content area */}
+                </div>
               </div>
 
               {/* Right Side - LMS Course Structure Animation */}
               <div 
-                className={`flex flex-col space-y-3 transition-all duration-700 ${
+                className={`flex flex-col h-[450px] transition-all duration-700 ${
                   currentStep === 2 ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-12'
                 }`}
                 style={{ transitionDelay: currentStep === 2 ? '500ms' : '0ms' }}
               >
-                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-3">
+                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-4">
                   Generated Courses
                 </h3>
                 
                 {/* Course Structure Skeleton - Generated Animation */}
-                <div className="space-y-3">
+                <div className="space-y-3 flex-1 overflow-y-auto">
                   {/* Course 1 - Security Awareness Training */}
                   <div 
                     className={`bg-white rounded-lg border-2 transition-all duration-700 ${
@@ -572,37 +623,56 @@ export function UserJourneyCarousel() {
                 </div>
               </div>
             </div>
-          </div>
-        )
 
-      case 3:
-        return (
-          <div className="w-full h-full flex items-center justify-center relative overflow-visible">
-            {/* Step 3: Learn & Progress - Employee learning from modules */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full max-w-6xl mx-auto overflow-visible">
+            {/* Step 3: Learn & Progress - Only visible on slide 3 */}
+            <div 
+              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                currentStep === 3 ? 'transform translate-x-0 opacity-100' : 
+                currentStep === 4 || currentStep === 5 ? 'transform -translate-x-full opacity-0' :
+                'transform translate-x-full opacity-0'
+              }`}
+              style={{ zIndex: currentStep === 3 ? 20 : 1 }}
+            >
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full max-w-6xl mx-auto relative">
+              {/* Arrow between columns */}
+              <div 
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-700 hidden lg:flex items-center justify-center ${
+                  currentStep === 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+                }`}
+                style={{ transitionDelay: currentStep === 3 ? '1200ms' : '0ms' }}
+              >
+                <ArrowRight className="w-8 h-8 text-cosmic-purple animate-pulse" />
+              </div>
+              
               {/* Left Side - Knowledge Graph with Employee Node */}
               <div 
-                className={`flex flex-col space-y-3 transition-all duration-700 ${
+                className={`flex flex-col h-[450px] transition-all duration-700 ${
                   currentStep === 3 ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-12'
                 }`}
                 style={{ transitionDelay: currentStep === 3 ? '300ms' : '0ms' }}
               >
-                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-3">
+                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-4">
                   Knowledge Graph
                 </h3>
+                <div className="flex-1 overflow-y-auto">
+                  {/* Graph content area */}
+                </div>
               </div>
 
               {/* Right Side - Learning Modules with Progress */}
               <div 
-                className={`flex flex-col space-y-3 transition-all duration-700 ${
+                className={`flex flex-col h-[450px] transition-all duration-700 ${
                   currentStep === 3 ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-12'
                 }`}
                 style={{ transitionDelay: currentStep === 3 ? '300ms' : '0ms' }}
               >
-                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-3">
+                <h3 className="text-lg md:text-xl font-display font-bold text-deep-space mb-4">
                   Learning Progress
                 </h3>
                 
+                {/* Scrollable content area */}
+                <div className="space-y-3 flex-1 overflow-y-auto">
                 {/* Employee Info */}
                 <div 
                   className={`bg-white rounded-lg border-2 transition-all duration-700 ${
@@ -719,6 +789,53 @@ export function UserJourneyCarousel() {
                     </div>
                   </div>
                 </div>
+                </div>
+              </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4: Track Analytics - Only visible on slide 4 */}
+            <div 
+              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                currentStep === 4 ? 'transform translate-x-0 opacity-100' : 'transform translate-x-full opacity-0'
+              }`}
+              style={{ zIndex: currentStep === 4 ? 20 : 1 }}
+            >
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-3xl font-display font-bold text-deep-space mb-4">
+                    Track Analytics
+                  </h3>
+                  <p className="text-xl text-stone-gray">
+                    Monitor learning outcomes and progress
+                  </p>
+                  <div className="mt-8 p-8 bg-white rounded-xl shadow-lg border border-mist-gray">
+                    <p className="text-stone-gray">Analytics dashboard coming soon...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 5: Generate Reports - Only visible on slide 5 */}
+            <div 
+              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                currentStep === 5 ? 'transform translate-x-0 opacity-100' : 'transform translate-x-full opacity-0'
+              }`}
+              style={{ zIndex: currentStep === 5 ? 20 : 1 }}
+            >
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <h3 className="text-3xl font-display font-bold text-deep-space mb-4">
+                    Generate Reports
+                  </h3>
+                  <p className="text-xl text-stone-gray">
+                    Compliance and insights reporting
+                  </p>
+                  <div className="mt-8 p-8 bg-white rounded-xl shadow-lg border border-mist-gray">
+                    <p className="text-stone-gray">Reporting features coming soon...</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -749,7 +866,7 @@ export function UserJourneyCarousel() {
       {(currentStep === 1 || currentStep === 2 || currentStep === 3) && showGraph && graphReady && graphData && typeof window !== 'undefined' && (
         <div 
           className={`absolute transition-opacity duration-700 ${
-            currentStep === 1 || currentStep === 2 || currentStep === 3 ? 'opacity-100' : 'opacity-0'
+            currentStep >= 1 && currentStep <= 3 ? 'opacity-100' : 'opacity-0'
           }`}
           style={{ 
             top: 0,
@@ -768,9 +885,9 @@ export function UserJourneyCarousel() {
               width: '200vw',
               height: '100%',
               paddingBottom: '120px', // Space for navigation controls
-              transform: currentStep === 2 ? 'translateX(-47vw)' : currentStep === 3 ? 'translateX(-25vw)' : 'translateX(0)',
+              transform: currentStep >= 2 ? 'translateX(-47vw)' : 'translateX(0)',
               transition: 'transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.8s ease-in-out',
-              opacity: currentStep === 2 ? 0.9 : 1,
+              opacity: 0.9,
               overflow: 'visible'
             }}
           >
@@ -795,18 +912,39 @@ export function UserJourneyCarousel() {
         </div>
       )}
         <div className="container mx-auto px-4 flex-1 flex flex-col overflow-visible" style={{ clipPath: 'none' }}>
-          <div className="max-w-7xl mx-auto flex-1 flex flex-col overflow-visible" style={{ clipPath: 'none' }}>
-            {/* Section Header */}
-            <div className="text-center py-8 md:py-12">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6 text-deep-space">
-                Transform Any Content Into{' '}
-                <span className="bg-gradient-to-r from-cosmic-purple via-electric-violet to-luminous-indigo bg-clip-text text-transparent">
-                  Intelligent Learning
-                </span>
-              </h2>
-              <p className="text-lg md:text-xl text-stone-gray max-w-3xl mx-auto">
-                Follow the complete user journey from content upload to advanced analytics
-              </p>
+          <div className="w-full flex-1 flex flex-col overflow-visible" style={{ clipPath: 'none' }}>
+            {/* Animated Section Headers */}
+            <div className="text-center py-8 md:py-12 relative h-[180px] md:h-[200px]">
+              {journeySteps.map((step, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-in-out ${
+                    currentStep === index 
+                      ? 'opacity-100 transform translate-x-0' 
+                      : currentStep > index 
+                        ? 'opacity-0 transform -translate-x-full' 
+                        : 'opacity-0 transform translate-x-full'
+                  }`}
+                >
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4 md:mb-6 text-deep-space px-4">
+                    {step.header.includes('Intelligent Learning') ? (
+                      <>
+                        Transform Any Content Into{' '}
+                        <span className="bg-gradient-to-r from-cosmic-purple via-electric-violet to-luminous-indigo bg-clip-text text-transparent">
+                          Intelligent Learning
+                        </span>
+                      </>
+                    ) : (
+                      <span className="bg-gradient-to-r from-cosmic-purple via-electric-violet to-luminous-indigo bg-clip-text text-transparent">
+                        {step.header}
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-lg md:text-xl text-stone-gray max-w-3xl mx-auto px-4">
+                    {step.subheader}
+                  </p>
+                </div>
+              ))}
             </div>
 
           {/* Carousel Container */}
