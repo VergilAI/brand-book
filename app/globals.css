@@ -145,6 +145,15 @@ body {
   50% { transform: scale(1.03); opacity: 1; }
 }
 
+@keyframes energy-flow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
@@ -214,6 +223,12 @@ body {
   100% {
     transform: translate(0px, 0px) scale(1);
   }
+}
+
+/* Energy Flow Effect for Graph Relationships */
+.energy-flow {
+  stroke-dasharray: 12 12;
+  animation: energy-flow 1s linear infinite;
 }
 
 /* Card Design System */
@@ -373,5 +388,44 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Carousel Smooth Scrolling Enhancement */
+body.carousel-active {
+  scroll-behavior: smooth;
+  /* Improves momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth scroll snap for sections */
+[data-carousel-section] {
+  scroll-snap-align: start;
+  scroll-margin-top: 0;
+}
+
+/* Prevent janky scrolling during carousel */
+body.carousel-active::-webkit-scrollbar {
+  width: 12px;
+}
+
+body.carousel-active::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.carousel-active::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+body.carousel-active::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* Smooth transitions for carousel elements */
+@media (prefers-reduced-motion: no-preference) {
+  body.carousel-active * {
+    scroll-behavior: smooth;
   }
 }

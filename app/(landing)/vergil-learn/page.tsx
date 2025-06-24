@@ -4,15 +4,6 @@ import { useState } from 'react'
 import { Navigation } from '@/components/landing/navigation'
 import { LearnHero } from '@/components/landing/learn-hero'
 import { UserJourneyCarousel } from '@/components/landing/user-journey-carousel'
-import { FivePillars } from '@/components/landing/five-pillars'
-import { HowItWorks } from '@/components/landing/how-it-works'
-import { UseCasesCarousel } from '@/components/landing/use-cases-carousel'
-import { ROICalculator } from '@/components/landing/roi-calculator'
-import { ComparisonTable } from '@/components/landing/comparison-table'
-import { PricingSection } from '@/components/landing/pricing-section'
-import { SecurityCompliance } from '@/components/landing/security-compliance'
-import { FAQsSection } from '@/components/landing/faqs-section'
-import { FinalCTA } from '@/components/landing/final-cta'
 import { LearnFooter } from '@/components/landing/learn-footer'
 
 // Demo Video Modal Component
@@ -64,33 +55,6 @@ export default function VergilLearnPage() {
       
       {/* User Journey Carousel */}
       <UserJourneyCarousel />
-      
-      {/* Five Pillars */}
-      <FivePillars />
-      
-      {/* How It Works */}
-      <HowItWorks onDemoClick={handleVideoClick} />
-      
-      {/* Use Cases */}
-      <UseCasesCarousel />
-      
-      {/* ROI Calculator */}
-      <ROICalculator />
-      
-      {/* Comparison Table */}
-      <ComparisonTable />
-      
-      {/* Pricing */}
-      <PricingSection />
-      
-      {/* Security & Compliance */}
-      <SecurityCompliance />
-      
-      {/* FAQs */}
-      <FAQsSection />
-      
-      {/* Final CTA */}
-      <FinalCTA />
       
       {/* Footer */}
       <LearnFooter />

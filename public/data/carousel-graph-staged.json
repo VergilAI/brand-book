@@ -165,7 +165,7 @@
       "type": "Person",
       "animationStage": 1,
       "animationOrder": 0,
-      "properties": { "role": "Security Manager", "status": "active" },
+      "properties": { "role": "Security Manager", "status": "active", "color": "#10B981" },
       "position": { "x": null, "y": null, "fixed": false }
     }
   ],
@@ -351,44 +351,69 @@
       "properties": {}
     },
     {
+      "id": "john_to_phishing",
+      "source": "john_smith",
+      "target": "phishing",
+      "type": "LEARNS",
+      "animationStage": 2,
+      "animationOrder": 1,
+      "animationDelay": 200,
+      "properties": { 
+        "color": "#10B981", 
+        "strokeWidth": 6, 
+        "highlight": true,
+        "pulseAnimation": true,
+        "energyFlow": true,
+        "glowIntensity": 0.8
+      }
+    },
+    {
       "id": "john_to_cyber",
       "source": "john_smith",
       "target": "cybersecurity",
-      "type": "MANAGES",
-      "animationStage": 1,
+      "type": "LEARNS",
+      "animationStage": 3,
       "animationOrder": 1,
       "animationDelay": 200,
-      "properties": {}
+      "properties": { 
+        "color": "#10B981", 
+        "strokeWidth": 6,
+        "pulseAnimation": true,
+        "energyFlow": true,
+        "glowIntensity": 0.8
+      }
     },
     {
       "id": "john_to_ai",
       "source": "john_smith",
       "target": "ai_safety",
-      "type": "MANAGES",
-      "animationStage": 1,
-      "animationOrder": 2,
-      "animationDelay": 400,
-      "properties": {}
-    },
-    {
-      "id": "john_to_phishing",
-      "source": "john_smith",
-      "target": "phishing",
-      "type": "MANAGES",
-      "animationStage": 1,
-      "animationOrder": 3,
-      "animationDelay": 600,
-      "properties": {}
+      "type": "LEARNS",
+      "animationStage": 4,
+      "animationOrder": 1,
+      "animationDelay": 200,
+      "properties": { 
+        "color": "#10B981", 
+        "strokeWidth": 6,
+        "pulseAnimation": true,
+        "energyFlow": true,
+        "glowIntensity": 0.8
+      }
     },
     {
       "id": "john_to_privacy",
       "source": "john_smith",
       "target": "data_privacy",
-      "type": "MANAGES",
-      "animationStage": 1,
-      "animationOrder": 4,
-      "animationDelay": 800,
-      "properties": {}
+      "type": "LEARNS",
+      "animationStage": 5,
+      "animationOrder": 1,
+      "animationDelay": 200,
+      "properties": { 
+        "color": "#10B981", 
+        "strokeWidth": 6,
+        "pulseAnimation": true,
+        "energyFlow": true,
+        "glowIntensity": 0.8
+      }
     }
   ],
   "metadata": {
@@ -403,11 +428,31 @@
       },
       {
         "stage": 1,
-        "title": "Security Management",
-        "description": "Security manager oversight of all domains"
+        "title": "Learner Introduction",
+        "description": "John Smith joins the learning journey"
+      },
+      {
+        "stage": 2,
+        "title": "Learning Phishing Detection",
+        "description": "First learning connection established"
+      },
+      {
+        "stage": 3,
+        "title": "Learning Incident Response",
+        "description": "Second learning connection established"
+      },
+      {
+        "stage": 4,
+        "title": "Learning AI Safety",
+        "description": "Third learning connection established"
+      },
+      {
+        "stage": 5,
+        "title": "Learning Data Privacy",
+        "description": "Fourth learning connection established"
       }
     ],
     "nodeTypes": ["Concept", "Example", "Person"],
-    "relationshipTypes": ["RELATES_TO", "INCLUDES", "MANAGES"]
+    "relationshipTypes": ["RELATES_TO", "INCLUDES", "MANAGES", "LEARNS"]
   }
 }

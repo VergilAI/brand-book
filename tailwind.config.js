@@ -9,6 +9,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Vergil Brand Colors
+        'cosmic-purple': '#6366F1',
+        'electric-violet': '#A78BFA',
+        'luminous-indigo': '#818CF8',
+        'phosphor-cyan': '#10B981',
+        'synaptic-blue': '#3B82F6',
+        'neural-pink': '#F472B6',
+        'pure-light': '#FFFFFF',
+        'soft-light': '#FAFAFA',
+        'whisper-gray': '#F8F9FA',
+        'mist-gray': '#E5E7EB',
+        'stone-gray': '#9CA3AF',
+        'deep-space': '#0F172A',
+        
         // shadcn/ui theme integration - these use CSS variables
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

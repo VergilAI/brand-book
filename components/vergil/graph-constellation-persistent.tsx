@@ -193,6 +193,7 @@ export interface GraphConstellationPersistentProps {
   initialPosition?: { x: number, y: number } // Initial center position for nodes (default center)
   anchorElementId?: string                  // ID of element to anchor graph position to
   anchorOffset?: { x: number, y: number }  // Offset from anchor element (default: center of element)
+  disableFloatingMotion?: boolean           // Disable floating motion effect
 }
 
 export function GraphConstellationPersistent({ 
@@ -207,7 +208,8 @@ export function GraphConstellationPersistent({
   enableBoundaries = true,
   initialPosition,
   anchorElementId,
-  anchorOffset = { x: 0, y: 0 }
+  anchorOffset = { x: 0, y: 0 },
+  disableFloatingMotion = false
 }: GraphConstellationPersistentProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -725,8 +727,9 @@ export function GraphConstellationPersistent({
     const allLinks = linkG.selectAll('line')
       .data(workingRelationships)
       .enter().append('line')
-      .attr('stroke', '#E5E7EB')
-      .attr('stroke-width', 2)
+      .attr('stroke', d => d.properties?.color || '#E5E7EB')
+      .attr('stroke-width', d => d.properties?.strokeWidth || 2)
+      .attr('class', d => d.properties?.energyFlow ? 'energy-flow' : '')
       .style('opacity', d => {
         // Initially only show relationships from previous stages (current stage = 0 initially)
         const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : d.source.id))
@@ -1347,12 +1350,56 @@ export function GraphConstellationPersistent({
         const relDelay = bothNodesReady + 100 // Small buffer after both nodes are ready
         
         setTimeout(() => {
-          allLinks
-            .filter((d: GraphRelationship) => d.id === rel.id)
-            .transition()
-            .duration(150) // Very quick fade in
-            .ease(d3.easeCubicOut)
-            .style('opacity', 0.3) // Lower opacity
+          const link = allLinks.filter((d: GraphRelationship) => d.id === rel.id)
+          
+          // Check if this is an energy flow relationship
+          if (rel.properties?.energyFlow) {
+            // Dramatic energy ray animation
+            link
+              .style('opacity', 0)
+              .attr('stroke-width', 0)
+              .transition()
+              .duration(500) // Longer animation for energy rays
+              .ease(d3.easeBackOut.overshoot(1.5))
+              .attr('stroke-width', rel.properties?.strokeWidth || 6)
+              .style('opacity', 0.8)
+              .style('filter', 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8))')
+              .on('end', function() {
+                // Add pulsing animation after initial appearance
+                d3.select(this)
+                  .transition()
+                  .duration(1000)
+                  .ease(d3.easeSinInOut)
+                  .attr('stroke-width', (rel.properties?.strokeWidth || 6) * 0.8)
+                  .style('opacity', 0.6)
+                  .transition()
+                  .duration(1000)
+                  .ease(d3.easeSinInOut)
+                  .attr('stroke-width', rel.properties?.strokeWidth || 6)
+                  .style('opacity', 0.8)
+                  .on('end', function repeat() {
+                    d3.select(this)
+                      .transition()
+                      .duration(1000)
+                      .ease(d3.easeSinInOut)
+                      .attr('stroke-width', (rel.properties?.strokeWidth || 6) * 0.8)
+                      .style('opacity', 0.6)
+                      .transition()
+                      .duration(1000)
+                      .ease(d3.easeSinInOut)
+                      .attr('stroke-width', rel.properties?.strokeWidth || 6)
+                      .style('opacity', 0.8)
+                      .on('end', repeat)
+                  })
+              })
+          } else {
+            // Normal relationship animation
+            link
+              .transition()
+              .duration(150)
+              .ease(d3.easeCubicOut)
+              .style('opacity', 0.3)
+          }
             
           if (settings.showRelationshipLabels) {
             allLinkLabels
@@ -1396,16 +1443,16 @@ export function GraphConstellationPersistent({
     }
   }, [updateStageVisibility])
 
-  // Start floating motion after initialization
+  // Start floating motion after initialization (if not disabled)
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && !disableFloatingMotion) {
       console.log('Component initialized, starting floating motion in 2 seconds...')
       const timer = setTimeout(() => {
         startFloatingMotion()
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [isInitialized, startFloatingMotion])
+  }, [isInitialized, startFloatingMotion, disableFloatingMotion])
 
   // Update label visibility when settings change
   useEffect(() => {
