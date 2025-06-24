@@ -81,7 +81,7 @@ export function StreamgraphBackground({
 
     // Create stack
     const stack = d3.stack()
-      .keys(d3.range(n))
+      .keys(d3.range(n).map(String))
       .offset(d3.stackOffsetExpand)
       .order(d3.stackOrderNone)
 
@@ -90,7 +90,16 @@ export function StreamgraphBackground({
 
     // Randomize function
     function randomize() {
-      const layers = stack(d3.transpose(Array.from({length: n}, () => bumps(m, k))))
+      // Convert array data to object format expected by stack
+      const transposedData = d3.transpose(Array.from({length: n}, () => bumps(m, k)))
+      const objectData = transposedData.map(row => {
+        const obj: {[key: string]: number} = {}
+        row.forEach((value, i) => {
+          obj[String(i)] = value
+        })
+        return obj
+      })
+      const layers = stack(objectData)
       y.domain([
         d3.min(layers, l => d3.min(l, d => d[0])) || 0,
         d3.max(layers, l => d3.max(l, d => d[1])) || 1

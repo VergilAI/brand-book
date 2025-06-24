@@ -732,8 +732,8 @@ export function GraphConstellationPersistent({
       .attr('class', d => d.properties?.energyFlow ? 'energy-flow' : '')
       .style('opacity', d => {
         // Initially only show relationships from previous stages (current stage = 0 initially)
-        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : d.source.id))
-        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : d.target.id))
+        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : (d.source as GraphNode).id))
+        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : (d.target as GraphNode).id))
         const sourceStage = sourceNode?.animationStage ?? 0
         const targetStage = targetNode?.animationStage ?? 0
         const relStage = d.animationStage ?? 0
@@ -758,8 +758,8 @@ export function GraphConstellationPersistent({
         if (!settings.showRelationshipLabels) return 0
         
         // Initially only show labels for relationships from previous stages
-        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : d.source.id))
-        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : d.target.id))
+        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : (d.source as GraphNode).id))
+        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : (d.target as GraphNode).id))
         const sourceStage = sourceNode?.animationStage ?? 0
         const targetStage = targetNode?.animationStage ?? 0
         const relStage = d.animationStage ?? 0
@@ -777,12 +777,14 @@ export function GraphConstellationPersistent({
       .attr('cursor', 'pointer')
       .style('opacity', 0) // Start all nodes invisible - they will animate in via stage transitions
       .attr('transform', d => {
+        const nodeX = d.x ?? centerX ?? width/2
+        const nodeY = d.y ?? centerY ?? height/2
         if ((d.animationStage ?? 0) <= currentStage) {
-          return `translate(${d.x ?? calculatedPosition?.x ?? initialPosition?.x ?? width/2},${d.y ?? calculatedPosition?.y ?? initialPosition?.y ?? height/2}) scale(1)`
+          return `translate(${nodeX},${nodeY}) scale(1)`
         }
-        return `translate(${calculatedPosition?.x ?? initialPosition?.x ?? width/2},${calculatedPosition?.y ?? initialPosition?.y ?? height/2}) scale(0)`
+        return `translate(${nodeX},${nodeY}) scale(0)`
       })
-      .call(d3.drag<SVGGElement, GraphNode>()
+      .call(d3.drag<SVGGElement, any>()
         .on('start', (event, d) => {
           // Stop floating motion and reactivate force simulation for dragging
           isHoveredRef.current = true
@@ -872,11 +874,13 @@ export function GraphConstellationPersistent({
     labelTexts.each(function(d) {
       const textElement = this as SVGTextElement
       const bbox = textElement.getBBox()
-      const bg = d3.select(textElement.parentNode).select('rect')
-      bg.attr('x', -bbox.width / 2 - 8)
-        .attr('y', -bbox.height / 2 - 4)
-        .attr('width', bbox.width + 16)
-        .attr('height', bbox.height + 8)
+      if (textElement.parentNode) {
+        const bg = d3.select(textElement.parentNode as Element).select('rect')
+        bg.attr('x', -bbox.width / 2 - 8)
+          .attr('y', -bbox.height / 2 - 4)
+          .attr('width', bbox.width + 16)
+          .attr('height', bbox.height + 8)
+      }
     })
 
     // Click handler
@@ -887,9 +891,9 @@ export function GraphConstellationPersistent({
 
     // Store element references for later updates
     elementsRef.current = {
-      allNodeGroups,
-      allLinks,
-      allLinkLabels
+      allNodeGroups: allNodeGroups as d3.Selection<SVGGElement, GraphNode, SVGGElement, unknown>,
+      allLinks: allLinks as d3.Selection<SVGLineElement, GraphRelationship, SVGGElement, unknown>,
+      allLinkLabels: allLinkLabels as d3.Selection<SVGTextElement, GraphRelationship, SVGGElement, unknown>
     }
 
     // Store the hover handlers setup function in elementsRef so it can be called later
@@ -921,8 +925,8 @@ export function GraphConstellationPersistent({
           
           // Find all directly connected nodes - use the original data relationships
           data.relationships.forEach(rel => {
-            const sourceId = typeof rel.source === 'string' ? rel.source : rel.source
-            const targetId = typeof rel.target === 'string' ? rel.target : rel.target
+            const sourceId = typeof rel.source === 'string' ? rel.source : rel.source.id
+            const targetId = typeof rel.target === 'string' ? rel.target : rel.target.id
             
             if (sourceId === d.id) {
               connectedNodeIds.add(targetId)
@@ -949,7 +953,7 @@ export function GraphConstellationPersistent({
             .transition()
             .duration(300)
             .ease(d3.easeCubicInOut)
-            .style('opacity', (node: GraphNode) => {
+            .style('opacity', (node: any) => {
               if (!settings.showNodeLabels) return 0
               const isVisible = (node.animationStage ?? 0) <= currentStageValue
               if (!isVisible) return 0
@@ -967,8 +971,8 @@ export function GraphConstellationPersistent({
                 sourceId = l.source
                 targetId = l.target as string
               } else {
-                sourceId = (l.source as GraphNode).id
-                targetId = (l.target as GraphNode).id
+                sourceId = (l.source as any).id
+                targetId = (l.target as any).id
               }
               
               const isDirectlyConnected = sourceId === d.id || targetId === d.id
@@ -1085,7 +1089,7 @@ export function GraphConstellationPersistent({
             .transition()
             .duration(400)
             .ease(d3.easeCubicInOut)
-            .style('opacity', (node: GraphNode) => {
+            .style('opacity', (node: any) => {
               if (!settings.showNodeLabels) return 0
               return (node.animationStage ?? 0) <= currentStageValue ? 0.2 : 0 // Back to very low opacity
             })
@@ -1108,31 +1112,31 @@ export function GraphConstellationPersistent({
     simulation.on('tick', () => {
       allLinks
         .attr('x1', d => {
-          const source = d.source as GraphNode
+          const source = d.source as any
           return source.x ?? 0
         })
         .attr('y1', d => {
-          const source = d.source as GraphNode
+          const source = d.source as any
           return source.y ?? 0
         })
         .attr('x2', d => {
-          const target = d.target as GraphNode
+          const target = d.target as any
           return target.x ?? 0
         })
         .attr('y2', d => {
-          const target = d.target as GraphNode
+          const target = d.target as any
           return target.y ?? 0
         })
 
       allLinkLabels
         .attr('x', d => {
-          const source = d.source as GraphNode
-          const target = d.target as GraphNode
+          const source = d.source as any
+          const target = d.target as any
           return ((source.x ?? 0) + (target.x ?? 0)) / 2
         })
         .attr('y', d => {
-          const source = d.source as GraphNode
-          const target = d.target as GraphNode
+          const source = d.source as any
+          const target = d.target as any
           return ((source.y ?? 0) + (target.y ?? 0)) / 2
         })
 
@@ -1211,8 +1215,8 @@ export function GraphConstellationPersistent({
     if (allLinks) {
       allLinks.style('opacity', (d: GraphRelationship) => {
         // Only show relationships from PREVIOUS stages (current stage relationships will animate in individually)
-        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : d.source.id))
-        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : d.target.id))
+        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : (d.source as GraphNode).id))
+        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : (d.target as GraphNode).id))
         const sourceStage = sourceNode?.animationStage ?? 0
         const targetStage = targetNode?.animationStage ?? 0
         const relStage = d.animationStage ?? 0
@@ -1226,8 +1230,8 @@ export function GraphConstellationPersistent({
         if (!settings.showRelationshipLabels) return 0
         
         // Only show labels for relationships from PREVIOUS stages (current stage will animate in individually)
-        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : d.source.id))
-        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : d.target.id))
+        const sourceNode = data.nodes.find(n => n.id === (typeof d.source === 'string' ? d.source : (d.source as GraphNode).id))
+        const targetNode = data.nodes.find(n => n.id === (typeof d.target === 'string' ? d.target : (d.target as GraphNode).id))
         const sourceStage = sourceNode?.animationStage ?? 0
         const targetStage = targetNode?.animationStage ?? 0
         const relStage = d.animationStage ?? 0
@@ -1350,6 +1354,7 @@ export function GraphConstellationPersistent({
         const relDelay = bothNodesReady + 100 // Small buffer after both nodes are ready
         
         setTimeout(() => {
+          if (!allLinks) return
           const link = allLinks.filter((d: GraphRelationship) => d.id === rel.id)
           
           // Check if this is an energy flow relationship
@@ -1401,7 +1406,7 @@ export function GraphConstellationPersistent({
               .style('opacity', 0.3)
           }
             
-          if (settings.showRelationshipLabels) {
+          if (settings.showRelationshipLabels && allLinkLabels) {
             allLinkLabels
               .filter((d: GraphRelationship) => d.id === rel.id)
               .transition()

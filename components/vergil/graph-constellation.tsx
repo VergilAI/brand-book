@@ -341,7 +341,7 @@ export function GraphConstellation({
       .data(animated ? [] : simulationNodes)
       .enter().append('g')
       .attr('cursor', 'pointer')
-      .call(d3.drag<SVGGElement, GraphNode>()
+      .call(d3.drag<SVGGElement, any>()
         .on('start', (event, d) => {
           if (!event.active) simulation.alphaTarget(0.3).restart()
           d.fx = d.x
@@ -454,7 +454,7 @@ export function GraphConstellation({
         .attr('cursor', 'pointer')
         .style('opacity', 0)
         .attr('transform', `translate(${width/2},${height/2}) scale(0)`)
-        .call(d3.drag<SVGGElement, GraphNode>()
+        .call(d3.drag<SVGGElement, any>()
           .on('start', (event, d) => {
             if (!event.active) simulation.alphaTarget(0.1).restart() // Gentler restart
             d.fx = d.x
@@ -660,7 +660,7 @@ export function GraphConstellation({
           }
           return `translate(${width/2},${height/2}) scale(0)`
         })
-        .call(d3.drag<SVGGElement, GraphNode>()
+        .call(d3.drag<SVGGElement, any>()
           .on('start', (event, d) => {
             if (!event.active) simulation.alphaTarget(0.1).restart() // Gentler restart
             d.fx = d.x
@@ -734,7 +734,7 @@ export function GraphConstellation({
             .attr('r', 26)
 
           allLinks.style('opacity', l => {
-            const isConnected = (l.source as GraphNode).id === d.id || (l.target as GraphNode).id === d.id
+            const isConnected = (l.source as any).id === d.id || (l.target as any).id === d.id
             const isPreviousStage = (l.animationStage ?? 0) <= (currentStage ?? internalStage)
             return isConnected && isPreviousStage ? 1 : isPreviousStage ? 0.3 : 0
           })
@@ -774,19 +774,19 @@ export function GraphConstellation({
       allLinks
         .filter((d: GraphRelationship) => (d.animationStage ?? 0) < (currentStage ?? internalStage))
         .attr('x1', d => {
-          const source = d.source as GraphNode
+          const source = d.source as any
           return source.x ?? 0
         })
         .attr('y1', d => {
-          const source = d.source as GraphNode  
+          const source = d.source as any
           return source.y ?? 0
         })
         .attr('x2', d => {
-          const target = d.target as GraphNode
+          const target = d.target as any
           return target.x ?? 0
         })
         .attr('y2', d => {
-          const target = d.target as GraphNode
+          const target = d.target as any
           return target.y ?? 0
         })
       
@@ -855,8 +855,8 @@ export function GraphConstellation({
         setTimeout(() => {
           // Check if both source and target nodes exist in simulation
           const currentNodes = simulation.nodes()
-          const sourceExists = currentNodes.some(n => n.id === (typeof rel.source === 'string' ? rel.source : rel.source.id))
-          const targetExists = currentNodes.some(n => n.id === (typeof rel.target === 'string' ? rel.target : rel.target.id))
+          const sourceExists = currentNodes.some(n => n.id === (typeof rel.source === 'string' ? rel.source : (rel.source as GraphNode).id))
+          const targetExists = currentNodes.some(n => n.id === (typeof rel.target === 'string' ? rel.target : (rel.target as GraphNode).id))
           
           if (sourceExists && targetExists) {
             // Find the working relationship
@@ -919,31 +919,31 @@ export function GraphConstellation({
       simulation.on('tick', () => {
         allLinks
           .attr('x1', d => {
-            const source = d.source as GraphNode
+            const source = d.source as any
             return source.x ?? 0
           })
           .attr('y1', d => {
-            const source = d.source as GraphNode
+            const source = d.source as any
             return source.y ?? 0
           })
           .attr('x2', d => {
-            const target = d.target as GraphNode
+            const target = d.target as any
             return target.x ?? 0
           })
           .attr('y2', d => {
-            const target = d.target as GraphNode
+            const target = d.target as any
             return target.y ?? 0
           })
 
         allLinkLabels
           .attr('x', d => {
-            const source = d.source as GraphNode
-            const target = d.target as GraphNode
+            const source = d.source as any
+            const target = d.target as any
             return ((source.x ?? 0) + (target.x ?? 0)) / 2
           })
           .attr('y', d => {
-            const source = d.source as GraphNode
-            const target = d.target as GraphNode
+            const source = d.source as any
+            const target = d.target as any
             return ((source.y ?? 0) + (target.y ?? 0)) / 2
           })
 
