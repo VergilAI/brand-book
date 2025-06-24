@@ -772,9 +772,9 @@ export function UserJourneyCarousel() {
                           <div 
                             className="absolute inset-0 rounded-md"
                             style={{
-                              background: activeModule === index && activeModule !== 4
+                              background: activeModule !== null && activeModule === index && activeModule !== 4
                                 ? 'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(167, 139, 250, 0.2))'
-                                : (activeModule > index && activeModule !== -1) || activeModule === 4
+                                : activeModule !== null && ((activeModule > index && activeModule !== -1) || activeModule === 4)
                                   ? 'rgba(16, 185, 129, 0.1)'
                                   : 'transparent',
                               transition: 'background 2s ease-in-out',
@@ -785,12 +785,12 @@ export function UserJourneyCarousel() {
                           <div 
                             className="absolute inset-0 rounded-md"
                             style={{
-                              border: activeModule === index && activeModule !== 4
+                              border: activeModule !== null && activeModule === index && activeModule !== 4
                                 ? '1px solid rgba(99, 102, 241, 0.6)'
-                                : (activeModule > index && activeModule !== -1) || activeModule === 4
+                                : activeModule !== null && ((activeModule > index && activeModule !== -1) || activeModule === 4)
                                   ? '1px solid rgba(16, 185, 129, 0.3)'
                                   : '1px solid rgba(229, 231, 235, 0.5)',
-                              boxShadow: activeModule === index && activeModule !== 4 
+                              boxShadow: activeModule !== null && activeModule === index && activeModule !== 4 
                                 ? '0 0 20px rgba(99, 102, 241, 0.2)' 
                                 : 'none',
                               transition: 'all 2s ease-in-out',
@@ -803,14 +803,14 @@ export function UserJourneyCarousel() {
                           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 relative">
                             {/* Default gray dot - always present */}
                             <div className={`absolute w-3 h-3 rounded-full bg-mist-gray/50 transition-all duration-1000 ${
-                              activeModule === index || (activeModule > index && activeModule !== -1) || activeModule === 4
+                              activeModule !== null && (activeModule === index || (activeModule > index && activeModule !== -1) || activeModule === 4)
                                 ? 'opacity-0 scale-0'
                                 : 'opacity-100 scale-100'
                             }`}></div>
                             
                             {/* Active purple zap */}
                             <div className={`absolute transition-all duration-700 ${
-                              activeModule === index && activeModule !== 4
+                              activeModule !== null && activeModule === index && activeModule !== 4
                                 ? 'opacity-100 scale-100'
                                 : 'opacity-0 scale-75'
                             }`}>
@@ -819,7 +819,7 @@ export function UserJourneyCarousel() {
                             
                             {/* Completed green checkmark */}
                             <div className={`absolute w-5 h-5 rounded-full bg-phosphor-cyan flex items-center justify-center transition-all duration-1000 ${
-                              (activeModule > index && activeModule !== -1) || activeModule === 4
+                              activeModule !== null && ((activeModule > index && activeModule !== -1) || activeModule === 4)
                                 ? 'opacity-100 scale-100'
                                 : 'opacity-0 scale-50'
                             }`}>
@@ -827,9 +827,9 @@ export function UserJourneyCarousel() {
                             </div>
                           </div>
                           <span className={`text-xs transition-all duration-1500 ease-in-out ${
-                            activeModule === index && activeModule !== 4
+                            activeModule !== null && activeModule === index && activeModule !== 4
                               ? 'text-cosmic-purple font-semibold' 
-                              : (activeModule > index && activeModule !== -1) || activeModule === 4
+                              : activeModule !== null && ((activeModule > index && activeModule !== -1) || activeModule === 4)
                                 ? 'text-phosphor-cyan font-medium'
                                 : 'text-stone-gray'
                           }`}>
@@ -837,7 +837,7 @@ export function UserJourneyCarousel() {
                           </span>
                           {/* Learning indicator - smooth fade in/out */}
                           <div className={`ml-auto flex items-center gap-1 transition-all duration-1000 ease-in-out ${
-                            activeModule === index && activeModule !== 4
+                            activeModule !== null && activeModule === index && activeModule !== 4
                               ? 'opacity-100'
                               : 'opacity-0 scale-95'
                           }`}>
