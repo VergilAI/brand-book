@@ -1187,8 +1187,22 @@ export function GraphConstellationPersistent({
         // When going backwards, hide all nodes beyond current stage immediately
         allNodeGroups.style('opacity', (d: GraphNode) => (d.animationStage ?? 0) <= currentStage ? 1 : 0)
       } else {
-        // When going forward, hide current stage nodes initially (they'll animate in)
-        allNodeGroups.style('opacity', (d: GraphNode) => (d.animationStage ?? 0) < currentStage ? 1 : 0)
+        // When going forward, set up nodes for animation
+        allNodeGroups
+          .style('opacity', (d: GraphNode) => (d.animationStage ?? 0) < currentStage ? 1 : 0)
+          .attr('transform', (d: GraphNode) => {
+            const stage = d.animationStage ?? 0
+            if (stage === currentStage) {
+              // Current stage nodes start at scale 0 for animation
+              return `translate(${d.x ?? 0},${d.y ?? 0}) scale(0)`
+            } else if (stage < currentStage) {
+              // Previous stage nodes stay at scale 1
+              return `translate(${d.x ?? 0},${d.y ?? 0}) scale(1)`
+            } else {
+              // Future stage nodes stay hidden
+              return `translate(${d.x ?? 0},${d.y ?? 0}) scale(0)`
+            }
+          })
       }
     }
     if (allLinks) {
@@ -1236,23 +1250,65 @@ export function GraphConstellationPersistent({
     const sortedNodes = [...currentStageNodes].sort((a, b) => (a.animationOrder || 0) - (b.animationOrder || 0))
     const sortedRelationships = [...currentStageRelationships].sort((a, b) => (a.animationOrder || 0) - (b.animationOrder || 0))
 
-    // Calculate animation timing
-    const stepDuration = stageDuration / Math.max(sortedNodes.length + sortedRelationships.length, 1)
+    // Calculate animation timing with easing
+    const totalElements = sortedNodes.length + sortedRelationships.length
+    const baseDuration = stageDuration / Math.max(totalElements, 1)
+    
+    // Custom easing function for timing delays - smooth acceleration and deceleration
+    const calculateDelay = (index: number, total: number) => {
+      if (total <= 1) return 0 // No delay if only one element
+      
+      const progress = index / (total - 1)
+      
+      // Use a smooth ease-in-out curve (cubic bezier style)
+      // This creates natural acceleration in the middle without jaggedness
+      let eased: number
+      
+      if (progress < 0.5) {
+        // First half: ease in (accelerating)
+        eased = 2 * progress * progress
+      } else {
+        // Second half: ease out (decelerating)
+        eased = 1 - Math.pow(-2 * progress + 2, 2) / 2
+      }
+      
+      // Calculate actual delay in milliseconds
+      // Use 30% of stage duration for a balanced animation speed
+      const delay = eased * stageDuration * 0.3
+      
+      // Debug logging
+      if (index === 0 || index === total - 1) {
+        console.log(`[TIMING] Element ${index + 1}/${total}: delay=${delay.toFixed(0)}ms (stageDuration=${stageDuration}ms)`)
+      }
+      
+      return delay
+    }
 
     // Animate in nodes for current stage
     sortedNodes.forEach((node, i) => {
-      const delay = (node.animationDelay || 0) + (node.animationOrder || i) * stepDuration
+      // Combine calculated delay with scaled-down animationDelay for better pacing
+      const calculatedDelay = calculateDelay(i, sortedNodes.length)
+      const additionalDelay = (node.animationDelay || 0) * 0.3 // Scale down the hardcoded delays
+      const delay = calculatedDelay + additionalDelay
       
       setTimeout(() => {
-        allNodeGroups
-          .filter((d: GraphNode) => d.id === node.id)
-          .transition()
-          .duration(300)
+        const nodeGroup = allNodeGroups.filter((d: GraphNode) => d.id === node.id)
+        
+        // Start with scale 0 for a more dramatic entrance
+        nodeGroup
           .style('opacity', 1)
+          .attr('transform', function(d) {
+            return `translate(${(d as GraphNode).x ?? 0},${(d as GraphNode).y ?? 0}) scale(0)`
+          })
+        
+        // Then animate to full size
+        nodeGroup
+          .transition()
+          .duration(200) // Even faster individual animations
           .attr('transform', function(d) {
             return `translate(${(d as GraphNode).x ?? 0},${(d as GraphNode).y ?? 0}) scale(1)`
           })
-          .ease(d3.easeBackOut.overshoot(1.5))
+          .ease(d3.easeCubicOut) // Smooth deceleration without bounce
       }, delay)
     })
 
@@ -1274,7 +1330,7 @@ export function GraphConstellationPersistent({
         if (sourceStage === currentStage) {
           const sourceNodeIndex = sortedNodes.findIndex(n => n.id === sourceNode?.id)
           if (sourceNodeIndex >= 0) {
-            sourceNodeDelay = (sourceNode?.animationDelay || 0) + (sourceNode?.animationOrder || sourceNodeIndex) * stepDuration + 300
+            sourceNodeDelay = calculateDelay(sourceNodeIndex, sortedNodes.length) + (sourceNode?.animationDelay || 0) + 300
           }
         }
         
@@ -1282,7 +1338,7 @@ export function GraphConstellationPersistent({
         if (targetStage === currentStage) {
           const targetNodeIndex = sortedNodes.findIndex(n => n.id === targetNode?.id)
           if (targetNodeIndex >= 0) {
-            targetNodeDelay = (targetNode?.animationDelay || 0) + (targetNode?.animationOrder || targetNodeIndex) * stepDuration + 300
+            targetNodeDelay = calculateDelay(targetNodeIndex, sortedNodes.length) + (targetNode?.animationDelay || 0) + 300
           }
         }
         
@@ -1294,7 +1350,8 @@ export function GraphConstellationPersistent({
           allLinks
             .filter((d: GraphRelationship) => d.id === rel.id)
             .transition()
-            .duration(200)
+            .duration(150) // Very quick fade in
+            .ease(d3.easeCubicOut)
             .style('opacity', 0.3) // Lower opacity
             
           if (settings.showRelationshipLabels) {

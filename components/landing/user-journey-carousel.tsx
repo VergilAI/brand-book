@@ -134,15 +134,8 @@ export function UserJourneyCarousel() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Ensure graph is shown when on appropriate steps
-  useEffect(() => {
-    if ((currentStep === 1 || currentStep === 2 || currentStep === 3) && graphData && !showGraph) {
-      // If we're on a step that should show the graph but it's not showing, initialize it
-      setShowGraph(true)
-      setGraphReady(true)
-      setGraphKey(prev => prev + 1)
-    }
-  }, [currentStep, graphData, showGraph])
+  // Remove the automatic graph initialization effect to prevent restarts
+  // The graph should only be initialized through the handleNext function
 
   // Prevent scrolling past this section until carousel is completed
   useEffect(() => {
@@ -210,18 +203,14 @@ export function UserJourneyCarousel() {
       setCurrentStep(1)
       setIsGenerating(true)
       
-      // Wait for slide transition to complete, then initialize graph
+      // Wait for slide transition to complete before initializing graph
       setTimeout(() => {
         setShowGraph(true)
         setCurrentStage(0) // Start with stage 0
         setGraphKey(prev => prev + 1)
-        
-        // Reduce initialization time for faster response
-        setTimeout(() => {
-          setGraphReady(true)
-          setIsGenerating(false)
-        }, 300) // Quick initialization
-      }, 1000) // Wait for slide transition (reduced from 1200ms)
+        setGraphReady(true)
+        setIsGenerating(false)
+      }, 1200) // Wait for full slide transition to complete
     } else if (currentStep < journeySteps.length - 1) {
       if (currentStep === 1) {
         // Moving to step 2, delay course animations and graph movement
