@@ -644,7 +644,7 @@ export function UserJourneyCarousel() {
             <div 
               className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
                 currentStep === 3 ? 'transform translate-x-0 opacity-100' : 
-                currentStep === 4 || currentStep === 5 ? 'transform -translate-x-full opacity-0' :
+                currentStep === 4 ? 'transform -translate-x-full opacity-0' :
                 'transform translate-x-full opacity-0'
               }`}
               style={{ zIndex: currentStep === 3 ? 20 : 1 }}
