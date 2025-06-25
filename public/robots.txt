@@ -1,5 +1,5 @@
 # Vergil Learn Robots.txt
-# https://learn.vergil.ai
+# https://vergilai.com
 
 User-agent: *
 Allow: /
@@ -8,7 +8,7 @@ Disallow: /_next/
 Disallow: /private/
 
 # Sitemap location
-Sitemap: https://learn.vergil.ai/sitemap.xml
+Sitemap: https://vergilai.com/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1

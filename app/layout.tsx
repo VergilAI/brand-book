@@ -25,12 +25,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://learn.vergil.ai'),
+  metadataBase: new URL('https://vergilai.com'),
   alternates: {
     canonical: '/',
-    languages: {
-      'en-US': '/en-US',
-    },
   },
   icons: {
     icon: [
@@ -56,7 +53,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Vergil Learn",
-    url: "https://learn.vergil.ai",
+    url: "https://vergilai.com",
     images: [
       {
         url: '/og-image.png',
@@ -79,8 +76,6 @@ export const metadata: Metadata = {
     title: "Vergil Learn - AI-Powered Enterprise Learning Platform",
     description: "Transform employee training with AI. Boost engagement by 85%, reduce training time by 60%. Personalized learning paths, advanced analytics, proven ROI.",
     images: ['/og-image.png'],
-    creator: "@VergilAI",
-    site: "@VergilAI",
   },
   robots: {
     index: true,
@@ -93,14 +88,6 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
-    },
-  },
-  verification: {
-    google: 'google-site-verification-code',
-    yandex: 'yandex-verification-code',
-    yahoo: 'yahoo-verification-code',
-    other: {
-      me: ['contact@vergil.ai', 'https://vergil.ai'],
     },
   },
   viewport: {
@@ -130,35 +117,15 @@ export default function RootLayout({
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     description: 'AI-powered enterprise learning platform that creates personalized training paths, boosts engagement, and tracks ROI with advanced analytics.',
-    url: 'https://learn.vergil.ai',
+    url: 'https://vergilai.com',
     creator: {
       '@type': 'Organization',
       name: 'Vergil AI',
-      url: 'https://vergil.ai',
-      logo: 'https://learn.vergil.ai/logos/vergil-logo.png',
+      url: 'https://www.vergilai.com',
+      logo: 'https://vergilai.com/logos/vergil-logo.png',
       sameAs: [
         'https://www.linkedin.com/company/103983727',
-        'https://twitter.com/VergilAI',
       ],
-    },
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      priceValidUntil: '2025-12-31',
-      itemCondition: 'https://schema.org/NewCondition',
-      availability: 'https://schema.org/InStock',
-      seller: {
-        '@type': 'Organization',
-        name: 'Vergil AI',
-      },
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '127',
-      bestRating: '5',
-      worstRating: '1',
     },
     featureList: [
       'AI-Powered Personalization',
@@ -170,26 +137,24 @@ export default function RootLayout({
       'Enterprise Integration',
       'Advanced Reporting',
     ],
-    screenshot: 'https://learn.vergil.ai/og-image.png',
+    screenshot: 'https://vergilai.com/og-image.png',
   };
 
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Vergil AI',
-    url: 'https://vergil.ai',
-    logo: 'https://learn.vergil.ai/logos/vergil-logo.png',
+    url: 'https://www.vergilai.com',
+    logo: 'https://vergilai.com/logos/vergil-logo.png',
     description: 'Leading AI-powered enterprise learning platform provider',
-    contactPoint: {
-      '@type': 'ContactPoint',
-      telephone: '+1-800-VERGIL-AI',
-      contactType: 'sales',
-      areaServed: 'US',
-      availableLanguage: ['English'],
+    email: 'botond.varga@vergilai.com',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'London',
+      addressCountry: 'United Kingdom',
     },
     sameAs: [
       'https://www.linkedin.com/company/103983727',
-      'https://twitter.com/VergilAI',
     ],
   };
 
@@ -201,13 +166,13 @@ export default function RootLayout({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://learn.vergil.ai',
+        item: 'https://vergilai.com',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Vergil Learn Platform',
-        item: 'https://learn.vergil.ai/vergil-learn',
+        item: 'https://vergilai.com/vergil-learn',
       },
     ],
   };

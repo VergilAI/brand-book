@@ -1,7 +1,4 @@
-Contact: mailto:security@vergil.ai
+Contact: mailto:botond.varga@vergilai.com
 Expires: 2025-12-31T23:59:59.000Z
-Encryption: https://vergil.ai/pgp-key.txt
-Acknowledgments: https://vergil.ai/security/acknowledgments
 Preferred-Languages: en
-Canonical: https://learn.vergil.ai/.well-known/security.txt
-Policy: https://vergil.ai/security-policy
+Canonical: https://vergilai.com/.well-known/security.txt
