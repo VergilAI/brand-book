@@ -31,15 +31,19 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-bold.svg', type: 'image/svg+xml', media: '(prefers-color-scheme: light)' },
-      { url: '/favicon.svg', type: 'image/svg+xml', media: '(prefers-color-scheme: dark)' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+        sizes: 'any'
+      },
+      {
+        url: '/icon.png',
+        type: 'image/png',
+        sizes: '32x32'
+      }
     ],
-    shortcut: '/favicon.svg',
-    apple: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+    shortcut: '/icon.png',
+    apple: '/icon.png',
   },
   openGraph: {
     title: "Vergil Learn - AI-Powered Enterprise Learning Platform | Transform Employee Training",
@@ -174,6 +178,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="alternate icon" href="/icon.svg" />
+        <link rel="mask-icon" href="/icon.svg" color="#0F172A" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
