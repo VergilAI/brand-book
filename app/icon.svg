@@ -1,0 +1,20 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White rounded rectangle background -->
+  <rect width="32" height="32" rx="6" fill="white"/>
+  
+  <!-- Black Vergil star logo centered -->
+  <g transform="translate(16, 16)">
+    <!-- Outer star points -->
+    <path d="M0,-10 L2.45,-3.09 L9.51,-3.09 L3.09,2.36 L5.88,9.51 L0,4.05 L-5.88,9.51 L-3.09,2.36 L-9.51,-3.09 L-2.45,-3.09 Z" 
+          fill="black" 
+          opacity="0.9"/>
+    
+    <!-- Inner star for depth -->
+    <path d="M0,-6 L1.47,-1.85 L5.71,-1.85 L1.85,1.42 L3.53,5.71 L0,2.43 L-3.53,5.71 L-1.85,1.42 L-5.71,-1.85 L-1.47,-1.85 Z" 
+          fill="black" 
+          opacity="0.3"/>
+    
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="1.5" fill="black"/>
+  </g>
+</svg>
