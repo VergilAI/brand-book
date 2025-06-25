@@ -1,0 +1,20 @@
+/* TEAM */
+Company: Vergil AI
+Site: https://vergil.ai
+LinkedIn: https://www.linkedin.com/company/103983727
+Twitter: @VergilAI
+Location: United States
+
+/* THANKS */
+Name: Our amazing users and partners
+For: Believing in the power of AI-powered learning
+
+/* SITE */
+Last update: 2025/01/25
+Standards: HTML5, CSS3, ES6+
+Components: React, Next.js, Tailwind CSS
+Software: Vergil Learn Platform
+
+/* MISSION */
+Transforming workforce development through AI-powered personalized learning.
+Making enterprise training more engaging, effective, and measurable.

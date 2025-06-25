@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  
+  <!-- Homepage (redirects to /vergil-learn) -->
+  <url>
+    <loc>https://learn.vergil.ai/</loc>
+    <lastmod>2025-01-25T00:00:00.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Main Vergil Learn Page -->
+  <url>
+    <loc>https://learn.vergil.ai/vergil-learn</loc>
+    <lastmod>2025-01-25T00:00:00.000Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://learn.vergil.ai/og-image.png</image:loc>
+      <image:title>Vergil Learn AI-Powered Enterprise Learning Platform</image:title>
+      <image:caption>Transform your workforce with AI-powered personalized learning</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- Contact Page -->
+  <url>
+    <loc>https://learn.vergil.ai/contact</loc>
+    <lastmod>2025-01-25T00:00:00.000Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+</urlset>

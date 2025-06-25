@@ -1,12 +1,30 @@
 {
-  "name": "Vergil Learn",
+  "name": "Vergil Learn - AI-Powered Enterprise Learning Platform",
   "short_name": "Vergil Learn",
-  "description": "Transform your workforce with AI-powered personalized learning",
+  "description": "Transform your workforce with AI-powered personalized learning. Create custom training paths, boost engagement by 85%, reduce training time by 60%, and track ROI with advanced analytics.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0F172A",
   "theme_color": "#6366F1",
   "orientation": "portrait-primary",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["business", "education", "productivity"],
+  "iarc_rating_id": "e84b072d-71b3-4d5e-9b8f-3c4b3b0b1234",
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "Vergil Learn Dashboard - Real-time analytics and insights"
+    },
+    {
+      "src": "/screenshots/learning-path.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "Custom AI-powered learning paths"
+    }
+  ],
   "icons": [
     {
       "src": "/favicon.svg",
@@ -15,14 +33,53 @@
       "purpose": "any maskable"
     },
     {
+      "src": "/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
       "src": "/icon-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-384.png",
+      "sizes": "384x384",
       "type": "image/png"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://learn.vergil.ai"
+    }
+  ],
+  "prefer_related_applications": false
 }
