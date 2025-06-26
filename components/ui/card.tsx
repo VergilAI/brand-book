@@ -35,17 +35,29 @@ import { cn } from "@/lib/utils"
  */
 
 const cardVariants = cva(
-  "rounded-lg border border-gray-200 bg-white text-gray-900",
+  "rounded-lg border bg-card text-card-foreground",
   {
     variants: {
       variant: {
-        default: "shadow-sm",
-        interactive: "shadow-sm transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer vergil-breathing",
-        neural: "shadow-md bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/20",
+        default: "border-border shadow-sm",
+        interactive: "border-border shadow-sm transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer breathing",
+        neural: "shadow-md bg-gradient-to-br from-cosmic-purple/10 to-electric-violet/10 border-cosmic-purple/20",
+        feature: "border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300",
+        metric: "border-border hover:shadow-lg transition-shadow",
+        problem: "border-border h-full",
+        destructive: "border-destructive/20",
+        gradient: "border-0 consciousness-gradient text-white",
+        outlined: "border-2 border-primary",
+      },
+      size: {
+        default: "",
+        sm: "p-4",
+        lg: "p-8",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )

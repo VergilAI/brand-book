@@ -76,7 +76,7 @@ const userContent: ContentCard[] = [
 // Load staged graph data
 const loadCarouselGraphData = async () => {
   try {
-    const response = await fetch('/data/carousel-graph-staged.json')
+    const response = await fetch('/data/graph/staged/carousel-graph-staged.json')
     const data = await response.json()
     return data
   } catch (error) {
@@ -1319,7 +1319,7 @@ export function UserJourneyCarousel() {
         <Button
           size="lg"
           className="bg-cosmic-purple hover:bg-electric-violet text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg px-8 py-6"
-          onClick={() => router.push('/contact')}
+          onClick={() => router.push('/vergil-learn/contact')}
         >
           Book a Demo
           <ChevronRight className="w-5 h-5 ml-2" />

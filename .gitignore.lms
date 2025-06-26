@@ -1,0 +1,64 @@
+# LMS Demo Only Deployment
+# This .gitignore is for deploying only the LMS demo
+# Usage: cp .gitignore.lms .gitignore
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Ignore other modules for LMS deployment
+/app/brand/
+/app/vergil-main/
+/app/vergil-learn/
+/components/landing/
+/components/docs/
+
+# Keep LMS module
+!/app/lms/
+!/app/layout.tsx
+!/app/globals.css
+!/app/not-found.tsx
+!/components/lms/
+
+# Also ignore brand book specific pages
+/app/brand/
+/app/visual/
+/app/elements/
+/app/motion/
+/app/page.tsx

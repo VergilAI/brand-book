@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils'
 
 interface NavigationProps {
   className?: string
+  basePath?: string
 }
 
-export function Navigation({ className }: NavigationProps) {
+export function Navigation({ className, basePath = "" }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -65,7 +66,7 @@ export function Navigation({ className }: NavigationProps) {
             </Link>
 
             {/* CTA Button */}
-            <Link href="/contact">
+            <Link href={`${basePath}/contact`}>
               <Button 
                 size="sm" 
                 className="bg-cosmic-purple hover:bg-electric-violet text-pure-light rounded-full px-5 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105"
@@ -119,7 +120,7 @@ export function Navigation({ className }: NavigationProps) {
           {isOpen && (
             <div className="border-t border-mist-gray/30 bg-pure-light/98 backdrop-blur-xl">
               <div className="px-6 py-6">
-                <Link href="/contact" className="block w-full">
+                <Link href={`${basePath}/contact`} className="block w-full">
                   <Button 
                     size="sm" 
                     className="w-full bg-cosmic-purple hover:bg-electric-violet text-pure-light rounded-full py-3"

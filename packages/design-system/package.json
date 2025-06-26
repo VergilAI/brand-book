@@ -1,0 +1,22 @@
+{
+  "name": "@vergil/design-system",
+  "version": "1.0.0",
+  "description": "Vergil Design System - Living Intelligence Components",
+  "main": "index.ts",
+  "scripts": {
+    "generate-tokens": "tsx scripts/generate-tokens.ts",
+    "build": "npm run generate-tokens"
+  },
+  "keywords": [
+    "design-system",
+    "vergil",
+    "components",
+    "tokens"
+  ],
+  "author": "Vergil AI",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0"
+  }
+}

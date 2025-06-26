@@ -34,101 +34,70 @@ import { Button } from "@/components/ui/button"
 const navigation = [
   {
     title: "Home",
-    url: "/",
+    url: "/brand",
     icon: Home,
     description: "Brand book overview",
   },
   {
     title: "Brand Foundation",
-    url: "/brand/foundation",
+    url: "/brand/brand/foundation",
     icon: Sparkles,
     description: "Mission, vision & values",
   },
   {
     title: "Voice & Tone",
-    url: "/brand/voice-tone",
+    url: "/brand/brand/voice-tone",
     icon: MessageCircle,
     description: "Communication style",
   },
   {
     title: "Colors",
-    url: "/visual/colors",
+    url: "/brand/visual/colors",
     icon: Palette,
     description: "Brand color system",
   },
   {
     title: "Typography",
-    url: "/visual/typography",
+    url: "/brand/visual/typography",
     icon: Type,
     description: "Font system & scales",
   },
   {
     title: "Logo Guidelines",
-    url: "/visual/logo",
+    url: "/brand/visual/logo",
     icon: Image,
     description: "Logo usage & variants",
   },
   {
-    title: "Iris Pattern",
-    url: "/elements/iris",
-    icon: Zap,
-    description: "Consciousness pattern",
-  },
-  {
-    title: "Light Rays",
-    url: "/elements/iris-rays",
-    icon: Zap,
-    description: "Diagonal light ray patterns",
-  },
-  {
     title: "Radial Heatmap",
-    url: "/elements/heatmap",
+    url: "/brand/elements/heatmap",
     icon: Sparkles,
     description: "Living data visualization",
   },
   {
     title: "Graph Visualization",
-    url: "/elements/graph",
+    url: "/brand/elements/graph",
     icon: Zap,
     description: "Interactive network graphs",
   },
   {
     title: "Graph Constellation",
-    url: "/elements/graph-constellation",
+    url: "/brand/elements/graph-constellation",
     icon: Sparkles,
     description: "Premium graph visualization",
   },
   {
     title: "Motion System",
-    url: "/motion/breathing",
+    url: "/brand/motion/breathing",
     icon: Sparkles,
     description: "Living animations",
   },
   {
     title: "Components",
-    url: "/components",
+    url: "/brand/components",
     icon: Code,
     description: "UI component library",
   },
-  {
-    title: "Hero Demo",
-    url: "/demo/hero",
-    icon: Rocket,
-    description: "Hero component showcase",
-  },
-  {
-    title: "Learning System",
-    url: "/lms",
-    icon: Code,
-    description: "Full LMS implementation",
-  },
-]
-
-const comingSoon = [
-  "Neural Networks",
-  "Motion Principles", 
-  "Examples",
-  "Guidelines"
 ]
 
 export function VergilSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -176,25 +145,6 @@ export function VergilSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
             )
           })}
         </SidebarMenu>
-
-        {/* Coming Soon Section */}
-        <div className="mt-auto px-3 py-2">
-          <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-            Coming Soon
-          </div>
-          <SidebarMenu>
-            {comingSoon.map((title) => (
-              <SidebarMenuItem key={title}>
-                <div className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50">
-                  <div className="h-4 w-4 rounded border border-dashed border-sidebar-border/50 flex items-center justify-center">
-                    <div className="h-1 w-1 rounded-full bg-sidebar-foreground/30" />
-                  </div>
-                  <span className="truncate">{title}</span>
-                </div>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </div>
       </SidebarContent>
 
       <SidebarFooter>
