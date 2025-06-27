@@ -8,6 +8,7 @@ This repository contains multiple Vergil-related projects:
 2. **Vergil Main** (`/app/vergil-main/`) - Main AI infrastructure platform landing page
 3. **Vergil Learn** (`/app/vergil-learn/`) - Educational platform landing page
 4. **LMS Demo** (`/app/lms/`) - Learning Management System demo interface
+5. **Investors Portal** (`/app/investors/`) - Internal financial health dashboard for stakeholders
 
 ## Tech Stack
 
@@ -121,6 +122,7 @@ Example hierarchy:
 - `/components/vergil/` - Brand-specific components (logos, patterns, visualizations)
 - `/components/landing/` - Approved landing components (Navigation, LearnHero, UserJourneyCarousel)
 - `/components/lms/` - LMS-specific components (CourseCard, LessonViewer, etc.)
+- `/components/investors/` - Investor portal components (FinancialChart, MetricDashboard, etc.)
 - `/components/docs/` - Documentation components
 - `/components/landing/_archived/` - Deprecated components (replaced by unified system)
 
@@ -146,6 +148,7 @@ Each major module has its own CLAUDE.md file with detailed information:
 - `/app/vergil-main/CLAUDE.md` - Vergil platform landing documentation
 - `/app/vergil-learn/CLAUDE.md` - Vergil Learn landing documentation
 - `/app/lms/CLAUDE.md` - LMS module documentation
+- `/app/investors/INVESTOR_PORTAL_DOCS.md` - Comprehensive investor portal documentation
 - `/components/CLAUDE.md` - Component library documentation
 - `/public/data/CLAUDE.md` - Data files documentation
 
@@ -156,6 +159,7 @@ For deploying individual modules, use branch-specific .gitignore files:
 - `.gitignore.vergil` - Deploy only Vergil platform landing
 - `.gitignore.vergil-learn` - Deploy only Vergil Learn landing
 - `.gitignore.lms` - Deploy only LMS demo
+- `.gitignore.investors` - Deploy only Investors portal (restricted access)
 
 **Important**: See `README_GITIGNORE.md` for detailed deployment instructions.
 
@@ -174,6 +178,7 @@ For deploying individual modules, use branch-specific .gitignore files:
 - `deploy-vergil` - Vergil platform landing deployment only
 - `deploy-vergil-learn` - Vergil Learn landing deployment only
 - `deploy-lms` - LMS deployment only
+- `deploy-investors` - Investors portal deployment (private)
 
 **Important Rules:**
 - Never modify .gitignore on main branch
@@ -187,6 +192,28 @@ git checkout deploy-brand-book
 git merge main
 git push origin deploy-brand-book
 ```
+
+## Investors Portal Overview
+
+### Purpose
+Internal-facing dashboard for stakeholders to review company financial health, metrics, and performance indicators.
+
+### Key Features
+- **Financial Dashboard**: Real-time metrics using Card component with `metric` variant
+- **Performance Charts**: D3.js visualizations with brand color system
+- **Reports Repository**: Secure document viewer for financial reports
+- **Company Updates**: News and strategic announcements
+
+### Design Requirements
+- Use existing Card variants (`metric`, `gradient`, `interactive`)
+- Apply brand colors: cosmic-purple, electric-violet, consciousness-cyan
+- Implement breathing animations for live data
+- Maintain dark theme consistency (bg-dark-900, bg-dark-800)
+
+### Security
+- Authentication required (implement with existing auth patterns)
+- Restricted deployment via `deploy-investors` branch
+- No public access allowed
 
 ## GitHub Repository
 

@@ -1,0 +1,63 @@
+# Investors Portal Deployment Only
+# This gitignore is for deploying only the investor portal
+
+# Ignore all top-level directories except the ones we need
+/*
+!/app/
+!/components/
+!/lib/
+!/styles/
+!/public/
+!/.env.example
+!/.eslintrc.json
+!/next.config.js
+!/package.json
+!/package-lock.json
+!/postcss.config.js
+!/tailwind.config.js
+!/tsconfig.json
+!/README.md
+
+# Within app/, ignore everything except investors
+/app/*
+!/app/investors/
+
+# Within components/, keep only what investors needs
+/components/*
+!/components/ui/
+!/components/investors/
+!/components/vergil/
+
+# Within public/, keep only necessary assets
+/public/*
+!/public/favicon.ico
+!/public/fonts/
+!/public/images/
+
+# Keep backend configuration
+!/app/investors/backend/
+
+# Standard Next.js and Node ignores
+node_modules/
+.next/
+out/
+build/
+dist/
+*.log
+.DS_Store
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
+
+# OS
+Thumbs.db
