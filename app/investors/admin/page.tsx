@@ -7,8 +7,9 @@ import { BalanceManager } from "@/components/investors/admin/BalanceManager";
 import { RevenueManager } from "@/components/investors/admin/RevenueManager";
 import { ExpenseManager } from "@/components/investors/admin/ExpenseManager";
 import { HypotheticalManager } from "@/components/investors/admin/HypotheticalManager";
+import { UserManager } from "@/components/investors/admin/UserManager";
 
-type TabType = "balances" | "revenues" | "expenses" | "hypotheticals";
+type TabType = "balances" | "revenues" | "expenses" | "hypotheticals" | "users";
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>("balances");
@@ -18,6 +19,7 @@ export default function AdminPage() {
     { id: "revenues" as TabType, label: "Revenues", icon: "📈" },
     { id: "expenses" as TabType, label: "Expenses", icon: "📉" },
     { id: "hypotheticals" as TabType, label: "Hypotheticals", icon: "🔮" },
+    { id: "users" as TabType, label: "Users", icon: "👥" },
   ];
 
   return (
@@ -76,6 +78,7 @@ export default function AdminPage() {
             {activeTab === "revenues" && <RevenueManager />}
             {activeTab === "expenses" && <ExpenseManager />}
             {activeTab === "hypotheticals" && <HypotheticalManager />}
+            {activeTab === "users" && <UserManager />}
           </div>
         </div>
       </div>

@@ -17,7 +17,6 @@ interface HypotheticalItem {
     frequency?: string;
   };
   enabled: boolean;
-  probability: number;
   description: string;
 }
 
@@ -60,7 +59,6 @@ export async function POST(request: NextRequest) {
       transaction_type: body.transaction_type,
       date_info: body.date_info,
       enabled: body.enabled ?? true,
-      probability: body.probability || 0.5,
       description: body.description
     };
     

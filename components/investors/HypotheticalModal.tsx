@@ -24,7 +24,6 @@ interface HypotheticalModalProps {
       frequency?: string;
     };
     enabled: boolean;
-    probability: number;
   } | null;
 }
 
@@ -39,7 +38,6 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
     start_date: "",
     end_date: "",
     frequency: "Monthly",
-    probability: "0.5",
     enabled: true,
   });
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -57,7 +55,6 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
         start_date: hypothetical.date_info.start_date || "",
         end_date: hypothetical.date_info.end_date || "",
         frequency: hypothetical.date_info.frequency || "Monthly",
-        probability: hypothetical.probability.toString(),
         enabled: hypothetical.enabled,
       });
     } else {
@@ -72,8 +69,7 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
         start_date: "",
         end_date: "",
         frequency: "Monthly",
-        probability: "0.5",
-        enabled: true,
+            enabled: true,
       });
     }
     setErrors({});
@@ -85,11 +81,6 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
     // Amount validation
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
-    }
-    
-    // Probability validation
-    if (!formData.probability || parseFloat(formData.probability) < 0 || parseFloat(formData.probability) > 1) {
-      newErrors.probability = "Probability must be between 0 and 1";
     }
     
     // Date validation
@@ -151,7 +142,6 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
       type: formData.type,
       transaction_type: formData.transaction_type,
       amount: parseFloat(formData.amount),
-      probability: parseFloat(formData.probability),
       enabled: formData.enabled,
       date_info: formData.transaction_type === "one-time"
         ? { date: formatDateForBackend(formData.expected_date) }
@@ -173,8 +163,7 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
       start_date: "",
       end_date: "",
       frequency: "Monthly",
-      probability: "0.5",
-      enabled: true,
+        enabled: true,
     });
     setErrors({});
   };
@@ -261,29 +250,6 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
             />
             {errors.amount && (
               <p className="text-red-400 text-xs mt-1">{errors.amount}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-400">Probability (0-1)</label>
-            <Input
-              type="number"
-              step="0.1"
-              min="0"
-              max="1"
-              value={formData.probability}
-              onChange={(e) => {
-                setFormData({ ...formData, probability: e.target.value });
-                if (errors.probability) {
-                  setErrors({ ...errors, probability: "" });
-                }
-              }}
-              placeholder="0.5"
-              className={`bg-dark-700 border-dark-600 ${errors.probability ? 'border-red-500' : ''}`}
-              required
-            />
-            {errors.probability && (
-              <p className="text-red-400 text-xs mt-1">{errors.probability}</p>
             )}
           </div>
 

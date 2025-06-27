@@ -20,7 +20,6 @@ interface Hypothetical {
     frequency?: string;
   };
   enabled: boolean;
-  probability: number;
 }
 
 interface HypotheticalDealsProps {
@@ -58,7 +57,7 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
           const freq = h.date_info.frequency?.toLowerCase();
           const multiplier = freq === "yearly" ? 1/12 : 
                             freq === "quarterly" ? 1/3 : 1;
-          return total + (h.amount * multiplier * h.probability);
+          return total + (h.amount * multiplier);
         }
         // Don't include one-time in monthly calculation
         return total;
@@ -224,7 +223,6 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
                           : `${hypothetical.date_info.frequency || "Monthly"} • ${hypothetical.date_info.start_date || "Not set"} - ${
                               hypothetical.date_info.end_date || "Ongoing"
                             }`}
-                        {hypothetical.probability && ` • ${Math.round(hypothetical.probability * 100)}% likely`}
                       </p>
                       
                       <div className="flex items-center justify-between">

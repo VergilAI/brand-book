@@ -28,7 +28,6 @@ interface FinancialItem {
 
 interface HypotheticalItem extends FinancialItem {
   enabled: boolean;
-  probability: number;
   description: string;
 }
 
@@ -141,11 +140,11 @@ export async function GET() {
     
     const hypotheticalRevenue = enabledHypotheticals
       .filter(h => h.type === "revenue")
-      .reduce((sum, item) => sum + calculateMonthlyAmount(item) * item.probability, 0);
+      .reduce((sum, item) => sum + calculateMonthlyAmount(item), 0);
     
     const hypotheticalExpense = enabledHypotheticals
       .filter(h => h.type === "expense")
-      .reduce((sum, item) => sum + calculateMonthlyAmount(item) * item.probability, 0);
+      .reduce((sum, item) => sum + calculateMonthlyAmount(item), 0);
     
     const totalMonthlyRevenue = monthlyRevenue + hypotheticalRevenue;
     const totalMonthlyExpenses = monthlyExpenses + hypotheticalExpense;

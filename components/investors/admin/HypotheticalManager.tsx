@@ -19,7 +19,6 @@ interface HypotheticalItem {
     frequency?: string;
   };
   enabled: boolean;
-  probability: number;
   description: string;
 }
 
@@ -32,7 +31,6 @@ export function HypotheticalManager() {
     transaction_type: "one-time",
     date_info: {},
     enabled: true,
-    probability: 0.5,
   });
 
   useEffect(() => {
@@ -70,8 +68,7 @@ export function HypotheticalManager() {
           transaction_type: "one-time",
           date_info: {},
           enabled: true,
-          probability: 0.5,
-        });
+              });
         setEditingId(null);
       }
     } catch (error) {
@@ -198,20 +195,6 @@ export function HypotheticalManager() {
                 />
               </div>
               
-              <div>
-                <label className="text-sm text-stone-gray mb-1 block">Probability (0-1)</label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="1"
-                  value={formData.probability || ""}
-                  onChange={(e) => setFormData({ ...formData, probability: parseFloat(e.target.value) })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
-                  placeholder="0.5"
-                  required
-                />
-              </div>
               
               {formData.transaction_type === "recurring" ? (
                 <>
@@ -291,8 +274,7 @@ export function HypotheticalManager() {
                       transaction_type: "one-time",
                       date_info: {},
                       enabled: true,
-                      probability: 0.5,
-                    });
+                                      });
                   }}
                   className="border-stone-gray/30 text-stone-gray hover:text-pure-light"
                 >
@@ -336,9 +318,6 @@ export function HypotheticalManager() {
                           : "bg-neural-pink/20 text-neural-pink border border-neural-pink/30"
                       }`}>
                         {hypothetical.type}
-                      </span>
-                      <span className="px-2 py-0.5 text-xs bg-electric-violet/20 text-electric-violet rounded-full border border-electric-violet/30">
-                        {Math.round(hypothetical.probability * 100)}% likely
                       </span>
                     </div>
                     <p className="text-sm text-stone-gray mt-1">{hypothetical.description}</p>
