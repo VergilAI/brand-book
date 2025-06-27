@@ -18,9 +18,14 @@
 !/tsconfig.json
 !/README.md
 
-# Within app/, ignore everything except investors
+# Within app/, ignore everything except investors and API
 /app/*
 !/app/investors/
+!/app/api/
+
+# Within api/, only keep investors endpoints
+/app/api/*
+!/app/api/investors/
 
 # Within components/, keep only what investors needs
 /components/*

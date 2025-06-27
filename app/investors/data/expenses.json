@@ -1,0 +1,29 @@
+{
+  "expenses": [
+    {
+      "id": "exp-1751036215576",
+      "name": "Salaries ",
+      "amount": 3900000,
+      "type": "expense",
+      "transaction_type": "recurring",
+      "date_info": {
+        "frequency": "Monthly",
+        "start_date": "2025-07-03"
+      },
+      "is_hypothetical": false
+    },
+    {
+      "id": "exp-1751036910322",
+      "name": "Tharpa Salary",
+      "amount": 700000,
+      "type": "expense",
+      "transaction_type": "recurring",
+      "date_info": {
+        "frequency": "Monthly",
+        "start_date": "2025-07-03",
+        "end_date": "2025-10-31"
+      },
+      "is_hypothetical": false
+    }
+  ]
+}

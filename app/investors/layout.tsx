@@ -10,11 +10,5 @@ export default function InvestorsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-space to-deep-space/90">
-      <div className="bg-gradient-to-b from-cosmic-purple/5 to-transparent">
-        {children}
-      </div>
-    </div>
-  );
+  return children;
 }

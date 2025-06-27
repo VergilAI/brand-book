@@ -1,108 +1,118 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 
-export async function GET() {
+const dataPath = path.join(process.cwd(), "app/investors/data/hypotheticals.json");
+
+interface HypotheticalItem {
+  id: string;
+  name: string;
+  amount: number;
+  type: "revenue" | "expense";
+  transaction_type: "recurring" | "one-time";
+  date_info: {
+    date?: string;
+    start_date?: string;
+    end_date?: string;
+    frequency?: string;
+  };
+  enabled: boolean;
+  probability: number;
+  description: string;
+}
+
+interface HypotheticalsData {
+  hypotheticals: HypotheticalItem[];
+}
+
+async function readHypotheticals(): Promise<HypotheticalsData> {
   try {
-    const response = await fetch('http://localhost:8000/api/hypotheticals');
-    const data = await response.json();
-    return NextResponse.json(data);
+    const data = await fs.readFile(dataPath, "utf-8");
+    return JSON.parse(data);
   } catch (error) {
-    console.error('Error fetching hypotheticals:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch hypotheticals' },
-      { status: 500 }
-    );
+    return { hypotheticals: [] };
   }
 }
 
-export async function POST(request: Request) {
+async function writeHypotheticals(data: HypotheticalsData): Promise<void> {
+  await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+}
+
+export async function GET() {
+  try {
+    const data = await readHypotheticals();
+    return NextResponse.json(data.hypotheticals);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to read hypotheticals" }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const data = await readHypotheticals();
     
-    // Validate required fields
-    if (!body.amount || body.amount <= 0) {
-      return NextResponse.json(
-        { message: 'Amount must be greater than 0' },
-        { status: 400 }
-      );
-    }
+    const newHypothetical: HypotheticalItem = {
+      id: `hyp-${Date.now()}`,
+      name: body.name,
+      amount: body.amount,
+      type: body.type,
+      transaction_type: body.transaction_type,
+      date_info: body.date_info,
+      enabled: body.enabled ?? true,
+      probability: body.probability || 0.5,
+      description: body.description
+    };
     
-    if (body.transaction_type === 'onetime' && !body.expected_date) {
-      return NextResponse.json(
-        { message: 'Expected date is required for one-time transactions' },
-        { status: 400 }
-      );
-    }
+    data.hypotheticals.push(newHypothetical);
+    await writeHypotheticals(data);
     
-    if (body.transaction_type === 'recurring' && !body.start_date) {
-      return NextResponse.json(
-        { message: 'Start date is required for recurring transactions' },
-        { status: 400 }
-      );
-    }
-    
-    // Validate date formats and logic
-    if (body.expected_date) {
-      const expectedDate = new Date(body.expected_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (isNaN(expectedDate.getTime())) {
-        return NextResponse.json(
-          { message: 'Invalid expected date format' },
-          { status: 400 }
-        );
-      }
-      
-      if (expectedDate < today) {
-        return NextResponse.json(
-          { message: 'Expected date cannot be in the past' },
-          { status: 400 }
-        );
-      }
-    }
-    
-    if (body.start_date && body.end_date) {
-      const startDate = new Date(body.start_date);
-      const endDate = new Date(body.end_date);
-      
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return NextResponse.json(
-          { message: 'Invalid date format' },
-          { status: 400 }
-        );
-      }
-      
-      if (endDate <= startDate) {
-        return NextResponse.json(
-          { message: 'End date must be after start date' },
-          { status: 400 }
-        );
-      }
-    }
-    
-    const response = await fetch('http://localhost:8000/api/hypotheticals', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      return NextResponse.json(
-        { message: errorData.detail || 'Failed to create hypothetical' },
-        { status: response.status }
-      );
-    }
-    
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(newHypothetical, { status: 201 });
   } catch (error) {
-    console.error('Error creating hypothetical:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create hypothetical" }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const data = await readHypotheticals();
+    
+    const index = data.hypotheticals.findIndex(h => h.id === body.id);
+    if (index === -1) {
+      return NextResponse.json({ error: "Hypothetical not found" }, { status: 404 });
+    }
+    
+    data.hypotheticals[index] = { ...data.hypotheticals[index], ...body };
+    await writeHypotheticals(data);
+    
+    return NextResponse.json(data.hypotheticals[index]);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to update hypothetical" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    
+    if (!id) {
+      return NextResponse.json({ error: "ID required" }, { status: 400 });
+    }
+    
+    const data = await readHypotheticals();
+    const filteredHypotheticals = data.hypotheticals.filter(h => h.id !== id);
+    
+    if (filteredHypotheticals.length === data.hypotheticals.length) {
+      return NextResponse.json({ error: "Hypothetical not found" }, { status: 404 });
+    }
+    
+    data.hypotheticals = filteredHypotheticals;
+    await writeHypotheticals(data);
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to delete hypothetical" }, { status: 500 });
   }
 }

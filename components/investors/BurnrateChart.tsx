@@ -1,430 +1,707 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import * as d3 from "d3";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 
-interface BurnrateChartProps {
-  currentBalance: number;
-  burnrate: number;
-  monthlyRevenue?: number;
-  hypotheticalRevenue?: number;
-}
-
-interface MonthlyProjection {
-  date: string;
-  month: string;
+interface ChartDataPoint {
+  date: Date;
+  burnRate: number;
   revenue: number;
-  expense: number;
-  hypothetical_revenue: number;
-  net_change: number;
-  net_change_with_hypothetical: number;
-  balance_without_hypothetical: number;
-  balance_with_hypothetical: number;
+  balance: number;
+  oneTimeRevenue?: number;
+  oneTimeExpense?: number;
+  oneTimeRevenueName?: string;
+  oneTimeExpenseName?: string;
+  actualRevenue: number;
+  projectedRevenue: number;
 }
 
-export function BurnrateChart({ currentBalance, burnrate, monthlyRevenue = 0, hypotheticalRevenue = 0 }: BurnrateChartProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [projections, setProjections] = useState<MonthlyProjection[]>([]);
-  const [loading, setLoading] = useState(true);
+export interface OneTimeEvent {
+  date: string;
+  amount: number;
+  name: string;
+  type: 'revenue' | 'expense';
+}
 
-  // Fetch monthly projections
-  useEffect(() => {
-    const fetchProjections = async () => {
+export interface RecurringItem {
+  name?: string;
+  source?: string;
+  amount: number;
+  transaction_type: string;
+  date_info: {
+    start_date?: string;
+    end_date?: string;
+    frequency?: string;
+  };
+}
+
+interface BurnRateChartProps {
+  currentBalance: number;
+  monthlyBurnRate: number;
+  monthlyRevenue: number;
+  oneTimeEvents?: OneTimeEvent[];
+  recurringRevenues?: RecurringItem[];
+  recurringExpenses?: RecurringItem[];
+}
+
+export function BurnRateChart({ 
+  currentBalance, 
+  monthlyBurnRate, 
+  monthlyRevenue,
+  oneTimeEvents = [],
+  recurringRevenues = [],
+  recurringExpenses = []
+}: BurnRateChartProps) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 400 });
+  
+  const createTooltip = (className: string, borderColor: string) => {
+    return d3.select("body").append("div")
+      .attr("class", className)
+      .style("position", "absolute")
+      .style("padding", "12px")
+      .style("background", "rgba(15, 23, 42, 0.95)")
+      .style("border", `1px solid ${borderColor}`)
+      .style("border-radius", "8px")
+      .style("color", "#FFFFFF")
+      .style("font-size", "12px")
+      .style("pointer-events", "none")
+      .style("opacity", 0)
+      .style("transition", "opacity 0.2s");
+  };
+
+  // Helper function to check if a recurring item is active for a given date
+  const isRecurringActive = (item: RecurringItem, date: Date): boolean => {
+    if (!item.date_info.start_date) return false;
+    
+    const startDate = new Date(item.date_info.start_date);
+    if (date < startDate) return false;
+    
+    if (item.date_info.end_date) {
+      const endDate = new Date(item.date_info.end_date);
+      if (date > endDate) return false;
+    }
+    
+    return true;
+  };
+
+  // Calculate monthly amount for a recurring item
+  const getMonthlyAmount = (item: RecurringItem): number => {
+    const freq = item.date_info.frequency?.toLowerCase();
+    const multiplier = freq === "yearly" ? 1/12 : 
+                      freq === "quarterly" ? 1/3 : 1;
+    return item.amount * multiplier;
+  };
+
+  // Generate projection data for next 24 months
+  const generateProjectionData = (): ChartDataPoint[] => {
+    const data: ChartDataPoint[] = [];
+    const today = new Date();
+    let balance = currentBalance;
+
+    // Process one-time events into a map by month
+    const eventsByMonth: { [key: string]: { revenue?: number; expense?: number; revenueName?: string; expenseName?: string } } = {};
+    
+    oneTimeEvents.forEach(event => {
       try {
-        const response = await fetch('/api/investors/analytics/monthly-projections?months=24');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch projections: ${response.status}`);
+        const eventDate = new Date(event.date);
+        
+        // Check if date is valid
+        if (isNaN(eventDate.getTime())) {
+          return;
         }
-        const data = await response.json();
-        console.log('Fetched projections:', data);
-        if (Array.isArray(data)) {
-          setProjections(data);
-        } else {
-          console.error('Invalid projections data:', data);
+        
+        const monthDiff = (eventDate.getFullYear() - today.getFullYear()) * 12 + 
+                         (eventDate.getMonth() - today.getMonth());
+        
+        // Only include events within the next 24 months
+        if (monthDiff >= 0 && monthDiff < 24) {
+          if (!eventsByMonth[monthDiff]) {
+            eventsByMonth[monthDiff] = {};
+          }
+          
+          if (event.type === 'revenue') {
+            eventsByMonth[monthDiff].revenue = (eventsByMonth[monthDiff].revenue || 0) + event.amount;
+            // Combine names if multiple events
+            if (eventsByMonth[monthDiff].revenueName) {
+              eventsByMonth[monthDiff].revenueName += ` + ${event.name}`;
+            } else {
+              eventsByMonth[monthDiff].revenueName = event.name;
+            }
+          } else {
+            eventsByMonth[monthDiff].expense = (eventsByMonth[monthDiff].expense || 0) + event.amount;
+            // Combine names if multiple events
+            if (eventsByMonth[monthDiff].expenseName) {
+              eventsByMonth[monthDiff].expenseName += ` + ${event.name}`;
+            } else {
+              eventsByMonth[monthDiff].expenseName = event.name;
+            }
+          }
         }
       } catch (error) {
-        console.error('Error fetching projections:', error);
-      } finally {
-        setLoading(false);
+        // Skip invalid events
+      }
+    });
+
+    for (let i = 0; i < 24; i++) {
+      const date = new Date(today);
+      date.setMonth(date.getMonth() + i);
+      
+      // Calculate actual monthly revenue for this specific month
+      let monthlyRevenueForDate = 0;
+      recurringRevenues.forEach(item => {
+        if (isRecurringActive(item, date)) {
+          monthlyRevenueForDate += getMonthlyAmount(item);
+        }
+      });
+      
+      // Calculate actual monthly expenses for this specific month
+      let monthlyExpensesForDate = 0;
+      recurringExpenses.forEach(item => {
+        if (isRecurringActive(item, date)) {
+          monthlyExpensesForDate += getMonthlyAmount(item);
+        }
+      });
+      
+      // Use calculated values if we have recurring data, otherwise fall back to provided totals
+      const currentRevenue = recurringRevenues.length > 0 ? monthlyRevenueForDate : monthlyRevenue;
+      const currentExpenses = recurringExpenses.length > 0 ? monthlyExpensesForDate : monthlyBurnRate;
+      
+      // First 3 months are "actual" revenue, rest is projected
+      const isActual = i < 3;
+      
+      // For projected data, no growth trend
+      const projectedRevenue = 0;
+      const actualRevenue = currentRevenue;
+      
+      // Get one-time events for this month
+      const oneTime = eventsByMonth[i] || {};
+      
+      // Calculate running balance including one-time items
+      balance = balance - currentExpenses + currentRevenue + (oneTime.revenue || 0) - (oneTime.expense || 0);
+      
+      data.push({
+        date,
+        burnRate: currentExpenses,
+        revenue: currentRevenue,
+        balance: Math.max(0, balance), // Don't go negative for display
+        oneTimeRevenue: oneTime.revenue,
+        oneTimeExpense: oneTime.expense,
+        oneTimeRevenueName: oneTime.revenueName,
+        oneTimeExpenseName: oneTime.expenseName,
+        actualRevenue: isActual ? currentRevenue : actualRevenue,
+        projectedRevenue: projectedRevenue
+      });
+
+      // Stop if we hit zero
+      if (balance <= 0) break;
+    }
+
+    return data;
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (svgRef.current) {
+        const { width } = svgRef.current.getBoundingClientRect();
+        setDimensions({ width, height: 400 });
       }
     };
 
-    fetchProjections();
-  }, [currentBalance, burnrate, monthlyRevenue, hypotheticalRevenue]);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
-    console.log('BurnrateChart received data:', { currentBalance, burnrate, monthlyRevenue, hypotheticalRevenue });
-    console.log('Projections:', projections);
-    
-    if (!svgRef.current || loading || projections.length === 0) {
-      console.log('Not ready to render chart');
-      return;
-    }
-    
-    // Convert string values to numbers if needed
-    const balance = typeof currentBalance === 'number' ? currentBalance : parseFloat(currentBalance as any) || 0;
-    const burn = typeof burnrate === 'number' ? burnrate : parseFloat(burnrate as any) || 0;
+    if (!svgRef.current || dimensions.width === 0) return;
 
-    const svg = d3.select(svgRef.current);
-    
-    // Clean up previous chart
-    try {
-      svg.selectAll("*").remove();
-    } catch (error) {
-      console.error('Error clearing chart:', error);
-      return;
-    }
+    const data = generateProjectionData();
+    const margin = { top: 20, right: 80, bottom: 60, left: 80 };
+    const width = dimensions.width - margin.left - margin.right;
+    const height = dimensions.height - margin.top - margin.bottom;
 
-    const margin = { top: 20, right: 30, bottom: 60, left: 80 }; // Increased bottom margin for labels
-    const width = 800 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    // Clear previous chart
+    d3.select(svgRef.current).selectAll("*").remove();
 
-    const g = svg
-      .append("g")
+    const svg = d3.select(svgRef.current)
+      .attr("width", dimensions.width)
+      .attr("height", dimensions.height);
+
+    const g = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Transform projection data for D3
-    const data = projections && projections.length > 0 ? projections.map((proj, i) => ({
-      month: i,
-      date: new Date(proj.date),
-      balance: proj.balance_without_hypothetical,
-      balanceWithRevenue: proj.balance_with_hypothetical,
-      label: new Date(proj.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
-      revenue: proj.revenue,
-      expense: proj.expense,
-      hypotheticalRevenue: proj.hypothetical_revenue
-    })) : [];
+    // Set up scales
+    const xScale = d3.scaleTime()
+      .domain(d3.extent(data, d => d.date) as [Date, Date])
+      .range([0, width]);
+
+    const maxValue = Math.max(
+      d3.max(data, d => d.burnRate) || 0,
+      d3.max(data, d => d.revenue) || 0,
+      d3.max(data, d => d.oneTimeRevenue || 0) || 0,
+      currentBalance
+    );
+
+    const minValue = Math.min(
+      0,
+      -(d3.max(data, d => d.oneTimeExpense || 0) || 0)
+    );
+
+    const yScale = d3.scaleLinear()
+      .domain([minValue * 1.1, maxValue * 1.1])
+      .range([height, 0]);
+
+    // No gridlines for cleaner look
+
+    // Define line generators
+    const burnRateLine = d3.line<ChartDataPoint>()
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.burnRate))
+      .curve(d3.curveMonotoneX);
+
+    const revenueLine = d3.line<ChartDataPoint>()
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.revenue))
+      .curve(d3.curveMonotoneX);
+
+    const balanceLine = d3.line<ChartDataPoint>()
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.balance))
+      .curve(d3.curveMonotoneX);
+
+
+    // Calculate bar width based on number of data points
+    const barWidth = width / data.length * 0.6;
+
+    // Add one-time revenue bars (green)
+    g.selectAll(".revenue-bar")
+      .data(data.filter(d => d.oneTimeRevenue))
+      .enter().append("rect")
+      .attr("class", "revenue-bar")
+      .attr("x", d => xScale(d.date) - barWidth / 2)
+      .attr("y", d => yScale(d.oneTimeRevenue || 0))
+      .attr("width", barWidth)
+      .attr("height", d => yScale(0) - yScale(d.oneTimeRevenue || 0))
+      .attr("fill", "#10B981")
+      .attr("opacity", 0.8)
+      .style("cursor", "pointer")
+      .on("mouseover", function(event, d) {
+        d3.select(this).attr("opacity", 1);
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this).attr("opacity", 0.8);
+      });
+
+    // Add one-time expense bars (red, negative)
+    g.selectAll(".expense-bar")
+      .data(data.filter(d => d.oneTimeExpense))
+      .enter().append("rect")
+      .attr("class", "expense-bar")
+      .attr("x", d => xScale(d.date) - barWidth / 2)
+      .attr("y", yScale(0))
+      .attr("width", barWidth)
+      .attr("height", d => yScale(-(d.oneTimeExpense || 0)) - yScale(0))
+      .attr("fill", "#DC2626")
+      .attr("opacity", 0.7)
+      .style("cursor", "pointer")
+      .on("mouseover", function(event, d) {
+        d3.select(this).attr("opacity", 1);
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this).attr("opacity", 0.7);
+      });
+
+    // Add the lines
+    // Revenue line (green)
+    const revenuePath = g.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#10B981")
+      .attr("stroke-width", 3)
+      .attr("d", revenueLine)
+      .attr("opacity", 1);
+
+    // Balance line (purple - dotted)
+    const balancePath = g.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#6366F1")
+      .attr("stroke-width", 3)
+      .attr("stroke-dasharray", "8,4")
+      .attr("d", balanceLine)
+      .attr("opacity", 0.9);
+      
+    // Create tooltips
+    const tooltip = createTooltip("vergil-chart-tooltip", "#6366F1");
+      
+    // Add hover line
+    const hoverLine = g.append("line")
+      .attr("class", "hover-line")
+      .attr("y1", 0)
+      .attr("y2", height)
+      .style("stroke", "#6366F1")
+      .style("stroke-width", 1)
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0);
+      
+    // Add circle for hover point
+    const hoverCircle = g.append("circle")
+      .attr("r", 5)
+      .style("fill", "#6366F1")
+      .style("stroke", "#FFFFFF")
+      .style("stroke-width", 2)
+      .style("opacity", 0);
+      
+    // Add mouse interaction
+    const bisectDate = d3.bisector<ChartDataPoint, Date>(d => d.date).left;
     
-    console.log('Chart data:', data.slice(0, 5)); // Log first 5 points
-    
-    if (data.length === 0) {
-      console.log('No data to render');
-      return;
-    }
-
-    let xScale, yScale;
-    try {
-      // Create time scale for x-axis
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setMonth(startDate.getMonth() + 24);
+    // Add invisible wider path for balance line hover detection
+    g.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "transparent")
+      .attr("stroke-width", 20)
+      .attr("d", balanceLine)
+      .style("cursor", "pointer")
+      .on("mousemove", function(event) {
+        const [mouseX] = d3.pointer(event);
+        const x0 = xScale.invert(mouseX);
+        const i = bisectDate(data, x0, 1);
+        const d0 = data[i - 1];
+        const d1 = data[i];
+        
+        if (!d0 || !d1) return;
+        
+        const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
+        
+        // Calculate net burn rate for this period
+        const netBurn = d.burnRate - d.revenue;
+        
+        // Update hover elements
+        hoverLine
+          .attr("x1", xScale(d.date))
+          .attr("x2", xScale(d.date))
+          .style("opacity", 0.5);
+          
+        hoverCircle
+          .attr("cx", xScale(d.date))
+          .attr("cy", yScale(d.balance))
+          .style("opacity", 1);
+          
+        // Format tooltip content
+        const tooltipHtml = `
+          <div style="font-weight: 600; margin-bottom: 8px; color: #A78BFA;">
+            ${d3.timeFormat("%B %Y")(d.date)}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <span style="color: #9CA3AF;">Balance:</span> 
+            <span style="font-weight: 600;">${formatCurrency(d.balance)}</span>
+          </div>
+          <div>
+            <span style="color: #9CA3AF;">Net Burn:</span> 
+            <span style="font-weight: 600; color: ${netBurn > 0 ? '#F472B6' : '#10B981'}">
+              ${formatCurrency(Math.abs(netBurn))}/mo
+            </span>
+          </div>
+        `;
+        
+        tooltip
+          .html(tooltipHtml)
+          .style("left", (event.pageX + 15) + "px")
+          .style("top", (event.pageY - 28) + "px")
+          .style("opacity", 1);
+      })
+      .on("mouseout", function() {
+        hoverLine.style("opacity", 0);
+        hoverCircle.style("opacity", 0);
+        tooltip.style("opacity", 0);
+      });
       
-      xScale = d3.scaleTime()
-        .domain([startDate, endDate])
-        .range([0, width]);
-
-      // Calculate max balance considering potential growth
-      const maxProjectedBalance = Math.max(...data.map(d => Math.max(d.balance, d.balanceWithRevenue)));
-      const maxBalance = Math.max(maxProjectedBalance * 1.1, balance * 1.1, 1000); // Minimum scale of $1000
-      yScale = d3.scaleLinear()
-        .domain([0, maxBalance])
-        .range([height, 0]);
-    } catch (error) {
-      console.error('Error creating scales:', error);
-      return;
-    }
-
-    let line, area, lineWithRevenue;
-    try {
-      // Line for burn only
-      line = d3.line<any>()
-        .x(d => xScale(d.date))
-        .y(d => yScale(d.balance))
-        .curve(d3.curveMonotoneX);
-
-      // Area for burn only
-      area = d3.area<any>()
-        .x(d => xScale(d.date))
-        .y0(height)
-        .y1(d => yScale(d.balance))
-        .curve(d3.curveMonotoneX);
-        
-      // Line for balance with potential revenue
-      lineWithRevenue = d3.line<any>()
-        .x(d => xScale(d.date))
-        .y(d => yScale(d.balanceWithRevenue))
-        .curve(d3.curveMonotoneX);
-    } catch (error) {
-      console.error('Error creating line/area generators:', error);
-      return;
-    }
-
-    // Create gradient with dark purple theme
-    try {
-      g.append("defs")
-        .append("linearGradient")
-        .attr("id", "burnGradient")
-        .attr("gradientUnits", "userSpaceOnUse")
-        .attr("x1", 0).attr("y1", 0)
-        .attr("x2", 0).attr("y2", height)
-        .selectAll("stop")
-        .data([
-          { offset: "0%", color: "rgba(99, 102, 241, 0.4)" },  // cosmic-purple with opacity
-          { offset: "100%", color: "rgba(99, 102, 241, 0.1)" }   // cosmic-purple faded
-        ])
-        .enter().append("stop")
-        .attr("offset", d => d.offset)
-        .attr("stop-color", d => d.color);
-    } catch (error) {
-      console.error('Error creating gradient:', error);
-    }
-
-    // Draw area and line with dark purple theme
-    try {
-      // Area for burn-only scenario
-      g.append("path")
-        .datum(data)
-        .attr("fill", "url(#burnGradient)")
-        .attr("opacity", 0.5)
-        .attr("d", area);
-
-      // Line for burn-only scenario
-      g.append("path")
-        .datum(data)
-        .attr("fill", "none")
-        .attr("stroke", "#6366F1")  // cosmic-purple
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5") // Dashed for burn-only
-        .attr("d", line);
-        
-      // Line for balance with potential revenue
-      if (potentialRevenue > 0) {
-        g.append("path")
-          .datum(data)
-          .attr("fill", "none")
-          .attr("stroke", "#00D9FF")  // phosphor-cyan for revenue scenario
-          .attr("stroke-width", 3)
-          .attr("d", lineWithRevenue);
-          
-        // Add legend
-        const legendY = -10;
-        
-        // Burn-only legend
-        g.append("line")
-          .attr("x1", width - 200)
-          .attr("x2", width - 170)
-          .attr("y1", legendY)
-          .attr("y2", legendY)
-          .attr("stroke", "#6366F1")
-          .attr("stroke-width", 2)
-          .attr("stroke-dasharray", "5,5");
-          
-        g.append("text")
-          .attr("x", width - 165)
-          .attr("y", legendY + 4)
-          .attr("fill", "#374151")
-          .attr("font-size", "12px")
-          .text("Current Burn");
-          
-        // With revenue legend
-        g.append("line")
-          .attr("x1", width - 200)
-          .attr("x2", width - 170)
-          .attr("y1", legendY + 20)
-          .attr("y2", legendY + 20)
-          .attr("stroke", "#00D9FF")
-          .attr("stroke-width", 3);
-          
-        g.append("text")
-          .attr("x", width - 165)
-          .attr("y", legendY + 24)
-          .attr("fill", "#374151")
-          .attr("font-size", "12px")
-          .text("With Potential Revenue");
-      }
-        
-      // Add critical zone indicator (when balance gets low)
-      const criticalThreshold = balance * 0.2; // 20% of starting balance
-      if (criticalThreshold > 0) {
-        g.append("line")
-          .attr("x1", 0)
-          .attr("x2", width)
-          .attr("y1", yScale(criticalThreshold))
-          .attr("y2", yScale(criticalThreshold))
-          .attr("stroke", "#EF4444")  // red warning line
-          .attr("stroke-width", 2)
-          .attr("stroke-dasharray", "5,5")
-          .attr("opacity", 0.7);
-          
-        // Add critical zone label
-        g.append("text")
-          .attr("x", width - 10)
-          .attr("y", yScale(criticalThreshold) - 5)
-          .attr("fill", "#EF4444")
-          .attr("text-anchor", "end")
-          .attr("font-size", "12px")
-          .text("Critical Level");
-      }
+    // Create tooltips for other elements
+    const barTooltip = createTooltip("vergil-chart-tooltip-bar", "transparent");
+    const revenueTooltip = createTooltip("vergil-chart-tooltip-revenue", "#10B981");
       
-      // Find zero balance points
-      const zeroBalanceIndex = data.findIndex(d => d.balance <= 0);
-      const zeroBalanceWithRevenueIndex = data.findIndex(d => d.balanceWithRevenue <= 0);
+    // Add hover elements for revenue
+    const revenueHoverLine = g.append("line")
+      .attr("class", "revenue-hover-line")
+      .attr("y1", 0)
+      .attr("y2", height)
+      .style("stroke", "#10B981")
+      .style("stroke-width", 1)
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0);
       
-      if (zeroBalanceIndex > 0 && zeroBalanceIndex < data.length) {
-        const zeroDate = data[zeroBalanceIndex].date;
-        
-        g.append("line")
-          .attr("x1", xScale(zeroDate))
-          .attr("x2", xScale(zeroDate))
-          .attr("y1", 0)
-          .attr("y2", height)
-          .attr("stroke", "#DC2626")
-          .attr("stroke-width", 2)
-          .attr("stroke-dasharray", "3,3")
-          .attr("opacity", 0.5);
-          
-        g.append("text")
-          .attr("x", xScale(zeroDate) + 5)
-          .attr("y", 40)
-          .attr("fill", "#DC2626")
-          .attr("font-size", "12px")
-          .attr("font-weight", "bold")
-          .text(`Zero (${zeroBalanceIndex} months)`);
-      }
+    const revenueHoverCircle = g.append("circle")
+      .attr("r", 5)
+      .style("fill", "#10B981")
+      .style("stroke", "#FFFFFF")
+      .style("stroke-width", 2)
+      .style("opacity", 0);
       
-      if (zeroBalanceWithRevenueIndex > 0 && zeroBalanceWithRevenueIndex < data.length) {
-        const zeroDateWithRevenue = data[zeroBalanceWithRevenueIndex].date;
+    // Add invisible wider path for revenue line hover
+    g.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "transparent")
+      .attr("stroke-width", 20)
+      .attr("d", revenueLine)
+      .style("cursor", "pointer")
+      .on("mousemove", function(event) {
+        const [mouseX] = d3.pointer(event);
+        const x0 = xScale.invert(mouseX);
+        const i = bisectDate(data, x0, 1);
+        const d0 = data[i - 1];
+        const d1 = data[i];
         
-        g.append("line")
-          .attr("x1", xScale(zeroDateWithRevenue))
-          .attr("x2", xScale(zeroDateWithRevenue))
-          .attr("y1", 0)
-          .attr("y2", height)
-          .attr("stroke", "#00D9FF")
-          .attr("stroke-width", 2)
-          .attr("stroke-dasharray", "3,3")
-          .attr("opacity", 0.8);
+        if (!d0 || !d1) return;
+        
+        const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
+        
+        // Update hover elements
+        revenueHoverLine
+          .attr("x1", xScale(d.date))
+          .attr("x2", xScale(d.date))
+          .style("opacity", 0.5);
           
-        g.append("text")
-          .attr("x", xScale(zeroDateWithRevenue) + 5)
-          .attr("y", 20)
-          .attr("fill", "#00D9FF")
-          .attr("font-size", "12px")
-          .attr("font-weight", "bold")
-          .text(`Zero (${zeroBalanceWithRevenueIndex} months)`);
-      } else if (data[data.length - 1].balanceWithRevenue > data[0].balanceWithRevenue) {
-        // Company is growing with revenue
-        g.append("text")
-          .attr("x", width - 10)
-          .attr("y", 20)
-          .attr("fill", "#10B981")
-          .attr("text-anchor", "end")
-          .attr("font-size", "12px")
-          .attr("font-weight", "bold")
-          .text("Growing with revenue!");
-      }
-    } catch (error) {
-      console.error('Error drawing chart paths:', error);
-    }
-
-    // Draw axes with dark theme
-    try {
-      // X-axis (Time) with month labels
-      const xAxis = g.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xScale)
-          .ticks(d3.timeMonth.every(1)) // Show every month
-          .tickFormat(d => {
-            const date = d as Date;
-            return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-          })
-        );
+        revenueHoverCircle
+          .attr("cx", xScale(d.date))
+          .attr("cy", yScale(d.revenue))
+          .style("opacity", 1);
+          
+        // Format tooltip content
+        const isProjected = d.projectedRevenue > 0;
+        const tooltipHtml = `
+          <div style="font-weight: 600; margin-bottom: 8px; color: #10B981;">
+            ${d3.timeFormat("%B %Y")(d.date)}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <span style="color: #9CA3AF;">Total Revenue:</span> 
+            <span style="font-weight: 600;">${formatCurrency(d.revenue)}</span>
+          </div>
+          <div style="margin-bottom: 4px;">
+            <span style="color: #9CA3AF;">Actual:</span> 
+            <span style="font-weight: 600; color: #10B981;">${formatCurrency(d.actualRevenue)}</span>
+          </div>
+          <div>
+            <span style="color: #9CA3AF;">Projected Growth:</span> 
+            <span style="font-weight: 600; color: #A78BFA;">
+              ${isProjected ? formatCurrency(d.revenue - d.actualRevenue) : "$0"}
+            </span>
+          </div>
+        `;
         
-      // Rotate x-axis labels for better readability
-      xAxis.selectAll("text")
-        .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .attr("font-size", "10px"); // Smaller font for monthly labels
+        revenueTooltip
+          .html(tooltipHtml)
+          .style("left", (event.pageX + 15) + "px")
+          .style("top", (event.pageY - 28) + "px")
+          .style("opacity", 1);
+          
+        // Hide other tooltips if visible
+        tooltip.style("opacity", 0);
+        hoverLine.style("opacity", 0);
+        hoverCircle.style("opacity", 0);
+        barTooltip.style("opacity", 0);
+      })
+      .on("mouseout", function() {
+        revenueHoverLine.style("opacity", 0);
+        revenueHoverCircle.style("opacity", 0);
+        revenueTooltip.style("opacity", 0);
+      });
+      
+    // Update revenue bar interactions
+    g.selectAll(".revenue-bar")
+      .on("mouseover", function(event, d) {
+        d3.select(this).attr("opacity", 1);
         
-      xAxis.append("text")
-        .attr("x", width / 2)
-        .attr("y", 50) // Move down to avoid overlapping with rotated labels
-        .attr("fill", "#1F2937")  // dark gray for visibility on white
-        .attr("font-weight", "600")
-        .style("text-anchor", "middle")
-        .attr("transform", "rotate(0)")
-        .text("Timeline");
+        const tooltipHtml = `
+          <div style="font-weight: 600; margin-bottom: 4px; color: #10B981;">
+            ${d.oneTimeRevenueName || "One-time Revenue"}
+          </div>
+          <div>
+            <span style="color: #9CA3AF;">Amount:</span> 
+            <span style="font-weight: 600;">+${formatCurrency(d.oneTimeRevenue || 0)}</span>
+          </div>
+        `;
+        
+        barTooltip
+          .html(tooltipHtml)
+          .style("border", "1px solid #10B981")
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 10) + "px")
+          .style("opacity", 1);
+          
+        // Hide other tooltips
+        tooltip.style("opacity", 0);
+        hoverLine.style("opacity", 0);
+        hoverCircle.style("opacity", 0);
+        revenueTooltip.style("opacity", 0);
+        revenueHoverLine.style("opacity", 0);
+        revenueHoverCircle.style("opacity", 0);
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this).attr("opacity", 0.8);
+        barTooltip.style("opacity", 0);
+      });
+      
+    // Update expense bar interactions
+    g.selectAll(".expense-bar")
+      .on("mouseover", function(event, d) {
+        d3.select(this).attr("opacity", 1);
+        
+        const tooltipHtml = `
+          <div style="font-weight: 600; margin-bottom: 4px; color: #DC2626;">
+            ${d.oneTimeExpenseName || "One-time Expense"}
+          </div>
+          <div>
+            <span style="color: #9CA3AF;">Amount:</span> 
+            <span style="font-weight: 600; color: #DC2626;">-${formatCurrency(d.oneTimeExpense || 0)}</span>
+          </div>
+        `;
+        
+        barTooltip
+          .html(tooltipHtml)
+          .style("border", "1px solid #DC2626")
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 10) + "px")
+          .style("opacity", 1);
+          
+        // Hide other tooltips
+        tooltip.style("opacity", 0);
+        hoverLine.style("opacity", 0);
+        hoverCircle.style("opacity", 0);
+        revenueTooltip.style("opacity", 0);
+        revenueHoverLine.style("opacity", 0);
+        revenueHoverCircle.style("opacity", 0);
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this).attr("opacity", 0.7);
+        barTooltip.style("opacity", 0);
+      });
 
-      // Y-axis (Money)
-      const yAxis = g.append("g")
-        .call(d3.axisLeft(yScale).tickFormat(d => {
-          const value = d as number;
-          if (value >= 1000000) {
-            return `${(value / 1000000).toFixed(1)}M Ft`;
-          } else if (value >= 1000) {
-            return `${(value / 1000).toFixed(0)}k Ft`;
-          } else {
-            return `${value.toFixed(0)} Ft`;
+    // Add axes - X-axis at bottom of chart
+    g.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(xScale)
+        .tickFormat(d => d3.timeFormat("%b %Y")(d as Date)))
+      .style("color", "#6B7280")
+      .style("font-size", "12px")
+      .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "rotate(-45)");
+      
+    // Add X-axis line at y=0
+    g.append("line")
+      .attr("x1", 0)
+      .attr("x2", width)
+      .attr("y1", yScale(0))
+      .attr("y2", yScale(0))
+      .attr("stroke", "#9CA3AF")
+      .attr("stroke-width", 1.5);
+
+    g.append("g")
+      .call(d3.axisLeft(yScale)
+        .tickFormat(d => {
+          const value = +d;
+          if (value === 0) return "0 Ft";
+          const millions = value / 1000000;
+          if (Math.abs(millions) >= 1) {
+            return `${millions.toFixed(1)}M Ft`;
           }
-        }));
-        
-      yAxis.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", -60)
-        .attr("x", -height / 2)
-        .attr("fill", "#1F2937")  // dark gray for visibility on white
-        .attr("font-weight", "600")
-        .style("text-anchor", "middle")
-        .text("Company Balance (HUF)");
-    } catch (error) {
-      console.error('Error drawing axes:', error);
+          const thousands = value / 1000;
+          return `${thousands.toFixed(0)}k Ft`;
+        }))
+      .style("color", "#6B7280")
+      .style("font-size", "12px");
+
+
+    // Add zero line if balance goes negative
+    const zeroDate = data.find(d => d.balance === 0)?.date;
+    if (zeroDate) {
+      g.append("line")
+        .attr("x1", xScale(zeroDate))
+        .attr("x2", xScale(zeroDate))
+        .attr("y1", 0)
+        .attr("y2", height)
+        .attr("stroke", "#DC2626")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "5,5")
+        .attr("opacity", 0.7);
+
+      g.append("text")
+        .attr("x", xScale(zeroDate))
+        .attr("y", -5)
+        .attr("text-anchor", "middle")
+        .style("fill", "#DC2626")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .text("Zero Date");
     }
 
-    // Style axes with dark theme
-    try {
-      g.selectAll(".domain").attr("stroke", "#1F2937").attr("stroke-width", 2);
-      g.selectAll(".tick line").attr("stroke", "#6B7280").attr("stroke-width", 1);
-      g.selectAll(".tick text").attr("fill", "#374151").attr("font-size", "12px");
-      
-      // Add grid lines for better readability
-      g.selectAll(".tick line")
-        .clone()
-        .attr("stroke", "#E5E7EB")
-        .attr("stroke-width", 0.5)
-        .attr("opacity", 0.5)
-        .attr("x2", width)
-        .attr("y2", 0);
-    } catch (error) {
-      console.error('Error styling chart:', error);
-    }
-
-  }, [currentBalance, burnrate, projections, loading]);
-
-  // Cleanup function
+  }, [dimensions, currentBalance, monthlyBurnRate, monthlyRevenue, oneTimeEvents, recurringRevenues, recurringExpenses]);
+  
   useEffect(() => {
     return () => {
-      if (svgRef.current) {
-        const svg = d3.select(svgRef.current);
-        svg.selectAll("*").remove();
-      }
+      // Cleanup all tooltips on unmount
+      d3.selectAll("[class^='vergil-chart-tooltip']").remove();
     };
   }, []);
+
+  const netBurn = monthlyBurnRate - monthlyRevenue;
+  const runwayMonths = netBurn > 0 ? Math.floor(currentBalance / netBurn) : null;
 
   return (
     <Card variant="default" className="bg-white border-cosmic-purple/20 shadow-lg">
       <CardHeader className="border-b border-cosmic-purple/10 bg-gradient-to-r from-cosmic-purple/5 to-transparent">
-        <CardTitle className="text-cosmic-purple font-display text-xl flex items-center gap-2">
-          <div className="w-1 h-6 bg-cosmic-purple rounded-full"></div>
-          Runway Projection
-        </CardTitle>
-        <p className="text-sm text-gray-600">
-          Current burn rate: {formatCurrency(Math.abs(burnrate))}/month
-        </p>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="h-[400px] flex items-center justify-center">
-            <div className="animate-pulse text-cosmic-purple">Loading projections...</div>
-          </div>
-        ) : (
+        <div className="flex justify-between items-start">
           <div>
-            <svg ref={svgRef} width="100%" height="400" viewBox="0 0 800 400" />
+            <CardTitle className="text-cosmic-purple font-display text-xl flex items-center gap-2">
+              <div className="w-1 h-6 bg-cosmic-purple rounded-full"></div>
+              Burn Rate & Runway Analysis
+            </CardTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              Financial trajectory projection
+            </p>
+            {/* Legend */}
+            <div className="flex gap-4 mt-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-0.5 bg-green-500"></div>
+                <span className="text-xs text-gray-600">Revenue</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 opacity-80 rounded-sm"></div>
+                <span className="text-xs text-gray-600">One-time Income</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-600 opacity-70 rounded-sm"></div>
+                <span className="text-xs text-gray-600">One-time Cost</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-0.5 bg-cosmic-purple border-t-2 border-dashed border-cosmic-purple"></div>
+                <span className="text-xs text-gray-600">Balance</span>
+              </div>
+            </div>
           </div>
-        )}
+          <div className="text-right">
+            <p className="text-xs text-gray-600 uppercase tracking-wider">Net Burn</p>
+            <p className={`text-2xl font-bold font-display ${netBurn > 0 ? 'text-neural-pink' : 'text-green-500'}`}>
+              {formatCurrency(Math.abs(netBurn))}
+              <span className="text-sm font-normal text-gray-600 ml-1">/ mo</span>
+            </p>
+            {runwayMonths !== null && (
+              <p className="text-sm text-gray-600 mt-1">
+                Runway: <span className="font-semibold">{runwayMonths} months</span>
+              </p>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6">
+        <svg ref={svgRef} className="w-full" />
       </CardContent>
     </Card>
   );

@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { FinancialSummary } from "@/components/investors/FinancialSummary";
 import { RevenueBreakdown } from "@/components/investors/RevenueBreakdown";
 import { RecurringExpenses } from "@/components/investors/RecurringExpenses";
-import { OneTimePayments } from "@/components/investors/OneTimePayments";
 import { HypotheticalDeals } from "@/components/investors/HypotheticalDeals";
+import { BurnRateChart, type OneTimeEvent, type RecurringItem } from "@/components/investors/BurnRateChart";
 import { VergilLogo } from "@/components/vergil/vergil-logo";
 
 interface DashboardData {
@@ -22,31 +20,110 @@ interface DashboardData {
   zero_date: string | null;
 }
 
+
 export default function InvestorsPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [oneTimeEvents, setOneTimeEvents] = useState<OneTimeEvent[]>([]);
+  const [recurringRevenues, setRecurringRevenues] = useState<RecurringItem[]>([]);
+  const [recurringExpenses, setRecurringExpenses] = useState<RecurringItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchAllData();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchAllData = async () => {
     try {
-      console.log("Fetching dashboard data...");
-      const response = await fetch("/api/investors/dashboard");
-      console.log("Response status:", response.status);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("Dashboard data:", data);
-      setDashboardData(data);
+      // Fetch dashboard data
+      const dashboardResponse = await fetch("/api/investors/dashboard");
+      const dashboardData = await dashboardResponse.json();
+      setDashboardData(dashboardData);
+
+      // Fetch revenues, expenses, and hypotheticals in parallel
+      const [revenuesResponse, expensesResponse, hypotheticalsResponse] = await Promise.all([
+        fetch("/api/investors/revenues"),
+        fetch("/api/investors/expenses"),
+        fetch("/api/investors/hypotheticals")
+      ]);
+
+      const revenues = await revenuesResponse.json();
+      const expenses = await expensesResponse.json();
+      const hypotheticals = await hypotheticalsResponse.json();
+
+      // Process one-time events and recurring items
+      const events: OneTimeEvent[] = [];
+      const recRevenues: RecurringItem[] = [];
+      const recExpenses: RecurringItem[] = [];
+
+      revenues.forEach((item: any) => {
+        if (item.transaction_type === "one-time" && item.date_info?.date) {
+          events.push({
+            date: item.date_info.date,
+            amount: item.amount,
+            name: item.source || "One-time revenue",
+            type: "revenue"
+          });
+        } else if (item.transaction_type === "recurring") {
+          recRevenues.push({
+            name: item.name,
+            source: item.source,
+            amount: item.amount,
+            transaction_type: item.transaction_type,
+            date_info: item.date_info || {}
+          });
+        }
+      });
+
+      expenses.forEach((item: any) => {
+        if ((item.transaction_type === "one-time" || item.transaction_type === "onetime") && item.date_info?.date) {
+          events.push({
+            date: item.date_info.date,
+            amount: item.amount,
+            name: item.source || item.name || "One-time expense",
+            type: "expense"
+          });
+        } else if (item.transaction_type === "recurring") {
+          recExpenses.push({
+            name: item.name,
+            source: item.source,
+            amount: item.amount,
+            transaction_type: item.transaction_type,
+            date_info: item.date_info || {}
+          });
+        }
+      });
+
+      hypotheticals.forEach((item: any) => {
+        if (item.enabled) {
+          if (item.transaction_type === "one-time" && item.date_info?.date) {
+            events.push({
+              date: item.date_info.date,
+              amount: item.amount * (item.probability || 1), // Apply probability to amount
+              name: `${item.name} (${Math.round(item.probability * 100)}% probable)`,
+              type: item.type as "revenue" | "expense"
+            });
+          } else if (item.transaction_type === "recurring") {
+            const recurringItem: RecurringItem = {
+              name: `${item.name} (${Math.round(item.probability * 100)}% probable)`,
+              amount: item.amount * (item.probability || 1), // Apply probability to amount
+              transaction_type: item.transaction_type,
+              date_info: item.date_info || {}
+            };
+            
+            if (item.type === "revenue") {
+              recRevenues.push(recurringItem);
+            } else {
+              recExpenses.push(recurringItem);
+            }
+          }
+        }
+      });
+
+      setOneTimeEvents(events);
+      setRecurringRevenues(recRevenues);
+      setRecurringExpenses(recExpenses);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      setError(error instanceof Error ? error.message : "Failed to fetch data");
+      setDashboardData(null);
     } finally {
       setLoading(false);
     }
@@ -60,23 +137,10 @@ export default function InvestorsPage() {
     );
   }
 
-  if (error) {
+  if (!dashboardData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-deep-space to-deep-space/90 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-neural-pink text-xl font-display mb-2">Connection Error</div>
-          <div className="text-stone-gray mb-4">{error}</div>
-          <button 
-            onClick={() => {
-              setError(null);
-              setLoading(true);
-              fetchDashboardData();
-            }}
-            className="bg-cosmic-purple text-white px-4 py-2 rounded hover:bg-cosmic-purple/80"
-          >
-            Retry
-          </button>
-        </div>
+        <div className="text-neural-pink text-xl">Failed to load financial data</div>
       </div>
     );
   }
@@ -105,10 +169,16 @@ export default function InvestorsPage() {
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="space-y-8">
-            {/* Financial Summary */}
-            {dashboardData && (
-              <FinancialSummary data={dashboardData} />
-            )}
+            <FinancialSummary data={dashboardData} />
+
+            <BurnRateChart 
+              currentBalance={dashboardData.current_balance}
+              monthlyBurnRate={dashboardData.monthly_expenses}
+              monthlyRevenue={dashboardData.monthly_revenue}
+              oneTimeEvents={oneTimeEvents}
+              recurringRevenues={recurringRevenues}
+              recurringExpenses={recurringExpenses}
+            />
 
             {/* Revenue and Expense Breakdown */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -116,11 +186,8 @@ export default function InvestorsPage() {
               <RecurringExpenses />
             </div>
 
-            {/* One-time Payments */}
-            <OneTimePayments />
-
             {/* Hypothetical Deals */}
-            <HypotheticalDeals />
+            <HypotheticalDeals onToggle={fetchAllData} />
           </div>
         </div>
       </div>

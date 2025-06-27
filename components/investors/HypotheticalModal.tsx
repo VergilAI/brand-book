@@ -9,18 +9,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 interface HypotheticalModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (data: any) => void;
   hypothetical?: {
-    id?: number;
-    name?: string;
-    description?: string;
-    type: string;
-    transaction_type: string;
+    id?: string;
+    name: string;
+    description: string;
+    type: "revenue" | "expense";
+    transaction_type: "recurring" | "one-time";
     amount: number;
-    expected_date?: string;
-    start_date?: string;
-    end_date?: string;
-    frequency?: string;
+    date_info: {
+      date?: string;
+      start_date?: string;
+      end_date?: string;
+      frequency?: string;
+    };
+    enabled: boolean;
+    probability: number;
   } | null;
 }
 
@@ -29,12 +33,14 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
     name: "",
     description: "",
     type: "revenue",
-    transaction_type: "onetime",
+    transaction_type: "one-time",
     amount: "",
     expected_date: "",
     start_date: "",
     end_date: "",
-    frequency: "monthly",
+    frequency: "Monthly",
+    probability: "0.5",
+    enabled: true,
   });
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
@@ -47,10 +53,12 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
         type: hypothetical.type,
         transaction_type: hypothetical.transaction_type,
         amount: hypothetical.amount.toString(),
-        expected_date: hypothetical.expected_date || "",
-        start_date: hypothetical.start_date || "",
-        end_date: hypothetical.end_date || "",
-        frequency: hypothetical.frequency || "monthly",
+        expected_date: hypothetical.date_info.date || "",
+        start_date: hypothetical.date_info.start_date || "",
+        end_date: hypothetical.date_info.end_date || "",
+        frequency: hypothetical.date_info.frequency || "Monthly",
+        probability: hypothetical.probability.toString(),
+        enabled: hypothetical.enabled,
       });
     } else {
       // Reset form when creating new
@@ -58,12 +66,14 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
         name: "",
         description: "",
         type: "revenue",
-        transaction_type: "onetime",
+        transaction_type: "one-time",
         amount: "",
         expected_date: "",
         start_date: "",
         end_date: "",
-        frequency: "monthly",
+        frequency: "Monthly",
+        probability: "0.5",
+        enabled: true,
       });
     }
     setErrors({});
@@ -77,8 +87,13 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
       newErrors.amount = "Amount must be greater than 0";
     }
     
+    // Probability validation
+    if (!formData.probability || parseFloat(formData.probability) < 0 || parseFloat(formData.probability) > 1) {
+      newErrors.probability = "Probability must be between 0 and 1";
+    }
+    
     // Date validation
-    if (formData.transaction_type === "onetime") {
+    if (formData.transaction_type === "one-time") {
       if (!formData.expected_date) {
         newErrors.expected_date = "Expected date is required";
       } else {
@@ -123,61 +138,45 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
       return;
     }
     
-    try {
-      // Format dates as ISO strings for backend
-      const formatDateForBackend = (dateStr: string) => {
-        if (!dateStr) return null;
-        const date = new Date(dateStr);
-        return date.toISOString().split('T')[0]; // YYYY-MM-DD format
-      };
-      
-      const payload = {
-        name: formData.name.trim() || null,
-        description: formData.description.trim() || null,
-        type: formData.type,
-        transaction_type: formData.transaction_type,
-        amount: parseFloat(formData.amount),
-        ...(formData.transaction_type === "onetime"
-          ? { expected_date: formatDateForBackend(formData.expected_date) }
-          : {
-              start_date: formatDateForBackend(formData.start_date),
-              end_date: formData.end_date ? formatDateForBackend(formData.end_date) : null,
-              frequency: formData.frequency,
-            }),
-      };
+    // Format dates as ISO strings
+    const formatDateForBackend = (dateStr: string) => {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    };
+    
+    const payload = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      type: formData.type,
+      transaction_type: formData.transaction_type,
+      amount: parseFloat(formData.amount),
+      probability: parseFloat(formData.probability),
+      enabled: formData.enabled,
+      date_info: formData.transaction_type === "one-time"
+        ? { date: formatDateForBackend(formData.expected_date) }
+        : {
+            start_date: formatDateForBackend(formData.start_date),
+            end_date: formData.end_date ? formatDateForBackend(formData.end_date) : null,
+            frequency: formData.frequency,
+          },
+    };
 
-      const url = hypothetical?.id 
-        ? `/api/investors/hypotheticals/${hypothetical.id}`
-        : "/api/investors/hypotheticals";
-      
-      const response = await fetch(url, {
-        method: hypothetical?.id ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        onSuccess();
-        setFormData({
-          name: "",
-          description: "",
-          type: "revenue",
-          transaction_type: "onetime",
-          amount: "",
-          expected_date: "",
-          start_date: "",
-          end_date: "",
-          frequency: "monthly",
-        });
-        setErrors({});
-      } else {
-        const errorData = await response.json();
-        setErrors({ submit: errorData.message || "Failed to create hypothetical" });
-      }
-    } catch (error) {
-      console.error("Error creating hypothetical:", error);
-      setErrors({ submit: "Network error. Please try again." });
-    }
+    onSuccess(payload);
+    setFormData({
+      name: "",
+      description: "",
+      type: "revenue",
+      transaction_type: "one-time",
+      amount: "",
+      expected_date: "",
+      start_date: "",
+      end_date: "",
+      frequency: "Monthly",
+      probability: "0.5",
+      enabled: true,
+    });
+    setErrors({});
   };
 
   return (
@@ -236,7 +235,7 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="onetime">One-time</SelectItem>
+                  <SelectItem value="one-time">One-time</SelectItem>
                   <SelectItem value="recurring">Recurring</SelectItem>
                 </SelectContent>
               </Select>
@@ -265,7 +264,30 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
             )}
           </div>
 
-          {formData.transaction_type === "onetime" ? (
+          <div>
+            <label className="text-sm text-gray-400">Probability (0-1)</label>
+            <Input
+              type="number"
+              step="0.1"
+              min="0"
+              max="1"
+              value={formData.probability}
+              onChange={(e) => {
+                setFormData({ ...formData, probability: e.target.value });
+                if (errors.probability) {
+                  setErrors({ ...errors, probability: "" });
+                }
+              }}
+              placeholder="0.5"
+              className={`bg-dark-700 border-dark-600 ${errors.probability ? 'border-red-500' : ''}`}
+              required
+            />
+            {errors.probability && (
+              <p className="text-red-400 text-xs mt-1">{errors.probability}</p>
+            )}
+          </div>
+
+          {formData.transaction_type === "one-time" ? (
             <div>
               <label className="text-sm text-gray-400">Expected Date</label>
               <Input
@@ -336,9 +358,9 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="Monthly">Monthly</SelectItem>
+                    <SelectItem value="Quarterly">Quarterly</SelectItem>
+                    <SelectItem value="Yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

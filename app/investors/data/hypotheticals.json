@@ -1,0 +1,17 @@
+{
+  "hypotheticals": [
+    {
+      "id": "hyp-1751036141649",
+      "name": "MBH Project ",
+      "amount": 15000000,
+      "type": "revenue",
+      "transaction_type": "one-time",
+      "date_info": {
+        "date": "2025-09-01"
+      },
+      "enabled": false,
+      "probability": 1,
+      "description": "This is about the MBH project"
+    }
+  ]
+}
