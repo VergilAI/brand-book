@@ -10,6 +10,7 @@ import { BurnRateChart, type OneTimeEvent, type RecurringItem } from "@/componen
 import { VergilLogo } from "@/components/vergil/vergil-logo";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings } from "lucide-react";
+import { MobileNav } from "@/components/investors/MobileNav";
 
 interface DashboardData {
   current_balance: number;
@@ -184,8 +185,12 @@ export default function InvestorsPage() {
       <div className="bg-gradient-to-b from-cosmic-purple/5 to-transparent">
         {/* Header with Logo */}
         <header className="border-b border-stone-gray/20 bg-pure-light/5 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-6 max-w-7xl">
-            <div className="flex items-center justify-between">
+          <div className="container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
+            {/* Mobile Navigation */}
+            <MobileNav user={user} onLogout={handleLogout} />
+            
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <VergilLogo variant="logo" size="lg" animated />
                 <div className="h-8 w-px bg-stone-gray/30" />

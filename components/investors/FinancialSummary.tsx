@@ -56,16 +56,16 @@ export function FinancialSummary({ data }: FinancialSummaryProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
       {metrics.map((metric, index) => (
         <Card 
           key={index} 
           variant="metric" 
           className="bg-pure-light/10 border-stone-gray/20 animate-breathing backdrop-blur-sm hover:bg-pure-light/15 transition-colors"
         >
-          <CardContent className="p-6">
-            <p className="text-sm text-stone-gray mb-2 font-medium">{metric.label}</p>
-            <p className={`text-2xl font-bold font-display ${
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <p className="text-xs sm:text-sm text-stone-gray mb-1 sm:mb-2 font-medium">{metric.label}</p>
+            <p className={`text-xl sm:text-2xl font-bold font-display ${
               metric.trend === "positive" 
                 ? "text-phosphor-cyan" 
                 : metric.trend === "negative"
@@ -77,7 +77,7 @@ export function FinancialSummary({ data }: FinancialSummaryProps) {
               {metric.value}
             </p>
             {metric.subtitle && (
-              <p className="text-xs text-mist-gray mt-1">{metric.subtitle}</p>
+              <p className="text-[10px] sm:text-xs text-mist-gray mt-1">{metric.subtitle}</p>
             )}
           </CardContent>
         </Card>

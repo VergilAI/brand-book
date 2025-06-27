@@ -111,7 +111,7 @@ export function UserManager() {
     <div className="space-y-6">
       <Card variant="gradient" className="p-6">
         <h3 className="text-lg font-medium text-white mb-4">Create New User</h3>
-        <form onSubmit={createUser} className="grid grid-cols-2 gap-4">
+        <form onSubmit={createUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="name">Name</Label>
             <Input
@@ -167,7 +167,7 @@ export function UserManager() {
               </SelectContent>
             </Select>
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 sm:col-span-2">
             <Button type="submit" disabled={creating} className="w-full">
               <UserPlus className="w-4 h-4 mr-2" />
               {creating ? 'Creating...' : 'Create User'}
@@ -184,22 +184,22 @@ export function UserManager() {
           ) : (
             users.map((user) => (
               <Card key={user.id} variant="interactive" className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-cosmic-purple to-electric-violet rounded-full flex items-center justify-center">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-cosmic-purple to-electric-violet rounded-full flex items-center justify-center flex-shrink-0">
                       {user.role === 'admin' ? (
                         <Shield className="w-5 h-5 text-white" />
                       ) : (
                         <User className="w-5 h-5 text-white" />
                       )}
                     </div>
-                    <div>
-                      <h4 className="font-medium text-white">{user.name}</h4>
-                      <p className="text-sm text-gray-400">{user.email}</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium text-white truncate">{user.name}</h4>
+                      <p className="text-sm text-gray-400 truncate">{user.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 pl-13 sm:pl-0">
+                    <div className="text-left sm:text-right">
                       <p className="text-xs text-gray-500">Last login</p>
                       <p className="text-sm text-gray-400">{formatDate(user.lastLogin)}</p>
                     </div>
@@ -208,7 +208,7 @@ export function UserManager() {
                         variant="ghost"
                         size="sm"
                         onClick={() => deleteUser(user.id)}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-400 hover:text-red-300 -mr-2 sm:mr-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

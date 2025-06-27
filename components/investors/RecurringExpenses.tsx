@@ -58,23 +58,26 @@ export function RecurringExpenses() {
   const renderExpenseItem = (item: ExpenseItem, index: number) => (
     <div
       key={index}
-      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-neural-pink/5 transition-colors border border-gray-200 hover:border-neural-pink/20"
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-3 rounded-lg bg-gray-50 hover:bg-neural-pink/5 transition-colors border border-gray-200 hover:border-neural-pink/20"
     >
-      <div className="flex-1">
+      <div className="flex-1 mb-3 sm:mb-0">
         <p className="text-gray-900 font-medium">{item.name || item.source}</p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 mt-1">
           {item.transaction_type === "recurring" ? (
             <>
-              {item.date_info.frequency} • 
-              {item.date_info.start_date} - {item.date_info.end_date || "Ongoing"}
+              <span className="block sm:inline">{item.date_info.frequency}</span>
+              <span className="hidden sm:inline"> • </span>
+              <span className="block sm:inline text-xs sm:text-sm">
+                {item.date_info.start_date} - {item.date_info.end_date || "Ongoing"}
+              </span>
             </>
           ) : (
             item.date_info.date
           )}
         </p>
       </div>
-      <div className="text-right">
-        <p className="text-neural-pink font-bold font-display">
+      <div className="text-left sm:text-right">
+        <p className="text-neural-pink font-bold font-display text-lg sm:text-base">
           {formatCurrency(item.amount)}
         </p>
         <p className="text-xs text-gray-500 capitalize">
@@ -97,31 +100,31 @@ export function RecurringExpenses() {
           </CardTitle>
           
           {/* Tabs */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-4 flex-wrap">
             <button
               onClick={() => setActiveTab("recurring")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all min-w-0 ${
                 activeTab === "recurring"
                   ? "bg-cosmic-purple text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              Recurring
-              <span className="ml-2 text-xs opacity-80">
-                ({formatCurrency(monthlyTotal)}/mo)
+              <span className="block sm:inline">Recurring</span>
+              <span className="block sm:inline sm:ml-2 text-xs opacity-80">
+                {formatCurrency(monthlyTotal)}/mo
               </span>
             </button>
             <button
               onClick={() => setActiveTab("one-time")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all min-w-0 ${
                 activeTab === "one-time"
                   ? "bg-cosmic-purple text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              One-time
-              <span className="ml-2 text-xs opacity-80">
-                ({formatCurrency(oneTimeTotal)})
+              <span className="block sm:inline">One-time</span>
+              <span className="block sm:inline sm:ml-2 text-xs opacity-80">
+                {formatCurrency(oneTimeTotal)}
               </span>
             </button>
           </div>

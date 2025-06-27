@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, isTouchDevice, formatCompactNumber } from "@/lib/utils";
 
 interface ChartDataPoint {
   date: Date;
@@ -55,21 +55,132 @@ export function BurnRateChart({
   recurringExpenses = []
 }: BurnRateChartProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 400 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<{ x: number; y: number; content: string } | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const touchStartRef = useRef<{ x: number; y: number; distance?: number } | null>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const createTooltip = (className: string, borderColor: string) => {
-    return d3.select("body").append("div")
-      .attr("class", className)
-      .style("position", "absolute")
-      .style("padding", "12px")
-      .style("background", "rgba(15, 23, 42, 0.95)")
-      .style("border", `1px solid ${borderColor}`)
-      .style("border-radius", "8px")
-      .style("color", "#FFFFFF")
-      .style("font-size", "12px")
-      .style("pointer-events", "none")
-      .style("opacity", 0)
-      .style("transition", "opacity 0.2s");
+    // Only create tooltips for non-touch devices
+    if (!isTouchDevice()) {
+      return d3.select("body").append("div")
+        .attr("class", className)
+        .style("position", "absolute")
+        .style("padding", "12px")
+        .style("background", "rgba(15, 23, 42, 0.95)")
+        .style("border", `1px solid ${borderColor}`)
+        .style("border-radius", "8px")
+        .style("color", "#FFFFFF")
+        .style("font-size", "12px")
+        .style("pointer-events", "none")
+        .style("opacity", 0)
+        .style("transition", "opacity 0.2s");
+    }
+    return null;
+  };
+  
+  // Handle touch events for pinch-to-zoom and pan
+  const handleTouchStart = (event: React.TouchEvent) => {
+    if (event.touches.length === 1) {
+      touchStartRef.current = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      };
+      
+      // Start long press timer
+      longPressTimerRef.current = setTimeout(() => {
+        // Trigger tooltip on long press
+        if (svgRef.current && touchStartRef.current) {
+          const rect = svgRef.current.getBoundingClientRect();
+          const touch = event.touches[0];
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+          
+          // Simulate click event for tooltip
+          const clickEvent = new MouseEvent('click', {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            bubbles: true
+          });
+          
+          const element = document.elementFromPoint(touch.clientX, touch.clientY);
+          if (element) {
+            element.dispatchEvent(clickEvent);
+          }
+        }
+      }, 500); // 500ms for long press
+    } else if (event.touches.length === 2) {
+      // Clear long press timer
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+      
+      // Calculate initial distance for pinch-to-zoom
+      const touch1 = event.touches[0];
+      const touch2 = event.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      touchStartRef.current = {
+        x: (touch1.clientX + touch2.clientX) / 2,
+        y: (touch1.clientY + touch2.clientY) / 2,
+        distance
+      };
+    }
+  };
+  
+  const handleTouchMove = (event: React.TouchEvent) => {
+    // Clear long press timer on move
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    
+    if (!touchStartRef.current) return;
+    
+    if (event.touches.length === 1 && zoomLevel > 1) {
+      // Pan when zoomed
+      const touch = event.touches[0];
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      setPanX(prev => Math.max(-dimensions.width * (zoomLevel - 1), Math.min(0, prev + deltaX)));
+      touchStartRef.current.x = touch.clientX;
+    } else if (event.touches.length === 2) {
+      // Pinch-to-zoom
+      const touch1 = event.touches[0];
+      const touch2 = event.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      if (touchStartRef.current.distance) {
+        const scale = distance / touchStartRef.current.distance;
+        setZoomLevel(prev => Math.max(1, Math.min(3, prev * scale)));
+        touchStartRef.current.distance = distance;
+      }
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    // Clear long press timer
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    
+    touchStartRef.current = null;
+    
+    // Reset zoom if close to 1
+    if (Math.abs(zoomLevel - 1) < 0.1) {
+      setZoomLevel(1);
+      setPanX(0);
+    }
   };
 
   // Helper function to check if a recurring item is active for a given date
@@ -204,9 +315,16 @@ export function BurnRateChart({
 
   useEffect(() => {
     const handleResize = () => {
-      if (svgRef.current) {
-        const { width } = svgRef.current.getBoundingClientRect();
-        setDimensions({ width, height: 400 });
+      if (containerRef.current) {
+        const { width } = containerRef.current.getBoundingClientRect();
+        const isMobileView = width < 640;
+        setIsMobile(isMobileView);
+        
+        // Adjust dimensions for mobile
+        const chartWidth = isMobileView ? Math.max(width, 600) : width;
+        const chartHeight = isMobileView ? 300 : 400;
+        
+        setDimensions({ width: chartWidth, height: chartHeight });
       }
     };
 
@@ -219,7 +337,9 @@ export function BurnRateChart({
     if (!svgRef.current || dimensions.width === 0) return;
 
     const data = generateProjectionData();
-    const margin = { top: 20, right: 80, bottom: 60, left: 80 };
+    const margin = isMobile 
+      ? { top: 20, right: 20, bottom: 80, left: 60 }
+      : { top: 20, right: 80, bottom: 60, left: 80 };
     const width = dimensions.width - margin.left - margin.right;
     const height = dimensions.height - margin.top - margin.bottom;
 
@@ -230,8 +350,12 @@ export function BurnRateChart({
       .attr("width", dimensions.width)
       .attr("height", dimensions.height);
 
-    const g = svg.append("g")
+    // Create a group for zooming/panning
+    const zoomGroup = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
+      
+    const g = zoomGroup.append("g")
+      .attr("transform", `translate(${panX},0) scale(${zoomLevel},1)`);
 
     // Set up scales
     const xScale = d3.scaleTime()
@@ -334,7 +458,7 @@ export function BurnRateChart({
       .attr("d", balanceLine)
       .attr("opacity", 0.9);
       
-    // Create tooltips
+    // Create tooltips (only for non-touch devices)
     const tooltip = createTooltip("vergil-chart-tooltip", "#6366F1");
       
     // Add hover line
@@ -367,57 +491,121 @@ export function BurnRateChart({
       .attr("d", balanceLine)
       .style("cursor", "pointer")
       .on("mousemove", function(event) {
-        const [mouseX] = d3.pointer(event);
-        const x0 = xScale.invert(mouseX);
-        const i = bisectDate(data, x0, 1);
-        const d0 = data[i - 1];
-        const d1 = data[i];
-        
-        if (!d0 || !d1) return;
-        
-        const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
-        
-        // Calculate net burn rate for this period
-        const netBurn = d.burnRate - d.revenue;
-        
-        // Update hover elements
-        hoverLine
-          .attr("x1", xScale(d.date))
-          .attr("x2", xScale(d.date))
-          .style("opacity", 0.5);
+        if (!isTouchDevice()) {
+          const [mouseX] = d3.pointer(event);
+          const x0 = xScale.invert(mouseX);
+          const i = bisectDate(data, x0, 1);
+          const d0 = data[i - 1];
+          const d1 = data[i];
           
-        hoverCircle
-          .attr("cx", xScale(d.date))
-          .attr("cy", yScale(d.balance))
-          .style("opacity", 1);
+          if (!d0 || !d1) return;
           
-        // Format tooltip content
-        const tooltipHtml = `
-          <div style="font-weight: 600; margin-bottom: 8px; color: #A78BFA;">
-            ${d3.timeFormat("%B %Y")(d.date)}
-          </div>
-          <div style="margin-bottom: 4px;">
-            <span style="color: #9CA3AF;">Balance:</span> 
-            <span style="font-weight: 600;">${formatCurrency(d.balance)}</span>
-          </div>
-          <div>
-            <span style="color: #9CA3AF;">Net Burn:</span> 
-            <span style="font-weight: 600; color: ${netBurn > 0 ? '#F472B6' : '#10B981'}">
-              ${formatCurrency(Math.abs(netBurn))}/mo
-            </span>
-          </div>
-        `;
-        
-        tooltip
-          .html(tooltipHtml)
-          .style("left", (event.pageX + 15) + "px")
-          .style("top", (event.pageY - 28) + "px")
-          .style("opacity", 1);
+          const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
+          
+          // Calculate net burn rate for this period
+          const netBurn = d.burnRate - d.revenue;
+          
+          // Update hover elements
+          hoverLine
+            .attr("x1", xScale(d.date))
+            .attr("x2", xScale(d.date))
+            .style("opacity", 0.5);
+            
+          hoverCircle
+            .attr("cx", xScale(d.date))
+            .attr("cy", yScale(d.balance))
+            .style("opacity", 1);
+            
+          // Format tooltip content
+          const tooltipHtml = `
+            <div style="font-weight: 600; margin-bottom: 8px; color: #A78BFA;">
+              ${d3.timeFormat("%B %Y")(d.date)}
+            </div>
+            <div style="margin-bottom: 4px;">
+              <span style="color: #9CA3AF;">Balance:</span> 
+              <span style="font-weight: 600;">${formatCurrency(d.balance)}</span>
+            </div>
+            <div>
+              <span style="color: #9CA3AF;">Net Burn:</span> 
+              <span style="font-weight: 600; color: ${netBurn > 0 ? '#F472B6' : '#10B981'}">
+                ${formatCurrency(Math.abs(netBurn))}/mo
+              </span>
+            </div>
+          `;
+          
+          if (tooltip) {
+            tooltip
+              .html(tooltipHtml)
+              .style("left", (event.pageX + 15) + "px")
+              .style("top", (event.pageY - 28) + "px")
+              .style("opacity", 1);
+          }
+        }
       })
       .on("mouseout", function() {
         hoverLine.style("opacity", 0);
         hoverCircle.style("opacity", 0);
-        tooltip.style("opacity", 0);
+        if (tooltip) tooltip.style("opacity", 0);
+      })
+      .on("click", function(event) {
+        if (isTouchDevice()) {
+          const [mouseX] = d3.pointer(event);
+          const adjustedX = (mouseX - panX) / zoomLevel; // Adjust for zoom and pan
+          const x0 = xScale.invert(adjustedX);
+          const i = bisectDate(data, x0, 1);
+          const d0 = data[i - 1];
+          const d1 = data[i];
+          
+          if (!d0 || !d1) return;
+          
+          const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
+          const netBurn = d.burnRate - d.revenue;
+          
+          // Update hover elements
+          hoverLine
+            .attr("x1", xScale(d.date))
+            .attr("x2", xScale(d.date))
+            .style("opacity", 0.5);
+            
+          hoverCircle
+            .attr("cx", xScale(d.date))
+            .attr("cy", yScale(d.balance))
+            .style("opacity", 1);
+          
+          // Set active tooltip for mobile
+          const tooltipContent = `
+            <div class="font-bold mb-2 text-cosmic-purple">
+              ${d3.timeFormat("%B %Y")(d.date)}
+            </div>
+            <div class="mb-1">
+              <span class="text-gray-500">Balance:</span> 
+              <span class="font-semibold">${formatCurrency(d.balance)}</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Net Burn:</span> 
+              <span class="font-semibold ${netBurn > 0 ? 'text-neural-pink' : 'text-green-500'}">
+                ${formatCurrency(Math.abs(netBurn))}/mo
+              </span>
+            </div>
+          `;
+          
+          // Adjust tooltip position for zoom and pan
+          const tooltipX = xScale(d.date) * zoomLevel + margin.left + panX;
+          const tooltipY = yScale(d.balance) + margin.top;
+          
+          setActiveTooltip({
+            x: tooltipX,
+            y: tooltipY,
+            content: tooltipContent
+          });
+          
+          // Hide tooltip after 3 seconds
+          setTimeout(() => {
+            setActiveTooltip(null);
+            hoverLine.style("opacity", 0);
+            hoverCircle.style("opacity", 0);
+          }, 3000);
+        }
       });
       
     // Create tooltips for other elements
@@ -450,149 +638,303 @@ export function BurnRateChart({
       .attr("d", revenueLine)
       .style("cursor", "pointer")
       .on("mousemove", function(event) {
-        const [mouseX] = d3.pointer(event);
-        const x0 = xScale.invert(mouseX);
-        const i = bisectDate(data, x0, 1);
-        const d0 = data[i - 1];
-        const d1 = data[i];
-        
-        if (!d0 || !d1) return;
-        
-        const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
-        
-        // Update hover elements
-        revenueHoverLine
-          .attr("x1", xScale(d.date))
-          .attr("x2", xScale(d.date))
-          .style("opacity", 0.5);
+        if (!isTouchDevice()) {
+          const [mouseX] = d3.pointer(event);
+          const x0 = xScale.invert(mouseX);
+          const i = bisectDate(data, x0, 1);
+          const d0 = data[i - 1];
+          const d1 = data[i];
           
-        revenueHoverCircle
-          .attr("cx", xScale(d.date))
-          .attr("cy", yScale(d.revenue))
-          .style("opacity", 1);
+          if (!d0 || !d1) return;
           
-        // Format tooltip content
-        const isProjected = d.projectedRevenue > 0;
-        const tooltipHtml = `
-          <div style="font-weight: 600; margin-bottom: 8px; color: #10B981;">
-            ${d3.timeFormat("%B %Y")(d.date)}
-          </div>
-          <div style="margin-bottom: 4px;">
-            <span style="color: #9CA3AF;">Total Revenue:</span> 
-            <span style="font-weight: 600;">${formatCurrency(d.revenue)}</span>
-          </div>
-          <div style="margin-bottom: 4px;">
-            <span style="color: #9CA3AF;">Actual:</span> 
-            <span style="font-weight: 600; color: #10B981;">${formatCurrency(d.actualRevenue)}</span>
-          </div>
-          <div>
-            <span style="color: #9CA3AF;">Projected Growth:</span> 
-            <span style="font-weight: 600; color: #A78BFA;">
-              ${isProjected ? formatCurrency(d.revenue - d.actualRevenue) : "$0"}
-            </span>
-          </div>
-        `;
-        
-        revenueTooltip
-          .html(tooltipHtml)
-          .style("left", (event.pageX + 15) + "px")
-          .style("top", (event.pageY - 28) + "px")
-          .style("opacity", 1);
+          const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
           
-        // Hide other tooltips if visible
-        tooltip.style("opacity", 0);
-        hoverLine.style("opacity", 0);
-        hoverCircle.style("opacity", 0);
-        barTooltip.style("opacity", 0);
+          // Update hover elements
+          revenueHoverLine
+            .attr("x1", xScale(d.date))
+            .attr("x2", xScale(d.date))
+            .style("opacity", 0.5);
+            
+          revenueHoverCircle
+            .attr("cx", xScale(d.date))
+            .attr("cy", yScale(d.revenue))
+            .style("opacity", 1);
+            
+          // Format tooltip content
+          const isProjected = d.projectedRevenue > 0;
+          const tooltipHtml = `
+            <div style="font-weight: 600; margin-bottom: 8px; color: #10B981;">
+              ${d3.timeFormat("%B %Y")(d.date)}
+            </div>
+            <div style="margin-bottom: 4px;">
+              <span style="color: #9CA3AF;">Total Revenue:</span> 
+              <span style="font-weight: 600;">${formatCurrency(d.revenue)}</span>
+            </div>
+            <div style="margin-bottom: 4px;">
+              <span style="color: #9CA3AF;">Actual:</span> 
+              <span style="font-weight: 600; color: #10B981;">${formatCurrency(d.actualRevenue)}</span>
+            </div>
+            <div>
+              <span style="color: #9CA3AF;">Projected Growth:</span> 
+              <span style="font-weight: 600; color: #A78BFA;">
+                ${isProjected ? formatCurrency(d.revenue - d.actualRevenue) : "$0"}
+              </span>
+            </div>
+          `;
+          
+          if (revenueTooltip) {
+            revenueTooltip
+              .html(tooltipHtml)
+              .style("left", (event.pageX + 15) + "px")
+              .style("top", (event.pageY - 28) + "px")
+              .style("opacity", 1);
+          }
+            
+          // Hide other tooltips if visible
+          if (tooltip) tooltip.style("opacity", 0);
+          hoverLine.style("opacity", 0);
+          hoverCircle.style("opacity", 0);
+          if (barTooltip) barTooltip.style("opacity", 0);
+        }
       })
       .on("mouseout", function() {
         revenueHoverLine.style("opacity", 0);
         revenueHoverCircle.style("opacity", 0);
-        revenueTooltip.style("opacity", 0);
+        if (revenueTooltip) revenueTooltip.style("opacity", 0);
+      })
+      .on("click", function(event) {
+        if (isTouchDevice()) {
+          const [mouseX] = d3.pointer(event);
+          const adjustedX = (mouseX - panX) / zoomLevel; // Adjust for zoom and pan
+          const x0 = xScale.invert(adjustedX);
+          const i = bisectDate(data, x0, 1);
+          const d0 = data[i - 1];
+          const d1 = data[i];
+          
+          if (!d0 || !d1) return;
+          
+          const d = x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime() ? d1 : d0;
+          
+          // Update hover elements
+          revenueHoverLine
+            .attr("x1", xScale(d.date))
+            .attr("x2", xScale(d.date))
+            .style("opacity", 0.5);
+            
+          revenueHoverCircle
+            .attr("cx", xScale(d.date))
+            .attr("cy", yScale(d.revenue))
+            .style("opacity", 1);
+            
+          // Format tooltip content for mobile
+          const isProjected = d.projectedRevenue > 0;
+          const tooltipContent = `
+            <div class="font-bold mb-2 text-green-500">
+              ${d3.timeFormat("%B %Y")(d.date)}
+            </div>
+            <div class="mb-1">
+              <span class="text-gray-500">Total Revenue:</span> 
+              <span class="font-semibold">${formatCurrency(d.revenue)}</span>
+            </div>
+            <div class="mb-1">
+              <span class="text-gray-500">Actual:</span> 
+              <span class="font-semibold text-green-500">${formatCurrency(d.actualRevenue)}</span>
+            </div>
+            <div>
+              <span class="text-gray-500">Projected Growth:</span> 
+              <span class="font-semibold text-cosmic-purple">
+                ${isProjected ? formatCurrency(d.revenue - d.actualRevenue) : "$0"}
+              </span>
+            </div>
+          `;
+          
+          // Adjust tooltip position for zoom and pan
+          const tooltipX = xScale(d.date) * zoomLevel + margin.left + panX;
+          const tooltipY = yScale(d.revenue) + margin.top;
+          
+          setActiveTooltip({
+            x: tooltipX,
+            y: tooltipY,
+            content: tooltipContent
+          });
+          
+          // Hide tooltip after 3 seconds
+          setTimeout(() => {
+            setActiveTooltip(null);
+            revenueHoverLine.style("opacity", 0);
+            revenueHoverCircle.style("opacity", 0);
+          }, 3000);
+        }
       });
       
     // Update revenue bar interactions
     g.selectAll(".revenue-bar")
       .on("mouseover", function(event, d) {
-        d3.select(this).attr("opacity", 1);
-        
-        const tooltipHtml = `
-          <div style="font-weight: 600; margin-bottom: 4px; color: #10B981;">
-            ${d.oneTimeRevenueName || "One-time Revenue"}
-          </div>
-          <div>
-            <span style="color: #9CA3AF;">Amount:</span> 
-            <span style="font-weight: 600;">+${formatCurrency(d.oneTimeRevenue || 0)}</span>
-          </div>
-        `;
-        
-        barTooltip
-          .html(tooltipHtml)
-          .style("border", "1px solid #10B981")
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 10) + "px")
-          .style("opacity", 1);
+        if (!isTouchDevice()) {
+          d3.select(this).attr("opacity", 1);
           
-        // Hide other tooltips
-        tooltip.style("opacity", 0);
-        hoverLine.style("opacity", 0);
-        hoverCircle.style("opacity", 0);
-        revenueTooltip.style("opacity", 0);
-        revenueHoverLine.style("opacity", 0);
-        revenueHoverCircle.style("opacity", 0);
+          const tooltipHtml = `
+            <div style="font-weight: 600; margin-bottom: 4px; color: #10B981;">
+              ${d.oneTimeRevenueName || "One-time Revenue"}
+            </div>
+            <div>
+              <span style="color: #9CA3AF;">Amount:</span> 
+              <span style="font-weight: 600;">+${formatCurrency(d.oneTimeRevenue || 0)}</span>
+            </div>
+          `;
+          
+          if (barTooltip) {
+            barTooltip
+              .html(tooltipHtml)
+              .style("border", "1px solid #10B981")
+              .style("left", (event.pageX + 10) + "px")
+              .style("top", (event.pageY - 10) + "px")
+              .style("opacity", 1);
+          }
+            
+          // Hide other tooltips
+          if (tooltip) tooltip.style("opacity", 0);
+          hoverLine.style("opacity", 0);
+          hoverCircle.style("opacity", 0);
+          if (revenueTooltip) revenueTooltip.style("opacity", 0);
+          revenueHoverLine.style("opacity", 0);
+          revenueHoverCircle.style("opacity", 0);
+        }
       })
       .on("mouseout", function(event, d) {
         d3.select(this).attr("opacity", 0.8);
-        barTooltip.style("opacity", 0);
+        if (barTooltip) barTooltip.style("opacity", 0);
+      })
+      .on("click", function(event, d) {
+        if (isTouchDevice()) {
+          d3.select(this).attr("opacity", 1);
+          
+          const tooltipContent = `
+            <div class="font-bold mb-1 text-green-500">
+              ${d.oneTimeRevenueName || "One-time Revenue"}
+            </div>
+            <div>
+              <span class="text-gray-500">Amount:</span> 
+              <span class="font-semibold">+${formatCurrency(d.oneTimeRevenue || 0)}</span>
+            </div>
+          `;
+          
+          // Adjust tooltip position for zoom and pan
+          const tooltipX = xScale(d.date) * zoomLevel + margin.left + panX;
+          const tooltipY = yScale(d.oneTimeRevenue || 0) + margin.top - 10;
+          
+          setActiveTooltip({
+            x: tooltipX,
+            y: tooltipY,
+            content: tooltipContent
+          });
+          
+          // Reset opacity and hide tooltip after 2 seconds
+          setTimeout(() => {
+            d3.select(this).attr("opacity", 0.8);
+            setActiveTooltip(null);
+          }, 2000);
+        }
       });
       
     // Update expense bar interactions
     g.selectAll(".expense-bar")
       .on("mouseover", function(event, d) {
-        d3.select(this).attr("opacity", 1);
-        
-        const tooltipHtml = `
-          <div style="font-weight: 600; margin-bottom: 4px; color: #DC2626;">
-            ${d.oneTimeExpenseName || "One-time Expense"}
-          </div>
-          <div>
-            <span style="color: #9CA3AF;">Amount:</span> 
-            <span style="font-weight: 600; color: #DC2626;">-${formatCurrency(d.oneTimeExpense || 0)}</span>
-          </div>
-        `;
-        
-        barTooltip
-          .html(tooltipHtml)
-          .style("border", "1px solid #DC2626")
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 10) + "px")
-          .style("opacity", 1);
+        if (!isTouchDevice()) {
+          d3.select(this).attr("opacity", 1);
           
-        // Hide other tooltips
-        tooltip.style("opacity", 0);
-        hoverLine.style("opacity", 0);
-        hoverCircle.style("opacity", 0);
-        revenueTooltip.style("opacity", 0);
-        revenueHoverLine.style("opacity", 0);
-        revenueHoverCircle.style("opacity", 0);
+          const tooltipHtml = `
+            <div style="font-weight: 600; margin-bottom: 4px; color: #DC2626;">
+              ${d.oneTimeExpenseName || "One-time Expense"}
+            </div>
+            <div>
+              <span style="color: #9CA3AF;">Amount:</span> 
+              <span style="font-weight: 600; color: #DC2626;">-${formatCurrency(d.oneTimeExpense || 0)}</span>
+            </div>
+          `;
+          
+          if (barTooltip) {
+            barTooltip
+              .html(tooltipHtml)
+              .style("border", "1px solid #DC2626")
+              .style("left", (event.pageX + 10) + "px")
+              .style("top", (event.pageY - 10) + "px")
+              .style("opacity", 1);
+          }
+            
+          // Hide other tooltips
+          if (tooltip) tooltip.style("opacity", 0);
+          hoverLine.style("opacity", 0);
+          hoverCircle.style("opacity", 0);
+          if (revenueTooltip) revenueTooltip.style("opacity", 0);
+          revenueHoverLine.style("opacity", 0);
+          revenueHoverCircle.style("opacity", 0);
+        }
       })
       .on("mouseout", function(event, d) {
         d3.select(this).attr("opacity", 0.7);
-        barTooltip.style("opacity", 0);
+        if (barTooltip) barTooltip.style("opacity", 0);
+      })
+      .on("click", function(event, d) {
+        if (isTouchDevice()) {
+          d3.select(this).attr("opacity", 1);
+          
+          const tooltipContent = `
+            <div class="font-bold mb-1 text-red-600">
+              ${d.oneTimeExpenseName || "One-time Expense"}
+            </div>
+            <div>
+              <span class="text-gray-500">Amount:</span> 
+              <span class="font-semibold text-red-600">-${formatCurrency(d.oneTimeExpense || 0)}</span>
+            </div>
+          `;
+          
+          // Adjust tooltip position for zoom and pan
+          const tooltipX = xScale(d.date) * zoomLevel + margin.left + panX;
+          const tooltipY = yScale(0) + margin.top + 10;
+          
+          setActiveTooltip({
+            x: tooltipX,
+            y: tooltipY,
+            content: tooltipContent
+          });
+          
+          // Reset opacity and hide tooltip after 2 seconds
+          setTimeout(() => {
+            d3.select(this).attr("opacity", 0.7);
+            setActiveTooltip(null);
+          }, 2000);
+        }
       });
 
     // Add axes - X-axis at bottom of chart
-    g.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(xScale)
+    const xAxis = g.append("g")
+      .attr("transform", `translate(0,${height})`);
+      
+    if (isMobile) {
+      // Mobile: Show fewer ticks and rotate more
+      xAxis.call(d3.axisBottom(xScale)
+        .ticks(6)
+        .tickFormat(d => d3.timeFormat("%b")(d as Date)))
+        .style("color", "#6B7280")
+        .style("font-size", "10px")
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-60)");
+    } else {
+      // Desktop: Normal display
+      xAxis.call(d3.axisBottom(xScale)
         .tickFormat(d => d3.timeFormat("%b %Y")(d as Date)))
-      .style("color", "#6B7280")
-      .style("font-size", "12px")
-      .selectAll("text")
-      .style("text-anchor", "end")
-      .attr("dx", "-.8em")
-      .attr("dy", ".15em")
-      .attr("transform", "rotate(-45)");
+        .style("color", "#6B7280")
+        .style("font-size", "12px")
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-45)");
+    }
       
     // Add X-axis line at y=0
     g.append("line")
@@ -605,9 +947,14 @@ export function BurnRateChart({
 
     g.append("g")
       .call(d3.axisLeft(yScale)
+        .ticks(isMobile ? 5 : 8)
         .tickFormat(d => {
           const value = +d;
-          if (value === 0) return "0 Ft";
+          if (value === 0) return "0";
+          if (isMobile) {
+            // Use compact format for mobile
+            return formatCompactNumber(value);
+          }
           const millions = value / 1000000;
           if (Math.abs(millions) >= 1) {
             return `${millions.toFixed(1)}M Ft`;
@@ -616,7 +963,7 @@ export function BurnRateChart({
           return `${thousands.toFixed(0)}k Ft`;
         }))
       .style("color", "#6B7280")
-      .style("font-size", "12px");
+      .style("font-size", isMobile ? "10px" : "12px");
 
 
     // Add zero line if balance goes negative
@@ -642,7 +989,7 @@ export function BurnRateChart({
         .text("Zero Date");
     }
 
-  }, [dimensions, currentBalance, monthlyBurnRate, monthlyRevenue, oneTimeEvents, recurringRevenues, recurringExpenses]);
+  }, [dimensions, currentBalance, monthlyBurnRate, monthlyRevenue, oneTimeEvents, recurringRevenues, recurringExpenses, isMobile, zoomLevel, panX]);
   
   useEffect(() => {
     return () => {
@@ -666,42 +1013,85 @@ export function BurnRateChart({
             <p className="text-sm text-gray-600 mt-1">
               Financial trajectory projection
             </p>
-            {/* Legend */}
-            <div className="flex gap-4 mt-3 flex-wrap">
+            {/* Legend - responsive grid on mobile */}
+            <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-4 mt-3">
               <div className="flex items-center gap-2">
                 <div className="w-5 h-0.5 bg-green-500"></div>
-                <span className="text-xs text-gray-600">Revenue</span>
+                <span className="text-[10px] sm:text-xs text-gray-600">Revenue</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 opacity-80 rounded-sm"></div>
-                <span className="text-xs text-gray-600">One-time Income</span>
+                <span className="text-[10px] sm:text-xs text-gray-600">One-time Income</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-red-600 opacity-70 rounded-sm"></div>
-                <span className="text-xs text-gray-600">One-time Cost</span>
+                <span className="text-[10px] sm:text-xs text-gray-600">One-time Cost</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-5 h-0.5 bg-cosmic-purple border-t-2 border-dashed border-cosmic-purple"></div>
-                <span className="text-xs text-gray-600">Balance</span>
+                <span className="text-[10px] sm:text-xs text-gray-600">Balance</span>
               </div>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-600 uppercase tracking-wider">Net Burn</p>
-            <p className={`text-2xl font-bold font-display ${netBurn > 0 ? 'text-neural-pink' : 'text-green-500'}`}>
+            <p className="text-[10px] sm:text-xs text-gray-600 uppercase tracking-wider">Net Burn</p>
+            <p className={`text-lg sm:text-2xl font-bold font-display ${netBurn > 0 ? 'text-neural-pink' : 'text-green-500'}`}>
               {formatCurrency(Math.abs(netBurn))}
-              <span className="text-sm font-normal text-gray-600 ml-1">/ mo</span>
+              <span className="text-xs sm:text-sm font-normal text-gray-600 ml-1">/ mo</span>
             </p>
             {runwayMonths !== null && (
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
                 Runway: <span className="font-semibold">{runwayMonths} months</span>
               </p>
             )}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <svg ref={svgRef} className="w-full" />
+      <CardContent className="p-3 sm:p-6 relative" ref={containerRef}>
+        {/* Mobile scrollable container */}
+        <div 
+          className={isMobile ? "overflow-x-auto -mx-3" : ""}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className={isMobile ? "min-w-[600px] px-3" : ""}>
+            <svg ref={svgRef} className="w-full" />
+            
+            {/* Mobile tooltip overlay */}
+            {activeTooltip && isMobile && (
+              <div 
+                className="absolute bg-dark-900/95 border border-cosmic-purple/50 rounded-lg p-3 text-sm z-10"
+                style={{
+                  left: `${Math.min(activeTooltip.x, dimensions.width - 200)}px`,
+                  top: `${Math.max(activeTooltip.y - 80, 10)}px`,
+                  minWidth: '160px'
+                }}
+                dangerouslySetInnerHTML={{ __html: activeTooltip.content }}
+              />
+            )}
+          </div>
+        </div>
+        
+        {/* Mobile hint */}
+        {isMobile && (
+          <div className="text-center mt-2">
+            <p className="text-[10px] text-gray-500">
+              Tap on the chart for details • {zoomLevel > 1 ? 'Drag to pan • Pinch to zoom' : 'Pinch to zoom • Scroll horizontally'}
+            </p>
+            {zoomLevel > 1 && (
+              <button
+                onClick={() => {
+                  setZoomLevel(1);
+                  setPanX(0);
+                }}
+                className="text-[10px] text-cosmic-purple underline mt-1"
+              >
+                Reset zoom
+              </button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
