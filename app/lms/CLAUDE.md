@@ -2,7 +2,7 @@
 
 ## Overview
 
-The LMS (Learning Management System) module is a demo interface showcasing how Vergil's design system can be applied to educational platforms. It demonstrates authentication flows, course management, and admin interfaces.
+The LMS (Learning Management System) module is a demo interface showcasing how Vergil's design system can be applied to educational platforms. It demonstrates authentication flows, course management with multi-modal learning activities, and admin interfaces.
 
 ## Module Structure
 
@@ -21,6 +21,7 @@ app/lms/
 
 Related components in:
 - /components/lms/        # LMS-specific components
+- /lib/lms/              # LMS data structures and types
 ```
 
 ## Key Features
@@ -31,11 +32,52 @@ Related components in:
 - Session management (demo)
 - Branded authentication UI
 
-### Course Interface
-- Course listing and filtering
-- Course cards with metadata
-- Progress tracking visualization
-- Interactive course navigation
+### Course Structure
+- **Courses**: Top-level containers for learning content
+- **Sections**: Organized groups of related lessons within a course
+- **Lessons**: Individual learning units containing knowledge points
+- **Knowledge Points**: Specific concepts or skills to be mastered
+- **Game Types**: Multiple learning modalities for each lesson
+
+### Learning Activities
+The system supports 20+ different game types across 5 categories:
+
+1. **Content Types**
+   - Written Material
+   - Audio Material (read aloud)
+   - Video
+   - User-linked content
+
+2. **Quiz Games**
+   - Flashcards
+   - Who Wants to Be a Millionaire (with rewards)
+   - Jeopardy (with rewards)
+   - Speed Rounds (timed MCQ)
+
+3. **Assessment Types**
+   - Timed Tests
+   - Untimed Tests
+   - Multiple answer formats (MCQ, short/long answer, single word)
+
+4. **Interactive Games**
+   - Crossword Puzzles
+   - Concept Matching
+   - Odd One Out
+   - Territory Conquest (AI-powered)
+
+5. **Chat-Based Games**
+   - Case Study Discussions
+   - Open-ended Topic Chat
+   - Role Playing Games
+   - Shark Tank Format
+   - Escape Room Puzzles
+   - Debate Tournaments
+
+### Progress Tracking
+- Knowledge point proficiency (0-100%)
+- Lesson completion status
+- Section progress visualization
+- Overall course mastery metrics
 
 ### Admin Dashboard
 - User management interface
@@ -86,16 +128,44 @@ Related components in:
 ## Common Patterns
 
 ```tsx
-// Course card
-<Card variant="interactive">
-  <CardHeader>
-    <CardTitle>{course.title}</CardTitle>
-    <CardDescription>{course.description}</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <Progress value={course.progress} />
-  </CardContent>
-</Card>
+// Course overview with sections
+<CourseOverview 
+  course={course}
+  onStartCourse={() => navigateToCourse(course.id)}
+  onStartLesson={(lessonId, gameTypeId) => startLesson(lessonId, gameTypeId)}
+/>
+
+// Course section with lessons
+<CourseSection
+  section={section}
+  sectionNumber={1}
+  isExpanded={true}
+  onStartLesson={(lessonId, gameTypeId) => startLesson(lessonId, gameTypeId)}
+/>
+
+// Individual lesson card
+<LessonCard
+  lesson={lesson}
+  sectionNumber={1}
+  lessonNumber={1}
+  isLocked={false}
+  onStartLesson={(gameTypeId) => startLesson(lesson.id, gameTypeId)}
+/>
+
+// Lesson modal for game selection
+<LessonModal
+  lesson={lesson}
+  isOpen={showModal}
+  onClose={() => setShowModal(false)}
+  onSelectGame={(gameTypeId) => startGame(gameTypeId)}
+/>
+
+// Game type selection card
+<GameTypeCard
+  gameType={gameType}
+  isAvailable={true}
+  onClick={() => selectGameType(gameType.id)}
+/>
 
 // Login form
 <form>

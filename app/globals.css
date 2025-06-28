@@ -28,6 +28,11 @@
   --vergil-indigo-500: #818CF8;
   --vergil-cyan-500: #10B981;
   --vergil-blue-500: #3B82F6;
+  
+  /* Additional colors */
+  --luminous-gold: #F59E0B;
+  --vivid-red: #EF4444;
+  --midnight-black: #1E293B;
 
   /* Typography scale */
   --font-display: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
