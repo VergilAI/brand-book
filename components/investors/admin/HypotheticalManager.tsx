@@ -442,94 +442,80 @@ export function HypotheticalManager() {
           <CardTitle className="text-gray-900">Hypothetical Scenarios</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {hypotheticals.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No hypothetical scenarios found</p>
+              <p className="text-gray-500 col-span-full text-center py-8">No hypothetical scenarios found</p>
             ) : (
               hypotheticals.map((hypothetical) => (
                 <div
                   key={hypothetical.id}
-                  className={`p-4 rounded-lg border transition-colors ${
+                  className={`p-3 rounded-lg border transition-colors ${
                     hypothetical.enabled
                       ? "bg-blue-50 border-blue-200"
                       : "bg-gray-50 border-gray-200"
                   }`}
                 >
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-1">
-                          <p className={`font-medium ${
-                            hypothetical.enabled ? "text-gray-900" : "text-gray-500"
-                          }`}>
-                            {hypothetical.name}
-                          </p>
-                          <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                            hypothetical.type === "revenue"
-                              ? "bg-green-100 text-green-700 border border-green-200"
-                              : "bg-red-100 text-red-700 border border-red-200"
-                          }`}>
-                            {hypothetical.type}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600">{hypothetical.description}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {hypothetical.transaction_type === "recurring" ? (
-                            <>
-                              {hypothetical.recurring_type === "subscription" ? (
-                                <>
-                                  Subscription: {hypothetical.subscription_users || 0} users × {formatCurrency(hypothetical.subscription_price_per_user || 0)} (+{hypothetical.subscription_growth_factor || 0}%/mo, -{hypothetical.subscription_churn_rate || 0}%/mo churn)
-                                  <br />
-                                  Starting {hypothetical.date_info.start_date}{hypothetical.date_info.end_date && ` - ${hypothetical.date_info.end_date}`}
-                                </>
-                              ) : (
-                                <>
-                                  {hypothetical.date_info.frequency} starting {hypothetical.date_info.start_date}
-                                  {hypothetical.date_info.end_date && ` - ${hypothetical.date_info.end_date}`}
-                                </>
-                              )}
-                            </>
-                          ) : (
-                            <>Expected: {hypothetical.date_info.date || "TBD"}</>
-                          )}
-                        </p>
+                        <h4 className={`font-medium text-xs leading-tight ${
+                          hypothetical.enabled ? "text-gray-900" : "text-gray-500"
+                        }`}>
+                          {hypothetical.name}
+                        </h4>
+                        <span className={`inline-block mt-1 px-1.5 py-0.5 text-xs rounded-full font-medium ${
+                          hypothetical.type === "revenue"
+                            ? "bg-green-100 text-green-700 border border-green-200"
+                            : "bg-red-100 text-red-700 border border-red-200"
+                        }`}>
+                          {hypothetical.type}
+                        </span>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className={`text-lg sm:text-xl font-bold font-display ${
+                        <p className={`text-base font-bold font-display ${
                           hypothetical.type === "revenue" ? "text-green-600" : "text-red-600"
                         } ${!hypothetical.enabled && "opacity-50"}`}>
                           {formatCurrency(hypothetical.amount)}
                         </p>
-                        {hypothetical.transaction_type === "recurring" && hypothetical.date_info.frequency === "Yearly" && (
-                          <p className="text-xs text-gray-600">
-                            {formatCurrency(hypothetical.amount / 12)}/mo
-                          </p>
-                        )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">Include in projections</span>
+                    <div className="text-xs text-gray-500 line-clamp-2">
+                      {hypothetical.transaction_type === "recurring" ? (
+                        <>
+                          {hypothetical.recurring_type === "subscription" ? (
+                            `${hypothetical.subscription_users || 0} users × ${formatCurrency(hypothetical.subscription_price_per_user || 0)}`
+                          ) : (
+                            `${hypothetical.date_info.frequency} recurring`
+                          )}
+                        </>
+                      ) : (
+                        `One-time: ${hypothetical.date_info.date || "TBD"}`
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-1 border-t border-gray-200">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600">Active</span>
                         <button
                           onClick={() => handleToggle(hypothetical.id, !hypothetical.enabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
                             hypothetical.enabled ? "bg-gray-700" : "bg-gray-300"
                           }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              hypothetical.enabled ? "translate-x-6" : "translate-x-1"
+                            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                              hypothetical.enabled ? "translate-x-4" : "translate-x-0.5"
                             }`}
                           />
                         </button>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleEdit(hypothetical)}
-                          className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                          className="border-gray-300 text-gray-700 hover:bg-gray-100 text-xs px-2 py-1 h-6"
                         >
                           Edit
                         </Button>
@@ -537,9 +523,9 @@ export function HypotheticalManager() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleDelete(hypothetical.id)}
-                          className="border-red-200 text-red-600 hover:bg-red-50"
+                          className="border-red-200 text-red-600 hover:bg-red-50 text-xs px-2 py-1 h-6"
                         >
-                          Delete
+                          Del
                         </Button>
                       </div>
                     </div>

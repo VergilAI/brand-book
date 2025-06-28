@@ -132,9 +132,9 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {hypotheticals.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-gray-500 col-span-full text-center py-8">
                   No hypotheticals yet. Create one to start scenario planning!
                 </p>
               ) : (
@@ -148,19 +148,14 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
                         : "border-gray-200"
                     }`}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex flex-col gap-4">
-                        <div className="flex items-start justify-between gap-4">
+                    <CardContent className="p-3">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 text-sm">
+                            <h4 className="font-medium text-gray-900 text-xs leading-tight">
                               {hypothetical.name || `${hypothetical.type === "revenue" ? "Revenue" : "Expense"} Scenario`}
                             </h4>
-                            {hypothetical.description && (
-                              <p className="text-xs text-gray-600 mt-1">
-                                {hypothetical.description}
-                              </p>
-                            )}
-                            <span className={`inline-block mt-2 px-2 py-0.5 text-xs rounded-full font-medium ${
+                            <span className={`inline-block mt-1 px-1.5 py-0.5 text-xs rounded-full font-medium ${
                               hypothetical.type === "revenue" 
                                 ? "bg-green-50 text-green-600 border border-green-200" 
                                 : "bg-red-50 text-red-600 border border-red-200"
@@ -170,50 +165,44 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
                           </div>
                           <button
                             onClick={() => deleteHypothetical(hypothetical.id)}
-                            className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
+                            className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-0.5"
                             title="Delete"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           </button>
                         </div>
                         
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <p className={`text-lg font-bold ${
-                              hypothetical.type === "revenue"
-                                ? "text-green-600"
-                                : "text-red-600"
-                            }`}>
-                              {hypothetical.type === "expense" && "-"}
-                              {formatCurrency(hypothetical.amount)}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {hypothetical.transaction_type === "one-time"
-                                ? `Date: ${hypothetical.date_info.date || "Not set"}`
-                                : (hypothetical as any).recurring_type === "subscription"
-                                ? `Subscription: ${(hypothetical as any).subscription_users || 0} users × ${formatCurrency((hypothetical as any).subscription_price_per_user || 0)} (+${(hypothetical as any).subscription_growth_factor || 0}%/mo, -${(hypothetical as any).subscription_churn_rate || 0}%/mo churn)`
-                                : `${hypothetical.date_info.frequency || "Monthly"} • ${hypothetical.date_info.start_date || "Not set"} - ${
-                                    hypothetical.date_info.end_date || "Ongoing"
-                                  }`}
-                            </p>
-                          </div>
+                        <div>
+                          <p className={`text-base font-bold ${
+                            hypothetical.type === "revenue"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}>
+                            {hypothetical.type === "expense" && "-"}
+                            {formatCurrency(hypothetical.amount)}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                            {hypothetical.transaction_type === "one-time"
+                              ? `Date: ${hypothetical.date_info.date || "Not set"}`
+                              : (hypothetical as any).recurring_type === "subscription"
+                              ? `${(hypothetical as any).subscription_users || 0} users × ${formatCurrency((hypothetical as any).subscription_price_per_user || 0)}`
+                              : `${hypothetical.date_info.frequency || "Monthly"}`}
+                          </p>
                         </div>
                         
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                          <label className="text-xs text-gray-600">
-                            Include in projections
-                          </label>
+                        <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+                          <span className="text-xs text-gray-600">Active</span>
                           <button
                             onClick={() => toggleHypothetical(hypothetical.id, !hypothetical.enabled)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                               hypothetical.enabled ? "bg-cosmic-purple" : "bg-gray-300"
                             }`}
                           >
                             <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                hypothetical.enabled ? "translate-x-6" : "translate-x-1"
+                              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                                hypothetical.enabled ? "translate-x-5" : "translate-x-1"
                               }`}
                             />
                           </button>
