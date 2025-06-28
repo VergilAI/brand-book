@@ -11,7 +11,8 @@ import {
   Hand,
   Grid3x3,
   Eye,
-  EyeOff
+  EyeOff,
+  Waves
 } from 'lucide-react'
 import type { ToolType } from '../../types/editor'
 
@@ -86,15 +87,35 @@ export function ToolPalette() {
         </div>
         
         {store.tool === 'pen' && (
-          <label className="flex items-center gap-2 px-3 py-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={store.drawing.snapToGrid}
-              onChange={(e) => store.setSnapToGrid(e.target.checked)}
-              className="rounded"
-            />
-            <span className="text-sm">Snap to Grid</span>
-          </label>
+          <>
+            <div className="h-px bg-gray-200 my-1" />
+            
+            {/* Drawing Options */}
+            <label className="flex items-center gap-2 px-3 py-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.drawing.snapToGrid}
+                onChange={(e) => store.setSnapToGrid(e.target.checked)}
+                className="rounded"
+              />
+              <span className="text-sm">Snap to Grid</span>
+            </label>
+            
+            <label className="flex items-center gap-2 px-3 py-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.drawing.showControlPoints}
+                onChange={(e) => store.setShowControlPoints(e.target.checked)}
+                className="rounded"
+              />
+              <span className="text-sm">Show Control Points</span>
+            </label>
+            
+            <div className="text-xs text-gray-500 px-3 py-1">
+              <div>• Click: Straight lines</div>
+              <div>• Click + Drag: Curves</div>
+            </div>
+          </>
         )}
       </div>
     </div>

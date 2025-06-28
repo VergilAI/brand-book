@@ -4,24 +4,68 @@ import React, { useCallback, useRef, useEffect } from 'react'
 import { useMapEditor } from '../../hooks/useMapEditor'
 import { usePointerPosition } from '../../hooks/usePointerPosition'
 import { GridOverlay } from './GridOverlay'
+import { BezierDrawTool } from '../drawing/BezierDrawTool'
 import { cn } from '@/lib/utils'
 import type { Territory, Point } from '@/lib/lms/optimized-map-data'
+import type { BezierPoint } from '../../types/editor'
 
 // Helper function to parse SVG path into polygon points
 function parsePathToPoints(pathString: string): Point[] {
   const points: Point[] = []
-  const commands = pathString.match(/[ML]\s*[-\d.]+\s+[-\d.]+/g) || []
+  let currentX = 0
+  let currentY = 0
   
-  commands.forEach(command => {
-    const match = command.match(/[ML]\s*([-\d.]+)\s+([-\d.]+)/)
-    if (match) {
-      points.push({
-        x: parseFloat(match[1]),
-        y: parseFloat(match[2])
-      })
+  console.log('Parsing path:', pathString)
+  
+  // Match all path commands - updated regex to handle commas and decimals better
+  const commandRegex = /([MLCQZ])\s*([^MLCQZ]*)/gi
+  let match
+  
+  while ((match = commandRegex.exec(pathString)) !== null) {
+    const command = match[1].toUpperCase()
+    const coordsStr = match[2].trim()
+    
+    console.log('Found command:', command, 'with coords:', coordsStr)
+    
+    if (command === 'Z') {
+      continue // Close path, no coordinates
     }
-  })
+    
+    // Split by whitespace or comma and parse numbers
+    const coords = coordsStr.split(/[\s,]+/).map(parseFloat).filter(n => !isNaN(n))
+    console.log('Parsed coords:', coords)
+    
+    switch (command) {
+      case 'M': // Move to
+      case 'L': // Line to
+        if (coords.length >= 2) {
+          currentX = coords[0]
+          currentY = coords[1]
+          points.push({ x: currentX, y: currentY })
+        }
+        break
+        
+      case 'C': // Cubic bezier
+        if (coords.length >= 6) {
+          // For hit detection, just use the end point
+          // The curve interpolation was causing issues
+          currentX = coords[4]
+          currentY = coords[5]
+          points.push({ x: currentX, y: currentY })
+        }
+        break
+        
+      case 'Q': // Quadratic bezier
+        if (coords.length >= 4) {
+          currentX = coords[2]
+          currentY = coords[3]
+          points.push({ x: currentX, y: currentY })
+        }
+        break
+    }
+  }
   
+  console.log('Final points extracted:', points)
   return points
 }
 
@@ -50,6 +94,10 @@ function isPointInPolygon(point: Point, polygon: Point[]): boolean {
 // Helper function to check if point is inside territory using accurate polygon detection
 function isPointInTerritory(point: Point, territory: Territory): boolean {
   const polygonPoints = parsePathToPoints(territory.fillPath)
+  if (polygonPoints.length < 3) {
+    console.warn('Territory has less than 3 points:', territory.id, 'path:', territory.fillPath, 'parsed points:', polygonPoints)
+    return false
+  }
   return isPointInPolygon(point, polygonPoints)
 }
 
@@ -100,6 +148,57 @@ export function MapCanvas({ className }: MapCanvasProps) {
       lastPan.current = store.view.pan
       lastMousePos.current = { x: e.clientX, y: e.clientY }
       e.currentTarget.setPointerCapture(e.pointerId)
+      return
+    }
+    
+    // Handle vertex editing mode
+    if (store.editing.isEditing && e.button === 0) {
+      const point = position.svg
+      
+      // Check if clicking on a vertex
+      const vertexRadius = 8 / store.view.zoom // Scale with zoom
+      const handleRadius = 6 / store.view.zoom
+      
+      // Check vertices
+      for (let i = 0; i < store.editing.vertexPositions.length; i++) {
+        const vertex = store.editing.vertexPositions[i]
+        const distance = Math.sqrt(Math.pow(point.x - vertex.x, 2) + Math.pow(point.y - vertex.y, 2))
+        
+        if (distance < vertexRadius) {
+          store.selectVertex(i, e.ctrlKey || e.metaKey)
+          store.startDraggingVertex(i)
+          e.currentTarget.setPointerCapture(e.pointerId)
+          return
+        }
+        
+        // Check control handles
+        if (vertex.controlPoints?.in) {
+          const inDistance = Math.sqrt(
+            Math.pow(point.x - vertex.controlPoints.in.x, 2) + 
+            Math.pow(point.y - vertex.controlPoints.in.y, 2)
+          )
+          if (inDistance < handleRadius) {
+            store.startDraggingControlHandle(i, 'in')
+            e.currentTarget.setPointerCapture(e.pointerId)
+            return
+          }
+        }
+        
+        if (vertex.controlPoints?.out) {
+          const outDistance = Math.sqrt(
+            Math.pow(point.x - vertex.controlPoints.out.x, 2) + 
+            Math.pow(point.y - vertex.controlPoints.out.y, 2)
+          )
+          if (outDistance < handleRadius) {
+            store.startDraggingControlHandle(i, 'out')
+            e.currentTarget.setPointerCapture(e.pointerId)
+            return
+          }
+        }
+      }
+      
+      // If not clicking on any vertex/handle, clear selection
+      store.clearVertexSelection()
       return
     }
     
@@ -181,19 +280,23 @@ export function MapCanvas({ className }: MapCanvasProps) {
       const point = store.drawing.snapToGrid ? position.grid : position.svg
       
       if (!store.drawing.isDrawing) {
+        // Start drawing with first point
         store.startDrawing(point)
       } else {
         // Check if clicking near start point to close path
-        const firstPoint = store.drawing.currentPath[0]
+        const firstPoint = store.drawing.bezierPath[0]
         const distance = Math.sqrt(
           Math.pow(point.x - firstPoint.x, 2) + 
           Math.pow(point.y - firstPoint.y, 2)
         )
         
-        if (distance < 10 && store.drawing.currentPath.length > 2) {
+        if (distance < 10 && store.drawing.bezierPath.length > 2) {
           store.finishDrawing()
         } else {
-          store.addDrawingPoint(point)
+          // Add the new point first, then we can drag to create its handles
+          store.addBezierPoint(point)
+          // Set up for potential drag to create handles for this new point
+          store.startDraggingHandle(point)
         }
       }
     }
@@ -213,25 +316,20 @@ export function MapCanvas({ className }: MapCanvasProps) {
         x: lastPan.current.x - dx / store.view.zoom,
         y: lastPan.current.y - dy / store.view.zoom
       })
-    } else if (isAreaSelecting.current) {
-      // Update area selection rectangle (clamp to canvas bounds)
-      const svgAspectRatio = svgRef.current ? 
-        svgRef.current.getBoundingClientRect().width / svgRef.current.getBoundingClientRect().height : 
-        16/9
-      const baseWidth = 1000
-      const baseHeight = baseWidth / svgAspectRatio
-      const viewBoxWidth = baseWidth / store.view.zoom
-      const viewBoxHeight = baseHeight / store.view.zoom
-      const viewBounds = {
-        x: store.view.pan.x,
-        y: store.view.pan.y,
-        width: viewBoxWidth,
-        height: viewBoxHeight
-      }
-      
-      areaSelectEnd.current = clampToCanvasBounds(position.svg, viewBounds)
+    } else if (store.editing.isDraggingVertex && store.editing.draggedVertex !== null) {
+      // Move vertex
+      const point = store.drawing.snapToGrid ? position.grid : position.svg
+      store.updateVertexPosition(store.editing.draggedVertex, point)
+    } else if (store.editing.isDraggingHandle && store.editing.draggedHandle !== null) {
+      // Move control handle
+      const point = position.svg // Don't snap control handles to grid
+      store.updateControlHandle(
+        store.editing.draggedHandle.vertex,
+        store.editing.draggedHandle.type,
+        point
+      )
     } else if (isMovingTerritories.current) {
-      // Move selected territories
+      // Move selected territories - this should take priority over drawing handle
       const currentPos = position.svg
       const deltaX = currentPos.x - moveStartPos.current.x
       const deltaY = currentPos.y - moveStartPos.current.y
@@ -250,6 +348,27 @@ export function MapCanvas({ className }: MapCanvasProps) {
           moveStartPos.current = currentPos // Update for next frame
         }
       }
+    } else if (store.drawing.isDraggingHandle && store.tool === 'pen') {
+      // Update bezier handle during drag only when using pen tool
+      const point = store.drawing.snapToGrid ? position.grid : position.svg
+      store.updateDragHandle(point)
+    } else if (isAreaSelecting.current) {
+      // Update area selection rectangle (clamp to canvas bounds)
+      const svgAspectRatio = svgRef.current ? 
+        svgRef.current.getBoundingClientRect().width / svgRef.current.getBoundingClientRect().height : 
+        16/9
+      const baseWidth = 1000
+      const baseHeight = baseWidth / svgAspectRatio
+      const viewBoxWidth = baseWidth / store.view.zoom
+      const viewBoxHeight = baseHeight / store.view.zoom
+      const viewBounds = {
+        x: store.view.pan.x,
+        y: store.view.pan.y,
+        width: viewBoxWidth,
+        height: viewBoxHeight
+      }
+      
+      areaSelectEnd.current = clampToCanvasBounds(position.svg, viewBounds)
     }
   }, [store, updatePosition, position])
   
@@ -257,6 +376,14 @@ export function MapCanvas({ className }: MapCanvasProps) {
     if (isDragging.current) {
       isDragging.current = false
       e.currentTarget.releasePointerCapture(e.pointerId)
+    } else if (store.editing.isDraggingVertex || store.editing.isDraggingHandle) {
+      // End vertex or handle dragging
+      store.endDragging()
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    } else if (store.drawing.isDraggingHandle) {
+      // End bezier handle dragging and add the point
+      const point = store.drawing.snapToGrid ? position.grid : position.svg
+      store.endDraggingHandle(point)
     } else if (isAreaSelecting.current) {
       // Complete area selection
       const start = areaSelectStart.current
@@ -278,7 +405,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
         hasMoved.current = false
       }, 10)
     }
-  }, [store])
+  }, [store, position])
   
   // Handle zoom with wheel
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -344,6 +471,15 @@ export function MapCanvas({ className }: MapCanvasProps) {
     }
   }, [])
 
+  // Handle double-click for editing
+  const handleDoubleClick = useCallback((e: React.MouseEvent, territoryId: string) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (store.tool === 'select') {
+      store.startEditingTerritory(territoryId)
+    }
+  }, [store])
+  
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -353,13 +489,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
       }
       
       if (e.key === 'Escape') {
-        if (store.drawing.isDrawing) {
+        if (store.editing.isEditing) {
+          store.stopEditingTerritory()
+        } else if (store.drawing.isDrawing) {
           store.cancelDrawing()
         } else {
           store.clearSelection()
         }
-      } else if (e.key === 'Enter' && store.drawing.isDrawing) {
-        if (store.drawing.currentPath.length >= 3) {
+      } else if (e.key === 'Enter') {
+        if (store.editing.isEditing) {
+          store.stopEditingTerritory()
+        } else if (store.drawing.isDrawing && store.drawing.bezierPath.length >= 3) {
           store.finishDrawing()
         }
       } else if (e.key.toLowerCase() === 'v') {
@@ -483,17 +623,98 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     ? 'fill-[#F3F4F6]'
                     : 'hover:fill-gray-50'
                 }`}
+                style={{
+                  opacity: store.editing.isEditing && store.editing.editingTerritoryId !== territory.id ? 0.3 : 1
+                }}
                 onClick={(e) => {
-                  if (store.tool === 'select' && !hasMoved.current) {
+                  if (store.tool === 'select' && !hasMoved.current && !store.editing.isEditing) {
                     // Only handle click if we haven't just finished dragging
                     e.stopPropagation()
                     store.selectTerritory(territory.id, e.shiftKey)
                   }
                 }}
+                onDoubleClick={(e) => handleDoubleClick(e, territory.id)}
               />
             )
           })}
         </g>
+        
+        {/* Vertex editing visualization */}
+        {store.editing.isEditing && store.editing.vertexPositions.length > 0 && (
+          <g className="vertex-editing">
+            {/* Control handle lines */}
+            {store.editing.vertexPositions.map((vertex, index) => (
+              <g key={`vertex-handles-${index}`}>
+                {/* In control handle */}
+                {vertex.controlPoints?.in && (
+                  <>
+                    <line
+                      x1={vertex.x}
+                      y1={vertex.y}
+                      x2={vertex.controlPoints.in.x}
+                      y2={vertex.controlPoints.in.y}
+                      stroke="#8B5CF6"
+                      strokeWidth="2"
+                      opacity="0.7"
+                      className="pointer-events-none"
+                    />
+                    <circle
+                      cx={vertex.controlPoints.in.x}
+                      cy={vertex.controlPoints.in.y}
+                      r="6"
+                      fill="#8B5CF6"
+                      stroke="#FFFFFF"
+                      strokeWidth="2"
+                      className="cursor-move"
+                      style={{ cursor: 'move' }}
+                    />
+                  </>
+                )}
+                
+                {/* Out control handle */}
+                {vertex.controlPoints?.out && (
+                  <>
+                    <line
+                      x1={vertex.x}
+                      y1={vertex.y}
+                      x2={vertex.controlPoints.out.x}
+                      y2={vertex.controlPoints.out.y}
+                      stroke="#8B5CF6"
+                      strokeWidth="2"
+                      opacity="0.7"
+                      className="pointer-events-none"
+                    />
+                    <circle
+                      cx={vertex.controlPoints.out.x}
+                      cy={vertex.controlPoints.out.y}
+                      r="6"
+                      fill="#8B5CF6"
+                      stroke="#FFFFFF"
+                      strokeWidth="2"
+                      className="cursor-move"
+                      style={{ cursor: 'move' }}
+                    />
+                  </>
+                )}
+              </g>
+            ))}
+            
+            {/* Vertex anchor points */}
+            {store.editing.vertexPositions.map((vertex, index) => (
+              <circle
+                key={`vertex-${index}`}
+                cx={vertex.x}
+                cy={vertex.y}
+                r="8"
+                fill={store.editing.selectedVertices.has(index) ? '#3B82F6' : '#FFFFFF'}
+                stroke={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
+                strokeWidth="3"
+                className="cursor-move"
+                style={{ cursor: 'move' }}
+              />
+            ))}
+          </g>
+        )}
         
         {/* Drawing preview */}
         {store.drawing.isDrawing && (
@@ -509,8 +730,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
             />
             
             {/* Live preview line from last point to cursor */}
-            {store.drawing.currentPath.length > 0 && (() => {
-              const lastPoint = store.drawing.currentPath[store.drawing.currentPath.length - 1]
+            {!store.drawing.isDraggingHandle && store.drawing.bezierPath.length > 0 && (() => {
+              const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
               const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
               
               return (
@@ -529,8 +750,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
             })()}
             
             {/* Show close indicator when near start */}
-            {store.drawing.currentPath.length > 2 && (() => {
-              const firstPoint = store.drawing.currentPath[0]
+            {store.drawing.bezierPath.length > 2 && (() => {
+              const firstPoint = store.drawing.bezierPath[0]
               const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
               const distance = Math.sqrt(
                 Math.pow(currentPoint.x - firstPoint.x, 2) + 
@@ -550,8 +771,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
               ) : null
             })()}
             
-            {/* Show all drawing points */}
-            {store.drawing.currentPath.map((point, index) => (
+            {/* Show bezier anchor points */}
+            {store.drawing.bezierPath.map((point, index) => (
               <circle
                 key={index}
                 cx={point.x}
@@ -563,8 +784,40 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 className="pointer-events-none"
               />
             ))}
+            
+            {/* Show control handles when dragging */}
+            {store.drawing.isDraggingHandle && store.drawing.dragStartPoint && (() => {
+              const dragStart = store.drawing.dragStartPoint
+              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              
+              return (
+                <g>
+                  {/* Handle line */}
+                  <line
+                    x1={dragStart.x}
+                    y1={dragStart.y}
+                    x2={currentPoint.x}
+                    y2={currentPoint.y}
+                    stroke="#8B5CF6"
+                    strokeWidth="2"
+                    className="pointer-events-none"
+                  />
+                  {/* Handle point */}
+                  <circle
+                    cx={currentPoint.x}
+                    cy={currentPoint.y}
+                    r="4"
+                    fill="#8B5CF6"
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                    className="pointer-events-none"
+                  />
+                </g>
+              )
+            })()}
           </g>
         )}
+        
         
         {/* Area selection rectangle */}
         {showAreaSelect && (
@@ -598,6 +851,14 @@ export function MapCanvas({ className }: MapCanvasProps) {
       <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs font-mono">
         {position.svg.x}, {position.svg.y}
       </div>
+      
+      {/* Editing mode indicator */}
+      {store.editing.isEditing && (
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="text-sm font-medium">Editing Mode</div>
+          <div className="text-xs opacity-90">Press ESC or Enter to finish • Drag vertices to reshape</div>
+        </div>
+      )}
       
       {/* Zoom display */}
       <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs">

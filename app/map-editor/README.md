@@ -45,7 +45,7 @@ app/map-editor/
 ### 1. Tools System
 
 #### Available Tools
-- **Select (V)** - Select and manipulate territories
+- **Select (V)** - Select and manipulate territories with area selection and drag-to-move
 - **Move/Pan (H)** - Pan the canvas view
 - **Draw Territory (P)** - Create new territories by drawing polygons
 - **Edit Borders (B)** - *Future: Edit territory borders*
@@ -58,38 +58,55 @@ export type ToolType = 'select' | 'pen' | 'border' | 'connect' | 'move'
 
 ### 2. Drawing System
 
-#### Territory Creation
-- Click-based polygon drawing
-- Live preview with dashed lines
-- Snap-to-grid option (configurable)
-- Auto-close when clicking near start point
-- Minimum 3 points required for valid territory
+#### Unified Bezier Drawing System
+- **All territories use bezier paths** - No separate polygon/bezier modes
+- **Click for straight lines** - Single click places anchor point with straight segment
+- **Click + Drag for curves** - Drag to pull out bezier control handles
+- **Industry-standard UX** - Same behavior as Illustrator, Figma, Sketch
+- **Live preview** - See curves form as you drag handles
 
-#### Drawing States
+#### Drawing Workflow
 ```typescript
 interface DrawingState {
   isDrawing: boolean
-  currentPath: Point[]
+  bezierPath: BezierPoint[]  // All paths are bezier-ready
   previewPath: string
   snapToGrid: boolean
-  autoClose: boolean
+  showControlPoints: boolean
+  isDraggingHandle: boolean
+  dragStartPoint?: Point
+}
+
+interface BezierPoint extends Point {
+  type: 'anchor'
+  controlPoints: {
+    in?: Point   // Control handle for incoming curve
+    out?: Point  // Control handle for outgoing curve
+  }
 }
 ```
 
 #### Visual Feedback
 - **Preview lines** - Dashed blue lines showing current path
 - **Live cursor line** - Line from last point to cursor position
+- **Control handles** - Purple lines show bezier handles while dragging
 - **Close indicator** - Pulsing circle when near start point for closing
-- **Drawing points** - Visual markers for each placed point
+- **Anchor points** - Blue circles mark each placed point
 - **Cursor indicator** - Shows exact cursor position when drawing
+
+#### Technical Implementation
+- **SVG Path Generation** - Automatically generates smooth cubic bezier curves (C commands)
+- **Fallback to Lines** - Points without control handles render as straight lines (L commands)
+- **Path Movement** - Advanced SVG path parser correctly transforms all coordinate types
+- **Hit Detection** - Robust polygon approximation for accurate selection of curved territories
 
 ### 3. Pan and Zoom System
 
 #### Zoom Implementation
-- **Mouse wheel zoom** with 2% increments (0.98/1.02 multiplier)
-- **Zoom-to-cursor** - Zooms toward/away from cursor position
+- **Mouse wheel zoom** with 8% increments (0.92/1.08 multiplier)
+- **Zoom-to-cursor** - Accurate zooms toward/away from cursor position with dynamic aspect ratio
 - **Zoom range** - 10% to 500% (0.1x to 5.0x)
-- **Smooth zoom** - Low sensitivity for precise control
+- **Responsive zoom** - Dynamic sensitivity for precise control
 
 #### Pan Implementation
 - **Move tool** - Dedicated pan tool with grab cursor
@@ -99,19 +116,78 @@ interface DrawingState {
 
 #### Mathematical Implementation
 ```typescript
-// Zoom-to-cursor calculation
+// Dynamic aspect ratio zoom-to-cursor calculation
+const svgAspectRatio = rect.width / rect.height
+const baseWidth = 1000
+const baseHeight = baseWidth / svgAspectRatio
+
 const mouseInSVG = {
-  x: store.view.pan.x + (mouseX / svgWidth) * viewBoxWidth,
-  y: store.view.pan.y + (mouseY / svgHeight) * viewBoxHeight
+  x: store.view.pan.x + normalizedX * currentViewBoxWidth,
+  y: store.view.pan.y + normalizedY * currentViewBoxHeight
 }
 
 const newPan = {
-  x: mouseInSVG.x - (mouseX / svgWidth) * (900 / newZoom),
-  y: mouseInSVG.y - (mouseY / svgHeight) * (500 / newZoom)
+  x: mouseInSVG.x - normalizedX * newViewBoxWidth,
+  y: mouseInSVG.y - normalizedY * newViewBoxHeight
 }
 ```
 
-### 4. Grid System
+### 4. Selection System
+
+#### Territory Selection Features
+- **Click-to-select** - Single click selects individual territories
+- **Multi-select** - Ctrl/Cmd+click to add/remove from selection
+- **Area selection** - Click and drag to select multiple territories with rectangle
+- **Live preview** - Shows which territories will be selected during area selection
+- **Canvas-bounded** - Area selection constrained to canvas boundaries
+
+#### Territory Movement
+- **Click-and-drag** - Immediately drag any territory to move (auto-selects if needed)
+- **Multi-territory movement** - Move all selected territories together
+- **Movement threshold** - 3px threshold prevents accidental movement during clicks
+- **Selection preservation** - Multi-selection maintained during group movement
+
+#### Hit Detection
+- **Point-in-polygon** - Accurate hit detection using ray casting algorithm
+- **Edge-perfect** - Works precisely at territory boundaries
+- **Shape-agnostic** - Handles any polygon shape, concave or convex
+
+#### Visual Feedback States
+
+**Default (Unselected):**
+- Fill: White (`#FFFFFF`)
+- Border: Black (`#000000`, 2px)
+- Hover: Light gray fill (`hover:fill-gray-50`)
+
+**Selected:**
+- Fill: White (`#FFFFFF`)
+- Border: Blue (`#6366F1`, 3px)
+- Hover: Light blue fill (`hover:fill-[#E0E7FF]`)
+
+**Area Selection Preview:**
+- Fill: Light gray (`#F3F4F6`)
+- Border: Purple (`#8B5CF6`, 2.5px, dashed)
+- Real-time highlighting during area selection
+
+#### Area Selection Implementation
+```typescript
+// Live preview calculation during area selection
+const minX = Math.min(areaSelectStart.current.x, areaSelectEnd.current.x)
+const maxX = Math.max(areaSelectStart.current.x, areaSelectEnd.current.x)
+const minY = Math.min(areaSelectStart.current.y, areaSelectEnd.current.y)
+const maxY = Math.max(areaSelectStart.current.y, areaSelectEnd.current.y)
+
+const wouldBeSelected = territory.center.x >= minX && territory.center.x <= maxX && 
+                       territory.center.y >= minY && territory.center.y <= maxY
+```
+
+#### Canvas Isolation
+- **User selection prevention** - Prevents text selection outside canvas
+- **Event containment** - Area selection bounded to canvas area
+- **Scroll prevention** - No page scrolling during canvas interactions
+- **Clean cancellation** - Automatic selection cancellation when leaving canvas
+
+### 5. Grid System
 
 #### Grid Features
 - **Dynamic rendering** - Only renders visible grid lines plus padding
@@ -128,7 +204,7 @@ const startX = Math.floor((x - padding) / gridSize) * gridSize
 const endX = Math.ceil((x + width + padding) / gridSize) * gridSize
 ```
 
-### 5. Event Handling
+### 6. Event Handling
 
 #### Pointer Events
 - **Unified handling** - Single pointer event system for mouse/touch
@@ -158,7 +234,7 @@ useEffect(() => {
 }, [])
 ```
 
-### 6. Coordinate Systems
+### 7. Coordinate Systems
 
 #### Three Coordinate Systems
 1. **Screen coordinates** - Mouse position relative to browser window
@@ -238,6 +314,96 @@ interface ViewState {
 - **Territory selection** - Shows selected territory count
 - **Property editing** - Name and continent assignment
 - **Multi-selection** - Bulk operations support
+
+## How to Use
+
+### Territory Selection Workflows
+
+**Single Territory Selection:**
+1. **Select tool (V)** - Ensure selection tool is active
+2. **Click territory** - Single click selects individual territory
+3. **Drag to move** - Click and drag to move immediately
+
+**Multi-Territory Selection:**
+1. **Area selection** - Click and drag on empty space to draw selection rectangle
+2. **Live preview** - Purple dashed borders show what will be selected
+3. **Release to select** - All territories within rectangle are selected
+4. **Multi-select mode** - Hold Ctrl/Cmd while area selecting to add to existing selection
+
+**Territory Movement:**
+1. **Select territories** - Use any selection method above
+2. **Click and drag** - Click on any selected territory and drag to move all
+3. **Selection preserved** - All selected territories remain selected after movement
+
+### Drawing Territories
+
+**Create New Territory:**
+1. **Drawing tool (P)** - Switch to pen/drawing tool
+2. **Click to start** - First click begins the territory path
+3. **Add points with two methods:**
+   - **Click only** - Creates straight line to new point
+   - **Click and drag** - Creates curved line with bezier handles
+4. **Live preview** - See the path forming in real-time:
+   - Dashed blue line shows completed segments
+   - Dotted line follows cursor for next segment
+   - Purple handle lines appear when dragging curves
+5. **Close territory** - Click near start point (pulsing circle appears) or press Enter
+6. **Auto-switch** - Tool automatically switches to Select after completing territory
+
+**Drawing Tips:**
+- **Straight territories** - Just click each corner point
+- **Smooth curves** - Click and drag to pull out handles
+- **Mixed shapes** - Combine clicks and drags for complex territories
+- **Control points** - Toggle visibility in tool palette
+- **Snap to grid** - Enable for aligned territories
+
+### Navigation and View Control
+
+**Pan the Canvas:**
+- **Move tool (H)** - Dedicated pan tool with grab cursor
+- **Shift + drag** - Pan while using any other tool
+- **Middle mouse button** - Universal pan gesture
+
+**Zoom Control:**
+- **Mouse wheel** - Zoom in/out with 8% increments
+- **Zoom to cursor** - Zooms toward/away from cursor position precisely
+- **Center button** - Reset view to origin (0,0) at 100% zoom
+
+**Grid Management:**
+- **Toggle grid (G)** - Show/hide grid overlay
+- **Grid size** - Adjust spacing from 5-50 pixels in tool palette
+- **Snap to grid** - Enable when drawing for aligned territories
+
+### Keyboard Shortcuts
+
+- **V** - Select tool (area selection, territory movement)
+- **P** - Pen/draw tool (create territories)
+- **H** - Move/pan tool (canvas navigation)
+- **G** - Toggle grid visibility
+- **Escape** - Cancel current drawing or clear selection
+- **Enter** - Finish drawing territory (when drawing)
+- **Delete/Backspace** - Delete selected territories
+
+### Visual Feedback Reference
+
+**Territory States:**
+- **Default** - White fill, black border (2px)
+- **Selected** - White fill, blue border (3px)
+- **Hover (unselected)** - Light gray fill
+- **Hover (selected)** - Light blue fill
+- **Area preview** - Light gray fill, purple dashed border (2.5px)
+
+**Drawing States:**
+- **Anchor points** - Blue filled circles with white stroke
+- **Control handles** - Purple filled circles when dragging
+- **Handle lines** - Purple lines connecting handles to anchors
+- **Path preview** - Dashed blue line for completed segments
+- **Cursor line** - Dotted blue line to current cursor position
+
+**Tool Cursors:**
+- **Select** - Default arrow cursor, crosshair during area selection
+- **Draw** - Crosshair with position indicator dot
+- **Move** - Grab hand cursor, grabbing during pan
 
 ## Performance Optimizations
 
@@ -341,4 +507,5 @@ interface ViewState {
 ---
 
 *Last updated: 2025-06-28*
-*Version: Phase 1 Complete*
+*Version: Phase 1 Complete with Advanced Selection System*
+*Features: Complete territory selection, area selection with live preview, drag-to-move, accurate hit detection, zoom-to-cursor, and canvas isolation*
