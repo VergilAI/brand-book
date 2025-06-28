@@ -60,6 +60,10 @@ export interface MapEditorState {
   toggleGrid: () => void
   setGridSize: (size: number) => void
   setSnapToGrid: (snap: boolean) => void
+  
+  // Territory movement and area selection
+  moveTerritories: (territoryIds: string[], deltaX: number, deltaY: number) => void
+  selectTerritoriesInArea: (startX: number, startY: number, endX: number, endY: number, multi?: boolean) => void
 }
 
 export interface PointerPosition {

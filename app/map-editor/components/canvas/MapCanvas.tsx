@@ -5,6 +5,61 @@ import { useMapEditor } from '../../hooks/useMapEditor'
 import { usePointerPosition } from '../../hooks/usePointerPosition'
 import { GridOverlay } from './GridOverlay'
 import { cn } from '@/lib/utils'
+import type { Territory, Point } from '@/lib/lms/optimized-map-data'
+
+// Helper function to parse SVG path into polygon points
+function parsePathToPoints(pathString: string): Point[] {
+  const points: Point[] = []
+  const commands = pathString.match(/[ML]\s*[-\d.]+\s+[-\d.]+/g) || []
+  
+  commands.forEach(command => {
+    const match = command.match(/[ML]\s*([-\d.]+)\s+([-\d.]+)/)
+    if (match) {
+      points.push({
+        x: parseFloat(match[1]),
+        y: parseFloat(match[2])
+      })
+    }
+  })
+  
+  return points
+}
+
+// Ray casting algorithm for point-in-polygon detection
+function isPointInPolygon(point: Point, polygon: Point[]): boolean {
+  if (polygon.length < 3) return false
+  
+  let inside = false
+  const x = point.x
+  const y = point.y
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x
+    const yi = polygon[i].y
+    const xj = polygon[j].x
+    const yj = polygon[j].y
+    
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      inside = !inside
+    }
+  }
+  
+  return inside
+}
+
+// Helper function to check if point is inside territory using accurate polygon detection
+function isPointInTerritory(point: Point, territory: Territory): boolean {
+  const polygonPoints = parsePathToPoints(territory.fillPath)
+  return isPointInPolygon(point, polygonPoints)
+}
+
+// Helper function to clamp selection coordinates within canvas bounds
+function clampToCanvasBounds(point: Point, viewBox: { x: number, y: number, width: number, height: number }): Point {
+  return {
+    x: Math.max(viewBox.x, Math.min(viewBox.x + viewBox.width, point.x)),
+    y: Math.max(viewBox.y, Math.min(viewBox.y + viewBox.height, point.y))
+  }
+}
 
 interface MapCanvasProps {
   className?: string
@@ -22,8 +77,21 @@ export function MapCanvas({ className }: MapCanvasProps) {
   const lastMousePos = useRef({ x: 0, y: 0 })
   const canvasRef = useRef<HTMLDivElement>(null)
   
+  // Selection box state
+  const isAreaSelecting = useRef(false)
+  const areaSelectStart = useRef({ x: 0, y: 0 })
+  const areaSelectEnd = useRef({ x: 0, y: 0 })
+  const [showAreaSelect, setShowAreaSelect] = React.useState(false)
+  
+  // Territory moving state
+  const isMovingTerritories = useRef(false)
+  const hasMoved = useRef(false)
+  const moveStartPos = useRef({ x: 0, y: 0 })
+  const territoryMoveOffsets = useRef<Record<string, { x: number, y: number }>>({})
+  
   // Handle pointer events based on current tool
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault() // Prevent default behaviors like text selection
     updatePosition(e)
     
     if (e.button === 1 || (e.button === 0 && e.shiftKey) || (e.button === 0 && store.tool === 'move')) {
@@ -32,6 +100,80 @@ export function MapCanvas({ className }: MapCanvasProps) {
       lastPan.current = store.view.pan
       lastMousePos.current = { x: e.clientX, y: e.clientY }
       e.currentTarget.setPointerCapture(e.pointerId)
+      return
+    }
+    
+    if (store.tool === 'select' && e.button === 0) {
+      const point = position.svg
+      
+      // Check if clicking on any territory (selected or not)
+      const clickedTerritory = Object.values(store.map.territories).find(territory => {
+        return isPointInTerritory(point, territory)
+      })
+      
+      if (clickedTerritory) {
+        // Handle selection logic carefully to preserve multi-selection during drag
+        if (!store.selection.territories.has(clickedTerritory.id)) {
+          // Territory is not selected, so select it
+          store.selectTerritory(clickedTerritory.id, e.ctrlKey || e.metaKey)
+        } else if (e.ctrlKey || e.metaKey) {
+          // Territory is already selected and user is holding Ctrl/Cmd, so toggle it off
+          store.selectTerritory(clickedTerritory.id, true)
+          // Don't start dragging if we just deselected the territory
+          return
+        }
+        // If territory is already selected and no modifier key, DON'T call selectTerritory
+        // This preserves the current multi-selection for dragging
+        
+        // Prepare for potential territory movement
+        isMovingTerritories.current = true
+        hasMoved.current = false
+        moveStartPos.current = point
+        territoryMoveOffsets.current = {}
+        
+        // Calculate initial offsets for all currently selected territories
+        store.selection.territories.forEach(id => {
+          const territory = store.map.territories[id]
+          if (territory) {
+            territoryMoveOffsets.current[id] = {
+              x: territory.center.x - point.x,
+              y: territory.center.y - point.y
+            }
+          }
+        })
+        
+        // Also include the clicked territory if it wasn't already selected
+        if (!territoryMoveOffsets.current[clickedTerritory.id]) {
+          territoryMoveOffsets.current[clickedTerritory.id] = {
+            x: clickedTerritory.center.x - point.x,
+            y: clickedTerritory.center.y - point.y
+          }
+        }
+        
+        e.currentTarget.setPointerCapture(e.pointerId)
+      } else {
+        // Start area selection on empty space (clamp to canvas bounds)
+        const svgAspectRatio = svgRef.current ? 
+          svgRef.current.getBoundingClientRect().width / svgRef.current.getBoundingClientRect().height : 
+          16/9
+        const baseWidth = 1000
+        const baseHeight = baseWidth / svgAspectRatio
+        const viewBoxWidth = baseWidth / store.view.zoom
+        const viewBoxHeight = baseHeight / store.view.zoom
+        const viewBounds = {
+          x: store.view.pan.x,
+          y: store.view.pan.y,
+          width: viewBoxWidth,
+          height: viewBoxHeight
+        }
+        
+        const clampedPoint = clampToCanvasBounds(point, viewBounds)
+        isAreaSelecting.current = true
+        areaSelectStart.current = clampedPoint
+        areaSelectEnd.current = clampedPoint
+        setShowAreaSelect(true)
+        e.currentTarget.setPointerCapture(e.pointerId)
+      }
       return
     }
     
@@ -58,6 +200,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
   }, [store, position, updatePosition])
   
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (isAreaSelecting.current) {
+      e.preventDefault() // Prevent text selection during area select
+    }
     updatePosition(e)
     
     if (isDragging.current) {
@@ -68,15 +213,72 @@ export function MapCanvas({ className }: MapCanvasProps) {
         x: lastPan.current.x - dx / store.view.zoom,
         y: lastPan.current.y - dy / store.view.zoom
       })
+    } else if (isAreaSelecting.current) {
+      // Update area selection rectangle (clamp to canvas bounds)
+      const svgAspectRatio = svgRef.current ? 
+        svgRef.current.getBoundingClientRect().width / svgRef.current.getBoundingClientRect().height : 
+        16/9
+      const baseWidth = 1000
+      const baseHeight = baseWidth / svgAspectRatio
+      const viewBoxWidth = baseWidth / store.view.zoom
+      const viewBoxHeight = baseHeight / store.view.zoom
+      const viewBounds = {
+        x: store.view.pan.x,
+        y: store.view.pan.y,
+        width: viewBoxWidth,
+        height: viewBoxHeight
+      }
+      
+      areaSelectEnd.current = clampToCanvasBounds(position.svg, viewBounds)
+    } else if (isMovingTerritories.current) {
+      // Move selected territories
+      const currentPos = position.svg
+      const deltaX = currentPos.x - moveStartPos.current.x
+      const deltaY = currentPos.y - moveStartPos.current.y
+      
+      // Check if we've moved enough to start actual movement (3px threshold)
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      if (distance > 3) {
+        hasMoved.current = true
+      }
+      
+      // Only apply movement if we've crossed the threshold
+      if (hasMoved.current) {
+        const territoryIds = Array.from(store.selection.territories)
+        if (territoryIds.length > 0) {
+          store.moveTerritories(territoryIds, deltaX, deltaY)
+          moveStartPos.current = currentPos // Update for next frame
+        }
+      }
     }
-  }, [store, updatePosition])
+  }, [store, updatePosition, position])
   
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (isDragging.current) {
       isDragging.current = false
       e.currentTarget.releasePointerCapture(e.pointerId)
+    } else if (isAreaSelecting.current) {
+      // Complete area selection
+      const start = areaSelectStart.current
+      const end = areaSelectEnd.current
+      
+      store.selectTerritoriesInArea(start.x, start.y, end.x, end.y, e.ctrlKey || e.metaKey)
+      
+      // Reset area selection
+      isAreaSelecting.current = false
+      setShowAreaSelect(false)
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    } else if (isMovingTerritories.current) {
+      // Complete territory movement
+      isMovingTerritories.current = false
+      e.currentTarget.releasePointerCapture(e.pointerId)
+      
+      // Reset hasMoved after a small delay to prevent onClick from firing on drag end
+      setTimeout(() => {
+        hasMoved.current = false
+      }, 10)
     }
-  }, [])
+  }, [store])
   
   // Handle zoom with wheel
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -184,13 +386,36 @@ export function MapCanvas({ className }: MapCanvasProps) {
     16/9 // fallback aspect ratio
   const baseWidth = 1000
   const baseHeight = baseWidth / svgAspectRatio
-  const viewBox = `${store.view.pan.x} ${store.view.pan.y} ${baseWidth / store.view.zoom} ${baseHeight / store.view.zoom}`
+  const viewBoxWidth = baseWidth / store.view.zoom
+  const viewBoxHeight = baseHeight / store.view.zoom
+  const viewBox = `${store.view.pan.x} ${store.view.pan.y} ${viewBoxWidth} ${viewBoxHeight}`
+  
+  // Current viewBox bounds for clamping
+  const currentViewBounds = {
+    x: store.view.pan.x,
+    y: store.view.pan.y,
+    width: viewBoxWidth,
+    height: viewBoxHeight
+  }
   
   return (
     <div 
       ref={canvasRef}
       className={cn("relative w-full h-full overflow-hidden bg-gray-100", className)}
       onWheel={handleWheel}
+      style={{ 
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none'
+      }}
+      onMouseLeave={() => {
+        // Cancel area selection if mouse leaves the canvas container
+        if (isAreaSelecting.current) {
+          isAreaSelecting.current = false
+          setShowAreaSelect(false)
+        }
+      }}
     >
       <svg
         ref={svgRef}
@@ -199,11 +424,22 @@ export function MapCanvas({ className }: MapCanvasProps) {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        onPointerLeave={(e) => {
+          // End any ongoing area selection when leaving the SVG
+          if (isAreaSelecting.current) {
+            isAreaSelecting.current = false
+            setShowAreaSelect(false)
+            e.currentTarget.releasePointerCapture(e.pointerId)
+          }
+          handlePointerUp(e)
+        }}
         style={{
           cursor: isDragging.current ? 'grabbing' : 
+                  isMovingTerritories.current ? 'grabbing' :
+                  isAreaSelecting.current ? 'crosshair' :
                   store.tool === 'move' ? 'grab' :
-                  store.tool === 'pen' ? 'crosshair' : 
+                  store.tool === 'pen' ? 'crosshair' :
+                  store.tool === 'select' ? 'default' :
                   'default'
         }}
       >
@@ -220,16 +456,36 @@ export function MapCanvas({ className }: MapCanvasProps) {
           {Object.values(store.map.territories).map(territory => {
             const isSelected = store.selection.territories.has(territory.id)
             
+            // Check if territory would be selected by current area selection
+            let wouldBeSelected = false
+            if (isAreaSelecting.current && showAreaSelect) {
+              const minX = Math.min(areaSelectStart.current.x, areaSelectEnd.current.x)
+              const maxX = Math.max(areaSelectStart.current.x, areaSelectEnd.current.x)
+              const minY = Math.min(areaSelectStart.current.y, areaSelectEnd.current.y)
+              const maxY = Math.max(areaSelectStart.current.y, areaSelectEnd.current.y)
+              
+              const { x, y } = territory.center
+              wouldBeSelected = x >= minX && x <= maxX && y >= minY && y <= maxY
+            }
+            
             return (
               <path
                 key={territory.id}
                 d={territory.fillPath}
-                fill={isSelected ? '#E0E7FF' : '#FFFFFF'}
-                stroke={isSelected ? '#6366F1' : '#000000'}
-                strokeWidth={isSelected ? 3 : 2}
-                className="cursor-pointer hover:fill-gray-50"
+                fill="#FFFFFF"
+                stroke={isSelected ? '#6366F1' : wouldBeSelected ? '#8B5CF6' : '#000000'}
+                strokeWidth={isSelected ? 3 : wouldBeSelected ? 2.5 : 2}
+                strokeDasharray={wouldBeSelected && !isSelected ? '3 3' : 'none'}
+                className={`cursor-pointer transition-colors ${
+                  isSelected 
+                    ? 'hover:fill-[#E0E7FF]' 
+                    : wouldBeSelected
+                    ? 'fill-[#F3F4F6]'
+                    : 'hover:fill-gray-50'
+                }`}
                 onClick={(e) => {
-                  if (store.tool === 'select') {
+                  if (store.tool === 'select' && !hasMoved.current) {
+                    // Only handle click if we haven't just finished dragging
                     e.stopPropagation()
                     store.selectTerritory(territory.id, e.shiftKey)
                   }
@@ -308,6 +564,22 @@ export function MapCanvas({ className }: MapCanvasProps) {
               />
             ))}
           </g>
+        )}
+        
+        {/* Area selection rectangle */}
+        {showAreaSelect && (
+          <rect
+            x={Math.min(areaSelectStart.current.x, areaSelectEnd.current.x)}
+            y={Math.min(areaSelectStart.current.y, areaSelectEnd.current.y)}
+            width={Math.abs(areaSelectEnd.current.x - areaSelectStart.current.x)}
+            height={Math.abs(areaSelectEnd.current.y - areaSelectStart.current.y)}
+            fill="rgba(99, 102, 241, 0.1)"
+            stroke="#6366F1"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+            className="pointer-events-none"
+            style={{ pointerEvents: 'none' }}
+          />
         )}
         
         {/* Cursor position indicator */}

@@ -214,7 +214,64 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
   // Drawing settings
   setSnapToGrid: (snapToGrid) => set(state => ({
     drawing: { ...state.drawing, snapToGrid }
-  }))
+  })),
+  
+  // Territory movement
+  moveTerritories: (territoryIds: string[], deltaX: number, deltaY: number) => set(state => {
+    const updatedTerritories = { ...state.map.territories }
+    
+    territoryIds.forEach(id => {
+      const territory = updatedTerritories[id]
+      if (territory) {
+        // Move center point
+        updatedTerritories[id] = {
+          ...territory,
+          center: {
+            x: territory.center.x + deltaX,
+            y: territory.center.y + deltaY
+          },
+          // Move the path by transforming the SVG path
+          fillPath: moveSvgPath(territory.fillPath, deltaX, deltaY)
+        }
+      }
+    })
+    
+    return {
+      map: {
+        ...state.map,
+        territories: updatedTerritories
+      }
+    }
+  }),
+  
+  // Area selection
+  selectTerritoriesInArea: (startX: number, startY: number, endX: number, endY: number, multi = false) => set(state => {
+    const minX = Math.min(startX, endX)
+    const maxX = Math.max(startX, endX)
+    const minY = Math.min(startY, endY)
+    const maxY = Math.max(startY, endY)
+    
+    const territoriesInArea = Object.values(state.map.territories).filter(territory => {
+      const { x, y } = territory.center
+      return x >= minX && x <= maxX && y >= minY && y <= maxY
+    })
+    
+    const newSelection = new Set(multi ? state.selection.territories : [])
+    territoriesInArea.forEach(territory => {
+      if (newSelection.has(territory.id)) {
+        newSelection.delete(territory.id)
+      } else {
+        newSelection.add(territory.id)
+      }
+    })
+    
+    return {
+      selection: {
+        ...state.selection,
+        territories: newSelection
+      }
+    }
+  })
 }))
 
 // Helper functions
@@ -246,4 +303,13 @@ function calculateCenter(points: Point[]): Point {
     x: Math.round(sum.x / points.length),
     y: Math.round(sum.y / points.length)
   }
+}
+
+function moveSvgPath(path: string, deltaX: number, deltaY: number): string {
+  // Simple SVG path transformation - moves all coordinates by delta
+  return path.replace(/([ML])\s*([-\d.]+)\s+([-\d.]+)/g, (match, command, x, y) => {
+    const newX = parseFloat(x) + deltaX
+    const newY = parseFloat(y) + deltaY
+    return `${command} ${newX} ${newY}`
+  })
 }
