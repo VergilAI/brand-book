@@ -1,5 +1,7 @@
 // Core types for the drawing tool
 
+import type { SnapState } from './snapping'
+
 export interface Point {
   x: number
   y: number
@@ -94,6 +96,9 @@ export interface DrawingToolState {
   // View state
   view: ViewState
   
+  // Snapping state
+  snapping: SnapState
+  
   // Actions
   setTool: (tool: ToolType) => void
   updateShape: (id: string, updates: Partial<Shape>) => void
@@ -137,6 +142,11 @@ export interface DrawingToolState {
   toggleVertexBezier: (vertexIndex: number) => void
   addVertexOnEdge: (edgeIndex: number, position: Point) => void
   deleteVertex: (vertexIndex: number) => void
+  
+  // Snapping actions
+  updateSnapSettings: (settings: Partial<SnapState['settings']>) => void
+  toggleSnapping: () => void
+  setTemporarySnapDisabled: (disabled: boolean) => void
 }
 
 export interface PointerPosition {

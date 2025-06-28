@@ -9,7 +9,7 @@ A professional bezier-based vector drawing tool built with React and TypeScript.
 - **Click for straight lines** - Simple click to place vertices
 - **Click + Drag for curves** - Drag to create smooth bezier curves
 - **Live preview** - See your shape form in real-time
-- **Snap to grid** - Precise alignment when enabled
+- **Smart Snapping** - Professional magnetic alignment system
 
 ### ✏️ Professional Editing
 - **Double-click to edit** - Enter vertex editing mode
@@ -31,6 +31,16 @@ A professional bezier-based vector drawing tool built with React and TypeScript.
 - **Move/Pan (H)** - Navigate the canvas
 - **Draw (P)** - Create new shapes
 
+### 🧲 Smart Snapping System
+- **Vertex Snapping** - Snap to existing shape vertices
+- **Edge Snapping** - Snap to edges and midpoints
+- **Center Snapping** - Snap to shape centers
+- **Grid Snapping** - Align to grid points
+- **Angle Snapping** - Lock to 45° increments
+- **Alignment Guides** - Dynamic guidelines for perfect alignment
+- **Visual Feedback** - Color-coded snap indicators
+- **Customizable** - Adjust snap distance and toggle types
+
 ### 🎨 Shape Properties
 - **Fill color** - Customizable fill
 - **Stroke color** - Border color
@@ -45,6 +55,8 @@ A professional bezier-based vector drawing tool built with React and TypeScript.
 - **P** - Pen/draw tool  
 - **H** - Move/pan tool
 - **G** - Toggle grid
+- **S** - Toggle snapping
+- **Alt** (hold) - Temporarily disable snapping
 - **ESC** - Cancel current operation
 - **Enter** - Finish drawing/editing
 - **Delete/Backspace** - Delete selected items

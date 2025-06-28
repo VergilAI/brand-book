@@ -12,7 +12,8 @@ import {
   Grid3x3,
   Eye,
   EyeOff,
-  Waves
+  Waves,
+  Magnet
 } from 'lucide-react'
 import type { ToolType } from '../../types/editor'
 
@@ -94,16 +95,6 @@ export function ToolPalette() {
             <label className="flex items-center gap-2 px-3 py-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={store.drawing.snapToGrid}
-                onChange={(e) => store.setSnapToGrid(e.target.checked)}
-                className="rounded"
-              />
-              <span className="text-sm">Snap to Grid</span>
-            </label>
-            
-            <label className="flex items-center gap-2 px-3 py-2 cursor-pointer">
-              <input
-                type="checkbox"
                 checked={store.drawing.showControlPoints}
                 onChange={(e) => store.setShowControlPoints(e.target.checked)}
                 className="rounded"
@@ -116,6 +107,88 @@ export function ToolPalette() {
               <div>• Click + Drag: Curves</div>
             </div>
           </>
+        )}
+      </div>
+      
+      <div className="h-px bg-gray-200 my-1" />
+      
+      {/* Snapping Settings */}
+      <div className="flex flex-col gap-1">
+        <button
+          onClick={() => store.toggleSnapping()}
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded transition-colors",
+            "hover:bg-gray-100",
+            store.snapping.settings.enabled && "bg-blue-50 text-blue-700"
+          )}
+          title="Toggle Snapping (S)"
+        >
+          <Magnet size={20} className={store.snapping.settings.enabled ? "" : "opacity-50"} />
+          <span className="text-sm">Snapping</span>
+          <span className="ml-auto text-xs text-gray-500">S</span>
+        </button>
+        
+        {store.snapping.settings.enabled && (
+          <div className="pl-8 pr-3 space-y-1 text-xs">
+            <label className="flex items-center gap-2 py-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.snapping.settings.vertexSnap}
+                onChange={(e) => store.updateSnapSettings({ vertexSnap: e.target.checked })}
+                className="rounded text-blue-600"
+              />
+              <span>Vertices</span>
+            </label>
+            <label className="flex items-center gap-2 py-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.snapping.settings.edgeSnap}
+                onChange={(e) => store.updateSnapSettings({ edgeSnap: e.target.checked })}
+                className="rounded text-blue-600"
+              />
+              <span>Edges</span>
+            </label>
+            <label className="flex items-center gap-2 py-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.snapping.settings.centerSnap}
+                onChange={(e) => store.updateSnapSettings({ centerSnap: e.target.checked })}
+                className="rounded text-blue-600"
+              />
+              <span>Centers</span>
+            </label>
+            <label className="flex items-center gap-2 py-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.snapping.settings.gridSnap}
+                onChange={(e) => store.updateSnapSettings({ gridSnap: e.target.checked })}
+                className="rounded text-blue-600"
+              />
+              <span>Grid</span>
+            </label>
+            <label className="flex items-center gap-2 py-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={store.snapping.settings.angleSnap}
+                onChange={(e) => store.updateSnapSettings({ angleSnap: e.target.checked })}
+                className="rounded text-blue-600"
+              />
+              <span>Angles (45°)</span>
+            </label>
+            <div className="flex items-center gap-2 py-1">
+              <span>Distance:</span>
+              <input
+                type="number"
+                value={store.snapping.settings.snapDistance}
+                onChange={(e) => store.updateSnapSettings({ snapDistance: Number(e.target.value) })}
+                className="w-12 px-1 py-0.5 text-xs border rounded"
+                min="5"
+                max="50"
+                step="5"
+              />
+              <span className="text-gray-500">px</span>
+            </div>
+          </div>
         )}
       </div>
     </div>

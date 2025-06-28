@@ -1,6 +1,7 @@
 // Core types for the map editor
 
 import type { MapData, Territory, Border, Point } from '@/lib/lms/optimized-map-data'
+import type { SnapState } from './snapping'
 
 export type ToolType = 'select' | 'pen' | 'border' | 'connect' | 'move'
 
@@ -65,6 +66,9 @@ export interface MapEditorState {
   // View state
   view: ViewState
   
+  // Snapping state
+  snapping: SnapState
+  
   // Actions
   setTool: (tool: ToolType) => void
   updateTerritory: (id: string, updates: Partial<Territory>) => void
@@ -108,6 +112,11 @@ export interface MapEditorState {
   toggleVertexBezier: (vertexIndex: number) => void
   addVertexOnEdge: (edgeIndex: number, position: Point) => void
   deleteVertex: (vertexIndex: number) => void
+  
+  // Snapping actions
+  updateSnapSettings: (settings: Partial<SnapState['settings']>) => void
+  toggleSnapping: () => void
+  setTemporarySnapDisabled: (disabled: boolean) => void
 }
 
 export interface PointerPosition {

@@ -3,9 +3,12 @@
 import React, { useCallback, useRef, useEffect } from 'react'
 import { useDrawingTool } from '../../hooks/useDrawingTool'
 import { usePointerPosition } from '../../hooks/usePointerPosition'
+import { useSnapping } from '../../hooks/useSnapping'
 import { GridOverlay } from './GridOverlay'
+import { SnapIndicators } from './SnapIndicators'
 import { cn } from '@/lib/utils'
 import type { Shape, Point, BezierPoint } from '../../types/drawing'
+import type { SnapIndicator } from '../../types/snapping'
 
 // Helper function to parse SVG path into polygon points
 function parsePathToPoints(pathString: string): Point[] {
@@ -115,8 +118,9 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
   const store = useDrawingTool()
   const { position, updatePosition, svgRef } = usePointerPosition(
     store.view.gridSize,
-    store.drawing.snapToGrid
+    false // Never apply grid snapping in usePointerPosition - we handle it in snapping logic
   )
+  const { getSnappedPoint, getSnappedDrawingPoint, isSnappingEnabled } = useSnapping()
   
   const isDragging = useRef(false)
   const lastPan = useRef(store.view.pan)
@@ -134,6 +138,9 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
   const hasMoved = useRef(false)
   const moveStartPos = useRef({ x: 0, y: 0 })
   const shapeMoveOffsets = useRef<Record<string, { x: number, y: number }>>({})
+  
+  // Snapping state
+  const [snapIndicators, setSnapIndicators] = React.useState<SnapIndicator[]>([])
   
   // Handle pointer events based on current tool
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -300,26 +307,33 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
     }
     
     if (store.tool === 'pen' && e.button === 0) {
-      const point = store.drawing.snapToGrid ? position.grid : position.svg
+      const rawPoint = position.svg
+      const previousPoint = store.drawing.bezierPath.length > 0 ? 
+        store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
+      
+      // Apply snapping
+      const { point: snappedPoint, indicators } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      setSnapIndicators(indicators)
       
       if (!store.drawing.isDrawing) {
         // Start drawing with first point
-        store.startDrawing(point)
+        store.startDrawing(snappedPoint)
       } else {
         // Check if clicking near start point to close path
         const firstPoint = store.drawing.bezierPath[0]
         const distance = Math.sqrt(
-          Math.pow(point.x - firstPoint.x, 2) + 
-          Math.pow(point.y - firstPoint.y, 2)
+          Math.pow(snappedPoint.x - firstPoint.x, 2) + 
+          Math.pow(snappedPoint.y - firstPoint.y, 2)
         )
         
         if (distance < 10 && store.drawing.bezierPath.length > 2) {
           store.finishDrawing()
+          setSnapIndicators([])
         } else {
           // Add the new point first, then we can drag to create its handles
-          store.addBezierPoint(point)
+          store.addBezierPoint(snappedPoint)
           // Set up for potential drag to create handles for this new point
-          store.startDraggingHandle(point)
+          store.startDraggingHandle(snappedPoint)
         }
       }
     }
@@ -340,9 +354,11 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         y: lastPan.current.y - dy / store.view.zoom
       })
     } else if (store.editing.isDraggingVertex && store.editing.draggedVertex !== null) {
-      // Move vertex
-      const point = store.drawing.snapToGrid ? position.grid : position.svg
-      store.updateVertexPosition(store.editing.draggedVertex, point)
+      // Move vertex with snapping
+      const rawPoint = position.svg
+      const { point: snappedPoint, indicators } = getSnappedPoint(rawPoint)
+      setSnapIndicators(indicators)
+      store.updateVertexPosition(store.editing.draggedVertex, snappedPoint)
     } else if (store.editing.isDraggingHandle && store.editing.draggedHandle !== null) {
       // Move control handle
       const point = position.svg // Don't snap control handles to grid
@@ -352,29 +368,79 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         point
       )
     } else if (isMovingShapes.current) {
-      // Move selected shapes - this should take priority over drawing handle
-      const currentPos = position.svg
-      const deltaX = currentPos.x - moveStartPos.current.x
-      const deltaY = currentPos.y - moveStartPos.current.y
+      // Move selected shapes with snapping
+      const rawPos = position.svg
       
-      // Check if we've moved enough to start actual movement (3px threshold)
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-      if (distance > 3) {
-        hasMoved.current = true
-      }
+      // Calculate the center of all selected shapes for snapping
+      const selectedShapes = Array.from(store.selection.shapes)
+        .map(id => store.document.shapes[id])
+        .filter(Boolean)
       
-      // Only apply movement if we've crossed the threshold
-      if (hasMoved.current) {
-        const shapeIds = Array.from(store.selection.shapes)
-        if (shapeIds.length > 0) {
-          store.moveShapes(shapeIds, deltaX, deltaY)
-          moveStartPos.current = currentPos // Update for next frame
+      if (selectedShapes.length > 0) {
+        // Calculate bounding box center of selection
+        const bounds = {
+          minX: Math.min(...selectedShapes.map(s => s.center.x)),
+          maxX: Math.max(...selectedShapes.map(s => s.center.x)),
+          minY: Math.min(...selectedShapes.map(s => s.center.y)),
+          maxY: Math.max(...selectedShapes.map(s => s.center.y))
+        }
+        const selectionCenter = {
+          x: (bounds.minX + bounds.maxX) / 2,
+          y: (bounds.minY + bounds.maxY) / 2
+        }
+        
+        // Calculate raw delta
+        const rawDeltaX = rawPos.x - moveStartPos.current.x
+        const rawDeltaY = rawPos.y - moveStartPos.current.y
+        
+        // Check if we've moved enough to start actual movement (3px threshold)
+        const distance = Math.sqrt(rawDeltaX * rawDeltaX + rawDeltaY * rawDeltaY)
+        if (distance > 3) {
+          hasMoved.current = true
+        }
+        
+        // Only apply movement if we've crossed the threshold
+        if (hasMoved.current) {
+          // Get the potential new center position
+          const potentialCenter = {
+            x: selectionCenter.x + rawDeltaX,
+            y: selectionCenter.y + rawDeltaY
+          }
+          
+          // Apply snapping to the center, excluding selected shapes
+          const excludeIds = selectedShapes.map(s => s.id)
+          const { point: snappedCenter, indicators } = getSnappedPoint(potentialCenter, excludeIds)
+          setSnapIndicators(indicators)
+          
+          // Calculate snapped deltas
+          const snappedDeltaX = snappedCenter.x - selectionCenter.x
+          const snappedDeltaY = snappedCenter.y - selectionCenter.y
+          
+          // Move shapes with snapped deltas
+          if (selectedShapes.length > 0) {
+            store.moveShapes(
+              selectedShapes.map(s => s.id), 
+              snappedDeltaX, 
+              snappedDeltaY
+            )
+            // Update start position based on snapped movement
+            moveStartPos.current = {
+              x: moveStartPos.current.x + snappedDeltaX,
+              y: moveStartPos.current.y + snappedDeltaY
+            }
+          }
         }
       }
     } else if (store.drawing.isDraggingHandle && store.tool === 'pen') {
       // Update bezier handle during drag only when using pen tool
-      const point = store.drawing.snapToGrid ? position.grid : position.svg
-      store.updateDragHandle(point)
+      const rawPoint = position.svg
+      const previousPoint = store.drawing.bezierPath.length > 1 ? 
+        store.drawing.bezierPath[store.drawing.bezierPath.length - 2] : undefined
+      
+      // Apply snapping for handle drag
+      const { point: snappedPoint, indicators } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      setSnapIndicators(indicators)
+      store.updateDragHandle(snappedPoint)
     } else if (isAreaSelecting.current) {
       // Update area selection rectangle (clamp to canvas bounds)
       const svgAspectRatio = svgRef.current ? 
@@ -392,8 +458,26 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       }
       
       areaSelectEnd.current = clampToCanvasBounds(position.svg, viewBounds)
+    } else if (store.tool === 'pen' && store.drawing.isDrawing && !store.drawing.isDraggingHandle) {
+      // Update snap indicators during pen tool movement when drawing
+      const rawPoint = position.svg
+      const previousPoint = store.drawing.bezierPath.length > 0 ? 
+        store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
+      
+      const { indicators } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      setSnapIndicators(indicators)
+    } else if (store.tool === 'pen' && !store.drawing.isDrawing) {
+      // Update snap indicators during pen tool movement when not drawing
+      const rawPoint = position.svg
+      const { indicators } = getSnappedPoint(rawPoint)
+      setSnapIndicators(indicators)
+    } else {
+      // Clear snap indicators when not in a snapping mode
+      if (snapIndicators.length > 0) {
+        setSnapIndicators([])
+      }
     }
-  }, [store, updatePosition, position])
+  }, [store, updatePosition, position, snapIndicators, getSnappedPoint, getSnappedDrawingPoint])
   
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (isDragging.current) {
@@ -402,11 +486,16 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
     } else if (store.editing.isDraggingVertex || store.editing.isDraggingHandle) {
       // End vertex or handle dragging
       store.endDragging()
+      setSnapIndicators([]) // Clear snap indicators
       e.currentTarget.releasePointerCapture(e.pointerId)
     } else if (store.drawing.isDraggingHandle) {
       // End bezier handle dragging and add the point
-      const point = store.drawing.snapToGrid ? position.grid : position.svg
-      store.endDraggingHandle(point)
+      const rawPoint = position.svg
+      const previousPoint = store.drawing.bezierPath.length > 1 ? 
+        store.drawing.bezierPath[store.drawing.bezierPath.length - 2] : undefined
+      const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      store.endDraggingHandle(snappedPoint)
+      setSnapIndicators([]) // Clear snap indicators
     } else if (isAreaSelecting.current) {
       // Complete area selection
       const start = areaSelectStart.current
@@ -421,6 +510,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
     } else if (isMovingShapes.current) {
       // Complete shape movement
       isMovingShapes.current = false
+      setSnapIndicators([]) // Clear snap indicators
       e.currentTarget.releasePointerCapture(e.pointerId)
       
       // Reset hasMoved after a small delay to prevent onClick from firing on drag end
@@ -562,6 +652,9 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         store.setTool('move')
       } else if (e.key.toLowerCase() === 'g') {
         store.toggleGrid()
+      } else if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey) {
+        // Toggle snapping
+        store.toggleSnapping()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         if (store.editing.isEditing && store.editing.selectedVertices.size > 0) {
           // Delete selected vertices in editing mode
@@ -575,8 +668,28 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       }
     }
     
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        // Re-enable snapping when Alt is released
+        store.setTemporarySnapDisabled(false)
+      }
+    }
+    
+    const handleKeyDownForAlt = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        // Temporarily disable snapping while Alt is held
+        store.setTemporarySnapDisabled(true)
+      }
+    }
+    
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDownForAlt)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDownForAlt)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
   }, [store])
   
   // Calculate viewBox with dynamic aspect ratio
@@ -630,6 +743,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             setShowAreaSelect(false)
             e.currentTarget.releasePointerCapture(e.pointerId)
           }
+          // Clear snap indicators when leaving
+          setSnapIndicators([])
           handlePointerUp(e)
         }}
         style={{
@@ -822,7 +937,11 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             {/* Live preview line from last point to cursor */}
             {!store.drawing.isDraggingHandle && store.drawing.bezierPath.length > 0 && (() => {
               const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
-              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              const rawPoint = position.svg
+              
+              // Apply snapping to preview line
+              const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, lastPoint)
+              const currentPoint = snappedPoint
               
               return (
                 <line
@@ -842,10 +961,14 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             {/* Show close indicator when near start */}
             {store.drawing.bezierPath.length > 2 && (() => {
               const firstPoint = store.drawing.bezierPath[0]
-              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              const rawPoint = position.svg
+              const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
+              
+              // Apply snapping
+              const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, lastPoint)
               const distance = Math.sqrt(
-                Math.pow(currentPoint.x - firstPoint.x, 2) + 
-                Math.pow(currentPoint.y - firstPoint.y, 2)
+                Math.pow(snappedPoint.x - firstPoint.x, 2) + 
+                Math.pow(snappedPoint.y - firstPoint.y, 2)
               )
               
               return distance < 10 ? (
@@ -878,7 +1001,13 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             {/* Show control handles when dragging */}
             {store.drawing.isDraggingHandle && store.drawing.dragStartPoint && (() => {
               const dragStart = store.drawing.dragStartPoint
-              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              const rawPoint = position.svg
+              const previousPoint = store.drawing.bezierPath.length > 1 ? 
+                store.drawing.bezierPath[store.drawing.bezierPath.length - 2] : undefined
+              
+              // Apply snapping to handle
+              const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, previousPoint)
+              const currentPoint = snappedPoint
               
               return (
                 <g>
@@ -926,15 +1055,29 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         )}
         
         {/* Cursor position indicator */}
-        {store.tool === 'pen' && (
-          <circle
-            cx={store.drawing.snapToGrid ? position.grid.x : position.svg.x}
-            cy={store.drawing.snapToGrid ? position.grid.y : position.svg.y}
-            r="3"
-            fill="#6366F1"
-            className="pointer-events-none"
-          />
-        )}
+        {store.tool === 'pen' && (() => {
+          const rawPoint = position.svg
+          const lastPoint = store.drawing.isDrawing && store.drawing.bezierPath.length > 0 ? 
+            store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
+          
+          // Apply snapping to cursor
+          const { point: snappedPoint } = lastPoint ? 
+            getSnappedDrawingPoint(rawPoint, lastPoint) : 
+            getSnappedPoint(rawPoint)
+          
+          return (
+            <circle
+              cx={snappedPoint.x}
+              cy={snappedPoint.y}
+              r="3"
+              fill="#6366F1"
+              className="pointer-events-none"
+            />
+          )
+        })()}
+        
+        {/* Snap indicators */}
+        <SnapIndicators indicators={snapIndicators} zoom={store.view.zoom} />
       </svg>
       
       {/* Position display */}
@@ -970,6 +1113,19 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       >
         Center
       </button>
+      
+      {/* Snap indicator */}
+      {isSnappingEnabled && (
+        <div className="absolute top-2 right-2 bg-blue-600/90 backdrop-blur-sm text-white rounded px-2 py-1 text-xs flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white">
+            <rect x="1" y="1" width="4" height="4" fill="currentColor"/>
+            <rect x="7" y="1" width="4" height="4" fill="currentColor"/>
+            <rect x="1" y="7" width="4" height="4" fill="currentColor"/>
+            <rect x="7" y="7" width="4" height="4" fill="currentColor"/>
+          </svg>
+          Snap ON (S)
+        </div>
+      )}
     </div>
   )
 }

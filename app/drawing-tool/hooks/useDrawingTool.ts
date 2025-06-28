@@ -2,6 +2,8 @@
 
 import { create } from 'zustand'
 import { DrawingToolState, BezierPoint, Shape, Point } from '../types/drawing'
+import { SnapState, SnapResult } from '../types/snapping'
+import { getSnapCandidates, getAlignmentGuides, snapPointToAngle } from '../utils/snapping'
 
 const createEmptyDocument = () => ({
   version: "1.0",
@@ -57,6 +59,26 @@ export const useDrawingTool = create<DrawingToolState>((set, get) => ({
     showGrid: true,
     gridSize: 10
   },
+  
+  snapping: {
+    activeSnaps: [],
+    indicators: [],
+    hoveredSnapTargets: new Set(),
+    isSnapping: false,
+    temporaryDisabled: false,
+    settings: {
+      enabled: true,
+      vertexSnap: true,
+      edgeSnap: true,
+      centerSnap: true,
+      gridSnap: true,
+      guideSnap: true,
+      snapDistance: 15,
+      showSnapIndicators: true,
+      angleSnap: true,
+      angleSnapIncrement: 45
+    }
+  } as SnapState,
   
   // Tool actions
   setTool: (tool) => set({ tool }),
@@ -763,7 +785,35 @@ export const useDrawingTool = create<DrawingToolState>((set, get) => ({
         }
       } : state.document
     }
-  })
+  }),
+  
+  // Snapping actions
+  updateSnapSettings: (settings) => set(state => ({
+    snapping: {
+      ...state.snapping,
+      settings: {
+        ...state.snapping.settings,
+        ...settings
+      }
+    }
+  })),
+  
+  toggleSnapping: () => set(state => ({
+    snapping: {
+      ...state.snapping,
+      settings: {
+        ...state.snapping.settings,
+        enabled: !state.snapping.settings.enabled
+      }
+    }
+  })),
+  
+  setTemporarySnapDisabled: (disabled) => set(state => ({
+    snapping: {
+      ...state.snapping,
+      temporaryDisabled: disabled
+    }
+  }))
 }))
 
 // Helper functions

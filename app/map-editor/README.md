@@ -1,8 +1,23 @@
-# Map Editor - Phase 1 Implementation
+# Map Editor - Phase 2 Implementation
 
 ## Overview
 
-A React-based territory map editor for creating and editing game maps with territory-based gameplay. The editor provides an SVG canvas with pan/zoom functionality, drawing tools, and a complete UI for map creation.
+A professional React-based territory map editor for creating and editing game maps with territory-based gameplay. The editor provides an SVG canvas with pan/zoom functionality, advanced drawing tools, professional snapping system, and a complete UI for map creation.
+
+## Recent Updates (Phase 2)
+
+### 🧲 Professional Snapping System
+- **Magnetic alignment** with visual feedback for precise territory placement
+- **Multiple snap modes**: Vertices, edges, centers, grid, and angle constraints
+- **Smart guides** show alignment with other territories
+- **Works everywhere**: Drawing, editing vertices, and moving territories
+- See [Snapping System Documentation](/docs/snapping-system.md) for details
+
+### ✏️ Advanced Shape Editing
+- **Double-click to edit** any territory
+- **Full bezier control** - Convert any vertex between straight and curved
+- **Add/delete vertices** - Click edges to add, DELETE key to remove
+- **Industry-standard** controls matching Illustrator/Figma
 
 ## Architecture
 
