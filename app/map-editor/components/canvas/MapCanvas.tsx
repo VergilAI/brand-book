@@ -197,7 +197,32 @@ export function MapCanvas({ className }: MapCanvasProps) {
         }
       }
       
-      // If not clicking on any vertex/handle, clear selection
+      // Check if clicking on an edge to add a vertex
+      const edgeThreshold = 10 / store.view.zoom
+      let closestEdge = { index: -1, point: point, distance: Infinity }
+      
+      for (let i = 0; i < store.editing.vertexPositions.length; i++) {
+        const start = store.editing.vertexPositions[i]
+        const end = store.editing.vertexPositions[(i + 1) % store.editing.vertexPositions.length]
+        
+        const { point: closestPoint, distance } = getClosestPointOnSegment(point, start, end)
+        
+        if (distance < closestEdge.distance) {
+          closestEdge = { index: i, point: closestPoint, distance }
+        }
+      }
+      
+      if (closestEdge.distance < edgeThreshold) {
+        // Add vertex on edge
+        const snappedPoint = store.drawing.snapToGrid ? 
+          { x: Math.round(closestEdge.point.x / store.view.gridSize) * store.view.gridSize,
+            y: Math.round(closestEdge.point.y / store.view.gridSize) * store.view.gridSize }
+          : closestEdge.point
+        store.addVertexOnEdge(closestEdge.index, snappedPoint)
+        return
+      }
+      
+      // If not clicking on any vertex/handle/edge, clear selection
       store.clearVertexSelection()
       return
     }
@@ -480,6 +505,29 @@ export function MapCanvas({ className }: MapCanvasProps) {
     }
   }, [store])
   
+  // Helper function to find closest point on line segment
+  const getClosestPointOnSegment = (point: Point, start: Point, end: Point): { point: Point, distance: number } => {
+    const dx = end.x - start.x
+    const dy = end.y - start.y
+    const lengthSquared = dx * dx + dy * dy
+    
+    if (lengthSquared === 0) {
+      return { point: start, distance: Math.sqrt(Math.pow(point.x - start.x, 2) + Math.pow(point.y - start.y, 2)) }
+    }
+    
+    let t = ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared
+    t = Math.max(0, Math.min(1, t))
+    
+    const closestPoint = {
+      x: start.x + t * dx,
+      y: start.y + t * dy
+    }
+    
+    const distance = Math.sqrt(Math.pow(point.x - closestPoint.x, 2) + Math.pow(point.y - closestPoint.y, 2))
+    
+    return { point: closestPoint, distance }
+  }
+  
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -502,17 +550,30 @@ export function MapCanvas({ className }: MapCanvasProps) {
         } else if (store.drawing.isDrawing && store.drawing.bezierPath.length >= 3) {
           store.finishDrawing()
         }
-      } else if (e.key.toLowerCase() === 'v') {
+      } else if (e.key === ' ' && store.editing.isEditing) {
+        // Space to toggle bezier on selected vertices
+        e.preventDefault()
+        store.editing.selectedVertices.forEach(idx => {
+          store.toggleVertexBezier(idx)
+        })
+      } else if (e.key.toLowerCase() === 'v' && !store.editing.isEditing) {
         store.setTool('select')
-      } else if (e.key.toLowerCase() === 'p') {
+      } else if (e.key.toLowerCase() === 'p' && !store.editing.isEditing) {
         store.setTool('pen')
-      } else if (e.key.toLowerCase() === 'h') {
+      } else if (e.key.toLowerCase() === 'h' && !store.editing.isEditing) {
         store.setTool('move')
       } else if (e.key.toLowerCase() === 'g') {
         store.toggleGrid()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        // Delete selected territories
-        store.selection.territories.forEach(id => store.deleteTerritory(id))
+        if (store.editing.isEditing && store.editing.selectedVertices.size > 0) {
+          // Delete selected vertices in editing mode
+          // Sort indices in descending order to delete from end to start
+          const indices = Array.from(store.editing.selectedVertices).sort((a, b) => b - a)
+          indices.forEach(idx => store.deleteVertex(idx))
+        } else if (!store.editing.isEditing) {
+          // Delete selected territories
+          store.selection.territories.forEach(id => store.deleteTerritory(id))
+        }
       }
     }
     
@@ -642,6 +703,23 @@ export function MapCanvas({ className }: MapCanvasProps) {
         {/* Vertex editing visualization */}
         {store.editing.isEditing && store.editing.vertexPositions.length > 0 && (
           <g className="vertex-editing">
+            {/* Territory edges - for visual feedback when adding vertices */}
+            {store.editing.vertexPositions.map((vertex, index) => {
+              const nextVertex = store.editing.vertexPositions[(index + 1) % store.editing.vertexPositions.length]
+              return (
+                <line
+                  key={`edge-${index}`}
+                  x1={vertex.x}
+                  y1={vertex.y}
+                  x2={nextVertex.x}
+                  y2={nextVertex.y}
+                  stroke="transparent"
+                  strokeWidth="20"
+                  className="cursor-crosshair"
+                  style={{ pointerEvents: 'stroke' }}
+                />
+              )
+            })}
             {/* Control handle lines */}
             {store.editing.vertexPositions.map((vertex, index) => (
               <g key={`vertex-handles-${index}`}>
@@ -700,19 +778,33 @@ export function MapCanvas({ className }: MapCanvasProps) {
             ))}
             
             {/* Vertex anchor points */}
-            {store.editing.vertexPositions.map((vertex, index) => (
-              <circle
-                key={`vertex-${index}`}
-                cx={vertex.x}
-                cy={vertex.y}
-                r="8"
-                fill={store.editing.selectedVertices.has(index) ? '#3B82F6' : '#FFFFFF'}
-                stroke={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
-                strokeWidth="3"
-                className="cursor-move"
-                style={{ cursor: 'move' }}
-              />
-            ))}
+            {store.editing.vertexPositions.map((vertex, index) => {
+              const hasBezier = vertex.controlPoints && (vertex.controlPoints.in || vertex.controlPoints.out)
+              return (
+                <g key={`vertex-${index}`}>
+                  <circle
+                    cx={vertex.x}
+                    cy={vertex.y}
+                    r="8"
+                    fill={store.editing.selectedVertices.has(index) ? '#3B82F6' : '#FFFFFF'}
+                    stroke={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
+                    strokeWidth="3"
+                    className="cursor-move"
+                    style={{ cursor: 'move' }}
+                  />
+                  {/* Inner dot to indicate bezier vertex */}
+                  {hasBezier && (
+                    <circle
+                      cx={vertex.x}
+                      cy={vertex.y}
+                      r="3"
+                      fill={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
+                      className="pointer-events-none"
+                    />
+                  )}
+                </g>
+              )
+            })}
           </g>
         )}
         
@@ -854,9 +946,13 @@ export function MapCanvas({ className }: MapCanvasProps) {
       
       {/* Editing mode indicator */}
       {store.editing.isEditing && (
-        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
-          <div className="text-sm font-medium">Editing Mode</div>
-          <div className="text-xs opacity-90">Press ESC or Enter to finish • Drag vertices to reshape</div>
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg max-w-md">
+          <div className="text-sm font-medium mb-1">Editing Mode</div>
+          <div className="text-xs opacity-90 space-y-1">
+            <div>• Drag vertices to reshape • Click edge to add vertex</div>
+            <div>• Select vertex + SPACE to toggle bezier • DELETE to remove</div>
+            <div>• Press ESC to cancel or ENTER to finish</div>
+          </div>
         </div>
       )}
       

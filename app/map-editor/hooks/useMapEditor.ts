@@ -417,7 +417,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     if (!state.editing.isEditing || !state.editing.editingTerritoryId) return state
     
     // Apply the edited vertices back to the territory
-    const newPath = bezierPathToSvg(state.editing.vertexPositions) + ' Z'
+    const newPath = bezierPathToSvgClosed(state.editing.vertexPositions)
     const centerPoints = state.editing.vertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
     const newCenter = calculateCenter(centerPoints)
     
@@ -456,7 +456,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     }
     
     // Update the territory in real-time
-    const newPath = bezierPathToSvg(newVertexPositions) + ' Z'
+    const newPath = bezierPathToSvgClosed(newVertexPositions)
     const centerPoints = newVertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
     const newCenter = calculateCenter(centerPoints)
     
@@ -493,7 +493,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     }
     
     // Update the territory in real-time
-    const newPath = bezierPathToSvg(newVertexPositions) + ' Z'
+    const newPath = bezierPathToSvgClosed(newVertexPositions)
     
     return {
       editing: {
@@ -561,7 +561,169 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       draggedVertex: null,
       draggedHandle: null
     }
-  }))
+  })),
+  
+  toggleVertexBezier: (vertexIndex) => set(state => {
+    if (!state.editing.isEditing) return state
+    
+    const newVertexPositions = [...state.editing.vertexPositions]
+    if (vertexIndex >= 0 && vertexIndex < newVertexPositions.length) {
+      const vertex = { ...newVertexPositions[vertexIndex] }
+      
+      if (!vertex.controlPoints || (!vertex.controlPoints.in && !vertex.controlPoints.out)) {
+        // Convert to bezier - add control points
+        const prevIndex = vertexIndex === 0 ? newVertexPositions.length - 1 : vertexIndex - 1
+        const nextIndex = vertexIndex === newVertexPositions.length - 1 ? 0 : vertexIndex + 1
+        const prevVertex = newVertexPositions[prevIndex]
+        const nextVertex = newVertexPositions[nextIndex]
+        
+        vertex.controlPoints = {}
+        
+        // Calculate the angle between previous and next vertices
+        const dx1 = vertex.x - prevVertex.x
+        const dy1 = vertex.y - prevVertex.y
+        const dx2 = nextVertex.x - vertex.x
+        const dy2 = nextVertex.y - vertex.y
+        
+        // Calculate the tangent direction (perpendicular to the angle bisector)
+        const angle1 = Math.atan2(dy1, dx1)
+        const angle2 = Math.atan2(dy2, dx2)
+        let tangentAngle = (angle1 + angle2) / 2
+        
+        // Handle the case where angles wrap around
+        if (Math.abs(angle1 - angle2) > Math.PI) {
+          tangentAngle += Math.PI
+        }
+        
+        // Calculate control point distance based on neighboring vertices
+        const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1)
+        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2)
+        const controlDist = Math.min(dist1, dist2) * 0.3
+        
+        // Create control points along the tangent
+        vertex.controlPoints.in = {
+          x: vertex.x - Math.cos(tangentAngle) * controlDist,
+          y: vertex.y - Math.sin(tangentAngle) * controlDist
+        }
+        vertex.controlPoints.out = {
+          x: vertex.x + Math.cos(tangentAngle) * controlDist,
+          y: vertex.y + Math.sin(tangentAngle) * controlDist
+        }
+      } else {
+        // Convert to straight - remove control points
+        vertex.controlPoints = {}
+      }
+      
+      newVertexPositions[vertexIndex] = vertex
+    }
+    
+    // Update the territory in real-time
+    const newPath = bezierPathToSvgClosed(newVertexPositions)
+    
+    return {
+      editing: {
+        ...state.editing,
+        vertexPositions: newVertexPositions
+      },
+      map: state.editing.editingTerritoryId ? {
+        ...state.map,
+        territories: {
+          ...state.map.territories,
+          [state.editing.editingTerritoryId]: {
+            ...state.map.territories[state.editing.editingTerritoryId],
+            fillPath: newPath
+          }
+        }
+      } : state.map
+    }
+  }),
+  
+  addVertexOnEdge: (edgeIndex, position) => set(state => {
+    if (!state.editing.isEditing) return state
+    
+    const newVertexPositions = [...state.editing.vertexPositions]
+    
+    // Insert new vertex after the edge index
+    const newVertex: BezierPoint = {
+      x: position.x,
+      y: position.y,
+      type: 'anchor',
+      controlPoints: {}
+    }
+    
+    // Insert at the correct position
+    newVertexPositions.splice(edgeIndex + 1, 0, newVertex)
+    
+    // Update the territory in real-time
+    const newPath = bezierPathToSvgClosed(newVertexPositions)
+    const centerPoints = newVertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
+    const newCenter = calculateCenter(centerPoints)
+    
+    return {
+      editing: {
+        ...state.editing,
+        vertexPositions: newVertexPositions
+      },
+      map: state.editing.editingTerritoryId ? {
+        ...state.map,
+        territories: {
+          ...state.map.territories,
+          [state.editing.editingTerritoryId]: {
+            ...state.map.territories[state.editing.editingTerritoryId],
+            fillPath: newPath,
+            center: newCenter
+          }
+        }
+      } : state.map
+    }
+  }),
+  
+  deleteVertex: (vertexIndex) => set(state => {
+    if (!state.editing.isEditing) return state
+    
+    // Don't allow deletion if it would result in less than 3 vertices
+    if (state.editing.vertexPositions.length <= 3) return state
+    
+    const newVertexPositions = [...state.editing.vertexPositions]
+    newVertexPositions.splice(vertexIndex, 1)
+    
+    // Clear selection if the deleted vertex was selected
+    const newSelection = new Set(state.editing.selectedVertices)
+    newSelection.delete(vertexIndex)
+    // Adjust indices of selected vertices after the deleted one
+    const adjustedSelection = new Set<number>()
+    newSelection.forEach(idx => {
+      if (idx < vertexIndex) {
+        adjustedSelection.add(idx)
+      } else if (idx > vertexIndex) {
+        adjustedSelection.add(idx - 1)
+      }
+    })
+    
+    // Update the territory in real-time
+    const newPath = bezierPathToSvgClosed(newVertexPositions)
+    const centerPoints = newVertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
+    const newCenter = calculateCenter(centerPoints)
+    
+    return {
+      editing: {
+        ...state.editing,
+        vertexPositions: newVertexPositions,
+        selectedVertices: adjustedSelection
+      },
+      map: state.editing.editingTerritoryId ? {
+        ...state.map,
+        territories: {
+          ...state.map.territories,
+          [state.editing.editingTerritoryId]: {
+            ...state.map.territories[state.editing.editingTerritoryId],
+            fillPath: newPath,
+            center: newCenter
+          }
+        }
+      } : state.map
+    }
+  })
 }))
 
 // Helper functions
@@ -675,6 +837,56 @@ function moveSvgPath(path: string, deltaX: number, deltaY: number): string {
   return result
 }
 
+function bezierPathToSvgClosed(bezierPoints: BezierPoint[]): string {
+  if (bezierPoints.length === 0) return ''
+  if (bezierPoints.length === 1) return `M ${bezierPoints[0].x} ${bezierPoints[0].y}`
+  
+  let path = `M ${bezierPoints[0].x} ${bezierPoints[0].y}`
+  
+  // Add all segments
+  for (let i = 1; i < bezierPoints.length; i++) {
+    path += getBezierSegment(bezierPoints[i - 1], bezierPoints[i])
+  }
+  
+  // Close the path with a segment from last to first
+  path += getBezierSegment(bezierPoints[bezierPoints.length - 1], bezierPoints[0])
+  path += ' Z'
+  
+  return path
+}
+
+function getBezierSegment(fromPoint: BezierPoint, toPoint: BezierPoint): string {
+  // Check if we have control points for a curve
+  const hasOutControl = fromPoint.controlPoints?.out
+  const hasInControl = toPoint.controlPoints?.in
+  
+  if (hasOutControl && hasInControl) {
+    // Cubic bezier curve - both control points available
+    return ` C ${fromPoint.controlPoints!.out!.x} ${fromPoint.controlPoints!.out!.y}, ${toPoint.controlPoints!.in!.x} ${toPoint.controlPoints!.in!.y}, ${toPoint.x} ${toPoint.y}`
+  } else if (hasOutControl && !hasInControl) {
+    // Only from vertex has control point
+    const cp = fromPoint.controlPoints!.out!
+    // Calculate a mirrored control point for the to vertex
+    const mirroredCp = {
+      x: toPoint.x - (cp.x - fromPoint.x) * 0.5,
+      y: toPoint.y - (cp.y - fromPoint.y) * 0.5
+    }
+    return ` C ${cp.x} ${cp.y}, ${mirroredCp.x} ${mirroredCp.y}, ${toPoint.x} ${toPoint.y}`
+  } else if (!hasOutControl && hasInControl) {
+    // Only to vertex has control point
+    const cp = toPoint.controlPoints!.in!
+    // Calculate a mirrored control point for the from vertex
+    const mirroredCp = {
+      x: fromPoint.x + (toPoint.x - cp.x) * 0.5,
+      y: fromPoint.y + (toPoint.y - cp.y) * 0.5
+    }
+    return ` C ${mirroredCp.x} ${mirroredCp.y}, ${cp.x} ${cp.y}, ${toPoint.x} ${toPoint.y}`
+  } else {
+    // Straight line - neither vertex has control points
+    return ` L ${toPoint.x} ${toPoint.y}`
+  }
+}
+
 function bezierPathToSvg(bezierPoints: BezierPoint[]): string {
   if (bezierPoints.length === 0) return ''
   if (bezierPoints.length === 1) return `M ${bezierPoints[0].x} ${bezierPoints[0].y}`
@@ -690,14 +902,28 @@ function bezierPathToSvg(bezierPoints: BezierPoint[]): string {
     const hasInControl = currentPoint.controlPoints?.in
     
     if (hasOutControl && hasInControl) {
-      // Cubic bezier curve
+      // Cubic bezier curve - both control points available
       path += ` C ${previousPoint.controlPoints!.out!.x} ${previousPoint.controlPoints!.out!.y}, ${currentPoint.controlPoints!.in!.x} ${currentPoint.controlPoints!.in!.y}, ${currentPoint.x} ${currentPoint.y}`
-    } else if (hasOutControl || hasInControl) {
-      // Quadratic bezier curve
-      const controlPoint = hasOutControl ? previousPoint.controlPoints!.out! : currentPoint.controlPoints!.in!
-      path += ` Q ${controlPoint.x} ${controlPoint.y}, ${currentPoint.x} ${currentPoint.y}`
+    } else if (hasOutControl && !hasInControl) {
+      // Only previous vertex has control point - use it twice for a smooth curve
+      const cp = previousPoint.controlPoints!.out!
+      // Calculate a mirrored control point for the current vertex
+      const mirroredCp = {
+        x: currentPoint.x - (cp.x - previousPoint.x) * 0.5,
+        y: currentPoint.y - (cp.y - previousPoint.y) * 0.5
+      }
+      path += ` C ${cp.x} ${cp.y}, ${mirroredCp.x} ${mirroredCp.y}, ${currentPoint.x} ${currentPoint.y}`
+    } else if (!hasOutControl && hasInControl) {
+      // Only current vertex has control point - use it twice for a smooth curve
+      const cp = currentPoint.controlPoints!.in!
+      // Calculate a mirrored control point for the previous vertex
+      const mirroredCp = {
+        x: previousPoint.x + (currentPoint.x - cp.x) * 0.5,
+        y: previousPoint.y + (currentPoint.y - cp.y) * 0.5
+      }
+      path += ` C ${mirroredCp.x} ${mirroredCp.y}, ${cp.x} ${cp.y}, ${currentPoint.x} ${currentPoint.y}`
     } else {
-      // Straight line
+      // Straight line - neither vertex has control points
       path += ` L ${currentPoint.x} ${currentPoint.y}`
     }
   }

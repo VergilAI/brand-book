@@ -105,6 +105,9 @@ export interface MapEditorState {
   startDraggingVertex: (vertexIndex: number) => void
   startDraggingControlHandle: (vertexIndex: number, handleType: 'in' | 'out') => void
   endDragging: () => void
+  toggleVertexBezier: (vertexIndex: number) => void
+  addVertexOnEdge: (edgeIndex: number, position: Point) => void
+  deleteVertex: (vertexIndex: number) => void
 }
 
 export interface PointerPosition {
