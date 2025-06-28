@@ -1,28 +1,30 @@
 "use client"
 
 import { create } from 'zustand'
-import { MapEditorState, BezierPoint } from '../types/editor'
-import type { Territory, Point } from '@/lib/lms/optimized-map-data'
+import { DrawingToolState, BezierPoint, Shape, Point } from '../types/drawing'
 
-const createEmptyMap = () => ({
+const createEmptyDocument = () => ({
   version: "1.0",
   metadata: {
-    name: "New Map",
-    author: "Map Editor",
-    created: new Date().toISOString()
+    name: "Untitled Drawing",
+    author: "Drawing Tool",
+    created: new Date().toISOString(),
+    modified: new Date().toISOString()
   },
-  territories: {},
-  borders: {},
-  continents: {}
+  shapes: {},
+  settings: {
+    canvasWidth: 1000,
+    canvasHeight: 1000,
+    backgroundColor: '#FFFFFF'
+  }
 })
 
-export const useMapEditor = create<MapEditorState>((set, get) => ({
+export const useDrawingTool = create<DrawingToolState>((set, get) => ({
   // Initial state
-  map: createEmptyMap(),
+  document: createEmptyDocument(),
   
   selection: {
-    territories: new Set(),
-    borders: new Set()
+    shapes: new Set()
   },
   
   tool: 'select',
@@ -40,7 +42,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
   
   editing: {
     isEditing: false,
-    editingTerritoryId: null,
+    editingShapeId: null,
     selectedVertices: new Set(),
     isDraggingVertex: false,
     isDraggingHandle: false,
@@ -59,50 +61,61 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
   // Tool actions
   setTool: (tool) => set({ tool }),
   
-  // Territory actions
-  updateTerritory: (id, updates) => set(state => ({
-    map: {
-      ...state.map,
-      territories: {
-        ...state.map.territories,
+  // Shape actions
+  updateShape: (id, updates) => set(state => ({
+    document: {
+      ...state.document,
+      shapes: {
+        ...state.document.shapes,
         [id]: {
-          ...state.map.territories[id],
+          ...state.document.shapes[id],
           ...updates
         }
+      },
+      metadata: {
+        ...state.document.metadata,
+        modified: new Date().toISOString()
       }
     }
   })),
   
-  addTerritory: (territory) => set(state => ({
-    map: {
-      ...state.map,
-      territories: {
-        ...state.map.territories,
-        [territory.id]: territory
+  addShape: (shape) => set(state => ({
+    document: {
+      ...state.document,
+      shapes: {
+        ...state.document.shapes,
+        [shape.id]: shape
+      },
+      metadata: {
+        ...state.document.metadata,
+        modified: new Date().toISOString()
       }
     }
   })),
   
-  deleteTerritory: (id) => set(state => {
-    const { [id]: deleted, ...remainingTerritories } = state.map.territories
-    const newSelection = new Set(state.selection.territories)
+  deleteShape: (id) => set(state => {
+    const { [id]: deleted, ...remainingShapes } = state.document.shapes
+    const newSelection = new Set(state.selection.shapes)
     newSelection.delete(id)
     
     return {
-      map: {
-        ...state.map,
-        territories: remainingTerritories
+      document: {
+        ...state.document,
+        shapes: remainingShapes,
+        metadata: {
+          ...state.document.metadata,
+          modified: new Date().toISOString()
+        }
       },
       selection: {
-        ...state.selection,
-        territories: newSelection
+        shapes: newSelection
       }
     }
   }),
   
   // Selection actions
-  selectTerritory: (id, multi = false) => set(state => {
-    const newSelection = new Set(multi ? state.selection.territories : [])
+  selectShape: (id, multi = false) => set(state => {
+    const newSelection = new Set(multi ? state.selection.shapes : [])
     
     if (newSelection.has(id)) {
       newSelection.delete(id)
@@ -112,16 +125,14 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     
     return {
       selection: {
-        ...state.selection,
-        territories: newSelection
+        shapes: newSelection
       }
     }
   }),
   
   clearSelection: () => set(state => ({
     selection: {
-      territories: new Set(),
-      borders: new Set()
+      shapes: new Set()
     }
   })),
   
@@ -165,7 +176,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     
     // Check if we have enough points
     if (state.drawing.bezierPath.length < 3) {
-      // Need at least 3 points for a valid territory
+      // Need at least 3 points for a valid shape
       set(state => ({
         drawing: {
           ...state.drawing,
@@ -179,27 +190,33 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       return
     }
     
-    // Create new territory
-    const id = `territory-${Date.now()}`
-    const path = bezierPathToSvg(state.drawing.bezierPath) + ' Z' // Close the path
+    // Create new shape
+    const id = `shape-${Date.now()}`
+    const path = bezierPathToSvgClosed(state.drawing.bezierPath)
     const centerPoints = state.drawing.bezierPath.map(bp => ({ x: bp.x, y: bp.y }))
     const center = calculateCenter(centerPoints)
     
-    const newTerritory: Territory = {
+    const newShape: Shape = {
       id,
-      name: `Territory ${Object.keys(state.map.territories).length + 1}`,
-      continent: 'unassigned',
-      center,
+      name: `Shape ${Object.keys(state.document.shapes).length + 1}`,
       fillPath: path,
-      borderSegments: []
+      fill: '#FFFFFF',
+      stroke: '#000000',
+      strokeWidth: 2,
+      opacity: 1,
+      center
     }
     
     set(state => ({
-      map: {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [id]: newTerritory
+      document: {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [id]: newShape
+        },
+        metadata: {
+          ...state.document.metadata,
+          modified: new Date().toISOString()
         }
       },
       drawing: {
@@ -212,8 +229,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       },
       tool: 'select',
       selection: {
-        territories: new Set([id]),
-        borders: new Set()
+        shapes: new Set([id])
       }
     }))
   },
@@ -336,76 +352,79 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     }
   }),
   
-  // Territory movement
-  moveTerritories: (territoryIds: string[], deltaX: number, deltaY: number) => set(state => {
-    const updatedTerritories = { ...state.map.territories }
+  // Shape movement
+  moveShapes: (shapeIds: string[], deltaX: number, deltaY: number) => set(state => {
+    const updatedShapes = { ...state.document.shapes }
     
-    territoryIds.forEach(id => {
-      const territory = updatedTerritories[id]
-      if (territory) {
+    shapeIds.forEach(id => {
+      const shape = updatedShapes[id]
+      if (shape) {
         // Move center point
-        updatedTerritories[id] = {
-          ...territory,
+        updatedShapes[id] = {
+          ...shape,
           center: {
-            x: territory.center.x + deltaX,
-            y: territory.center.y + deltaY
+            x: shape.center.x + deltaX,
+            y: shape.center.y + deltaY
           },
           // Move the path by transforming the SVG path
-          fillPath: moveSvgPath(territory.fillPath, deltaX, deltaY)
+          fillPath: moveSvgPath(shape.fillPath, deltaX, deltaY)
         }
       }
     })
     
     return {
-      map: {
-        ...state.map,
-        territories: updatedTerritories
+      document: {
+        ...state.document,
+        shapes: updatedShapes,
+        metadata: {
+          ...state.document.metadata,
+          modified: new Date().toISOString()
+        }
       }
     }
   }),
   
   // Area selection
-  selectTerritoriesInArea: (startX: number, startY: number, endX: number, endY: number, multi = false) => set(state => {
+  selectShapesInArea: (startX: number, startY: number, endX: number, endY: number, multi = false) => set(state => {
     const minX = Math.min(startX, endX)
     const maxX = Math.max(startX, endX)
     const minY = Math.min(startY, endY)
     const maxY = Math.max(startY, endY)
     
-    const territoriesInArea = Object.values(state.map.territories).filter(territory => {
-      const { x, y } = territory.center
+    const shapesInArea = Object.values(state.document.shapes).filter(shape => {
+      const { x, y } = shape.center
       return x >= minX && x <= maxX && y >= minY && y <= maxY
     })
     
-    const newSelection = new Set(multi ? state.selection.territories : [])
-    territoriesInArea.forEach(territory => {
-      if (newSelection.has(territory.id)) {
-        newSelection.delete(territory.id)
+    const newSelection = new Set(multi ? state.selection.shapes : [])
+    shapesInArea.forEach(shape => {
+      if (newSelection.has(shape.id)) {
+        newSelection.delete(shape.id)
       } else {
-        newSelection.add(territory.id)
+        newSelection.add(shape.id)
       }
     })
     
     return {
       selection: {
-        ...state.selection,
-        territories: newSelection
+        shapes: newSelection
       }
     }
   }),
   
   // Editing actions
-  startEditingTerritory: (territoryId) => set(state => {
-    const territory = state.map.territories[territoryId]
-    if (!territory) return state
+  startEditingShape: (shapeId) => set(state => {
+    const shape = state.document.shapes[shapeId]
+    if (!shape) return state
     
     // Parse the SVG path to extract vertices
-    const vertexPositions = parseSvgPathToBezierPoints(territory.fillPath)
+    const vertexPositions = parseSvgPathToBezierPoints(shape.fillPath)
     
     return {
       editing: {
         ...state.editing,
         isEditing: true,
-        editingTerritoryId: territoryId,
+        editingShapeId: shapeId,
         selectedVertices: new Set(),
         vertexPositions
       },
@@ -413,30 +432,34 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     }
   }),
   
-  stopEditingTerritory: () => set(state => {
-    if (!state.editing.isEditing || !state.editing.editingTerritoryId) return state
+  stopEditingShape: () => set(state => {
+    if (!state.editing.isEditing || !state.editing.editingShapeId) return state
     
-    // Apply the edited vertices back to the territory
+    // Apply the edited vertices back to the shape
     const newPath = bezierPathToSvgClosed(state.editing.vertexPositions)
     const centerPoints = state.editing.vertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
     const newCenter = calculateCenter(centerPoints)
     
     return {
-      map: {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [state.editing.editingTerritoryId]: {
-            ...state.map.territories[state.editing.editingTerritoryId],
+      document: {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [state.editing.editingShapeId]: {
+            ...state.document.shapes[state.editing.editingShapeId],
             fillPath: newPath,
             center: newCenter
           }
+        },
+        metadata: {
+          ...state.document.metadata,
+          modified: new Date().toISOString()
         }
       },
       editing: {
         ...state.editing,
         isEditing: false,
-        editingTerritoryId: null,
+        editingShapeId: null,
         selectedVertices: new Set(),
         vertexPositions: []
       }
@@ -472,7 +495,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       newVertexPositions[vertexIndex] = updatedVertex
     }
     
-    // Update the territory in real-time
+    // Update the shape in real-time
     const newPath = bezierPathToSvgClosed(newVertexPositions)
     const centerPoints = newVertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
     const newCenter = calculateCenter(centerPoints)
@@ -482,17 +505,17 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         ...state.editing,
         vertexPositions: newVertexPositions
       },
-      map: state.editing.editingTerritoryId ? {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [state.editing.editingTerritoryId]: {
-            ...state.map.territories[state.editing.editingTerritoryId],
+      document: state.editing.editingShapeId ? {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [state.editing.editingShapeId]: {
+            ...state.document.shapes[state.editing.editingShapeId],
             fillPath: newPath,
             center: newCenter
           }
         }
-      } : state.map
+      } : state.document
     }
   }),
   
@@ -509,7 +532,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       newVertexPositions[vertexIndex] = vertex
     }
     
-    // Update the territory in real-time
+    // Update the shape in real-time
     const newPath = bezierPathToSvgClosed(newVertexPositions)
     
     return {
@@ -517,16 +540,16 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         ...state.editing,
         vertexPositions: newVertexPositions
       },
-      map: state.editing.editingTerritoryId ? {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [state.editing.editingTerritoryId]: {
-            ...state.map.territories[state.editing.editingTerritoryId],
+      document: state.editing.editingShapeId ? {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [state.editing.editingShapeId]: {
+            ...state.document.shapes[state.editing.editingShapeId],
             fillPath: newPath
           }
         }
-      } : state.map
+      } : state.document
     }
   }),
   
@@ -634,7 +657,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       newVertexPositions[vertexIndex] = vertex
     }
     
-    // Update the territory in real-time
+    // Update the shape in real-time
     const newPath = bezierPathToSvgClosed(newVertexPositions)
     
     return {
@@ -642,16 +665,16 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         ...state.editing,
         vertexPositions: newVertexPositions
       },
-      map: state.editing.editingTerritoryId ? {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [state.editing.editingTerritoryId]: {
-            ...state.map.territories[state.editing.editingTerritoryId],
+      document: state.editing.editingShapeId ? {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [state.editing.editingShapeId]: {
+            ...state.document.shapes[state.editing.editingShapeId],
             fillPath: newPath
           }
         }
-      } : state.map
+      } : state.document
     }
   }),
   
@@ -671,7 +694,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     // Insert at the correct position
     newVertexPositions.splice(edgeIndex + 1, 0, newVertex)
     
-    // Update the territory in real-time
+    // Update the shape in real-time
     const newPath = bezierPathToSvgClosed(newVertexPositions)
     const centerPoints = newVertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
     const newCenter = calculateCenter(centerPoints)
@@ -681,17 +704,17 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         ...state.editing,
         vertexPositions: newVertexPositions
       },
-      map: state.editing.editingTerritoryId ? {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [state.editing.editingTerritoryId]: {
-            ...state.map.territories[state.editing.editingTerritoryId],
+      document: state.editing.editingShapeId ? {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [state.editing.editingShapeId]: {
+            ...state.document.shapes[state.editing.editingShapeId],
             fillPath: newPath,
             center: newCenter
           }
         }
-      } : state.map
+      } : state.document
     }
   }),
   
@@ -717,7 +740,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       }
     })
     
-    // Update the territory in real-time
+    // Update the shape in real-time
     const newPath = bezierPathToSvgClosed(newVertexPositions)
     const centerPoints = newVertexPositions.map(bp => ({ x: bp.x, y: bp.y }))
     const newCenter = calculateCenter(centerPoints)
@@ -728,37 +751,22 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         vertexPositions: newVertexPositions,
         selectedVertices: adjustedSelection
       },
-      map: state.editing.editingTerritoryId ? {
-        ...state.map,
-        territories: {
-          ...state.map.territories,
-          [state.editing.editingTerritoryId]: {
-            ...state.map.territories[state.editing.editingTerritoryId],
+      document: state.editing.editingShapeId ? {
+        ...state.document,
+        shapes: {
+          ...state.document.shapes,
+          [state.editing.editingShapeId]: {
+            ...state.document.shapes[state.editing.editingShapeId],
             fillPath: newPath,
             center: newCenter
           }
         }
-      } : state.map
+      } : state.document
     }
   })
 }))
 
 // Helper functions
-function pathToSvg(points: Point[], close = false): string {
-  if (points.length === 0) return ''
-  
-  let path = `M ${points[0].x} ${points[0].y}`
-  for (let i = 1; i < points.length; i++) {
-    path += ` L ${points[i].x} ${points[i].y}`
-  }
-  
-  if (close) {
-    path += ' Z'
-  }
-  
-  return path
-}
-
 function calculateCenter(points: Point[]): Point {
   const sum = points.reduce(
     (acc, point) => ({
