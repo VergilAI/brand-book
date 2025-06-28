@@ -5,7 +5,11 @@ import path from 'path';
 import { SignJWT, jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'vergil-investors-portal-secret-key-2024'
+  process.env.JWT_SECRET || (
+    process.env.NODE_ENV === 'production' 
+      ? (() => { throw new Error('JWT_SECRET environment variable is required for production'); })()
+      : 'vergil-investors-portal-secret-key-2024'
+  )
 );
 
 const USERS_FILE = path.join(process.cwd(), 'app', 'investors', 'data', 'users.json');

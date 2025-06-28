@@ -10,6 +10,10 @@ interface HypotheticalItem {
   amount: number;
   type: "revenue" | "expense";
   transaction_type: "recurring" | "one-time";
+  recurring_type?: "standard" | "subscription";
+  subscription_users?: number;
+  subscription_price_per_user?: number;
+  subscription_growth_factor?: number;
   date_info: {
     date?: string;
     start_date?: string;
@@ -57,6 +61,10 @@ export async function POST(request: NextRequest) {
       amount: body.amount,
       type: body.type,
       transaction_type: body.transaction_type,
+      recurring_type: body.recurring_type,
+      subscription_users: body.subscription_users,
+      subscription_price_per_user: body.subscription_price_per_user,
+      subscription_growth_factor: body.subscription_growth_factor,
       date_info: body.date_info,
       enabled: body.enabled ?? true,
       description: body.description

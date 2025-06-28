@@ -3,7 +3,7 @@
     {
       "id": "exp-1751036215576",
       "name": "Salaries ",
-      "amount": 3900000,
+      "amount": 3220804,
       "type": "expense",
       "transaction_type": "recurring",
       "date_info": {
@@ -15,13 +15,36 @@
     {
       "id": "exp-1751036910322",
       "name": "Tharpa Salary",
-      "amount": 700000,
+      "amount": 720000,
       "type": "expense",
       "transaction_type": "recurring",
       "date_info": {
         "frequency": "Monthly",
         "start_date": "2025-07-03",
         "end_date": "2025-10-31"
+      },
+      "is_hypothetical": false
+    },
+    {
+      "id": "exp-1751108169868",
+      "name": "COMET - June payment ",
+      "amount": 3500000,
+      "type": "expense",
+      "transaction_type": "one-time",
+      "date_info": {
+        "date": "2025-07-04"
+      },
+      "is_hypothetical": false
+    },
+    {
+      "id": "exp-1751108286666",
+      "name": "Subscriptions ",
+      "amount": 120000,
+      "type": "expense",
+      "transaction_type": "recurring",
+      "date_info": {
+        "start_date": "2025-07-01",
+        "frequency": "Monthly"
       },
       "is_hypothetical": false
     }

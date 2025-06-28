@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, ReactNode } from "react";
-import * as d3 from "d3";
+import { select } from 'd3-selection';
+import type { Axis } from 'd3-axis';
 import { isTouchDevice } from "@/lib/utils";
 
 export interface BaseChartProps {
@@ -245,7 +246,7 @@ export function MobileTooltip({ tooltip, containerWidth, className = "" }: Mobil
 export function createD3Tooltip(className: string, borderColor: string) {
   if (isTouchDevice()) return null;
   
-  return d3.select("body").append("div")
+  return select("body").append("div")
     .attr("class", className)
     .style("position", "absolute")
     .style("padding", "12px")
@@ -273,7 +274,7 @@ export function formatAxisTick(value: number, isMobile: boolean): string {
 }
 
 export function responsiveAxisFormat(
-  axis: d3.Axis<any>,
+  axis: Axis<any>,
   isMobile: boolean,
   type: 'x' | 'y' = 'x'
 ) {

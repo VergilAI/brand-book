@@ -1,0 +1,62 @@
+[
+  {
+    "path": "/*",
+    "resourceSizes": [
+      {
+        "resourceType": "script",
+        "budget": 300
+      },
+      {
+        "resourceType": "stylesheet",
+        "budget": 100
+      },
+      {
+        "resourceType": "image",
+        "budget": 500
+      },
+      {
+        "resourceType": "total",
+        "budget": 1000
+      }
+    ],
+    "resourceCounts": [
+      {
+        "resourceType": "third-party",
+        "budget": 10
+      }
+    ],
+    "timings": [
+      {
+        "metric": "interactive",
+        "budget": 3000
+      },
+      {
+        "metric": "first-contentful-paint",
+        "budget": 1000
+      },
+      {
+        "metric": "cumulative-layout-shift",
+        "budget": 0.1
+      }
+    ]
+  },
+  {
+    "path": "/investors/*",
+    "resourceSizes": [
+      {
+        "resourceType": "script",
+        "budget": 400
+      }
+    ],
+    "timings": [
+      {
+        "metric": "interactive",
+        "budget": 4000
+      },
+      {
+        "metric": "total-blocking-time",
+        "budget": 300
+      }
+    ]
+  }
+]

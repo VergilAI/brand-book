@@ -1,16 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { FinancialSummary } from "@/components/investors/FinancialSummary";
-import { RevenueBreakdown } from "@/components/investors/RevenueBreakdown";
-import { RecurringExpenses } from "@/components/investors/RecurringExpenses";
-import { HypotheticalDeals } from "@/components/investors/HypotheticalDeals";
-import { BurnRateChart, type OneTimeEvent, type RecurringItem } from "@/components/investors/BurnRateChart";
 import { VergilLogo } from "@/components/vergil/vergil-logo";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings } from "lucide-react";
 import { MobileNav } from "@/components/investors/MobileNav";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import { DashboardSkeleton } from "@/components/investors/SkeletonScreens";
+import { usePerformanceMonitor } from "@/lib/performance";
+import { preloadComponent } from "@/components/investors/LazyLoad";
+import { prefetchCriticalResources } from "@/lib/bundle-optimization";
+import { OfflineIndicator } from "@/components/investors/OfflineIndicator";
+
+// Lazy load heavy components
+const FinancialSummary = lazy(() => 
+  import("@/components/investors/FinancialSummary").then(mod => ({ 
+    default: mod.FinancialSummary 
+  }))
+);
+
+const RevenueBreakdown = lazy(() => 
+  import("@/components/investors/RevenueBreakdown").then(mod => ({ 
+    default: mod.RevenueBreakdown 
+  }))
+);
+
+const RecurringExpenses = lazy(() => 
+  import("@/components/investors/RecurringExpenses").then(mod => ({ 
+    default: mod.RecurringExpenses 
+  }))
+);
+
+const HypotheticalDeals = lazy(() => 
+  import("@/components/investors/HypotheticalDeals").then(mod => ({ 
+    default: mod.HypotheticalDeals 
+  }))
+);
+
+const BurnRateChart = lazy(() => 
+  import("@/components/investors/BurnRateChart").then(mod => ({ 
+    default: mod.BurnRateChart 
+  }))
+);
+
+
+// Type imports and services
+import type { OneTimeEvent, RecurringItem } from "@/lib/investors/financialDataService";
+import { FinancialDataService } from "@/lib/investors/financialDataService";
 
 interface DashboardData {
   current_balance: number;
@@ -24,13 +61,13 @@ interface DashboardData {
   zero_date: string | null;
 }
 
-
 interface User {
   id: string;
   email: string;
   role: 'admin' | 'investor';
   name: string;
 }
+
 
 export default function InvestorsPage() {
   const router = useRouter();
@@ -40,6 +77,32 @@ export default function InvestorsPage() {
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+
+  // Performance monitoring
+  usePerformanceMonitor();
+
+  // Prefetch critical resources
+  useEffect(() => {
+    prefetchCriticalResources();
+  }, []);
+
+  // Preload components that are likely to be needed
+  useEffect(() => {
+    preloadComponent(() => import("@/components/investors/FinancialSummary"));
+    preloadComponent(() => import("@/components/investors/BurnRateChart"));
+  }, []);
+
+  // Swipe to admin panel for admin users
+  const { isSwiping, swipeDirection, swipeProgress } = useSwipeGesture({
+    onSwipeLeft: () => {
+      if (user?.role === 'admin') {
+        router.push('/investors/admin');
+      }
+    }
+  }, {
+    minSwipeDistance: 80,
+    preventScrollOnSwipe: true
+  });
 
   useEffect(() => {
     checkAuth();
@@ -52,6 +115,10 @@ export default function InvestorsPage() {
       const data = await response.json();
       if (data.user) {
         setUser(data.user);
+        // Preload admin components if user is admin
+        if (data.user.role === 'admin') {
+          preloadComponent(() => import("@/components/investors/HypotheticalDeals"));
+        }
       }
     } catch (error) {
       console.error('Failed to check auth:', error);
@@ -74,89 +141,16 @@ export default function InvestorsPage() {
       const dashboardData = await dashboardResponse.json();
       setDashboardData(dashboardData);
 
-      // Fetch revenues, expenses, and hypotheticals in parallel
-      const [revenuesResponse, expensesResponse, hypotheticalsResponse] = await Promise.all([
-        fetch("/api/investors/revenues"),
-        fetch("/api/investors/expenses"),
-        fetch("/api/investors/hypotheticals")
-      ]);
+      // Fetch and process all financial data using service
+      const financialData = await FinancialDataService.fetchAllFinancialData();
+      
+      setOneTimeEvents(financialData.oneTimeEvents);
+      setRecurringRevenues(financialData.recurringRevenues);
+      setRecurringExpenses(financialData.recurringExpenses);
 
-      const revenues = await revenuesResponse.json();
-      const expenses = await expensesResponse.json();
-      const hypotheticals = await hypotheticalsResponse.json();
-
-      // Process one-time events and recurring items
-      const events: OneTimeEvent[] = [];
-      const recRevenues: RecurringItem[] = [];
-      const recExpenses: RecurringItem[] = [];
-
-      revenues.forEach((item: any) => {
-        if (item.transaction_type === "one-time" && item.date_info?.date) {
-          events.push({
-            date: item.date_info.date,
-            amount: item.amount,
-            name: item.source || "One-time revenue",
-            type: "revenue"
-          });
-        } else if (item.transaction_type === "recurring") {
-          recRevenues.push({
-            name: item.name,
-            source: item.source,
-            amount: item.amount,
-            transaction_type: item.transaction_type,
-            date_info: item.date_info || {}
-          });
-        }
-      });
-
-      expenses.forEach((item: any) => {
-        if ((item.transaction_type === "one-time" || item.transaction_type === "onetime") && item.date_info?.date) {
-          events.push({
-            date: item.date_info.date,
-            amount: item.amount,
-            name: item.source || item.name || "One-time expense",
-            type: "expense"
-          });
-        } else if (item.transaction_type === "recurring") {
-          recExpenses.push({
-            name: item.name,
-            source: item.source,
-            amount: item.amount,
-            transaction_type: item.transaction_type,
-            date_info: item.date_info || {}
-          });
-        }
-      });
-
-      hypotheticals.forEach((item: any) => {
-        if (item.enabled) {
-          if (item.transaction_type === "one-time" && item.date_info?.date) {
-            events.push({
-              date: item.date_info.date,
-              amount: item.amount,
-              name: item.name,
-              type: item.type as "revenue" | "expense"
-            });
-          } else if (item.transaction_type === "recurring") {
-            const recurringItem: RecurringItem = {
-              name: item.name,
-              amount: item.amount,
-              transaction_type: item.transaction_type,
-              date_info: item.date_info || {}
-            };
-            
-            if (item.type === "revenue") {
-              recRevenues.push(recurringItem);
-            } else {
-              recExpenses.push(recurringItem);
-            }
-          }
-        }
-      });
-
-      setOneTimeEvents(events);
-      setRecurringRevenues(recRevenues);
-      setRecurringExpenses(recExpenses);
+      // Preload lower priority components after data is loaded
+      preloadComponent(() => import("@/components/investors/RevenueBreakdown"));
+      preloadComponent(() => import("@/components/investors/RecurringExpenses"));
     } catch (error) {
       setDashboardData(null);
     } finally {
@@ -166,56 +160,99 @@ export default function InvestorsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-deep-space to-deep-space/90 flex items-center justify-center">
-        <div className="animate-pulse text-cosmic-purple text-xl">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-cosmic-purple/5 via-white to-electric-violet/5">
+        <div className="bg-white/50 backdrop-blur-sm">
+          {/* Header Skeleton */}
+          <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm">
+            <div className="container mx-auto px-4 py-3 max-w-7xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
+                  <div>
+                    <div className="h-6 w-48 bg-gray-200 rounded mb-1 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          {/* Content Skeleton */}
+          <div className="container mx-auto px-4 py-8 max-w-7xl">
+            <DashboardSkeleton />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!dashboardData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-deep-space to-deep-space/90 flex items-center justify-center">
-        <div className="text-neural-pink text-xl">Failed to load financial data</div>
+      <div className="min-h-screen bg-gradient-to-br from-cosmic-purple/5 via-white to-electric-violet/5 flex items-center justify-center">
+        <div className="text-red-500 text-xl">Failed to load financial data</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-space to-deep-space/90">
-      <div className="bg-gradient-to-b from-cosmic-purple/5 to-transparent">
+    <div className="min-h-screen bg-gradient-to-br from-cosmic-purple/5 via-white to-electric-violet/5 relative overflow-hidden">
+      {/* Offline Indicator */}
+      <OfflineIndicator />
+      
+      {/* Swipe Visual Feedback */}
+      {isSwiping && swipeDirection === 'left' && user?.role === 'admin' && (
+        <div className="fixed inset-y-0 right-0 w-1 bg-cosmic-purple/50 z-50 lg:hidden">
+          <div 
+            className="absolute inset-y-0 right-0 bg-gradient-to-l from-cosmic-purple to-transparent"
+            style={{ 
+              width: `${swipeProgress * 100}px`,
+              opacity: swipeProgress 
+            }}
+          />
+        </div>
+      )}
+      
+      {/* Swipe Indicator for Admin Users */}
+      {user?.role === 'admin' && (
+        <div className="fixed right-2 top-1/2 -translate-y-1/2 z-40 lg:hidden">
+          <div className="bg-cosmic-purple/20 backdrop-blur-sm rounded-full p-2 animate-pulse">
+            <div className="text-cosmic-purple text-xs font-medium flex items-center gap-1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 7l-5 5 5 5" />
+              </svg>
+              <span>Admin</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="">
         {/* Header with Logo */}
-        <header className="border-b border-stone-gray/20 bg-pure-light/5 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4 lg:py-6 max-w-7xl">
+        <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
+          <div className="container mx-auto px-4 py-2 lg:py-3 max-w-7xl">
             {/* Mobile Navigation */}
             <MobileNav user={user} onLogout={handleLogout} />
             
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <VergilLogo variant="logo" size="lg" animated />
-                <div className="h-8 w-px bg-stone-gray/30" />
-                <div>
-                  <h1 className="text-2xl font-display font-bold text-pure-light mb-1">
-                    Vergil Financial Status Panel
-                  </h1>
-                  <p className="text-stone-gray text-sm">
-                    Real-time company financial health monitoring
-                  </p>
-                </div>
+              <div className="flex items-center gap-2">
+                <VergilLogo variant="mark" size="md" animated className="filter invert" />
+                <h1 className="text-xl font-display font-bold text-dark-900">
+                  Vergil Finances
+                </h1>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 {user && (
-                  <div className="text-right mr-4">
-                    <p className="text-sm text-pure-light font-medium">{user.name}</p>
-                    <p className="text-xs text-stone-gray">{user.role === 'admin' ? 'Administrator' : 'Investor'}</p>
+                  <div className="text-right mr-3">
+                    <p className="text-sm text-dark-900 font-medium">{user.name}</p>
+                    <p className="text-xs text-gray-600">{user.role === 'admin' ? 'Administrator' : 'Investor'}</p>
                   </div>
                 )}
                 {user?.role === 'admin' && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => router.push('/investors/admin')}
-                    className="text-consciousness-cyan"
+                    className="border-cosmic-purple/30 text-cosmic-purple hover:bg-cosmic-purple/10"
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Admin
@@ -225,7 +262,7 @@ export default function InvestorsPage() {
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="text-neural-pink"
+                  className="text-gray-700 hover:bg-gray-100"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
@@ -238,25 +275,29 @@ export default function InvestorsPage() {
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="space-y-8">
-            <FinancialSummary data={dashboardData} />
+            <Suspense fallback={<DashboardSkeleton />}>
+              <FinancialSummary data={dashboardData} />
 
-            <BurnRateChart 
-              currentBalance={dashboardData.current_balance}
-              monthlyBurnRate={dashboardData.monthly_expenses}
-              monthlyRevenue={dashboardData.monthly_revenue}
-              oneTimeEvents={oneTimeEvents}
-              recurringRevenues={recurringRevenues}
-              recurringExpenses={recurringExpenses}
-            />
+              <BurnRateChart 
+                currentBalance={dashboardData.current_balance}
+                monthlyBurnRate={dashboardData.monthly_expenses}
+                monthlyRevenue={dashboardData.monthly_revenue}
+                runwayMonths={dashboardData.runway_months}
+                oneTimeEvents={oneTimeEvents}
+                recurringRevenues={recurringRevenues}
+                recurringExpenses={recurringExpenses}
+              />
 
-            {/* Revenue and Expense Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <RevenueBreakdown />
-              <RecurringExpenses />
-            </div>
+              {/* Revenue and Expense Breakdown */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <RevenueBreakdown />
+                <RecurringExpenses />
+              </div>
 
-            {/* Hypothetical Deals */}
-            <HypotheticalDeals onToggle={fetchAllData} />
+              {/* Hypothetical Deals */}
+              <HypotheticalDeals onToggle={fetchAllData} />
+            </Suspense>
+            
           </div>
         </div>
       </div>

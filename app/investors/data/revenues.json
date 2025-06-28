@@ -10,6 +10,17 @@
         "date": "2025-07-03"
       },
       "is_hypothetical": false
+    },
+    {
+      "id": "rev-1751108140513",
+      "source": "VAT back ",
+      "amount": 2222222,
+      "type": "revenue",
+      "transaction_type": "one-time",
+      "date_info": {
+        "date": "2025-07-31"
+      },
+      "is_hypothetical": false
     }
   ]
 }

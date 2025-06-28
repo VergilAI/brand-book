@@ -149,11 +149,156 @@ export async function GET() {
     const totalMonthlyRevenue = monthlyRevenue + hypotheticalRevenue;
     const totalMonthlyExpenses = monthlyExpenses + hypotheticalExpense;
     
-    // Calculate burn rate and runway
+    // Calculate burn rate
     const burnrate = totalMonthlyExpenses - totalMonthlyRevenue;
-    const runway_months = burnrate > 0 ? Math.floor(currentBalance / burnrate) : null;
     
-    // Calculate zero date
+    // Calculate runway with month-by-month projection
+    let projectedBalance = currentBalance;
+    let runway_months = 0;
+    const maxMonths = 120; // Cap at 10 years
+    
+    // Get all one-time events (revenues, expenses, and hypotheticals)
+    const allOneTimeEvents: Array<{date: Date, amount: number, type: 'revenue' | 'expense'}> = [];
+    
+    // Add one-time revenues
+    (revenuesData.revenues || []).forEach(item => {
+      if (item.transaction_type === "one-time" && item.date_info?.date) {
+        const eventDate = new Date(item.date_info.date);
+        if (eventDate > new Date()) {
+          allOneTimeEvents.push({
+            date: eventDate,
+            amount: item.amount,
+            type: 'revenue'
+          });
+        }
+      }
+    });
+    
+    // Add one-time expenses
+    (expensesData.expenses || []).forEach(item => {
+      if (item.transaction_type === "one-time" && item.date_info?.date) {
+        const eventDate = new Date(item.date_info.date);
+        if (eventDate > new Date()) {
+          allOneTimeEvents.push({
+            date: eventDate,
+            amount: item.amount,
+            type: 'expense'
+          });
+        }
+      }
+    });
+    
+    // Add enabled one-time hypotheticals
+    enabledHypotheticals.forEach(item => {
+      if (item.transaction_type === "one-time" && item.date_info?.date) {
+        const eventDate = new Date(item.date_info.date);
+        if (eventDate > new Date()) {
+          allOneTimeEvents.push({
+            date: eventDate,
+            amount: item.amount,
+            type: item.type
+          });
+        }
+      }
+    });
+    
+    // Project month by month
+    for (let month = 0; month < maxMonths; month++) {
+      const projectionDate = new Date();
+      projectionDate.setMonth(projectionDate.getMonth() + month);
+      
+      // Calculate recurring revenue for this month
+      let monthRevenue = 0;
+      (revenuesData.revenues || []).forEach(item => {
+        if (item.transaction_type === "recurring") {
+          const startDate = item.date_info.start_date ? new Date(item.date_info.start_date) : null;
+          const endDate = item.date_info.end_date ? new Date(item.date_info.end_date) : null;
+          
+          if ((!startDate || startDate <= projectionDate) && 
+              (!endDate || endDate >= projectionDate)) {
+            if (item.date_info.frequency === "Yearly") {
+              monthRevenue += item.amount / 12;
+            } else if (item.date_info.frequency === "Quarterly") {
+              monthRevenue += item.amount / 3;
+            } else {
+              monthRevenue += item.amount;
+            }
+          }
+        }
+      });
+      
+      // Calculate recurring expenses for this month
+      let monthExpense = 0;
+      (expensesData.expenses || []).forEach(item => {
+        if (item.transaction_type === "recurring") {
+          const startDate = item.date_info.start_date ? new Date(item.date_info.start_date) : null;
+          const endDate = item.date_info.end_date ? new Date(item.date_info.end_date) : null;
+          
+          if ((!startDate || startDate <= projectionDate) && 
+              (!endDate || endDate >= projectionDate)) {
+            if (item.date_info.frequency === "Yearly") {
+              monthExpense += item.amount / 12;
+            } else if (item.date_info.frequency === "Quarterly") {
+              monthExpense += item.amount / 3;
+            } else {
+              monthExpense += item.amount;
+            }
+          }
+        }
+      });
+      
+      // Add recurring hypotheticals
+      enabledHypotheticals.forEach(item => {
+        if (item.transaction_type === "recurring") {
+          const startDate = item.date_info.start_date ? new Date(item.date_info.start_date) : null;
+          const endDate = item.date_info.end_date ? new Date(item.date_info.end_date) : null;
+          
+          if ((!startDate || startDate <= projectionDate) && 
+              (!endDate || endDate >= projectionDate)) {
+            let monthlyAmount = item.amount;
+            if (item.date_info.frequency === "Yearly") {
+              monthlyAmount = item.amount / 12;
+            } else if (item.date_info.frequency === "Quarterly") {
+              monthlyAmount = item.amount / 3;
+            }
+            if (item.type === "revenue") {
+              monthRevenue += monthlyAmount;
+            } else {
+              monthExpense += monthlyAmount;
+            }
+          }
+        }
+      });
+      
+      // Add one-time events for this month
+      allOneTimeEvents.forEach(event => {
+        if (event.date.getFullYear() === projectionDate.getFullYear() && 
+            event.date.getMonth() === projectionDate.getMonth()) {
+          if (event.type === 'revenue') {
+            monthRevenue += event.amount;
+          } else {
+            monthExpense += event.amount;
+          }
+        }
+      });
+      
+      // Update balance
+      projectedBalance = projectedBalance + monthRevenue - monthExpense;
+      
+      // Check if we've hit zero
+      if (projectedBalance <= 0) {
+        runway_months = month;
+        break;
+      }
+      
+      // If balance is growing, cap at max months
+      if (month === maxMonths - 1) {
+        runway_months = null; // Infinite runway
+        break;
+      }
+    }
+    
+    // Calculate zero date based on accurate runway
     const zero_date = runway_months !== null 
       ? new Date(Date.now() + runway_months * 30 * 24 * 60 * 60 * 1000).toISOString()
       : null;

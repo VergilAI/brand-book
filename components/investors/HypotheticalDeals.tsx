@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { HypotheticalModal } from "./HypotheticalModal";
 
 interface Hypothetical {
   id: string;
@@ -31,8 +30,6 @@ interface HypotheticalDealsProps {
 export function HypotheticalDeals({ onHypotheticalChange, onToggle }: HypotheticalDealsProps = {}) {
   const [hypotheticals, setHypotheticals] = useState<Hypothetical[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingHypothetical, setEditingHypothetical] = useState<Hypothetical | null>(null);
   useEffect(() => {
     fetchHypotheticals();
   }, []);
@@ -54,10 +51,16 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
       .filter(h => h.enabled && h.type === "revenue")
       .reduce((total, h) => {
         if (h.transaction_type === "recurring") {
-          const freq = h.date_info.frequency?.toLowerCase();
-          const multiplier = freq === "yearly" ? 1/12 : 
-                            freq === "quarterly" ? 1/3 : 1;
-          return total + (h.amount * multiplier);
+          if ((h as any).recurring_type === "subscription") {
+            // For subscriptions, use the base amount (users × price)
+            return total + h.amount;
+          } else {
+            // For standard recurring items
+            const freq = h.date_info.frequency?.toLowerCase();
+            const multiplier = freq === "yearly" ? 1/12 : 
+                              freq === "quarterly" ? 1/3 : 1;
+            return total + (h.amount * multiplier);
+          }
         }
         // Don't include one-time in monthly calculation
         return total;
@@ -106,23 +109,6 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
     }
   };
 
-  const createOrUpdateHypothetical = async (data: any) => {
-    try {
-      const method = editingHypothetical ? "PUT" : "POST";
-      const body = editingHypothetical 
-        ? { ...data, id: editingHypothetical.id } 
-        : data;
-      
-      await fetch("/api/investors/hypotheticals", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      
-      fetchHypotheticals();
-    } catch (error) {
-    }
-  };
 
   return (
     <>
@@ -146,9 +132,9 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-4">
               {hypotheticals.length === 0 ? (
-                <p className="text-gray-500 col-span-full text-center py-8">
+                <p className="text-gray-500 text-center py-8">
                   No hypotheticals yet. Create one to start scenario planning!
                 </p>
               ) : (
@@ -162,34 +148,29 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
                         : "border-gray-200"
                     }`}
                   >
-                    <CardContent className="p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 text-sm truncate">
-                            {hypothetical.name || `${hypothetical.type === "revenue" ? "Revenue" : "Expense"} Scenario`}
-                          </h4>
-                          {hypothetical.description && (
-                            <p className="text-xs text-gray-600 line-clamp-2 mt-1">
-                              {hypothetical.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 ml-2">
-                          <button
-                            onClick={() => {
-                              setEditingHypothetical(hypothetical);
-                              setModalOpen(true);
-                            }}
-                            className="text-gray-400 hover:text-cosmic-purple transition-colors"
-                            title="Edit"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
+                    <CardContent className="p-4">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 text-sm">
+                              {hypothetical.name || `${hypothetical.type === "revenue" ? "Revenue" : "Expense"} Scenario`}
+                            </h4>
+                            {hypothetical.description && (
+                              <p className="text-xs text-gray-600 mt-1">
+                                {hypothetical.description}
+                              </p>
+                            )}
+                            <span className={`inline-block mt-2 px-2 py-0.5 text-xs rounded-full font-medium ${
+                              hypothetical.type === "revenue" 
+                                ? "bg-green-50 text-green-600 border border-green-200" 
+                                : "bg-red-50 text-red-600 border border-red-200"
+                            }`}>
+                              {hypothetical.type === "revenue" ? "Revenue" : "Expense"}
+                            </span>
+                          </div>
                           <button
                             onClick={() => deleteHypothetical(hypothetical.id)}
-                            className="text-gray-400 hover:text-red-500 transition-colors"
+                            className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
                             title="Delete"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,50 +178,46 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
                             </svg>
                           </button>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${
-                          hypothetical.type === "revenue" 
-                            ? "bg-consciousness-cyan/10 text-consciousness-cyan" 
-                            : "bg-red-100 text-red-600"
-                        }`}>
-                          {hypothetical.type === "revenue" ? "Revenue" : "Expense"}
-                        </span>
-                        <p className={`text-lg font-bold ${
-                          hypothetical.type === "revenue"
-                            ? "text-consciousness-cyan"
-                            : "text-red-500"
-                        }`}>
-                          {hypothetical.type === "expense" && "-"}
-                          {formatCurrency(hypothetical.amount)}
-                        </p>
-                      </div>
-                      
-                      <p className="text-xs text-gray-500 mb-3">
-                        {hypothetical.transaction_type === "one-time"
-                          ? `Date: ${hypothetical.date_info.date || "Not set"}`
-                          : `${hypothetical.date_info.frequency || "Monthly"} • ${hypothetical.date_info.start_date || "Not set"} - ${
-                              hypothetical.date_info.end_date || "Ongoing"
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className={`text-lg font-bold ${
+                              hypothetical.type === "revenue"
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}>
+                              {hypothetical.type === "expense" && "-"}
+                              {formatCurrency(hypothetical.amount)}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {hypothetical.transaction_type === "one-time"
+                                ? `Date: ${hypothetical.date_info.date || "Not set"}`
+                                : (hypothetical as any).recurring_type === "subscription"
+                                ? `Subscription: ${(hypothetical as any).subscription_users || 0} users × ${formatCurrency((hypothetical as any).subscription_price_per_user || 0)} (+${(hypothetical as any).subscription_growth_factor || 0}%/mo, -${(hypothetical as any).subscription_churn_rate || 0}%/mo churn)`
+                                : `${hypothetical.date_info.frequency || "Monthly"} • ${hypothetical.date_info.start_date || "Not set"} - ${
+                                    hypothetical.date_info.end_date || "Ongoing"
+                                  }`}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <label className="text-xs text-gray-600">
+                            Include in projections
+                          </label>
+                          <button
+                            onClick={() => toggleHypothetical(hypothetical.id, !hypothetical.enabled)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                              hypothetical.enabled ? "bg-cosmic-purple" : "bg-gray-300"
                             }`}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs text-gray-600">
-                          Include in projections
-                        </label>
-                        <button
-                          onClick={() => toggleHypothetical(hypothetical.id, !hypothetical.enabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            hypothetical.enabled ? "bg-cosmic-purple" : "bg-gray-300"
-                          }`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              hypothetical.enabled ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          />
-                        </button>
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                hypothetical.enabled ? "translate-x-6" : "translate-x-1"
+                              }`}
+                            />
+                          </button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -251,19 +228,6 @@ export function HypotheticalDeals({ onHypotheticalChange, onToggle }: Hypothetic
         </CardContent>
       </Card>
 
-      <HypotheticalModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingHypothetical(null);
-        }}
-        onSuccess={(data) => {
-          createOrUpdateHypothetical(data);
-          setModalOpen(false);
-          setEditingHypothetical(null);
-        }}
-        hypothetical={editingHypothetical}
-      />
     </>
   );
 }

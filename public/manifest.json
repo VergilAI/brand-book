@@ -1,0 +1,53 @@
+{
+  "name": "Vergil Investors Portal",
+  "short_name": "Vergil Investors",
+  "description": "Real-time financial health monitoring for Vergil stakeholders",
+  "start_url": "/investors",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#6366F1",
+  "categories": ["finance", "business"],
+  "icons": [
+    {
+      "src": "/vergil-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vergil-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Financial Dashboard"
+    },
+    {
+      "src": "/screenshots/burnrate.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Burn Rate Analysis"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/investors",
+      "description": "View financial dashboard"
+    },
+    {
+      "name": "Admin Panel",
+      "url": "/investors/admin",
+      "description": "Access admin controls"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

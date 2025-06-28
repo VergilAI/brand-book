@@ -86,7 +86,7 @@ export function RevenueBreakdown() {
       </div>
       <div className="text-left sm:text-right">
         <p className={`font-bold font-display text-lg sm:text-base ${
-          item.is_hypothetical ? "text-cosmic-purple opacity-70" : "text-phosphor-cyan"
+          item.is_hypothetical ? "text-gray-500" : "text-green-600"
         }`}>
           {formatCurrency(item.amount)}
         </p>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
+import { AdminFormField, AdminFormGrid, AdminListItem } from "./AdminLayout";
 
 interface ExpenseItem {
   id: string;
@@ -96,7 +97,7 @@ export function ExpenseManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-cosmic-purple">Loading expenses...</div>
+        <div className="animate-pulse text-gray-600">Loading expenses...</div>
       </div>
     );
   }
@@ -114,7 +115,7 @@ export function ExpenseManager() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === "recurring"
               ? "bg-cosmic-purple text-white"
-              : "bg-pure-light/10 text-stone-gray hover:bg-pure-light/20"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
           Recurring Expenses
@@ -128,7 +129,7 @@ export function ExpenseManager() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === "one-time"
               ? "bg-cosmic-purple text-white"
-              : "bg-pure-light/10 text-stone-gray hover:bg-pure-light/20"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
           One-time Expenses
@@ -136,9 +137,9 @@ export function ExpenseManager() {
       </div>
 
       {/* Add/Edit Form */}
-      <Card variant="gradient" className="border-cosmic-purple/20">
+      <Card variant="default" className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-pure-light">
+          <CardTitle className="text-gray-900">
             {editingId ? "Edit Expense" : `Add ${activeTab === "recurring" ? "Recurring" : "One-time"} Expense`}
           </CardTitle>
         </CardHeader>
@@ -146,24 +147,24 @@ export function ExpenseManager() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="text-sm text-stone-gray mb-1 block">Name</label>
+                <label className="text-sm text-gray-600 mb-1 block">Name</label>
                 <Input
                   type="text"
                   value={formData.name || ""}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                  className="bg-white border-gray-300 text-gray-900"
                   placeholder="e.g., Engineering Salaries"
                   required
                 />
               </div>
               
               <div>
-                <label className="text-sm text-stone-gray mb-1 block">Amount</label>
+                <label className="text-sm text-gray-600 mb-1 block">Amount</label>
                 <Input
                   type="number"
                   value={formData.amount || ""}
                   onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                  className="bg-white border-gray-300 text-gray-900"
                   placeholder="0.00"
                   required
                 />
@@ -172,14 +173,14 @@ export function ExpenseManager() {
               {activeTab === "recurring" ? (
                 <>
                   <div>
-                    <label className="text-sm text-stone-gray mb-1 block">Frequency</label>
+                    <label className="text-sm text-gray-600 mb-1 block">Frequency</label>
                     <select
                       value={formData.date_info?.frequency || ""}
                       onChange={(e) => setFormData({
                         ...formData,
                         date_info: { ...formData.date_info, frequency: e.target.value }
                       })}
-                      className="w-full px-3 py-2 bg-pure-light/10 border border-stone-gray/30 rounded-md text-pure-light"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900"
                       required
                     >
                       <option value="">Select frequency</option>
@@ -189,7 +190,7 @@ export function ExpenseManager() {
                   </div>
                   
                   <div>
-                    <label className="text-sm text-stone-gray mb-1 block">Start Date</label>
+                    <label className="text-sm text-gray-600 mb-1 block">Start Date</label>
                     <Input
                       type="date"
                       value={formData.date_info?.start_date || ""}
@@ -197,13 +198,13 @@ export function ExpenseManager() {
                         ...formData,
                         date_info: { ...formData.date_info, start_date: e.target.value }
                       })}
-                      className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                      className="bg-white border-gray-300 text-gray-900"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="text-sm text-stone-gray mb-1 block">End Date (Optional)</label>
+                    <label className="text-sm text-gray-600 mb-1 block">End Date (Optional)</label>
                     <Input
                       type="date"
                       value={formData.date_info?.end_date || ""}
@@ -211,13 +212,13 @@ export function ExpenseManager() {
                         ...formData,
                         date_info: { ...formData.date_info, end_date: e.target.value }
                       })}
-                      className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                      className="bg-white border-gray-300 text-gray-900"
                     />
                   </div>
                 </>
               ) : (
                 <div>
-                  <label className="text-sm text-stone-gray mb-1 block">Date</label>
+                  <label className="text-sm text-gray-600 mb-1 block">Date</label>
                   <Input
                     type="date"
                     value={formData.date_info?.date || ""}
@@ -225,7 +226,7 @@ export function ExpenseManager() {
                       ...formData,
                       date_info: { ...formData.date_info, date: e.target.value }
                     })}
-                    className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                    className="bg-white border-gray-300 text-gray-900"
                     required
                   />
                 </div>
@@ -244,7 +245,7 @@ export function ExpenseManager() {
                     setEditingId(null);
                     setFormData({ transaction_type: activeTab, date_info: {} });
                   }}
-                  className="border-stone-gray/30 text-stone-gray hover:text-pure-light"
+                  className="border-gray-300 text-gray-600 hover:text-gray-900"
                 >
                   Cancel
                 </Button>
@@ -255,27 +256,27 @@ export function ExpenseManager() {
       </Card>
 
       {/* Expenses List */}
-      <Card variant="default" className="bg-pure-light/10 border-stone-gray/20">
+      <Card variant="default" className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-pure-light">
+          <CardTitle className="text-gray-900">
             {activeTab === "recurring" ? "Recurring Expenses" : "One-time Expenses"}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {filteredExpenses.length === 0 ? (
-              <p className="text-stone-gray text-center py-8">
+              <p className="text-gray-500 text-center py-8">
                 No {activeTab} expenses found
               </p>
             ) : (
               filteredExpenses.map((expense) => (
                 <div
                   key={expense.id}
-                  className="flex items-center justify-between p-4 rounded-lg bg-pure-light/5 border border-stone-gray/20 hover:border-cosmic-purple/30 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200 hover:border-gray-300 transition-colors"
                 >
                   <div className="flex-1">
-                    <p className="text-pure-light font-medium">{expense.name}</p>
-                    <p className="text-sm text-stone-gray mt-1">
+                    <p className="text-gray-900 font-medium">{expense.name}</p>
+                    <p className="text-sm text-gray-600 mt-1">
                       {expense.transaction_type === "recurring" ? (
                         <>
                           {expense.date_info.frequency} • 
@@ -289,11 +290,11 @@ export function ExpenseManager() {
                   
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-xl font-bold text-neural-pink font-display">
+                      <p className="text-xl font-bold text-red-600 font-display">
                         {formatCurrency(expense.amount)}
                       </p>
                       {expense.transaction_type === "recurring" && expense.date_info.frequency === "Yearly" && (
-                        <p className="text-xs text-stone-gray">
+                        <p className="text-xs text-gray-600">
                           {formatCurrency(expense.amount / 12)}/mo
                         </p>
                       )}
@@ -303,7 +304,7 @@ export function ExpenseManager() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleEdit(expense)}
-                        className="border-cosmic-purple/30 text-cosmic-purple hover:bg-cosmic-purple/10"
+                        className="border-gray-300 text-gray-700 hover:bg-gray-100"
                       >
                         Edit
                       </Button>
@@ -311,7 +312,7 @@ export function ExpenseManager() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDelete(expense.id)}
-                        className="border-neural-pink/30 text-neural-pink hover:bg-neural-pink/10"
+                        className="border-red-200 text-red-600 hover:bg-red-50"
                       >
                         Delete
                       </Button>

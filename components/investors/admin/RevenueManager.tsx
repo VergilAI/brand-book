@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/utils";
+import { AdminLayout, AdminForm, AdminFormField, AdminFormGrid, AdminListItem } from "./AdminLayout";
 
 interface RevenueItem {
   id: string;
@@ -96,7 +97,7 @@ export function RevenueManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-cosmic-purple">Loading revenues...</div>
+        <div className="animate-pulse text-gray-600">Loading revenues...</div>
       </div>
     );
   }
@@ -114,7 +115,7 @@ export function RevenueManager() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === "recurring"
               ? "bg-cosmic-purple text-white"
-              : "bg-pure-light/10 text-stone-gray hover:bg-pure-light/20"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
           Recurring Revenue
@@ -128,7 +129,7 @@ export function RevenueManager() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === "one-time"
               ? "bg-cosmic-purple text-white"
-              : "bg-pure-light/10 text-stone-gray hover:bg-pure-light/20"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
           One-time Revenue
@@ -136,50 +137,50 @@ export function RevenueManager() {
       </div>
 
       {/* Add/Edit Form */}
-      <Card variant="gradient" className="border-cosmic-purple/20">
+      <Card variant="default" className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-pure-light">
+          <CardTitle className="text-gray-900">
             {editingId ? "Edit Revenue" : `Add ${activeTab === "recurring" ? "Recurring" : "One-time"} Revenue`}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="text-sm text-stone-gray mb-1 block">Source</label>
-                <Input
-                  type="text"
-                  value={formData.source || ""}
-                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
-                  placeholder="e.g., Enterprise License - Acme Corp"
-                  required
-                />
+            <AdminFormGrid columns={2}>
+              <div className="sm:col-span-2">
+                <AdminFormField label="Source">
+                  <Input
+                    type="text"
+                    value={formData.source || ""}
+                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                    className="bg-white border-gray-300 text-gray-900 focus:border-gray-400"
+                    placeholder="e.g., Enterprise License - Acme Corp"
+                    required
+                  />
+                </AdminFormField>
               </div>
               
-              <div>
-                <label className="text-sm text-stone-gray mb-1 block">Amount</label>
+              <AdminFormField label="Amount">
                 <Input
                   type="number"
                   value={formData.amount || ""}
                   onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                  className="bg-white border-gray-300 text-gray-900 focus:border-gray-400"
                   placeholder="0.00"
                   required
                 />
-              </div>
+              </AdminFormField>
               
               {activeTab === "recurring" ? (
                 <>
                   <div>
-                    <label className="text-sm text-stone-gray mb-1 block">Frequency</label>
+                    <label className="text-sm text-gray-600 mb-1 block">Frequency</label>
                     <select
                       value={formData.date_info?.frequency || ""}
                       onChange={(e) => setFormData({
                         ...formData,
                         date_info: { ...formData.date_info, frequency: e.target.value }
                       })}
-                      className="w-full px-3 py-2 bg-pure-light/10 border border-stone-gray/30 rounded-md text-pure-light"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900"
                       required
                     >
                       <option value="">Select frequency</option>
@@ -189,7 +190,7 @@ export function RevenueManager() {
                   </div>
                   
                   <div>
-                    <label className="text-sm text-stone-gray mb-1 block">Start Date</label>
+                    <label className="text-sm text-gray-600 mb-1 block">Start Date</label>
                     <Input
                       type="date"
                       value={formData.date_info?.start_date || ""}
@@ -197,13 +198,13 @@ export function RevenueManager() {
                         ...formData,
                         date_info: { ...formData.date_info, start_date: e.target.value }
                       })}
-                      className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                      className="bg-white border-gray-300 text-gray-900"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="text-sm text-stone-gray mb-1 block">End Date (Optional)</label>
+                    <label className="text-sm text-gray-600 mb-1 block">End Date (Optional)</label>
                     <Input
                       type="date"
                       value={formData.date_info?.end_date || ""}
@@ -211,13 +212,13 @@ export function RevenueManager() {
                         ...formData,
                         date_info: { ...formData.date_info, end_date: e.target.value }
                       })}
-                      className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                      className="bg-white border-gray-300 text-gray-900"
                     />
                   </div>
                 </>
               ) : (
                 <div>
-                  <label className="text-sm text-stone-gray mb-1 block">Date</label>
+                  <label className="text-sm text-gray-600 mb-1 block">Date</label>
                   <Input
                     type="date"
                     value={formData.date_info?.date || ""}
@@ -225,12 +226,12 @@ export function RevenueManager() {
                       ...formData,
                       date_info: { ...formData.date_info, date: e.target.value }
                     })}
-                    className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
+                    className="bg-white border-gray-300 text-gray-900"
                     required
                   />
                 </div>
               )}
-            </div>
+            </AdminFormGrid>
             
             <div className="flex gap-2">
               <Button type="submit" variant="default" className="bg-cosmic-purple hover:bg-cosmic-purple/80">
@@ -244,7 +245,7 @@ export function RevenueManager() {
                     setEditingId(null);
                     setFormData({ transaction_type: activeTab, date_info: {} });
                   }}
-                  className="border-stone-gray/30 text-stone-gray hover:text-pure-light"
+                  className="border-gray-300 text-gray-600 hover:text-gray-900"
                 >
                   Cancel
                 </Button>
@@ -255,55 +256,36 @@ export function RevenueManager() {
       </Card>
 
       {/* Revenues List */}
-      <Card variant="default" className="bg-pure-light/10 border-stone-gray/20">
+      <Card variant="default" className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-pure-light">
+          <CardTitle className="text-gray-900">
             {activeTab === "recurring" ? "Recurring Revenues" : "One-time Revenues"}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {filteredRevenues.length === 0 ? (
-              <p className="text-stone-gray text-center py-8">
+              <p className="text-gray-500 text-center py-8">
                 No {activeTab} revenues found
               </p>
             ) : (
               filteredRevenues.map((revenue) => (
-                <div
+                <AdminListItem
                   key={revenue.id}
-                  className="flex items-center justify-between p-4 rounded-lg bg-pure-light/5 border border-stone-gray/20 hover:border-cosmic-purple/30 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="text-pure-light font-medium">{revenue.source}</p>
-                    <p className="text-sm text-stone-gray mt-1">
-                      {revenue.transaction_type === "recurring" ? (
-                        <>
-                          {revenue.date_info.frequency} • 
-                          {revenue.date_info.start_date} - {revenue.date_info.end_date || "Ongoing"}
-                        </>
-                      ) : (
-                        revenue.date_info.date
-                      )}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-phosphor-cyan font-display">
-                        {formatCurrency(revenue.amount)}
-                      </p>
-                      {revenue.transaction_type === "recurring" && revenue.date_info.frequency === "Yearly" && (
-                        <p className="text-xs text-stone-gray">
-                          {formatCurrency(revenue.amount / 12)}/mo
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
+                  title={revenue.source}
+                  subtitle={
+                    revenue.transaction_type === "recurring" 
+                      ? `${revenue.date_info.frequency} • ${revenue.date_info.start_date} - ${revenue.date_info.end_date || "Ongoing"}`
+                      : revenue.date_info.date
+                  }
+                  value={formatCurrency(revenue.amount)}
+                  actions={
+                    <>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEdit(revenue)}
-                        className="border-cosmic-purple/30 text-cosmic-purple hover:bg-cosmic-purple/10"
+                        className="border-gray-300 text-gray-700 hover:bg-gray-100 flex-1 sm:flex-initial"
                       >
                         Edit
                       </Button>
@@ -311,13 +293,60 @@ export function RevenueManager() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDelete(revenue.id)}
-                        className="border-neural-pink/30 text-neural-pink hover:bg-neural-pink/10"
+                        className="border-red-200 text-red-600 hover:bg-red-50 flex-1 sm:flex-initial"
                       >
                         Delete
                       </Button>
+                    </>
+                  }
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1 space-y-2">
+                      <p className="text-gray-900 font-medium">{revenue.source}</p>
+                      <p className="text-sm text-gray-600">
+                        {revenue.transaction_type === "recurring" ? (
+                          <>
+                            {revenue.date_info.frequency} • 
+                            {revenue.date_info.start_date} - {revenue.date_info.end_date || "Ongoing"}
+                          </>
+                        ) : (
+                          revenue.date_info.date
+                        )}
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="text-left sm:text-right">
+                        <p className="text-xl sm:text-2xl font-bold text-green-600 font-display">
+                          {formatCurrency(revenue.amount)}
+                        </p>
+                        {revenue.transaction_type === "recurring" && revenue.date_info.frequency === "Yearly" && (
+                          <p className="text-xs text-gray-600">
+                            {formatCurrency(revenue.amount / 12)}/mo
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(revenue)}
+                          className="border-gray-300 text-gray-700 hover:bg-gray-100 flex-1 sm:flex-initial"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(revenue.id)}
+                          className="border-red-200 text-red-600 hover:bg-red-50 flex-1 sm:flex-initial"
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </AdminListItem>
               ))
             )}
           </div>

@@ -22,22 +22,25 @@ export function FinancialSummary({ data }: FinancialSummaryProps) {
     {
       label: "Current Balance",
       value: formatCurrency(data.current_balance),
-      trend: data.current_balance > 0 ? "positive" : "negative",
+      trend: "neutral",
     },
     {
       label: "Monthly Revenue",
       value: formatCurrency(data.monthly_revenue),
       subtitle: `12m avg: ${formatCurrency(data.revenue_12month_avg)}`,
+      trend: "positive",
     },
     {
       label: "Monthly Expenses", 
-      value: formatCurrency(data.monthly_expenses),
+      value: `-${formatCurrency(data.monthly_expenses)}`,
       subtitle: `Next 30 days: ${formatCurrency(data.actual_spending_this_month)}`,
+      trend: "negative",
     },
     {
-      label: "Burn Rate",
-      value: formatCurrency(Math.abs(data.burnrate)),
-      trend: data.burnrate < 0 ? "positive" : "negative",
+      label: "Net Burn Rate",
+      value: data.burnrate > 0 ? `-${formatCurrency(Math.abs(data.burnrate))}` : formatCurrency(Math.abs(data.burnrate)),
+      trend: data.burnrate > 0 ? "negative" : "positive",
+      subtitle: data.burnrate > 0 ? "Spending more than earning" : "Earning more than spending",
     },
     {
       label: "Runway",
@@ -61,23 +64,21 @@ export function FinancialSummary({ data }: FinancialSummaryProps) {
         <Card 
           key={index} 
           variant="metric" 
-          className="bg-pure-light/10 border-stone-gray/20 animate-breathing backdrop-blur-sm hover:bg-pure-light/15 transition-colors"
+          className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow"
         >
           <CardContent className="p-4 sm:p-5 lg:p-6">
-            <p className="text-xs sm:text-sm text-stone-gray mb-1 sm:mb-2 font-medium">{metric.label}</p>
+            <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 font-medium">{metric.label}</p>
             <p className={`text-xl sm:text-2xl font-bold font-display ${
               metric.trend === "positive" 
-                ? "text-phosphor-cyan" 
+                ? "text-green-600" 
                 : metric.trend === "negative"
-                ? "text-neural-pink"
-                : metric.trend === "warning"
-                ? "text-electric-violet"
-                : "text-pure-light"
+                ? "text-red-600"
+                : "text-cosmic-purple"
             }`}>
               {metric.value}
             </p>
             {metric.subtitle && (
-              <p className="text-[10px] sm:text-xs text-mist-gray mt-1">{metric.subtitle}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{metric.subtitle}</p>
             )}
           </CardContent>
         </Card>

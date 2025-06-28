@@ -46,23 +46,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4">
-      <IrisPattern className="fixed inset-0 opacity-10" />
+    <div className="min-h-screen bg-gradient-to-br from-cosmic-purple/5 via-white to-electric-violet/5 flex items-center justify-center p-4">
+      <IrisPattern className="fixed inset-0 opacity-5" />
       
       <div className="relative z-10 w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <VergilLogo variant="mark" size="lg" />
+          <VergilLogo variant="logo" size="lg" className="filter invert" />
         </div>
         
-        <Card variant="gradient" className="p-8">
+        <Card variant="default" className="p-8 bg-white shadow-xl border-gray-200">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Investor Portal</h1>
-            <p className="text-gray-400">Sign in to access financial insights</p>
+            <h1 className="text-2xl font-bold text-dark-900 mb-2">Investor Portal</h1>
+            <p className="text-gray-600">Sign in to access financial insights</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+              <Label htmlFor="email" className="flex items-center gap-2 mb-2 text-gray-700">
                 <Mail className="w-4 h-4" />
                 Email Address
               </Label>
@@ -78,7 +78,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <Label htmlFor="password" className="flex items-center gap-2 mb-2">
+              <Label htmlFor="password" className="flex items-center gap-2 mb-2 text-gray-700">
                 <Lock className="w-4 h-4" />
                 Password
               </Label>
@@ -94,8 +94,8 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                <p className="text-sm text-red-400">{error}</p>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
@@ -109,15 +109,17 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <p className="text-center text-sm text-gray-400">
-              Default credentials for testing:
-              <br />
-              Email: admin@vergil.ai
-              <br />
-              Password: admin123
-            </p>
-          </div>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-center text-sm text-gray-500">
+                Development credentials:
+                <br />
+                Email: admin@vergil.ai
+                <br />
+                Password: admin123
+              </p>
+            </div>
+          )}
         </Card>
       </div>
     </div>

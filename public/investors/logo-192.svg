@@ -1,0 +1,12 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" fill="#030712"/>
+  <circle cx="96" cy="96" r="80" fill="url(#gradient)"/>
+  <path d="M96 48L80 144H112L96 48Z" fill="white" opacity="0.9"/>
+  <circle cx="96" cy="48" r="8" fill="white"/>
+  <defs>
+    <radialGradient id="gradient" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </radialGradient>
+  </defs>
+</svg>

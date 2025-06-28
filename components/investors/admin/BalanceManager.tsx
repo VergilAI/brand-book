@@ -80,7 +80,7 @@ export function BalanceManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-pulse text-cosmic-purple">Loading balances...</div>
+        <div className="animate-pulse text-gray-600">Loading balances...</div>
       </div>
     );
   }
@@ -88,62 +88,66 @@ export function BalanceManager() {
   return (
     <div className="space-y-6">
       {/* Add/Edit Form */}
-      <Card variant="gradient" className="border-cosmic-purple/20">
+      <Card variant="default" className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-pure-light">
+          <CardTitle className="text-gray-900">
             {editingId ? "Edit Balance" : "Add Balance"}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-stone-gray mb-1 block">Type</label>
-                <select
-                  value={formData.type || ""}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as "starting" | "current" })}
-                  className="w-full px-3 py-2 bg-pure-light/10 border border-stone-gray/30 rounded-md text-pure-light"
-                  required
-                >
-                  <option value="">Select type</option>
-                  <option value="starting">Starting Balance</option>
-                  <option value="current">Current Balance</option>
-                </select>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block font-medium">Type</label>
+                  <select
+                    value={formData.type || ""}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value as "starting" | "current" })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:border-cosmic-purple focus:ring-1 focus:ring-cosmic-purple/30"
+                    required
+                  >
+                    <option value="">Select type</option>
+                    <option value="starting">Starting Balance</option>
+                    <option value="current">Current Balance</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block font-medium">Amount</label>
+                  <Input
+                    type="number"
+                    value={formData.amount || ""}
+                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+                    className="bg-white border-gray-300 text-gray-900 focus:border-cosmic-purple"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
               </div>
               
-              <div>
-                <label className="text-sm text-stone-gray mb-1 block">Amount</label>
-                <Input
-                  type="number"
-                  value={formData.amount || ""}
-                  onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm text-stone-gray mb-1 block">Date</label>
-                <Input
-                  type="date"
-                  value={formData.date || ""}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm text-stone-gray mb-1 block">Description</label>
-                <Input
-                  type="text"
-                  value={formData.description || ""}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-pure-light/10 border-stone-gray/30 text-pure-light"
-                  placeholder="Description"
-                  required
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block font-medium">Date</label>
+                  <Input
+                    type="date"
+                    value={formData.date || ""}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="bg-white border-gray-300 text-gray-900 focus:border-cosmic-purple"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block font-medium">Description</label>
+                  <Input
+                    type="text"
+                    value={formData.description || ""}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="bg-white border-gray-300 text-gray-900 focus:border-cosmic-purple"
+                    placeholder="Description"
+                    required
+                  />
+                </div>
               </div>
             </div>
             
@@ -159,7 +163,7 @@ export function BalanceManager() {
                     setEditingId(null);
                     setFormData({});
                   }}
-                  className="border-stone-gray/30 text-stone-gray hover:text-pure-light"
+                  className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 >
                   Cancel
                 </Button>
@@ -170,46 +174,48 @@ export function BalanceManager() {
       </Card>
 
       {/* Balances List */}
-      <Card variant="default" className="bg-pure-light/10 border-stone-gray/20">
+      <Card variant="default" className="bg-white border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-pure-light">Current Balances</CardTitle>
+          <CardTitle className="text-gray-900">Current Balances</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {balances.length === 0 ? (
-              <p className="text-stone-gray text-center py-8">No balances found</p>
+              <p className="text-gray-500 text-center py-8">No balances found</p>
             ) : (
               balances.map((balance) => (
                 <div
                   key={balance.id}
-                  className="flex items-center justify-between p-4 rounded-lg bg-pure-light/5 border border-stone-gray/20 hover:border-cosmic-purple/30 transition-colors"
+                  className="p-4 rounded-lg bg-gray-50 border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${
-                        balance.type === "starting" 
-                          ? "bg-electric-violet/20 text-electric-violet border border-electric-violet/30"
-                          : "bg-phosphor-cyan/20 text-phosphor-cyan border border-phosphor-cyan/30"
-                      }`}>
-                        {balance.type === "starting" ? "Starting" : "Current"}
-                      </span>
-                      <p className="text-pure-light font-medium">{balance.description}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                          balance.type === "starting" 
+                            ? "bg-gray-100 text-gray-700 border border-gray-300"
+                            : "bg-blue-50 text-blue-700 border border-blue-200"
+                        }`}>
+                          {balance.type === "starting" ? "Starting" : "Current"}
+                        </span>
+                        <p className="text-gray-900 font-medium">{balance.description}</p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                        <p className="text-sm text-gray-600">
+                          {new Date(balance.date).toLocaleDateString()}
+                        </p>
+                        <p className="text-xl sm:text-2xl font-bold text-cosmic-purple font-display">
+                          {formatCurrency(balance.amount)}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-stone-gray mt-1">
-                      {new Date(balance.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <p className="text-xl font-bold text-phosphor-cyan font-display">
-                      {formatCurrency(balance.amount)}
-                    </p>
+                    
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEdit(balance)}
-                        className="border-cosmic-purple/30 text-cosmic-purple hover:bg-cosmic-purple/10"
+                        className="border-gray-300 text-gray-700 hover:bg-gray-50 flex-1 sm:flex-initial"
                       >
                         Edit
                       </Button>
@@ -217,7 +223,7 @@ export function BalanceManager() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDelete(balance.id)}
-                        className="border-neural-pink/30 text-neural-pink hover:bg-neural-pink/10"
+                        className="border-red-300 text-red-600 hover:bg-red-50 flex-1 sm:flex-initial"
                       >
                         Delete
                       </Button>

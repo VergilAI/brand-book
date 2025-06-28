@@ -1,0 +1,167 @@
+version: '3.8'
+
+services:
+  # Main Application
+  app:
+    build:
+      context: ../..
+      dockerfile: app/investors/Dockerfile
+    container_name: vergil-investors-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Application
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=https://investors.vergil.ai
+      
+      # Database
+      - DATABASE_URL=postgresql://vergil:${DB_PASSWORD}@postgres:5432/vergil_investors?schema=public
+      
+      # Authentication
+      - NEXTAUTH_URL=https://investors.vergil.ai
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      
+      # File Storage (using local volume in this example)
+      - UPLOAD_DIR=/app/uploads
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+      - ./logs:/app/logs
+    networks:
+      - vergil-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: vergil-investors-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=vergil
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=vergil_investors
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vergil -d vergil_investors"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vergil-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: vergil-investors-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vergil-network
+
+  # Nginx Reverse Proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: vergil-investors-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - nginx-cache:/var/cache/nginx
+    depends_on:
+      - app
+    networks:
+      - vergil-network
+
+  # Database Backup Service
+  backup:
+    image: postgres:15-alpine
+    container_name: vergil-investors-backup
+    environment:
+      - PGPASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    command: >
+      sh -c "while true; do
+        pg_dump -h postgres -U vergil vergil_investors > /backups/backup-$$(date +%Y%m%d-%H%M%S).sql
+        find /backups -name 'backup-*.sql' -mtime +7 -delete
+        sleep 86400
+      done"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vergil-network
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: vergil-investors-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    networks:
+      - vergil-network
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: vergil-investors-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - vergil-network
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  uploads:
+    driver: local
+  nginx-cache:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  vergil-network:
+    driver: bridge

@@ -15,9 +15,11 @@ interface MobileNavProps {
     name: string;
   } | null;
   onLogout: () => void;
+  adminTab?: string;
+  onAdminTabChange?: (tab: string) => void;
 }
 
-export function MobileNav({ user, onLogout }: MobileNavProps) {
+export function MobileNav({ user, onLogout, adminTab, onAdminTabChange }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -32,65 +34,41 @@ export function MobileNav({ user, onLogout }: MobileNavProps) {
     <>
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <VergilLogo variant="logo" size="md" animated />
-          <div>
-            <h1 className="text-lg font-display font-bold text-pure-light">
-              Financial Panel
-            </h1>
-          </div>
+        <div className="flex items-center gap-2">
+          <VergilLogo variant="mark" size="md" animated className="filter invert" />
+          <h1 className="text-base font-display font-bold text-dark-900">
+            Vergil Finances
+          </h1>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
-          className="text-pure-light"
+          className="text-gray-700"
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </Button>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <div 
-        className={cn(
-          "fixed inset-0 bg-deep-space/80 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300",
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        )}
-        onClick={() => setIsOpen(false)}
-      />
-
-      {/* Mobile Menu Slide-out */}
+      {/* Mobile Menu Push-down */}
       <div
         className={cn(
-          "fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-deep-space to-deep-space/95 border-l border-stone-gray/20 z-50 lg:hidden transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          "lg:hidden bg-white border-b border-gray-200 shadow-sm transition-all duration-300 ease-in-out overflow-hidden",
+          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
         )}
       >
-        <div className="flex flex-col h-full">
-          {/* Menu Header */}
-          <div className="flex items-center justify-between p-6 border-b border-stone-gray/20">
-            <h2 className="text-xl font-display font-bold text-pure-light">Menu</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="text-pure-light"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
+        <div className="px-4 py-3">
 
           {/* User Info */}
           {user && (
-            <div className="p-6 border-b border-stone-gray/20">
+            <div className="mb-4 pb-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cosmic-purple to-electric-violet flex items-center justify-center">
-                  <User className="w-6 h-6 text-pure-light" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cosmic-purple to-electric-violet flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-pure-light">{user.name}</p>
-                  <p className="text-xs text-stone-gray">{user.email}</p>
-                  <p className="text-xs text-consciousness-cyan mt-1">
+                  <p className="text-sm font-medium text-dark-900">{user.name}</p>
+                  <p className="text-xs text-cosmic-purple">
                     {user.role === 'admin' ? 'Administrator' : 'Investor'}
                   </p>
                 </div>
@@ -99,49 +77,46 @@ export function MobileNav({ user, onLogout }: MobileNavProps) {
           )}
 
           {/* Menu Items */}
-          <div className="flex-1 p-6">
-            <nav className="space-y-2">
+          <nav className="space-y-2">
               {isAdminPage ? (
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => handleNavigate('/investors')}
-                  className="w-full justify-start text-left text-pure-light hover:bg-cosmic-purple/20"
-                >
-                  <BarChart3 className="w-5 h-5 mr-3" />
-                  View Dashboard
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleNavigate('/investors')}
+                    className="w-full justify-start text-left text-gray-700 hover:bg-gray-100"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </>
               ) : (
                 user?.role === 'admin' && (
                   <Button
                     variant="ghost"
-                    size="lg"
+                    size="sm"
                     onClick={() => handleNavigate('/investors/admin')}
-                    className="w-full justify-start text-left text-pure-light hover:bg-cosmic-purple/20"
+                    className="w-full justify-start text-left text-gray-700 hover:bg-gray-100"
                   >
-                    <Settings className="w-5 h-5 mr-3" />
+                    <Settings className="w-4 h-4 mr-2" />
                     Admin Panel
                   </Button>
                 )
               )}
-            </nav>
-          </div>
-
-          {/* Logout Button */}
-          <div className="p-6 border-t border-stone-gray/20">
+            {/* Logout Button */}
             <Button
               variant="ghost"
-              size="lg"
+              size="sm"
               onClick={() => {
                 onLogout();
                 setIsOpen(false);
               }}
-              className="w-full justify-start text-left text-neural-pink hover:bg-neural-pink/20"
+              className="w-full justify-start text-left text-red-600 hover:bg-red-50 mt-4 pt-4 border-t border-gray-200"
             >
-              <LogOut className="w-5 h-5 mr-3" />
+              <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
-          </div>
+          </nav>
         </div>
       </div>
     </>

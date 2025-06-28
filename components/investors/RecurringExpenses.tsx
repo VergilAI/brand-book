@@ -77,7 +77,7 @@ export function RecurringExpenses() {
         </p>
       </div>
       <div className="text-left sm:text-right">
-        <p className="text-neural-pink font-bold font-display text-lg sm:text-base">
+        <p className="text-red-600 font-bold font-display text-lg sm:text-base">
           {formatCurrency(item.amount)}
         </p>
         <p className="text-xs text-gray-500 capitalize">

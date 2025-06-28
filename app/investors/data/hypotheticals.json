@@ -1,8 +1,8 @@
 {
   "hypotheticals": [
     {
-      "id": "hyp-1751036141649",
-      "name": "MBH Project ",
+      "id": "hyp-1751108317042",
+      "name": "MBH Bank - Vergil Learn",
       "amount": 15000000,
       "type": "revenue",
       "transaction_type": "one-time",
@@ -10,8 +10,31 @@
         "date": "2025-09-01"
       },
       "enabled": true,
-      "probability": 1,
-      "description": "This is about the MBH project"
+      "description": "Vergil Learn for comprehensive employee training and upskilling"
+    },
+    {
+      "id": "hyp-1751108349021",
+      "name": "PetraTalks - Schleer Tamás",
+      "amount": 3500000,
+      "type": "revenue",
+      "transaction_type": "one-time",
+      "date_info": {
+        "date": "2025-08-01"
+      },
+      "enabled": true,
+      "description": "AI chat bot development "
+    },
+    {
+      "id": "hyp-1751108378320",
+      "name": "Secure IT Labs",
+      "amount": 12000000,
+      "type": "revenue",
+      "transaction_type": "one-time",
+      "date_info": {
+        "date": "2025-08-01"
+      },
+      "enabled": false,
+      "description": "Bahrain Compliance Training "
     }
   ]
 }
