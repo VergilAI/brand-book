@@ -155,6 +155,14 @@ export const gameTypes: GameType[] = [
     category: 'game',
     requiresAI: true
   },
+  {
+    id: 'optimized-territory-map',
+    name: 'Optimized Territory Map',
+    description: 'Efficient border-based territory system',
+    icon: Map,
+    category: 'game',
+    requiresAI: true
+  },
 
   // Chat Based Games
   {
