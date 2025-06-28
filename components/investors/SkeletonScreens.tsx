@@ -34,11 +34,9 @@ export function ChartSkeleton() {
       <Skeleton className="h-6 w-48 mb-4" />
       <div className="h-[300px] flex items-end justify-between gap-2">
         {Array.from({ length: 12 }).map((_, i) => (
-          <Skeleton
-            key={i}
-            className="flex-1"
-            style={{ height: `${Math.random() * 70 + 30}%` }}
-          />
+          <div key={i} className="flex-1 relative" style={{ height: `${Math.random() * 70 + 30}%` }}>
+            <Skeleton className="absolute inset-0" />
+          </div>
         ))}
       </div>
     </div>

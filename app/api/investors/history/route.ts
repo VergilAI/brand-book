@@ -1,41 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { requireAuth } from '@/lib/investors/auth';
+import { DataService } from '@/lib/investors/dataService';
 
-// Data paths
-const balancesPath = path.join(process.cwd(), "app", "investors", "data", "balances.json");
-const revenuesPath = path.join(process.cwd(), "app", "investors", "data", "revenues.json");
-const expensesPath = path.join(process.cwd(), "app", "investors", "data", "expenses.json");
+interface Balance {
+  id: string;
+  type: "starting" | "current";
+  amount: number;
+  date: string;
+  description: string;
+}
+
+interface FinancialItem {
+  id: string;
+  source?: string;
+  name?: string;
+  amount: number;
+  type: string;
+  transaction_type: "recurring" | "one-time";
+  date_info: {
+    date?: string;
+    start_date?: string;
+    end_date?: string;
+    frequency?: string;
+  };
+  is_hypothetical: boolean;
+}
 
 // Helper functions to read data
-async function readBalances() {
+async function readBalances(): Promise<Balance[]> {
   try {
-    const data = await fs.readFile(balancesPath, "utf-8");
-    return JSON.parse(data).balances || [];
+    const data = await DataService.readJSON('balances.json');
+    return data.balances || [];
   } catch (error) {
     return [];
   }
 }
 
-async function readRevenues() {
+async function readRevenues(): Promise<FinancialItem[]> {
   try {
-    const data = await fs.readFile(revenuesPath, "utf-8");
-    return JSON.parse(data).revenues || [];
+    const data = await DataService.readJSON('revenues.json');
+    return data.revenues || [];
   } catch (error) {
     return [];
   }
 }
 
-async function readExpenses() {
+async function readExpenses(): Promise<FinancialItem[]> {
   try {
-    const data = await fs.readFile(expensesPath, "utf-8");
-    return JSON.parse(data).expenses || [];
+    const data = await DataService.readJSON('expenses.json');
+    return data.expenses || [];
   } catch (error) {
     return [];
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = requireAuth(async (request: NextRequest, user) => {
   try {
 
     // Get date parameters
@@ -78,9 +97,9 @@ export async function GET(request: NextRequest) {
 
     // Process one-time revenues
     revenues
-      .filter(r => r.transaction_type === "one-time" && !r.is_hypothetical)
+      .filter(r => r.transaction_type === "one-time" && !r.is_hypothetical && r.date_info.date)
       .forEach(revenue => {
-        const revenueDate = new Date(revenue.date_info.date);
+        const revenueDate = new Date(revenue.date_info.date!);
         if (revenueDate >= startDate && revenueDate <= endDate) {
           periodRevenues.push({
             id: revenue.id,
@@ -95,9 +114,9 @@ export async function GET(request: NextRequest) {
 
     // Process recurring revenues
     revenues
-      .filter(r => r.transaction_type === "recurring" && !r.is_hypothetical)
+      .filter(r => r.transaction_type === "recurring" && !r.is_hypothetical && r.date_info.start_date)
       .forEach(revenue => {
-        const recurringStart = new Date(revenue.date_info.start_date);
+        const recurringStart = new Date(revenue.date_info.start_date!);
         const recurringEnd = revenue.date_info.end_date ? new Date(revenue.date_info.end_date) : endDate;
         
         // Calculate overlap period
@@ -132,9 +151,9 @@ export async function GET(request: NextRequest) {
 
     // Process one-time expenses
     expenses
-      .filter(e => e.transaction_type === "one-time" && !e.is_hypothetical)
+      .filter(e => e.transaction_type === "one-time" && !e.is_hypothetical && e.date_info.date)
       .forEach(expense => {
-        const expenseDate = new Date(expense.date_info.date);
+        const expenseDate = new Date(expense.date_info.date!);
         if (expenseDate >= startDate && expenseDate <= endDate) {
           periodExpenses.push({
             id: expense.id,
@@ -149,9 +168,9 @@ export async function GET(request: NextRequest) {
 
     // Process recurring expenses
     expenses
-      .filter(e => e.transaction_type === "recurring" && !e.is_hypothetical)
+      .filter(e => e.transaction_type === "recurring" && !e.is_hypothetical && e.date_info.start_date)
       .forEach(expense => {
-        const recurringStart = new Date(expense.date_info.start_date);
+        const recurringStart = new Date(expense.date_info.start_date!);
         const recurringEnd = expense.date_info.end_date ? new Date(expense.date_info.end_date) : endDate;
         
         // Calculate overlap period
@@ -206,4 +225,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

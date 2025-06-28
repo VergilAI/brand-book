@@ -61,7 +61,7 @@ export function optimizedDebounce<T extends (...args: any[]) => any>(
   const trailing = options?.trailing ?? true;
 
   function invokeFunc(time: number) {
-    const args = lastCallTime ? arguments : [];
+    const args = lastCallTime ? Array.from(arguments) : [];
     lastInvokeTime = time;
     timeout = null;
     return func.apply(null, args);
@@ -149,7 +149,7 @@ export function optimizedDebounce<T extends (...args: any[]) => any>(
   debounced.cancel = cancel;
   debounced.flush = flush;
 
-  return debounced as T;
+  return debounced as unknown as T;
 }
 
 // Optimize images for mobile

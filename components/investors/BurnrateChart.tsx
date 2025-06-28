@@ -996,19 +996,20 @@ export function BurnRateChart({
     g.selectAll(".revenue-bar")
       .on("mouseover", function(event, d) {
         if (!isTouchDevice()) {
+          const dataPoint = d as ChartDataPoint;
           select(this).attr("opacity", 1);
           
           const tooltipHtml = `
             <div style="font-weight: 600; margin-bottom: 4px; color: #059669;">
-              ${d.oneTimeRevenueName || "One-time Revenue"}
+              ${dataPoint.oneTimeRevenueName || "One-time Revenue"}
             </div>
             <div style="margin-bottom: 4px;">
               <span style="color: #6B7280;">Date:</span> 
-              <span style="font-weight: 600;">${timeFormat("%B %d, %Y")(d.date)}</span>
+              <span style="font-weight: 600;">${timeFormat("%B %d, %Y")(dataPoint.date)}</span>
             </div>
             <div>
               <span style="color: #6B7280;">Amount:</span> 
-              <span style="font-weight: 600;">+${formatCurrency(d.oneTimeRevenue || 0)}</span>
+              <span style="font-weight: 600;">+${formatCurrency(dataPoint.oneTimeRevenue || 0)}</span>
             </div>
           `;
           
@@ -1036,25 +1037,26 @@ export function BurnRateChart({
       })
       .on("click", function(event, d) {
         if (isTouchDevice()) {
+          const dataPoint = d as ChartDataPoint;
           select(this).attr("opacity", 1);
           
           const tooltipContent = `
             <div class="font-bold mb-1 text-green-600">
-              ${d.oneTimeRevenueName || "One-time Revenue"}
+              ${dataPoint.oneTimeRevenueName || "One-time Revenue"}
             </div>
             <div class="mb-1">
               <span class="text-gray-500">Date:</span> 
-              <span class="font-semibold">${timeFormat("%B %d, %Y")(d.date)}</span>
+              <span class="font-semibold">${timeFormat("%B %d, %Y")(dataPoint.date)}</span>
             </div>
             <div>
               <span class="text-gray-500">Amount:</span> 
-              <span class="font-semibold">+${formatCurrency(d.oneTimeRevenue || 0)}</span>
+              <span class="font-semibold">+${formatCurrency(dataPoint.oneTimeRevenue || 0)}</span>
             </div>
           `;
           
           // Adjust tooltip position for zoom and pan
-          const tooltipX = xScale(d.date) * zoomLevel + margin.left + panX;
-          const tooltipY = yScale(d.oneTimeRevenue || 0) + margin.top - 10;
+          const tooltipX = xScale(dataPoint.date) * zoomLevel + margin.left + panX;
+          const tooltipY = yScale(dataPoint.oneTimeRevenue || 0) + margin.top - 10;
           
           setActiveTooltip({
             x: tooltipX,
@@ -1074,19 +1076,20 @@ export function BurnRateChart({
     g.selectAll(".expense-bar")
       .on("mouseover", function(event, d) {
         if (!isTouchDevice()) {
+          const dataPoint = d as ChartDataPoint;
           select(this).attr("opacity", 1);
           
           const tooltipHtml = `
             <div style="font-weight: 600; margin-bottom: 4px; color: #DC2626;">
-              ${d.oneTimeExpenseName || "One-time Expense"}
+              ${dataPoint.oneTimeExpenseName || "One-time Expense"}
             </div>
             <div style="margin-bottom: 4px;">
               <span style="color: #6B7280;">Date:</span> 
-              <span style="font-weight: 600;">${timeFormat("%B %d, %Y")(d.date)}</span>
+              <span style="font-weight: 600;">${timeFormat("%B %d, %Y")(dataPoint.date)}</span>
             </div>
             <div>
               <span style="color: #6B7280;">Amount:</span> 
-              <span style="font-weight: 600; color: #DC2626;">-${formatCurrency(d.oneTimeExpense || 0)}</span>
+              <span style="font-weight: 600; color: #DC2626;">-${formatCurrency(dataPoint.oneTimeExpense || 0)}</span>
             </div>
           `;
           
@@ -1114,24 +1117,25 @@ export function BurnRateChart({
       })
       .on("click", function(event, d) {
         if (isTouchDevice()) {
+          const dataPoint = d as ChartDataPoint;
           select(this).attr("opacity", 1);
           
           const tooltipContent = `
             <div class="font-bold mb-1 text-red-600">
-              ${d.oneTimeExpenseName || "One-time Expense"}
+              ${dataPoint.oneTimeExpenseName || "One-time Expense"}
             </div>
             <div class="mb-1">
               <span class="text-gray-500">Date:</span> 
-              <span class="font-semibold">${timeFormat("%B %d, %Y")(d.date)}</span>
+              <span class="font-semibold">${timeFormat("%B %d, %Y")(dataPoint.date)}</span>
             </div>
             <div>
               <span class="text-gray-500">Amount:</span> 
-              <span class="font-semibold text-red-600">-${formatCurrency(d.oneTimeExpense || 0)}</span>
+              <span class="font-semibold text-red-600">-${formatCurrency(dataPoint.oneTimeExpense || 0)}</span>
             </div>
           `;
           
           // Adjust tooltip position for zoom and pan
-          const tooltipX = xScale(d.date) * zoomLevel + margin.left + panX;
+          const tooltipX = xScale(dataPoint.date) * zoomLevel + margin.left + panX;
           const tooltipY = yScale(0) + margin.top + 10;
           
           setActiveTooltip({

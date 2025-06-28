@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-
-const dataPath = path.join(process.cwd(), "app/investors/data/expenses.json");
+import { DataService } from '@/lib/investors/dataService';
+import { requireAuth, requireAdmin } from '@/lib/investors/auth';
 
 interface ExpenseItem {
   id: string;
@@ -25,27 +23,26 @@ interface ExpensesData {
 
 async function readExpenses(): Promise<ExpensesData> {
   try {
-    const data = await fs.readFile(dataPath, "utf-8");
-    return JSON.parse(data);
+    return await DataService.readJSON('expenses.json');
   } catch (error) {
     return { expenses: [] };
   }
 }
 
 async function writeExpenses(data: ExpensesData): Promise<void> {
-  await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+  await DataService.writeJSON('expenses.json', data);
 }
 
-export async function GET() {
+export const GET = requireAuth(async (request: NextRequest, user) => {
   try {
     const data = await readExpenses();
     return NextResponse.json(data.expenses);
   } catch (error) {
     return NextResponse.json({ error: "Failed to read expenses" }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readExpenses();
@@ -67,9 +64,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to create expense" }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request: NextRequest) {
+export const PUT = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readExpenses();
@@ -86,9 +83,9 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to update expense" }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = requireAdmin(async (request: NextRequest, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -111,4 +108,4 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete expense" }, { status: 500 });
   }
-}
+});

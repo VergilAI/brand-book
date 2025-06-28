@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Vergil Design System",
-  description: "A living design system for AI orchestration platforms",
+  title: "Vergil Investors Portal",
+  description: "Real-time financial health monitoring for Vergil stakeholders",
 };
 
 export default function RootLayout({

@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-
-// Use absolute path to ensure consistency
-const dataPath = path.join(process.cwd(), "app", "investors", "data", "balances.json");
+import { requireAuth, requireAdmin } from '@/lib/investors/auth';
+import { DataService } from '@/lib/investors/dataService';
 
 interface Balance {
   id: string;
@@ -19,27 +16,26 @@ interface BalancesData {
 
 async function readBalances(): Promise<BalancesData> {
   try {
-    const data = await fs.readFile(dataPath, "utf-8");
-    return JSON.parse(data);
+    return await DataService.readJSON('balances.json');
   } catch (error) {
     return { balances: [] };
   }
 }
 
 async function writeBalances(data: BalancesData): Promise<void> {
-  await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+  await DataService.writeJSON('balances.json', data);
 }
 
-export async function GET() {
+export const GET = requireAuth(async (request: NextRequest, user) => {
   try {
     const data = await readBalances();
     return NextResponse.json(data.balances);
   } catch (error) {
     return NextResponse.json({ error: "Failed to read balances" }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readBalances();
@@ -59,9 +55,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to create balance" }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request: NextRequest) {
+export const PUT = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readBalances();
@@ -78,9 +74,9 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to update balance" }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = requireAdmin(async (request: NextRequest, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -103,4 +99,4 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete balance" }, { status: 500 });
   }
-}
+});

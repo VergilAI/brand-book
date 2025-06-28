@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { SignJWT, jwtVerify } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'vergil-investors-portal-secret-key-2024'
-);
-
-const USERS_FILE = path.join(process.cwd(), 'app', 'investors', 'data', 'users.json');
+import { requireAdmin, createUserSchema, logSecurityEvent, getClientIP } from '@/lib/investors/auth';
+import { DataService } from '@/lib/investors/dataService';
 
 interface User {
   id: string;
@@ -26,67 +19,83 @@ interface UsersData {
 
 async function readUsers(): Promise<UsersData> {
   try {
-    const data = await fs.readFile(USERS_FILE, 'utf-8');
-    return JSON.parse(data);
+    return await DataService.readJSON('users.json');
   } catch (error) {
     return { users: [] };
   }
 }
 
 async function writeUsers(data: UsersData): Promise<void> {
-  await fs.writeFile(USERS_FILE, JSON.stringify(data, null, 2));
+  await DataService.writeJSON('users.json', data);
 }
 
-async function verifyAuth(request: NextRequest): Promise<any | null> {
-  const token = request.cookies.get('auth-token')?.value;
+export const GET = requireAdmin(async (request: NextRequest, user) => {
+  const clientIP = getClientIP(request);
   
-  if (!token) {
-    return null;
-  }
-
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload;
+    const data = await readUsers();
+    const users = data.users.map(({ password, ...user }) => user);
+    
+    logSecurityEvent({
+      userId: user.id,
+      action: 'users_list_accessed',
+      ip: clientIP,
+      success: true
+    });
+    
+    return NextResponse.json({ users });
   } catch (error) {
-    return null;
+    logSecurityEvent({
+      userId: user.id,
+      action: 'users_list_error',
+      ip: clientIP,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
+    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
   }
-}
+});
 
-export async function GET(request: NextRequest) {
-  const auth = await verifyAuth(request);
+export const POST = requireAdmin(async (request: NextRequest, user) => {
+  const clientIP = getClientIP(request);
   
-  if (!auth || auth.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const data = await readUsers();
-  const users = data.users.map(({ password, ...user }) => user);
-  
-  return NextResponse.json({ users });
-}
-
-export async function POST(request: NextRequest) {
-  const auth = await verifyAuth(request);
-  
-  if (!auth || auth.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const body = await request.json();
-    const { email, password, name, role = 'investor' } = body;
-
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const validationResult = createUserSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      logSecurityEvent({
+        userId: user.id,
+        action: 'user_creation_invalid_input',
+        ip: clientIP,
+        success: false,
+        error: validationResult.error.issues[0].message
+      });
+      
+      return NextResponse.json(
+        { error: validationResult.error.issues[0].message },
+        { status: 400 }
+      );
     }
+
+    const { email, password, name, role } = validationResult.data;
 
     const data = await readUsers();
     
-    if (data.users.some(user => user.email === email)) {
+    if (data.users.some(existingUser => existingUser.email === email)) {
+      logSecurityEvent({
+        userId: user.id,
+        action: 'user_creation_duplicate_email',
+        ip: clientIP,
+        success: false,
+        error: `Attempt to create user with existing email: ${email}`
+      });
+      
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12); // Increased salt rounds
     
     const newUser: User = {
       id: `user-${Date.now()}`,
@@ -101,20 +110,32 @@ export async function POST(request: NextRequest) {
     data.users.push(newUser);
     await writeUsers(data);
 
+    logSecurityEvent({
+      userId: user.id,
+      action: 'user_created',
+      ip: clientIP,
+      success: true,
+      error: `Created user: ${email} with role: ${role}`
+    });
+
     const { password: _, ...userWithoutPassword } = newUser;
     return NextResponse.json({ user: userWithoutPassword });
   } catch (error) {
+    logSecurityEvent({
+      userId: user.id,
+      action: 'user_creation_error',
+      ip: clientIP,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
-  const auth = await verifyAuth(request);
+export const DELETE = requireAdmin(async (request: NextRequest, user) => {
+  const clientIP = getClientIP(request);
   
-  if (!auth || auth.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('id');
@@ -124,21 +145,60 @@ export async function DELETE(request: NextRequest) {
     }
 
     const data = await readUsers();
-    const userIndex = data.users.findIndex(user => user.id === userId);
+    const userIndex = data.users.findIndex(targetUser => targetUser.id === userId);
 
     if (userIndex === -1) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (data.users[userIndex].email === 'admin@vergil.ai') {
+    const targetUser = data.users[userIndex];
+
+    // Prevent deletion of default admin and self-deletion
+    if (targetUser.email === 'admin@vergil.ai') {
+      logSecurityEvent({
+        userId: user.id,
+        action: 'user_deletion_blocked_default_admin',
+        ip: clientIP,
+        success: false,
+        error: 'Attempt to delete default admin user'
+      });
+      
       return NextResponse.json({ error: 'Cannot delete default admin user' }, { status: 400 });
+    }
+
+    if (targetUser.id === user.id) {
+      logSecurityEvent({
+        userId: user.id,
+        action: 'user_deletion_blocked_self',
+        ip: clientIP,
+        success: false,
+        error: 'Attempt to delete own account'
+      });
+      
+      return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
     }
 
     data.users.splice(userIndex, 1);
     await writeUsers(data);
 
+    logSecurityEvent({
+      userId: user.id,
+      action: 'user_deleted',
+      ip: clientIP,
+      success: true,
+      error: `Deleted user: ${targetUser.email} (${targetUser.id})`
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
+    logSecurityEvent({
+      userId: user.id,
+      action: 'user_deletion_error',
+      ip: clientIP,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
     return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
   }
-}
+});

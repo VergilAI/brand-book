@@ -190,7 +190,7 @@ export default function AdminPage() {
               user={user} 
               onLogout={handleLogout} 
               adminTab={activeTab} 
-              onAdminTabChange={setActiveTab} 
+              onAdminTabChange={(tab) => setActiveTab(tab as TabType)} 
             />
             
             {/* Desktop Navigation */}

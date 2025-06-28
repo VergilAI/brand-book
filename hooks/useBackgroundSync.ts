@@ -34,7 +34,7 @@ export function useBackgroundSync({
       const registration = await navigator.serviceWorker.ready;
       
       if ('sync' in registration) {
-        await registration.sync.register(tag);
+        await (registration as any).sync.register(tag);
         
         // Call onSync callback if provided
         if (onSync) {

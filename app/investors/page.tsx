@@ -88,8 +88,16 @@ export default function InvestorsPage() {
 
   // Preload components that are likely to be needed
   useEffect(() => {
-    preloadComponent(() => import("@/components/investors/FinancialSummary"));
-    preloadComponent(() => import("@/components/investors/BurnRateChart"));
+    preloadComponent(() => 
+      import("@/components/investors/FinancialSummary").then(mod => ({ 
+        default: mod.FinancialSummary 
+      }))
+    );
+    preloadComponent(() => 
+      import("@/components/investors/BurnRateChart").then(mod => ({ 
+        default: mod.BurnRateChart 
+      }))
+    );
   }, []);
 
   // Swipe to admin panel for admin users
@@ -117,7 +125,11 @@ export default function InvestorsPage() {
         setUser(data.user);
         // Preload admin components if user is admin
         if (data.user.role === 'admin') {
-          preloadComponent(() => import("@/components/investors/HypotheticalDeals"));
+          preloadComponent(() => 
+            import("@/components/investors/HypotheticalDeals").then(mod => ({ 
+              default: mod.HypotheticalDeals 
+            }))
+          );
         }
       }
     } catch (error) {
@@ -149,8 +161,16 @@ export default function InvestorsPage() {
       setRecurringExpenses(financialData.recurringExpenses);
 
       // Preload lower priority components after data is loaded
-      preloadComponent(() => import("@/components/investors/RevenueBreakdown"));
-      preloadComponent(() => import("@/components/investors/RecurringExpenses"));
+      preloadComponent(() => 
+        import("@/components/investors/RevenueBreakdown").then(mod => ({ 
+          default: mod.RevenueBreakdown 
+        }))
+      );
+      preloadComponent(() => 
+        import("@/components/investors/RecurringExpenses").then(mod => ({ 
+          default: mod.RecurringExpenses 
+        }))
+      );
     } catch (error) {
       setDashboardData(null);
     } finally {

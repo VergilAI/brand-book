@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth, logSecurityEvent, getClientIP } from '@/lib/investors/auth';
+import { DataService } from '@/lib/investors/dataService';
 
 interface Balance {
   id: string;
@@ -33,9 +33,7 @@ interface HypotheticalItem extends FinancialItem {
 
 async function readData<T>(filename: string): Promise<T> {
   try {
-    const dataPath = path.join(process.cwd(), "app/investors/data", filename);
-    const data = await fs.readFile(dataPath, "utf-8");
-    return JSON.parse(data);
+    return await DataService.readJSON(filename);
   } catch (error) {
     return {} as T;
   }
@@ -107,8 +105,16 @@ function calculateHistoricTotal(items: FinancialItem[]): number {
   return total;
 }
 
-export async function GET() {
+export const GET = requireAuth(async (request: NextRequest, user) => {
+  const clientIP = getClientIP(request);
+  
   try {
+    logSecurityEvent({
+      userId: user.id,
+      action: 'dashboard_accessed',
+      ip: clientIP,
+      success: true
+    });
     // Read all data
     const balancesData = await readData<{ balances: Balance[] }>("balances.json");
     const revenuesData = await readData<{ revenues: FinancialItem[] }>("revenues.json");
@@ -154,7 +160,7 @@ export async function GET() {
     
     // Calculate runway with month-by-month projection
     let projectedBalance = currentBalance;
-    let runway_months = 0;
+    let runway_months: number | null = 0;
     const maxMonths = 120; // Cap at 10 years
     
     // Get all one-time events (revenues, expenses, and hypotheticals)
@@ -196,7 +202,7 @@ export async function GET() {
           allOneTimeEvents.push({
             date: eventDate,
             amount: item.amount,
-            type: item.type
+            type: item.type as 'revenue' | 'expense'
           });
         }
       }
@@ -354,6 +360,14 @@ export async function GET() {
     
     return NextResponse.json(dashboardData);
   } catch (error) {
+    logSecurityEvent({
+      userId: user.id,
+      action: 'dashboard_error',
+      ip: clientIP,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
     return NextResponse.json({ error: "Failed to calculate dashboard data" }, { status: 500 });
   }
-}
+});

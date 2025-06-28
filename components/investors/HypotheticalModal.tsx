@@ -188,13 +188,13 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
     const payload = {
       name: formData.name.trim(),
       description: formData.description.trim(),
-      type: formData.type,
-      transaction_type: formData.transaction_type,
+      type: formData.type as "revenue" | "expense",
+      transaction_type: formData.transaction_type as "recurring" | "one-time",
       amount: formData.transaction_type === "recurring" && formData.recurring_type === "subscription" 
         ? parseInt(formData.subscription_users) * parseFloat(formData.subscription_price_per_user)
         : parseFloat(formData.amount),
       enabled: formData.enabled,
-      recurring_type: formData.transaction_type === "recurring" ? formData.recurring_type : undefined,
+      recurring_type: formData.transaction_type === "recurring" ? formData.recurring_type as "standard" | "subscription" : undefined,
       subscription_users: formData.transaction_type === "recurring" && formData.recurring_type === "subscription" 
         ? parseInt(formData.subscription_users) : undefined,
       subscription_price_per_user: formData.transaction_type === "recurring" && formData.recurring_type === "subscription" 
@@ -202,10 +202,10 @@ export function HypotheticalModal({ open, onClose, onSuccess, hypothetical }: Hy
       subscription_growth_factor: formData.transaction_type === "recurring" && formData.recurring_type === "subscription" 
         ? parseFloat(formData.subscription_growth_factor) : undefined,
       date_info: formData.transaction_type === "one-time"
-        ? { date: formatDateForBackend(formData.expected_date) }
+        ? { date: formatDateForBackend(formData.expected_date) || undefined }
         : {
-            start_date: formatDateForBackend(formData.start_date),
-            end_date: formData.end_date ? formatDateForBackend(formData.end_date) : null,
+            start_date: formatDateForBackend(formData.start_date) || undefined,
+            end_date: formData.end_date ? formatDateForBackend(formData.end_date) || undefined : undefined,
             frequency: formData.recurring_type === "subscription" ? "Monthly" : formData.frequency,
           },
     };

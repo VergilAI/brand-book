@@ -100,7 +100,7 @@ class PerformanceMonitor {
     try {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (!entry.hadRecentInput) {
+          if (!(entry as any).hadRecentInput) {
             clsEntries.push(entry);
             clsValue += (entry as any).value;
           }

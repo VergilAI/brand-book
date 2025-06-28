@@ -1,225 +1,170 @@
-# Vergil Design System - Project Overview
+# Vergil Investors Portal
 
-## Project Structure
+## Project Overview
 
-This repository contains multiple Vergil-related projects:
-
-1. **Brand Book** (`/app/brand/`) - Comprehensive brand guidelines and design system documentation
-2. **Vergil Main** (`/app/vergil-main/`) - Main AI infrastructure platform landing page
-3. **Vergil Learn** (`/app/vergil-learn/`) - Educational platform landing page
-4. **LMS Demo** (`/app/lms/`) - Learning Management System demo interface
-5. **Investors Portal** (`/app/investors/`) - Internal financial health dashboard for stakeholders
+Internal investor dashboard and admin portal for monitoring Vergil's financial health metrics.
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 (IMPORTANT: v4 syntax, not v3)
+- **Styling**: Tailwind CSS v4
 - **UI Components**: Custom components + Radix UI primitives
 - **Animations**: Framer Motion
 - **Data Visualization**: D3.js
-- **Component Architecture**: Class Variance Authority (CVA)
+- **Storage**: AWS S3 for data persistence
+- **Authentication**: JWT with secure cookies
 
-## CRITICAL: Component Architecture Standards
+## Architecture
 
-### Component Structure (MANDATORY)
-Every component MUST follow this structure:
+### Frontend Structure
 ```
-components/
-└── ComponentName/
-    ├── ComponentName.tsx          // Component implementation
-    ├── ComponentName.stories.tsx  // Storybook stories (required)
-    ├── ComponentName.test.tsx     // Tests (required)
-    ├── ComponentName.module.css   // Styles (if needed)
-    └── index.ts                   // Exports
-```
-
-### Component Categories & Precedence
-1. **Vergil Learn Components** - HIGHEST PRIORITY (fully approved, do not modify)
-   - LearnHero, UserJourneyCarousel, Navigation, LearnFooter
-2. **Core UI Components** - Unified system (Card with all variants, Button, Input, etc.)
-3. **Brand Components** - Vergil-specific (NeuralNetwork, IrisPattern, logos)
-4. **Module Components** - Product-specific (LMS CourseCard, GameInterface)
-
-### Unified Card System
-The Card component now includes all variants:
-- `default` - Basic card
-- `interactive` - With hover effects and breathing
-- `neural` - With gradient background
-- `feature` - For feature displays (replaces FeatureCard)
-- `metric` - For metrics (replaces MetricCard)
-- `problem` - For problem/solution displays (replaces ProblemCard)
-- `gradient` - With consciousness gradient
-- `outlined` - With border emphasis
-
-### Token-First Development
-```typescript
-// ❌ NEVER use arbitrary values
-<div className="bg-[#6366F1]" />
-
-// ✅ ALWAYS use design tokens
-<div className="bg-cosmic-purple" />
+/app/investors/
+├── layout.tsx          # Portal layout with dark theme
+├── page.tsx           # Main dashboard page
+├── login/             # Authentication
+├── admin/             # Admin panel
+├── history/           # Historical analysis
+└── data/              # Local data files (development only)
 ```
 
-## CLAUDE.md File Guidelines
-
-### Purpose of CLAUDE.md Files
-CLAUDE.md files are context documents that get passed to AI assistants when working on specific parts of the codebase. They should contain ONLY the most relevant information for that specific context level.
-
-### Hierarchy and Content Rules
-
-#### Root CLAUDE.md (this file)
-- **ONLY** universal, project-wide standards
-- Critical architectural decisions
-- Mandatory patterns that apply everywhere
-- Brief project structure overview
-- Links to module-specific CLAUDE.md files
-
-#### Module-level CLAUDE.md (`/app/[module]/CLAUDE.md`)
-- Module-specific architecture
-- Page structure and routing
-- Module-specific components
-- Business logic unique to that module
-- Module deployment instructions
-
-#### Component-level CLAUDE.md (`/components/[category]/CLAUDE.md`)
-- Component library standards
-- Specific patterns for that component category
-- Props documentation patterns
-- Accessibility requirements
-- Performance considerations
-
-### Writing Effective CLAUDE.md Files
-
-1. **Be Concise**: Every line should be essential
-2. **Be Specific**: Include exact file paths and code examples
-3. **Be Current**: Update immediately when patterns change
-4. **Be Contextual**: Only include what's needed at that level
-
-Example hierarchy:
+### API Routes
 ```
-/CLAUDE.md (root) - Universal standards, component structure
-├── /app/lms/CLAUDE.md - LMS routing, features, components
-│   └── /app/lms/courses/CLAUDE.md - Course-specific logic
-├── /components/CLAUDE.md - Component library overview
-│   ├── /components/ui/CLAUDE.md - Primitive patterns
-│   └── /components/vergil/CLAUDE.md - Brand component patterns
+/app/api/investors/
+├── auth/              # Authentication endpoints
+├── dashboard/         # Dashboard metrics
+├── users/             # User management
+├── revenues/          # Revenue CRUD
+├── expenses/          # Expense CRUD
+├── balances/          # Balance management
+├── hypotheticals/     # Hypothetical scenarios
+├── history/           # Historical data
+└── status/            # API health check
 ```
 
-## Key Conventions
+### Components
+```
+/components/
+├── ui/                # Core UI components
+├── vergil/            # Brand components
+└── investors/         # Portal-specific components
+```
 
-### Tailwind CSS v4
-- Import syntax: `@import "tailwindcss"` (NOT `@tailwind base/components/utilities`)
-- Config file: `tailwind.config.js` (JavaScript, not TypeScript)
+## Data Integration
 
-### Brand Guidelines
-- **Logo Strategy**: All logos are white by default - always use on dark/colored backgrounds
-- **Color System**: Use brand color tokens (cosmic-purple, electric-violet, etc.)
-- **Animations**: Incorporate "living system" breathing effects
+### S3 Configuration
+- Bucket: `generalvergilstorage`
+- Path: `vergil-investor-data/production/`
+- Files: users.json, revenues.json, expenses.json, balances.json, hypotheticals.json
 
-### Component Organization
-- `/components/ui/` - Core UI components (unified Card, Button, Input, etc.)
-- `/components/vergil/` - Brand-specific components (logos, patterns, visualizations)
-- `/components/landing/` - Approved landing components (Navigation, LearnHero, UserJourneyCarousel)
-- `/components/lms/` - LMS-specific components (CourseCard, LessonViewer, etc.)
-- `/components/investors/` - Investor portal components (FinancialChart, MetricDashboard, etc.)
-- `/components/docs/` - Documentation components
-- `/components/landing/_archived/` - Deprecated components (replaced by unified system)
+### Environment Variables
+```env
+# Authentication
+JWT_SECRET=your-secure-jwt-secret-here
 
-### Code Style
-- DO NOT add comments unless requested
-- Follow existing patterns in neighboring files
-- Use existing libraries - check package.json first
-- Maintain accessibility (WCAG AA standards)
+# S3 Configuration
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=eu-north-1
+S3_BUCKET=generalvergilstorage
+
+# Development Options
+USE_LOCAL_FILES=false  # Set to true for local development
+NODE_ENV=production
+```
+
+## Security
+
+- JWT authentication with secure httpOnly cookies
+- Role-based access control (admin/investor)
+- Rate limiting on login attempts
+- Account lockout after failed attempts
+- Comprehensive security event logging
+- Input validation with Zod schemas
+
+## Key Features
+
+### Dashboard
+- Real-time financial metrics
+- Burn rate calculation and runway projection
+- Revenue/expense breakdowns
+- Interactive D3.js visualizations
+- Hypothetical scenario modeling
+
+### Admin Panel
+- User management (add/remove investors)
+- Data import/export functionality
+- Manual balance adjustments
+- Security settings and logs
+- Historical data analysis
 
 ## Development
 
 ```bash
-npm run dev    # Start development server
-npm run build  # Build for production
-npm run start  # Start production server
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
 ```
 
-## Module-Specific Documentation
+## Deployment to Vercel
 
-Each major module has its own CLAUDE.md file with detailed information:
+1. Push to GitHub
+2. Connect repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
 
-- `/app/brand/CLAUDE.md` - Brand book implementation details
-- `/app/vergil-main/CLAUDE.md` - Vergil platform landing documentation
-- `/app/vergil-learn/CLAUDE.md` - Vergil Learn landing documentation
-- `/app/lms/CLAUDE.md` - LMS module documentation
-- `/app/investors/INVESTOR_PORTAL_DOCS.md` - Comprehensive investor portal documentation
-- `/components/CLAUDE.md` - Component library documentation
-- `/public/data/CLAUDE.md` - Data files documentation
+### Required Environment Variables for Vercel:
+- `JWT_SECRET`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
+- `S3_BUCKET`
+- `USE_LOCAL_FILES=false`
+- `NODE_ENV=production`
 
-## Deployment
+## API Security
 
-For deploying individual modules, use branch-specific .gitignore files:
-- `.gitignore.brand-book` - Deploy only brand book
-- `.gitignore.vergil` - Deploy only Vergil platform landing
-- `.gitignore.vergil-learn` - Deploy only Vergil Learn landing
-- `.gitignore.lms` - Deploy only LMS demo
-- `.gitignore.investors` - Deploy only Investors portal (restricted access)
+All API endpoints require authentication except:
+- `/api/investors/auth` (login)
+- `/api/investors/status` (health check)
 
-**Important**: See `README_GITIGNORE.md` for detailed deployment instructions.
+Admin-only endpoints:
+- All POST/PUT/DELETE operations
+- User management endpoints
+- Data export functionality
 
-### Quick Deployment Steps
+## Tailwind CSS v4
 
-1. **Create deployment branch**: `git checkout -b deploy-[module]`
-2. **Apply module gitignore**: `cp .gitignore.[module] .gitignore`
-3. **Commit and push**: `git add . && git commit -m "Deploy [module]" && git push`
-4. **Configure platform** to deploy from the deployment branch
+This project uses Tailwind CSS v4 with the following configuration:
+- Import syntax: `@import "tailwindcss"`
+- Brand color tokens: cosmic-purple, electric-violet, consciousness-cyan, etc.
+- Dark theme by default: bg-dark-900, bg-dark-800
 
-### GitHub Workflow
+## Component Architecture
 
-**Branch Strategy:**
-- `main` - Development branch with all modules
-- `deploy-brand-book` - Brand book deployment only
-- `deploy-vergil` - Vergil platform landing deployment only
-- `deploy-vergil-learn` - Vergil Learn landing deployment only
-- `deploy-lms` - LMS deployment only
-- `deploy-investors` - Investors portal deployment (private)
+### Design System
+- Uses Class Variance Authority (CVA) for component variants
+- Unified Card system with multiple variants
+- Brand components: VergilLogo, IrisPattern
+- All components fully typed with TypeScript
 
-**Important Rules:**
-- Never modify .gitignore on main branch
-- Don't merge deployment branches back to main
-- Update deployment branches by merging from main
+### Accessibility
+- WCAG AA compliance
+- Proper ARIA labels
+- Keyboard navigation support
+- Focus management
 
-**Updating Deployments:**
-```bash
-# After making changes on main
-git checkout deploy-brand-book
-git merge main
-git push origin deploy-brand-book
-```
+## Performance
 
-## Investors Portal Overview
-
-### Purpose
-Internal-facing dashboard for stakeholders to review company financial health, metrics, and performance indicators.
-
-### Key Features
-- **Financial Dashboard**: Real-time metrics using Card component with `metric` variant
-- **Performance Charts**: D3.js visualizations with brand color system
-- **Reports Repository**: Secure document viewer for financial reports
-- **Company Updates**: News and strategic announcements
-
-### Design Requirements
-- Use existing Card variants (`metric`, `gradient`, `interactive`)
-- Apply brand colors: cosmic-purple, electric-violet, consciousness-cyan
-- Implement breathing animations for live data
-- Maintain dark theme consistency (bg-dark-900, bg-dark-800)
-
-### Security
-- Authentication required (implement with existing auth patterns)
-- Restricted deployment via `deploy-investors` branch
-- No public access allowed
-
-## GitHub Repository
-
-**URL**: https://github.com/VergilAI/brand-book
-
-**Repository Structure:**
-- Single monorepo containing all modules
-- Module separation through routing and deployment branches
-- Shared component library across all modules
+- Automatic S3 caching with 1-minute TTL
+- Service worker for offline support
+- Progressive Web App ready
+- Optimized D3.js visualizations

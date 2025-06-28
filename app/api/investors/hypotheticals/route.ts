@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-
-const dataPath = path.join(process.cwd(), "app/investors/data/hypotheticals.json");
+import { requireAuth, requireAdmin, logSecurityEvent, getClientIP } from '@/lib/investors/auth';
+import { DataService } from '@/lib/investors/dataService';
 
 interface HypotheticalItem {
   id: string;
@@ -30,27 +28,44 @@ interface HypotheticalsData {
 
 async function readHypotheticals(): Promise<HypotheticalsData> {
   try {
-    const data = await fs.readFile(dataPath, "utf-8");
-    return JSON.parse(data);
+    return await DataService.readJSON('hypotheticals.json');
   } catch (error) {
     return { hypotheticals: [] };
   }
 }
 
 async function writeHypotheticals(data: HypotheticalsData): Promise<void> {
-  await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+  await DataService.writeJSON('hypotheticals.json', data);
 }
 
-export async function GET() {
+export const GET = requireAuth(async (request: NextRequest, user) => {
+  const clientIP = getClientIP(request);
+  
   try {
     const data = await readHypotheticals();
+    
+    logSecurityEvent({
+      userId: user.id,
+      action: 'hypotheticals_accessed',
+      ip: clientIP,
+      success: true
+    });
+    
     return NextResponse.json(data.hypotheticals);
   } catch (error) {
+    logSecurityEvent({
+      userId: user.id,
+      action: 'hypotheticals_access_error',
+      ip: clientIP,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
     return NextResponse.json({ error: "Failed to read hypotheticals" }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readHypotheticals();
@@ -77,9 +92,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to create hypothetical" }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request: NextRequest) {
+export const PUT = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readHypotheticals();
@@ -96,9 +111,9 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to update hypothetical" }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = requireAdmin(async (request: NextRequest, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -121,4 +136,4 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete hypothetical" }, { status: 500 });
   }
-}
+});

@@ -33,7 +33,7 @@ export function OfflineIndicator({ className }: OfflineIndicatorProps) {
 
     // Check for service worker registration
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
+      navigator.serviceWorker.ready.then((registration: any) => {
         if (registration.sync) {
           // Register for periodic sync
           registration.sync.register('sync-investor-data');
@@ -54,8 +54,8 @@ export function OfflineIndicator({ className }: OfflineIndicatorProps) {
     setIsSyncing(true);
     try {
       const registration = await navigator.serviceWorker.ready;
-      if (registration.sync) {
-        await registration.sync.register('sync-investor-data');
+      if ((registration as any).sync) {
+        await (registration as any).sync.register('sync-investor-data');
       }
     } catch (error) {
       console.error('Sync failed:', error);

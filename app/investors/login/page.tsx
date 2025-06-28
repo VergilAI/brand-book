@@ -109,17 +109,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-center text-sm text-gray-500">
-                Development credentials:
-                <br />
-                Email: admin@vergil.ai
-                <br />
-                Password: admin123
-              </p>
-            </div>
-          )}
         </Card>
       </div>
     </div>

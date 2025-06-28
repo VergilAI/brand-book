@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-
-const dataPath = path.join(process.cwd(), "app/investors/data/revenues.json");
+import { DataService } from '@/lib/investors/dataService';
+import { requireAuth, requireAdmin } from '@/lib/investors/auth';
 
 interface RevenueItem {
   id: string;
@@ -25,27 +23,26 @@ interface RevenuesData {
 
 async function readRevenues(): Promise<RevenuesData> {
   try {
-    const data = await fs.readFile(dataPath, "utf-8");
-    return JSON.parse(data);
+    return await DataService.readJSON('revenues.json');
   } catch (error) {
     return { revenues: [] };
   }
 }
 
 async function writeRevenues(data: RevenuesData): Promise<void> {
-  await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+  await DataService.writeJSON('revenues.json', data);
 }
 
-export async function GET() {
+export const GET = requireAuth(async (request: NextRequest, user) => {
   try {
     const data = await readRevenues();
     return NextResponse.json(data.revenues);
   } catch (error) {
     return NextResponse.json({ error: "Failed to read revenues" }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readRevenues();
@@ -67,9 +64,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to create revenue" }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request: NextRequest) {
+export const PUT = requireAdmin(async (request: NextRequest, user) => {
   try {
     const body = await request.json();
     const data = await readRevenues();
@@ -86,9 +83,9 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to update revenue" }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = requireAdmin(async (request: NextRequest, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -111,4 +108,4 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete revenue" }, { status: 500 });
   }
-}
+});
