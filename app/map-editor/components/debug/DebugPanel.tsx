@@ -30,8 +30,8 @@ export function DebugPanel() {
   const [gridConfig, setGridConfig] = React.useState<GridDebugConfig>({
     referenceSize: 10,
     subdivisionFactor: 4,
-    levelsVisible: 4,
-    strokeOpacity: 0.28,
+    levelsVisible: 2,
+    strokeOpacity: 0.18,
     minOpacity: 0.01,
     strokeColor: '#94A3B8',
     minLevel: 0,
@@ -359,8 +359,8 @@ export function DebugPanel() {
                 setGridConfig({
                   referenceSize: 10,
                   subdivisionFactor: 4,
-                  levelsVisible: 4,
-                  strokeOpacity: 0.28,
+                  levelsVisible: 2,
+                  strokeOpacity: 0.18,
                   minOpacity: 0.01,
                   strokeColor: '#94A3B8',
                   minLevel: 0,

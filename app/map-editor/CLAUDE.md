@@ -12,12 +12,22 @@ Visual editor for creating territory-based maps with optimized border system.
 - Draw tool shortcut changed from P to D
 - UI consistency improvements with design system buttons
 - Snap indicator moved to bottom center
-- **NEW**: Sophisticated constant-density dynamic grid system
-  - Always shows consistent number of grid lines (3-4 major, 6-8 minor)
-  - Smooth transitions with fractal-like structure
-  - Powers of 2 and 5 spacing (1, 2, 5, 10, 20, 50, 100, etc.)
-  - Three-level visual hierarchy with different opacities
+- **NEW**: Advanced hierarchical grid system with debug panel
+  - 4×4 fractal subdivisions with configurable levels
+  - Base size 10px matching snap grid for perfect alignment
+  - Configurable opacity curves (linear, sigmoid, exponential, step)
+  - Debug panel for real-time grid customization
+  - Smart level limiting to reduce visual noise
   - Toggle with G key, Shift+G for grid type (lines/dots)
+- **NEW**: Comprehensive debug panel (development mode)
+  - Real-time grid configuration
+  - Opacity curve selection and tuning
+  - View settings and state monitoring
+  - Scrollable with isolated events
+- **NEW**: Improved gesture detection
+  - Better trackpad pinch vs pan distinction
+  - Gesture consistency for smooth transitions
+  - Fixed scroll isolation for panels
 
 ## Key Context
 - Maps use separate border elements (each border rendered once)
@@ -42,15 +52,20 @@ Visual editor for creating territory-based maps with optimized border system.
 ```
 map-editor/
 ├── components/     # React components
-│   ├── canvas/     # MapCanvas, GridOverlay, SnapIndicators
-│   ├── tools/      # ToolPalette
-│   ├── panels/     # PropertiesPanel
+│   ├── canvas/     # MapCanvas, HierarchicalGrid, SnapIndicators
+│   ├── tools/      # ToolPalette, Toolbar
+│   ├── panels/     # PropertiesPanel, TerritoryTablePanel
+│   ├── debug/      # DebugPanel
 │   ├── template-library/  # Shape library components
 │   └── shapes/     # Shape definitions and generators
 ├── hooks/         # Editor state and logic
 ├── types/         # TypeScript definitions
 ├── lib/           # Geometry and validation
-├── docs/          # Documentation (snapping, templates)
+├── docs/          # Documentation
+│   ├── zoom-pan-grid-system.md
+│   ├── debug-panel-system.md
+│   ├── snapping-system.md
+│   └── template-library.md
 └── page.tsx       # Main editor page
 ```
 
@@ -67,6 +82,8 @@ map-editor/
 - Keyboard shortcuts: Update handleKeyDown in `MapCanvas.tsx`
 - Adding shapes: Create in `components/shapes/definitions/`, import in `ShapeLibrary.ts`
 - Template features: All in `components/template-library/` and `types/template-library.ts`
+- Grid customization: Use DebugPanel in development or modify `HierarchicalGrid.tsx` defaults
+- Debug features: Add to `components/debug/DebugPanel.tsx`
 
 ## New Features (December 2024)
 
@@ -81,3 +98,17 @@ map-editor/
 - **Quick duplicate**: Ctrl/Cmd+D
 - **Alt-drag**: Hold Alt while dragging to duplicate
 - **Implementation**: In `useMapEditor.ts` clipboard state and actions
+
+### Hierarchical Grid System
+- **Base size**: 10px (matches snap grid)
+- **Subdivision**: 4×4 fractal pattern
+- **Levels**: Configurable 1-6 (default 2)
+- **Opacity**: 0.18 default with curves
+- **Canvas rendering**: Separate layer for performance
+- **Debug panel**: Real-time configuration
+
+### Debug Panel
+- **Access**: Development mode or `NEXT_PUBLIC_DEBUG_MODE=true`
+- **Location**: Top-left corner, collapsible
+- **Features**: Grid config, opacity curves, view settings
+- **Scroll**: Isolated from canvas with custom implementation

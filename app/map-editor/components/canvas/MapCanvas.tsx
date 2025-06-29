@@ -1607,22 +1607,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
       
       {/* Debug Panel */}
       <DebugPanel />
-      
-      {/* Debug info - remove in production */}
-      <div className="absolute top-2 right-2 bg-black/50 text-white rounded px-2 py-1 text-xs font-mono space-y-1">
-        <div>Canvas: {containerSize.width}×{containerSize.height}</div>
-        <div>Zoom: {currentZoom.toFixed(3)} → {targetZoom.toFixed(3)}</div>
-        <div>Grid Spacing: {calculatePrimaryGridSpacing(currentZoom).toFixed(1)}</div>
-      </div>
     </div>
   )
 }
 
-// Helper to calculate primary grid spacing for debug display
-function calculatePrimaryGridSpacing(zoom: number): number {
-  const baseSpacing = 50
-  const idealSpacing = baseSpacing / zoom
-  const log4 = Math.log(idealSpacing) / Math.log(4)
-  const roundedLog4 = Math.round(log4)
-  return Math.pow(4, roundedLog4)
-}

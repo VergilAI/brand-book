@@ -8,7 +8,8 @@
 5. [Gesture Detection](#gesture-detection)
 6. [Implementation Details](#implementation-details)
 7. [Configuration & Customization](#configuration--customization)
-8. [Troubleshooting](#troubleshooting)
+8. [Debug Panel](#debug-panel)
+9. [Troubleshooting](#troubleshooting)
 
 ## Overview
 
@@ -29,21 +30,27 @@ The grid uses a fractal-like structure where each level is a 4×4 subdivision of
 ```typescript
 // Grid configuration in components/canvas/HierarchicalGrid.tsx
 const GRID_CONFIG = {
-  REFERENCE_SIZE: 40,          // Base unit in world coordinates
-  LEVELS_VISIBLE: 4,           // Always show exactly 4 grid levels
+  REFERENCE_SIZE: 10,          // Base unit matches snap grid
+  LEVELS_VISIBLE: 2,           // Show only 2 grid levels
   SUBDIVISION_FACTOR: 4,       // Each level is 4x the previous
   MIN_OPACITY: 0.01,          // Don't render below this opacity
   STROKE_COLOR: '#94A3B8',    // Slate-400 for subtle grid
-  STROKE_OPACITY: 0.08        // Very subtle opacity
+  STROKE_OPACITY: 0.18,        // Subtle grid opacity
+  MIN_LEVEL: 0,               // No grids smaller than reference
+  OPACITY_CURVE: 'sigmoid',    // S-curve transitions
+  CURVE_STEEPNESS: 4,         // Transition sharpness
+  MAX_VISIBLE_GRIDS: 3        // Maximum simultaneous grids
 }
 ```
 
 ### Grid Levels
 
-- **Level 0**: Base unit (40px at zoom 1.0)
-- **Level 1**: 160px (4× Level 0)
-- **Level 2**: 640px (4× Level 1)
-- **Level n**: 40 × 4^n pixels
+- **Level 0**: Base unit (10px at zoom 1.0) - matches snap grid
+- **Level 1**: 40px (4× Level 0)
+- **Level 2**: 160px (4× Level 1)
+- **Level n**: 10 × 4^n pixels
+
+With `MIN_LEVEL: 0`, no grids smaller than 10px are shown, preventing visual noise from sub-reference grids.
 
 ### Level Selection Algorithm
 
@@ -53,34 +60,67 @@ function getVisibleLevels(zoom: number): number[] {
   const idealLevel = -Math.log(zoom) / Math.log(4)
   const centerLevel = Math.round(idealLevel)
   
-  // Always show 4 consecutive levels
-  return [
-    centerLevel - 1,  // Finest level
-    centerLevel,      // Primary level
-    centerLevel + 1,  // Secondary level
-    centerLevel + 2   // Coarsest level
-  ]
+  // Show configured number of levels, respecting MIN_LEVEL
+  const levels: number[] = []
+  const halfLevels = Math.floor(config.LEVELS_VISIBLE / 2)
+  const startLevel = centerLevel - halfLevels + (config.LEVELS_VISIBLE % 2 === 0 ? 1 : 0)
+  
+  for (let i = 0; i < config.LEVELS_VISIBLE; i++) {
+    const level = startLevel + i
+    if (level >= config.MIN_LEVEL) {
+      levels.push(level)
+    }
+  }
+  
+  return levels
 }
 ```
 
 ### Opacity Calculation
 
-Grid lines fade in/out based on their apparent size:
+Grid lines use configurable opacity curves for smooth transitions:
 
 ```typescript
-function calculateLevelOpacity(level: number, zoom: number): number {
-  const levelSize = GRID_CONFIG.REFERENCE_SIZE * Math.pow(4, level)
+// Base opacity calculation
+function calculateLevelOpacity(level: number, zoom: number, config): number {
+  const levelSize = config.REFERENCE_SIZE * Math.pow(config.SUBDIVISION_FACTOR, level)
   const apparentSize = levelSize * zoom
-  const normalizedSize = apparentSize / GRID_CONFIG.REFERENCE_SIZE
+  const normalizedSize = apparentSize / config.REFERENCE_SIZE
   
-  // Opacity transitions
-  if (normalizedSize < 0.25) return 0      // Too small
-  if (normalizedSize < 1) return (normalizedSize - 0.25) / 0.75
-  if (normalizedSize < 4) return 1         // Optimal
-  if (normalizedSize < 16) return 1 - (normalizedSize - 4) / 12
-  return 0  // Too large
+  // Calculate base opacity
+  let baseOpacity = 0
+  if (normalizedSize < 0.25) baseOpacity = 0
+  else if (normalizedSize < 1) baseOpacity = (normalizedSize - 0.25) / 0.75
+  else if (normalizedSize < 4) baseOpacity = 1
+  else if (normalizedSize < 16) baseOpacity = 1 - (normalizedSize - 4) / 12
+  else baseOpacity = 0
+  
+  // Apply opacity curve
+  const curvedOpacity = applyOpacityCurve(baseOpacity, config.OPACITY_CURVE, config.CURVE_STEEPNESS)
+  return Math.max(0, Math.min(1, curvedOpacity)) * config.STROKE_OPACITY
+}
+
+// Opacity curve functions
+function applyOpacityCurve(x: number, curve: string, steepness: number): number {
+  switch (curve) {
+    case 'sigmoid':
+      // S-curve for smooth transitions
+      return 1 / (1 + Math.exp(-steepness * (x - 0.5) * 2))
+    case 'exponential':
+      // Fast drop-off
+      return Math.pow(x, 1 / steepness)
+    case 'step':
+      // Discrete levels
+      if (x < 0.3) return 0
+      if (x < 0.7) return 0.5
+      return 1
+    default:
+      return x // Linear
+  }
 }
 ```
+
+The system also limits visible grids to `MAX_VISIBLE_GRIDS`, showing only the most opaque levels.
 
 ### Canvas Rendering
 
@@ -92,9 +132,9 @@ const svgToCanvas = (x: number, y: number) => {
   const normalizedX = (x - pan.x) / viewBoxWidth
   const normalizedY = (y - pan.y) / viewBoxHeight
   
-  // Snap to half-pixels for sharp rendering
-  const canvasX = Math.round(normalizedX * width * 2) / 2
-  const canvasY = Math.round(normalizedY * height * 2) / 2
+  // Direct conversion without half-pixel snapping for proper alignment
+  const canvasX = normalizedX * width
+  const canvasY = normalizedY * height
   
   return { x: canvasX, y: canvasY }
 }
@@ -283,16 +323,25 @@ gestureTimeout.current = setTimeout(() => {
 ### Modifying Grid Appearance
 
 ```typescript
-// In HierarchicalGrid.tsx
+// Default configuration in HierarchicalGrid.tsx
 const GRID_CONFIG = {
-  REFERENCE_SIZE: 40,      // Change base grid size
-  STROKE_COLOR: '#94A3B8', // Change grid color
-  STROKE_OPACITY: 0.08     // Change opacity
+  REFERENCE_SIZE: 10,         // Base grid size (matches snap grid)
+  LEVELS_VISIBLE: 2,          // Number of grid levels
+  SUBDIVISION_FACTOR: 4,      // Grid hierarchy factor
+  MIN_OPACITY: 0.01,         // Render threshold
+  STROKE_COLOR: '#94A3B8',   // Grid color
+  STROKE_OPACITY: 0.18,      // Overall opacity
+  MIN_LEVEL: 0,              // Minimum grid level
+  OPACITY_CURVE: 'sigmoid',   // Transition curve
+  CURVE_STEEPNESS: 4,        // Curve steepness
+  MAX_VISIBLE_GRIDS: 3       // Maximum grids shown
 }
 
 // For dot grid instead of lines
 <HierarchicalGrid gridType="dots" />
 ```
+
+For runtime configuration, use the Debug Panel (see below).
 
 ### Adjusting Zoom Behavior
 
@@ -317,26 +366,84 @@ const handleDoubleClick = (e: MouseEvent) => {
 }
 ```
 
+## Debug Panel
+
+The map editor includes a comprehensive debug panel for real-time grid configuration:
+
+### Accessing the Debug Panel
+
+- **Location**: Top-left corner of the map editor
+- **Toggle**: Click the bug icon to expand/collapse
+- **Availability**: Development mode or when `NEXT_PUBLIC_DEBUG_MODE=true`
+
+### Key Features
+
+1. **Grid Configuration**
+   - Base Reference Size (10-200px)
+   - Subdivision Factor (2-10)
+   - Visible Levels (1-6)
+   - Stroke Opacity (0-1 with slider)
+   - Grid Color (color picker)
+
+2. **Advanced Controls**
+   - Min Level (prevents sub-reference grids)
+   - Opacity Curve (linear, sigmoid, exponential, step)
+   - Curve Steepness (1-10)
+   - Max Visible Grids (1-5)
+
+3. **View Settings**
+   - Toggle grid visibility
+   - Show snap points (debug visualization)
+   - Adjust snap grid size
+   - Toggle grid snapping
+
+4. **Real-time State**
+   - Current zoom level
+   - Pan position
+   - Active tool
+   - Territory count
+
+### Usage Tips
+
+- Changes apply immediately without page reload
+- Use Reset button to restore defaults
+- Panel is scrollable with isolated scroll events
+- Settings persist until page refresh
+
+For detailed documentation, see `/app/map-editor/docs/debug-panel-system.md`
+
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Grid appears jittery during zoom**
-   - Check coordinate rounding in svgToCanvas
-   - Ensure pan values are rounded to prevent sub-pixel movement
+   - Fixed by removing half-pixel snapping
+   - Ensure direct coordinate transformation
 
 2. **Zoom feels sluggish**
    - Increase smoothingFactor (max 1.0)
    - Increase zoomSpeed
+   - Check if animation frame is running
 
 3. **Gestures getting confused**
-   - Adjust gesture detection thresholds
-   - Increase gestureTimeout delay
+   - System now better distinguishes pinch vs pan
+   - Uses gesture consistency timeout
+   - Check for ctrlKey on wheel events
 
 4. **Grid lines too prominent**
-   - Reduce STROKE_OPACITY
-   - Adjust canvas opacity
-   - Change STROKE_COLOR to lighter shade
+   - Default opacity reduced to 0.18
+   - Use debug panel to adjust
+   - Try sigmoid curve for smoother transitions
+
+5. **Grid not aligning with snap points**
+   - Ensure REFERENCE_SIZE matches snap grid size
+   - Both default to 10px
+   - Enable "Show Snap Points" in debug panel
+
+6. **Too many grid lines visible**
+   - Reduce LEVELS_VISIBLE (default now 2)
+   - Lower MAX_VISIBLE_GRIDS
+   - Increase MIN_LEVEL to hide fine grids
 
 ### Debug Mode
 

@@ -41,11 +41,11 @@ const getGridConfig = () => {
   // Default configuration
   return {
     REFERENCE_SIZE: 10,          // Base unit in world coordinates - matches snap grid
-    LEVELS_VISIBLE: 4,           // Always show exactly 4 grid levels
+    LEVELS_VISIBLE: 2,           // Show only 2 grid levels
     SUBDIVISION_FACTOR: 4,       // Each level is 4x the previous
     MIN_OPACITY: 0.01,          // Don't render below this opacity
     STROKE_COLOR: '#94A3B8',    // Slate-400 for subtle grid
-    STROKE_OPACITY: 0.28,        // More visible grid
+    STROKE_OPACITY: 0.18,        // Subtle grid opacity
     MIN_LEVEL: 0,               // Minimum grid level (0 = reference size)
     OPACITY_CURVE: 'sigmoid',    // Opacity curve type
     CURVE_STEEPNESS: 4,         // Steepness of the sigmoid curve

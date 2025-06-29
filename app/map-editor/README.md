@@ -1,10 +1,10 @@
-# Map Editor - Phase 2 Implementation
+# Map Editor - Advanced Territory Map Creation
 
 ## Overview
 
-A professional React-based territory map editor for creating and editing game maps with territory-based gameplay. The editor provides an SVG canvas with pan/zoom functionality, advanced drawing tools, professional snapping system, and a complete UI for map creation.
+A professional React-based territory map editor for creating and editing game maps with territory-based gameplay. Features include an SVG canvas with smooth pan/zoom, advanced drawing tools, hierarchical grid system, professional snapping, template library, and comprehensive debug tools.
 
-## Recent Updates (Phase 2 - December 2024)
+## Latest Updates (December 2024)
 
 ### 🧲 Professional Snapping System v2.0
 - **Magnetic alignment** with visual feedback for precise territory placement
@@ -44,10 +44,21 @@ A professional React-based territory map editor for creating and editing game ma
 - **Visual Preview** - See duplicate preview while Alt-dragging
 - **Smart Positioning** - Paste positions relative to cursor with snapping
 
-### 📚 Template Shape Library
-- **80+ Pre-built Shapes** - Basic shapes, arrows, UML, flowchart elements
-- **Category Organization** - Browse by type: Basic, Arrows, UML, Flowchart
-- **Quick Search** - Find shapes by name or tags
+### 🔲 Advanced Hierarchical Grid System
+- **Smart 4×4 subdivisions** with fractal-like structure
+- **Configurable opacity curves** - Linear, sigmoid, exponential, or step functions
+- **Level limiting** - Show only relevant grid levels (default: 2)
+- **Perfect snap alignment** - 10px base matches snap grid
+- **Real-time configuration** via debug panel
+- **Canvas rendering** for optimal performance
+
+### 🐛 Debug Panel (Development Mode)
+- **Comprehensive controls** for grid system tuning
+- **Real-time updates** without page reload
+- **Opacity curve visualization** with steepness control
+- **View state monitoring** - zoom, pan, selection info
+- **Isolated scrolling** - panel events don't affect canvas
+- **Environment control** - `NEXT_PUBLIC_DEBUG_MODE=true` to enable
 - **One-Click Placement** - Click shape → click canvas to place
 - **Snapping Support** - Full integration with snapping system
 - **Recent Shapes** - Quick access to last 10 used shapes
