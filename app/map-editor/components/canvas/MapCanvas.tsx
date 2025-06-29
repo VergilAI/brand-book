@@ -16,6 +16,19 @@ import { ZoomIndicator } from '../ui/ZoomIndicator'
 import { GestureHint } from '../ui/GestureHint'
 import { DebugPanel } from '../debug/DebugPanel'
 import { cn } from '@/lib/utils'
+import { Trash2 } from 'lucide-react'
+import {
+  BringToFrontIcon,
+  BringForwardIcon,
+  SendBackwardIcon,
+  SendToBackIcon,
+  CopyIcon,
+  DuplicateIcon,
+  PasteIcon,
+  SelectAllIcon,
+  GridIcon,
+  SnappingIcon
+} from '@/components/vergil/LayeringIcons'
 import styles from './MapCanvas.module.css'
 import type { Territory, Point } from '@/lib/lms/optimized-map-data'
 import type { BezierPoint } from '../../types/editor'
@@ -979,7 +992,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
       
       // Check for Ctrl/Cmd shortcuts first
       if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'c' || e.key === 'C') {
+        if (e.key === 'a' || e.key === 'A') {
+          // Select all territories
+          e.preventDefault()
+          store.selectAll()
+        } else if (e.key === 'c' || e.key === 'C') {
           // Copy selected territories
           e.preventDefault()
           if (store.selection.territories.size > 0) {
@@ -1604,12 +1621,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
       {/* Snap indicator */}
       {isSnappingEnabled && (
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-blue-600/90 backdrop-blur-sm text-white rounded px-2 py-1 text-xs flex items-center gap-1">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white">
-            <rect x="1" y="1" width="4" height="4" fill="currentColor"/>
-            <rect x="7" y="1" width="4" height="4" fill="currentColor"/>
-            <rect x="1" y="7" width="4" height="4" fill="currentColor"/>
-            <rect x="7" y="7" width="4" height="4" fill="currentColor"/>
-          </svg>
+          <SnappingIcon size={12} className="text-white" enabled={true} />
           Snap ON (S)
         </div>
       )}
@@ -1667,10 +1679,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-              <rect x="6" y="2" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
-            </svg>
+            <BringToFrontIcon />
             Bring to Front
           </button>
           <button
@@ -1680,10 +1689,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-              <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
-            </svg>
+            <BringForwardIcon />
             Bring Forward
           </button>
           <button
@@ -1693,10 +1699,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
-              <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-            </svg>
+            <SendBackwardIcon />
             Send Backward
           </button>
           <button
@@ -1706,10 +1709,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="6" y="2" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-              <rect x="2" y="6" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
-            </svg>
+            <SendToBackIcon />
             Send to Back
           </button>
           <div className="border-t border-gray-200 my-1"></div>
@@ -1720,10 +1720,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="2" width="10" height="10" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
-              <rect x="4" y="4" width="10" height="10" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
-            </svg>
+            <CopyIcon />
             Copy
           </button>
           <button
@@ -1733,10 +1730,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="2" width="8" height="8" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
-              <rect x="6" y="6" width="8" height="8" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
-            </svg>
+            <DuplicateIcon />
             Duplicate
           </button>
           <div className="border-t border-gray-200 my-1"></div>
@@ -1747,9 +1741,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M6 2V3H2V5H3V13C3 13.5523 3.44772 14 4 14H12C12.5523 14 13 13.5523 13 13V5H14V3H10V2H6ZM5 5H11V12H5V5ZM7 7V10H8V7H7ZM9 7V10H10V7H9Z" fill="#DC2626"/>
-            </svg>
+            <Trash2 size={16} />
             Delete
           </button>
             </>
@@ -1770,28 +1762,21 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 }}
                 disabled={!store.clipboard || store.clipboard.territories.length === 0}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="2" width="10" height="10" fill="none" stroke={store.clipboard && store.clipboard.territories.length > 0 ? '#6B7280' : '#D1D5DB'} strokeWidth="1.5"/>
-                  <rect x="4" y="4" width="10" height="10" fill="white" stroke={store.clipboard && store.clipboard.territories.length > 0 ? '#3B82F6' : '#D1D5DB'} strokeWidth="1.5"/>
-                  <path d="M6 8H12M6 10H12M6 12H10" stroke={store.clipboard && store.clipboard.territories.length > 0 ? '#3B82F6' : '#D1D5DB'} strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+                <PasteIcon 
+                  size={16} 
+                  className={store.clipboard && store.clipboard.territories.length > 0 ? '' : 'opacity-50'} 
+                />
                 Paste {store.clipboard && store.clipboard.territories.length > 0 ? `(${store.clipboard.territories.length} item${store.clipboard.territories.length > 1 ? 's' : ''})` : ''}
               </button>
               <div className="border-t border-gray-200 my-1"></div>
               <button
                 className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
                 onClick={() => {
-                  store.selectTerritoriesInArea(0, 0, 999999, 999999, false)
+                  store.selectAll()
                   setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="2" width="12" height="12" rx="1" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="2 2"/>
-                  <rect x="4" y="4" width="3" height="3" fill="#3B82F6"/>
-                  <rect x="9" y="4" width="3" height="3" fill="#3B82F6"/>
-                  <rect x="4" y="9" width="3" height="3" fill="#3B82F6"/>
-                  <rect x="9" y="9" width="3" height="3" fill="#3B82F6"/>
-                </svg>
+                <SelectAllIcon size={16} />
                 Select All
               </button>
               <button
@@ -1801,16 +1786,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <line x1="2" y1="2" x2="14" y2="2" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="2" y1="6" x2="14" y2="6" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="2" y1="10" x2="14" y2="10" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="2" y1="14" x2="14" y2="14" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="2" y1="2" x2="2" y2="14" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="6" y1="2" x2="6" y2="14" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="10" y1="2" x2="10" y2="14" stroke="#6B7280" strokeWidth="1"/>
-                  <line x1="14" y1="2" x2="14" y2="14" stroke="#6B7280" strokeWidth="1"/>
-                </svg>
+                <GridIcon size={16} />
                 {store.view.showGrid ? 'Hide Grid' : 'Show Grid'}
               </button>
               <button
@@ -1820,12 +1796,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="2" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
-                  <rect x="9" y="2" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
-                  <rect x="2" y="9" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
-                  <rect x="9" y="9" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
-                </svg>
+                <SnappingIcon size={16} enabled={isSnappingEnabled} />
                 {isSnappingEnabled ? 'Disable Snapping' : 'Enable Snapping'}
               </button>
             </>

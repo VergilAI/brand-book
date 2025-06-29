@@ -98,6 +98,7 @@ export interface MapEditorState {
   deleteTerritory: (id: string) => void
   selectTerritory: (id: string, multi?: boolean) => void
   clearSelection: () => void
+  selectAll: () => void
   
   // Drawing actions
   startDrawing: (point: Point) => void

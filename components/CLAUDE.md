@@ -27,6 +27,13 @@ Brand-specific components expressing living intelligence:
 - `graph-constellation.tsx` - Basic D3 graph
 - `graph-constellation-persistent.tsx` - Advanced graph with floating motion
 - `vergil-sidebar.tsx` - Brand book navigation sidebar
+- `LayeringIcons/` - Z-order manipulation icons for map editor:
+  - `BringToFrontIcon` - Move element to top layer
+  - `BringForwardIcon` - Move element up one layer
+  - `SendBackwardIcon` - Move element down one layer
+  - `SendToBackIcon` - Move element to bottom layer
+  - `CopyIcon` - Copy element icon
+  - `DuplicateIcon` - Duplicate element icon
 
 ### Landing Components (`/components/landing/`)
 **APPROVED Vergil Learn components (DO NOT MODIFY)**:

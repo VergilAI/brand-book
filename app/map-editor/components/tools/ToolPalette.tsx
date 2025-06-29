@@ -12,9 +12,9 @@ import {
   Grid3x3,
   Eye,
   EyeOff,
-  Waves,
-  Magnet
+  Waves
 } from 'lucide-react'
+import { SnappingIcon } from '@/components/vergil/LayeringIcons'
 import type { ToolType } from '../../types/editor'
 
 interface Tool {
@@ -117,12 +117,11 @@ export function ToolPalette() {
           onClick={() => store.toggleSnapping()}
           className={cn(
             "flex items-center gap-2 px-3 py-2 rounded transition-colors",
-            "hover:bg-gray-100",
-            store.snapping.settings.enabled && "bg-blue-50 text-blue-700"
+            "hover:bg-gray-100"
           )}
           title="Toggle Snapping (S)"
         >
-          <Magnet size={20} className={store.snapping.settings.enabled ? "" : "opacity-50"} />
+          <SnappingIcon size={20} enabled={store.snapping.settings.enabled} />
           <span className="text-sm">Snapping</span>
           <span className="ml-auto text-xs text-gray-500">S</span>
         </button>

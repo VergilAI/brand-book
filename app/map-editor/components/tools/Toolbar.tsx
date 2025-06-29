@@ -9,11 +9,10 @@ import {
   Pen, 
   Link,
   Hand,
-  Grid3x3,
-  Magnet,
   Library,
   Table2
 } from 'lucide-react'
+import { SnappingIcon, GridIcon } from '@/components/vergil/LayeringIcons'
 import type { ToolType } from '../../types/editor'
 
 interface Tool {
@@ -57,9 +56,9 @@ export function Toolbar() {
         
         {/* Grid toggle */}
         <IconButton
-          icon={<Grid3x3 className={store.view.showGrid ? "" : "opacity-50"} />}
+          icon={<GridIcon enabled={store.view.showGrid} />}
           onClick={() => store.toggleGrid()}
-          active={store.view.showGrid}
+          active={false}
           title="Toggle Grid (G)"
           rightSubscript="G"
           size="sm"
@@ -68,9 +67,9 @@ export function Toolbar() {
         
         {/* Snapping toggle */}
         <IconButton
-          icon={<Magnet className={store.snapping.settings.enabled ? "" : "opacity-50"} />}
+          icon={<SnappingIcon enabled={store.snapping.settings.enabled} />}
           onClick={() => store.toggleSnapping()}
-          active={store.snapping.settings.enabled}
+          active={false}
           title="Toggle Snapping (S)"
           rightSubscript="S"
           size="sm"

@@ -168,6 +168,13 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     }
   })),
   
+  selectAll: () => set(state => ({
+    selection: {
+      ...state.selection,
+      territories: new Set(Object.keys(state.map.territories))
+    }
+  })),
+  
   // Drawing actions
   startDrawing: (point) => set(state => {
     const bezierPoint: BezierPoint = {
@@ -428,19 +435,32 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       return x >= minX && x <= maxX && y >= minY && y <= maxY
     })
     
-    const newSelection = new Set(multi ? state.selection.territories : [])
-    territoriesInArea.forEach(territory => {
-      if (newSelection.has(territory.id)) {
-        newSelection.delete(territory.id)
-      } else {
-        newSelection.add(territory.id)
+    if (multi) {
+      // Multi-select mode: toggle territories
+      const newSelection = new Set(state.selection.territories)
+      territoriesInArea.forEach(territory => {
+        if (newSelection.has(territory.id)) {
+          newSelection.delete(territory.id)
+        } else {
+          newSelection.add(territory.id)
+        }
+      })
+      
+      return {
+        selection: {
+          ...state.selection,
+          territories: newSelection
+        }
       }
-    })
-    
-    return {
-      selection: {
-        ...state.selection,
-        territories: newSelection
+    } else {
+      // Normal mode: replace selection with territories in area
+      const newSelection = new Set(territoriesInArea.map(t => t.id))
+      
+      return {
+        selection: {
+          ...state.selection,
+          territories: newSelection
+        }
       }
     }
   }),

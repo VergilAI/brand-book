@@ -111,14 +111,14 @@ export function FloatingPropertiesPanel() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Z-Index (Layer Order)
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="space-y-2">
                   <input
                     type="number"
                     value={territory.zIndex || 0}
                     onChange={(e) => store.updateTerritory(territoryId, { 
                       zIndex: Number(e.target.value)
                     })}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                   <div className="flex gap-1">
                     <button

@@ -5,6 +5,7 @@ import { useMapEditor } from '../../hooks/useMapEditor'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Trash2 } from 'lucide-react'
+import { BringToFrontIcon, BringForwardIcon, SendBackwardIcon, SendToBackIcon } from '@/components/vergil/LayeringIcons'
 
 export function PropertiesPanel() {
   const store = useMapEditor()
@@ -115,7 +116,7 @@ export function PropertiesPanel() {
                   onChange={(e) => store.updateTerritory(territoryId, { 
                     zIndex: Number(e.target.value)
                   })}
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <div className="flex gap-1">
                   <button
@@ -123,40 +124,28 @@ export function PropertiesPanel() {
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
                     title="Send to Back"
                   >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="6" y="2" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-                      <rect x="2" y="6" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
-                    </svg>
+                    <SendToBackIcon size={16} />
                   </button>
                   <button
                     onClick={() => store.sendBackward(territoryId)}
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
                     title="Send Backward"
                   >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
-                      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-                    </svg>
+                    <SendBackwardIcon size={16} />
                   </button>
                   <button
                     onClick={() => store.bringForward(territoryId)}
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
                     title="Bring Forward"
                   >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-                      <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
-                    </svg>
+                    <BringForwardIcon size={16} />
                   </button>
                   <button
                     onClick={() => store.bringToFront(territoryId)}
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
                     title="Bring to Front"
                   >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-                      <rect x="6" y="2" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
-                    </svg>
+                    <BringToFrontIcon size={16} />
                   </button>
                 </div>
               </div>
