@@ -4,6 +4,7 @@ import React from 'react'
 import { MapCanvas } from './components/canvas/MapCanvas'
 import { ToolPalette } from './components/tools/ToolPalette'
 import { PropertiesPanel } from './components/panels/PropertiesPanel'
+import { TemplateLibraryPanel } from './components/template-library/TemplateLibraryPanel'
 
 export default function MapEditorPage() {
   return (
@@ -26,7 +27,7 @@ export default function MapEditorPage() {
             <li>• Select: Click territories</li>
             <li>• Move: Drag to pan view</li>
             <li>• Draw: Click to add points</li>
-            <li>• Close: Click near start point</li>
+            <li>• Library: L to toggle shapes</li>
             <li>• Pan: Shift+drag, middle mouse, or H tool</li>
             <li>• Zoom: Mouse wheel</li>
             <li>• Cancel: Press Escape</li>
@@ -37,6 +38,9 @@ export default function MapEditorPage() {
       {/* Main canvas area */}
       <div className="flex-1 relative">
         <MapCanvas />
+        
+        {/* Template Library Panel */}
+        <TemplateLibraryPanel />
         
         {/* Top toolbar */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center">

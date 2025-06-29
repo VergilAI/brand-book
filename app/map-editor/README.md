@@ -31,6 +31,15 @@ A professional React-based territory map editor for creating and editing game ma
 - **Visual Preview** - See duplicate preview while Alt-dragging
 - **Smart Positioning** - Paste positions relative to cursor with snapping
 
+### 📚 Template Shape Library
+- **80+ Pre-built Shapes** - Basic shapes, arrows, UML, flowchart elements
+- **Category Organization** - Browse by type: Basic, Arrows, UML, Flowchart
+- **Quick Search** - Find shapes by name or tags
+- **One-Click Placement** - Click shape → click canvas to place
+- **Snapping Support** - Full integration with snapping system
+- **Recent Shapes** - Quick access to last 10 used shapes
+- **Visual Preview** - See shape preview with snapping before placement
+
 ### 🎨 UI Improvements
 - **Tool Updates**:
   - Removed "Edit Borders" tool (functionality integrated into vertex editing)
@@ -424,6 +433,7 @@ interface ViewState {
 - **Ctrl/Cmd+C** - Copy selected territories
 - **Ctrl/Cmd+V** - Paste territories at cursor position
 - **Ctrl/Cmd+D** - Duplicate selected territories with offset
+- **L** - Toggle template shape library
 - **Alt** (hold while dragging) - Duplicate territories instead of moving
 
 ### Visual Feedback Reference

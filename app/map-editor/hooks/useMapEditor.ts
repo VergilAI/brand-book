@@ -79,6 +79,19 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
   
   clipboard: null,
   
+  templateLibrary: {
+    isOpen: false,
+    selectedCategory: 'all',
+    searchQuery: '',
+    recentShapes: [],
+    customShapes: [],
+    placementMode: {
+      active: false,
+      shapeId: null,
+      preview: null
+    }
+  },
+  
   // Tool actions
   setTool: (tool) => set({ tool }),
   
@@ -915,7 +928,128 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         territories: newSelection
       }
     })
-  }
+  },
+  
+  // Template library actions
+  toggleTemplateLibrary: () => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      isOpen: !state.templateLibrary.isOpen
+    }
+  })),
+  
+  setTemplateCategory: (category) => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      selectedCategory: category
+    }
+  })),
+  
+  setTemplateSearch: (query) => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      searchQuery: query
+    }
+  })),
+  
+  startShapePlacement: (shapeId) => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      placementMode: {
+        active: true,
+        shapeId,
+        preview: null
+      }
+    },
+    tool: 'select' // Switch to select tool for placement
+  })),
+  
+  updateShapePreview: (position) => set(state => {
+    if (!state.templateLibrary.placementMode.active || !state.templateLibrary.placementMode.shapeId) {
+      return state
+    }
+    
+    return {
+      templateLibrary: {
+        ...state.templateLibrary,
+        placementMode: {
+          ...state.templateLibrary.placementMode,
+          preview: {
+            position,
+            size: { width: 100, height: 100 }, // Default size, will be set by shape
+            rotation: 0
+          }
+        }
+      }
+    }
+  }),
+  
+  placeShape: (position) => {
+    const state = get()
+    const { shapeId } = state.templateLibrary.placementMode
+    
+    if (!shapeId) return
+    
+    // Import shape library to get shape definition
+    import('../components/shapes/ShapeLibrary').then(({ shapeLibrary }) => {
+      const shape = shapeLibrary.getShape(shapeId)
+      if (!shape) return
+      
+      const id = `territory-${Date.now()}`
+      const path = shapeLibrary.generateShapePath(shape)
+      const center = position
+      
+      const newTerritory: Territory = {
+        id,
+        name: shape.name,
+        continent: 'unassigned',
+        center,
+        fillPath: moveSvgPath(path, position.x - shape.defaultSize.width / 2, position.y - shape.defaultSize.height / 2),
+        borderSegments: []
+      }
+      
+      set(state => ({
+        map: {
+          ...state.map,
+          territories: {
+            ...state.map.territories,
+            [id]: newTerritory
+          }
+        },
+        selection: {
+          territories: new Set([id]),
+          borders: new Set()
+        },
+        templateLibrary: {
+          ...state.templateLibrary,
+          placementMode: {
+            active: false,
+            shapeId: null,
+            preview: null
+          },
+          recentShapes: [shapeId, ...state.templateLibrary.recentShapes.filter(id => id !== shapeId)].slice(0, 10)
+        }
+      }))
+    })
+  },
+  
+  cancelShapePlacement: () => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      placementMode: {
+        active: false,
+        shapeId: null,
+        preview: null
+      }
+    }
+  })),
+  
+  addRecentShape: (shapeId) => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      recentShapes: [shapeId, ...state.templateLibrary.recentShapes.filter(id => id !== shapeId)].slice(0, 10)
+    }
+  }))
 }))
 
 // Helper functions

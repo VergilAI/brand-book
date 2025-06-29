@@ -2,6 +2,7 @@
 
 import type { MapData, Territory, Border, Point } from '@/lib/lms/optimized-map-data'
 import type { SnapState } from './snapping'
+import type { TemplateLibraryState } from './template-library'
 
 export type ToolType = 'select' | 'pen' | 'connect' | 'move'
 
@@ -77,6 +78,9 @@ export interface MapEditorState {
   // Clipboard state
   clipboard: ClipboardState | null
   
+  // Template library state
+  templateLibrary: TemplateLibraryState
+  
   // Actions
   setTool: (tool: ToolType) => void
   updateTerritory: (id: string, updates: Partial<Territory>) => void
@@ -130,6 +134,16 @@ export interface MapEditorState {
   copyTerritories: (territoryIds: string[]) => void
   pasteTerritories: (cursorPosition?: Point) => void
   duplicateTerritories: (territoryIds: string[], offset?: Point) => void
+  
+  // Template library actions
+  toggleTemplateLibrary: () => void
+  setTemplateCategory: (category: string) => void
+  setTemplateSearch: (query: string) => void
+  startShapePlacement: (shapeId: string) => void
+  updateShapePreview: (position: Point) => void
+  placeShape: (position: Point) => void
+  cancelShapePlacement: () => void
+  addRecentShape: (shapeId: string) => void
 }
 
 export interface PointerPosition {

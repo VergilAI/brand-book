@@ -12,6 +12,67 @@ import type { Territory, Point } from '@/lib/lms/optimized-map-data'
 import type { BezierPoint } from '../../types/editor'
 import type { SnapIndicator } from '../../types/snapping'
 
+// Helper function to move SVG path (needed for shape placement)
+function moveSvgPath(path: string, deltaX: number, deltaY: number): string {
+  // SVG path transformation - moves all coordinates by delta
+  const result = path.replace(/([MLHVCSQTAZ])\s*((?:[-\d.]+\s*,?\s*)+)/gi, (match, command, params) => {
+    const cmd = command.toUpperCase()
+    
+    if (cmd === 'Z') return command
+    
+    const numbers = params.match(/[-\d.]+/g) || []
+    const transformed: string[] = []
+    
+    switch (cmd) {
+      case 'M':
+      case 'L':
+        for (let i = 0; i < numbers.length; i += 2) {
+          transformed.push((parseFloat(numbers[i]) + deltaX).toString())
+          if (i + 1 < numbers.length) {
+            transformed.push((parseFloat(numbers[i + 1]) + deltaY).toString())
+          }
+        }
+        break
+      case 'C':
+      case 'Q':
+      case 'S':
+      case 'T':
+        for (let i = 0; i < numbers.length; i += 2) {
+          transformed.push((parseFloat(numbers[i]) + deltaX).toString())
+          if (i + 1 < numbers.length) {
+            transformed.push((parseFloat(numbers[i + 1]) + deltaY).toString())
+          }
+        }
+        break
+      case 'H':
+        for (const num of numbers) {
+          transformed.push((parseFloat(num) + deltaX).toString())
+        }
+        break
+      case 'V':
+        for (const num of numbers) {
+          transformed.push((parseFloat(num) + deltaY).toString())
+        }
+        break
+      case 'A':
+        for (let i = 0; i < numbers.length; i += 7) {
+          transformed.push(numbers[i]) // rx
+          transformed.push(numbers[i + 1]) // ry
+          transformed.push(numbers[i + 2]) // rotation
+          transformed.push(numbers[i + 3]) // large-arc
+          transformed.push(numbers[i + 4]) // sweep
+          transformed.push((parseFloat(numbers[i + 5]) + deltaX).toString()) // x
+          transformed.push((parseFloat(numbers[i + 6]) + deltaY).toString()) // y
+        }
+        break
+    }
+    
+    return command + ' ' + transformed.join(' ')
+  })
+  
+  return result
+}
+
 // Helper function to parse SVG path into polygon points
 function parsePathToPoints(pathString: string): Point[] {
   const points: Point[] = []
@@ -147,10 +208,23 @@ export function MapCanvas({ className }: MapCanvasProps) {
   // Duplicate preview state
   const [duplicatePreviewOffset, setDuplicatePreviewOffset] = React.useState<Point | null>(null)
   
+  // Shape placement preview
+  const [shapePlacementPreview, setShapePlacementPreview] = React.useState<{ path: string; position: Point } | null>(null)
+  
   // Handle pointer events based on current tool
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault() // Prevent default behaviors like text selection
     updatePosition(e)
+    
+    // Handle shape placement mode
+    if (store.templateLibrary.placementMode.active && e.button === 0) {
+      const rawPoint = position.svg
+      const { point: snappedPoint } = getSnappedPoint(rawPoint)
+      store.placeShape(snappedPoint)
+      setShapePlacementPreview(null)
+      setSnapIndicators([])
+      return
+    }
     
     if (e.button === 1 || (e.button === 0 && e.shiftKey) || (e.button === 0 && store.tool === 'move')) {
       // Middle mouse, Shift+left click, or move tool for pan
@@ -479,6 +553,24 @@ export function MapCanvas({ className }: MapCanvasProps) {
       const rawPoint = position.svg
       const { indicators } = getSnappedPoint(rawPoint)
       setSnapIndicators(indicators)
+    } else if (store.templateLibrary.placementMode.active && store.templateLibrary.placementMode.shapeId) {
+      // Update shape placement preview
+      const rawPoint = position.svg
+      const { point: snappedPoint, indicators } = getSnappedPoint(rawPoint)
+      setSnapIndicators(indicators)
+      store.updateShapePreview(snappedPoint)
+      
+      // Generate preview path
+      import('../shapes/ShapeLibrary').then(({ shapeLibrary }) => {
+        const shape = shapeLibrary.getShape(store.templateLibrary.placementMode.shapeId!)
+        if (shape) {
+          const path = shapeLibrary.generateShapePath(shape)
+          setShapePlacementPreview({
+            path: moveSvgPath(path, snappedPoint.x - shape.defaultSize.width / 2, snappedPoint.y - shape.defaultSize.height / 2),
+            position: snappedPoint
+          })
+        }
+      })
     } else {
       // Clear snap indicators when not in a snapping mode
       if (snapIndicators.length > 0) {
@@ -667,7 +759,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
           e.preventDefault()
         }
       } else if (e.key === 'Escape') {
-        if (store.editing.isEditing) {
+        if (store.templateLibrary.placementMode.active) {
+          store.cancelShapePlacement()
+          setShapePlacementPreview(null)
+          setSnapIndicators([])
+        } else if (store.editing.isEditing) {
           store.stopEditingTerritory()
         } else if (store.drawing.isDrawing) {
           store.cancelDrawing()
@@ -697,6 +793,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
       } else if (e.key.toLowerCase() === 's') {
         // Toggle snapping
         store.toggleSnapping()
+      } else if (e.key.toLowerCase() === 'l' && !store.editing.isEditing) {
+        // Toggle template library
+        store.toggleTemplateLibrary()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         if (store.editing.isEditing && store.editing.selectedVertices.size > 0) {
           // Delete selected vertices in editing mode
@@ -876,6 +975,28 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 />
               )
             })}
+          </g>
+        )}
+        
+        {/* Shape placement preview */}
+        {shapePlacementPreview && (
+          <g className="shape-placement-preview">
+            <path
+              d={shapePlacementPreview.path}
+              fill="#6366F1"
+              fillOpacity="0.2"
+              stroke="#6366F1"
+              strokeWidth="2"
+              strokeDasharray="4 2"
+              className="pointer-events-none"
+            />
+            <circle
+              cx={shapePlacementPreview.position.x}
+              cy={shapePlacementPreview.position.y}
+              r="4"
+              fill="#6366F1"
+              className="pointer-events-none"
+            />
           </g>
         )}
         
