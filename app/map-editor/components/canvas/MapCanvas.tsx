@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useCallback, useRef, useEffect } from 'react'
+import React, { useCallback, useRef, useEffect, useState } from 'react'
 import { useMapEditor } from '../../hooks/useMapEditor'
 import { usePointerPosition } from '../../hooks/usePointerPosition'
 import { useSnapping } from '../../hooks/useSnapping'
 import { GridOverlay } from './GridOverlay'
 import { SnapIndicators } from './SnapIndicators'
 import { BezierDrawTool } from '../drawing/BezierDrawTool'
+import { TerritoryTablePanel } from '../panels/TerritoryTablePanel'
 import { cn } from '@/lib/utils'
 import type { Territory, Point } from '@/lib/lms/optimized-map-data'
 import type { BezierPoint } from '../../types/editor'
@@ -189,6 +190,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
   const lastPan = useRef(store.view.pan)
   const lastMousePos = useRef({ x: 0, y: 0 })
   const canvasRef = useRef<HTMLDivElement>(null)
+  
+  // Territory table is managed by the store now
   
   // Selection box state
   const isAreaSelecting = useRef(false)
@@ -796,6 +799,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
       } else if (e.key.toLowerCase() === 'l' && !store.editing.isEditing) {
         // Toggle template library
         store.toggleTemplateLibrary()
+      } else if (e.key.toLowerCase() === 't' && !store.editing.isEditing) {
+        // Toggle territory table panel
+        store.toggleTerritoryTable()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         if (store.editing.isEditing && store.editing.selectedVertices.size > 0) {
           // Delete selected vertices in editing mode
@@ -831,7 +837,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
       window.removeEventListener('keydown', handleKeyDownForAlt)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [store])
+  }, [store, position.svg])
   
   // Calculate viewBox with dynamic aspect ratio
   const svgAspectRatio = svgRef.current ? 
@@ -1313,6 +1319,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
           Snap ON (S)
         </div>
       )}
+      
+      {/* Territory Table Panel */}
+      <TerritoryTablePanel 
+        isOpen={store.territoryTable.isOpen}
+        onClose={() => store.toggleTerritoryTable()}
+      />
     </div>
   )
 }

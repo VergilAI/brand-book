@@ -53,6 +53,13 @@ export interface ClipboardState {
   offset: Point // Offset from original position for smart paste
 }
 
+export interface TerritoryTableState {
+  isOpen: boolean
+  activeTab: 'territories' | 'continents'
+  sortColumn: string | null
+  sortDirection: 'asc' | 'desc'
+}
+
 export interface MapEditorState {
   // Map data
   map: MapData
@@ -80,6 +87,9 @@ export interface MapEditorState {
   
   // Template library state
   templateLibrary: TemplateLibraryState
+  
+  // Territory table state
+  territoryTable: TerritoryTableState
   
   // Actions
   setTool: (tool: ToolType) => void
@@ -144,6 +154,11 @@ export interface MapEditorState {
   placeShape: (position: Point) => void
   cancelShapePlacement: () => void
   addRecentShape: (shapeId: string) => void
+  
+  // Territory table actions
+  toggleTerritoryTable: () => void
+  setTerritoryTableTab: (tab: 'territories' | 'continents') => void
+  setTerritoryTableSort: (column: string, direction: 'asc' | 'desc') => void
 }
 
 export interface PointerPosition {

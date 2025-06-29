@@ -53,33 +53,16 @@ export function TemplateLibraryPanel() {
   }
   
   return (
-    <>
-      {/* Toggle Button */}
-      <button
-        onClick={() => store.toggleTemplateLibrary()}
-        className={cn(
-          "fixed left-4 top-1/2 -translate-y-1/2 z-20",
-          "w-10 h-10 bg-white border-2 border-gray-300 rounded-lg",
-          "flex items-center justify-center",
-          "hover:bg-gray-50 transition-colors",
-          "shadow-md"
-        )}
-        title="Toggle Shape Library"
-      >
-        <Library className="w-5 h-5" />
-      </button>
-      
-      {/* Library Panel */}
-      <div
-        className={cn(
-          "fixed left-0 top-0 h-full z-30",
-          "bg-white border-r border-gray-200 shadow-lg",
-          "transition-transform duration-300",
-          "flex flex-col",
-          "w-64",
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
+    <div
+      className={cn(
+        "fixed left-0 top-0 h-full z-30",
+        "bg-white border-r border-gray-200 shadow-lg",
+        "transition-transform duration-300",
+        "flex flex-col",
+        "w-64",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+    >
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-3">
@@ -171,6 +154,5 @@ export function TemplateLibraryPanel() {
           Click a shape to place • L to toggle panel
         </div>
       </div>
-    </>
   )
 }

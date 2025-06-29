@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/nextjs';
+import path from 'path';
 
 const config: StorybookConfig = {
   stories: [
@@ -18,6 +19,16 @@ const config: StorybookConfig = {
   staticDirs: ["../public"],
   features: {
     previewMdx2: true,
+  },
+  webpackFinal: async (config) => {
+    // Add alias for the local design-system package
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@vergil/design-system': path.resolve(__dirname, '../packages/design-system'),
+    };
+    
+    return config;
   },
 };
 

@@ -92,6 +92,13 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     }
   },
   
+  territoryTable: {
+    isOpen: false,
+    activeTab: 'territories' as 'territories' | 'continents',
+    sortColumn: null as string | null,
+    sortDirection: 'asc' as 'asc' | 'desc'
+  },
+  
   // Tool actions
   setTool: (tool) => set({ tool }),
   
@@ -1048,6 +1055,29 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     templateLibrary: {
       ...state.templateLibrary,
       recentShapes: [shapeId, ...state.templateLibrary.recentShapes.filter(id => id !== shapeId)].slice(0, 10)
+    }
+  })),
+  
+  // Territory table actions
+  toggleTerritoryTable: () => set(state => ({
+    territoryTable: {
+      ...state.territoryTable,
+      isOpen: !state.territoryTable.isOpen
+    }
+  })),
+  
+  setTerritoryTableTab: (tab) => set(state => ({
+    territoryTable: {
+      ...state.territoryTable,
+      activeTab: tab
+    }
+  })),
+  
+  setTerritoryTableSort: (column, direction) => set(state => ({
+    territoryTable: {
+      ...state.territoryTable,
+      sortColumn: column,
+      sortDirection: direction
     }
   }))
 }))

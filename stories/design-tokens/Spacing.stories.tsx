@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { tokens } from '../../packages/design-system/tokens';
+import { tokens } from '@vergil/design-system/tokens';
 
 const SpacingBox = ({ size, sizeKey }: { size: string; sizeKey: string }) => {
   const pixels = size.endsWith('px') 
