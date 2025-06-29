@@ -5,6 +5,7 @@ import { useMapEditor } from '../../hooks/useMapEditor'
 import { cn } from '@/lib/utils'
 import { X, ChevronUp, ChevronDown, MapPin, Globe } from 'lucide-react'
 import type { Territory, Continent } from '@/lib/lms/optimized-map-data'
+import styles from './ScrollablePanel.module.css'
 
 type SortField = 'name' | 'continent' | 'borderCount' | 'centerX' | 'centerY'
 type SortDirection = 'asc' | 'desc'
@@ -20,6 +21,7 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const panelRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // Handle click outside
   useEffect(() => {
@@ -48,6 +50,25 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
+  
+  // Force enable scrolling
+  useEffect(() => {
+    const scrollEl = scrollRef.current
+    if (!scrollEl || !isOpen) return
+    
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation()
+      // Force scroll the element
+      scrollEl.scrollTop += e.deltaY
+    }
+    
+    // Use passive: false to ensure we can stopPropagation
+    scrollEl.addEventListener('wheel', handleWheel, { passive: false })
+    
+    return () => {
+      scrollEl.removeEventListener('wheel', handleWheel)
+    }
+  }, [isOpen])
 
   // Calculate border counts for each territory
   const territoryBorderCounts = useMemo(() => {
@@ -168,6 +189,10 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
         "max-h-[50vh]",
         isOpen ? "translate-y-0" : "translate-y-full"
       )}
+      data-panel="territory-table"
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -217,7 +242,16 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
       </div>
 
       {/* Content */}
-      <div className="overflow-auto" style={{ maxHeight: 'calc(50vh - 73px)' }}>
+      <div 
+        ref={scrollRef}
+        className={cn("overflow-auto", styles.scrollablePanel)}
+        style={{ 
+          maxHeight: 'calc(50vh - 73px)',
+          position: 'relative',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
         {activeTab === 'territories' ? (
           <table className="w-full">
             <thead className="bg-gray-50 sticky top-0 z-10">

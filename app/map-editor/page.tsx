@@ -9,7 +9,7 @@ import { HelpInfo } from './components/HelpInfo'
 
 export default function MapEditorPage() {
   return (
-    <div className="h-screen relative bg-gray-100">
+    <div className="h-screen relative bg-gray-100 overflow-hidden">
       {/* Main canvas - full screen */}
       <MapCanvas />
       

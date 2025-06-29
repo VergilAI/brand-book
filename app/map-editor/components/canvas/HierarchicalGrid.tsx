@@ -20,85 +20,146 @@ interface GridLevel {
 }
 
 // Grid configuration constants
-const GRID_CONFIG = {
-  REFERENCE_SIZE: 40,          // Base unit in world coordinates
-  LEVELS_VISIBLE: 4,           // Always show exactly 4 grid levels
-  SUBDIVISION_FACTOR: 4,       // Each level is 4x the previous
-  MIN_OPACITY: 0.01,          // Don't render below this opacity
-  STROKE_COLOR: '#94A3B8',    // Slate-400 for subtle grid
-  STROKE_OPACITY: 0.08         // Very subtle opacity
+const getGridConfig = () => {
+  // Check for debug override
+  if (typeof window !== 'undefined' && (window as any).__GRID_DEBUG_CONFIG) {
+    const debug = (window as any).__GRID_DEBUG_CONFIG
+    return {
+      REFERENCE_SIZE: debug.referenceSize || 10,
+      LEVELS_VISIBLE: debug.levelsVisible || 4,
+      SUBDIVISION_FACTOR: debug.subdivisionFactor || 4,
+      MIN_OPACITY: debug.minOpacity || 0.01,
+      STROKE_COLOR: debug.strokeColor || '#94A3B8',
+      STROKE_OPACITY: debug.strokeOpacity || 0.28,
+      MIN_LEVEL: debug.minLevel ?? 0,
+      OPACITY_CURVE: debug.opacityCurve || 'sigmoid',
+      CURVE_STEEPNESS: debug.curveSteepness || 4,
+      MAX_VISIBLE_GRIDS: debug.maxVisibleGrids || 3
+    }
+  }
+  
+  // Default configuration
+  return {
+    REFERENCE_SIZE: 10,          // Base unit in world coordinates - matches snap grid
+    LEVELS_VISIBLE: 4,           // Always show exactly 4 grid levels
+    SUBDIVISION_FACTOR: 4,       // Each level is 4x the previous
+    MIN_OPACITY: 0.01,          // Don't render below this opacity
+    STROKE_COLOR: '#94A3B8',    // Slate-400 for subtle grid
+    STROKE_OPACITY: 0.28,        // More visible grid
+    MIN_LEVEL: 0,               // Minimum grid level (0 = reference size)
+    OPACITY_CURVE: 'sigmoid',    // Opacity curve type
+    CURVE_STEEPNESS: 4,         // Steepness of the sigmoid curve
+    MAX_VISIBLE_GRIDS: 3        // Maximum number of grids visible at once
+  }
+}
+
+// Apply opacity curve function
+function applyOpacityCurve(x: number, curve: string, steepness: number): number {
+  // x is normalized opacity from 0 to 1
+  switch (curve) {
+    case 'sigmoid':
+      // S-curve: slow start/end, fast middle
+      const k = steepness
+      return 1 / (1 + Math.exp(-k * (x - 0.5) * 2))
+    
+    case 'exponential':
+      // Fast drop-off
+      return Math.pow(x, 1 / steepness)
+    
+    case 'step':
+      // More discrete levels
+      if (x < 0.3) return 0
+      if (x < 0.7) return 0.5
+      return 1
+    
+    case 'linear':
+    default:
+      return x
+  }
 }
 
 // Calculate opacity based on apparent size
-function calculateLevelOpacity(level: number, zoom: number): number {
-  const levelSize = GRID_CONFIG.REFERENCE_SIZE * Math.pow(4, level)
+function calculateLevelOpacity(level: number, zoom: number, config: ReturnType<typeof getGridConfig>): number {
+  const levelSize = config.REFERENCE_SIZE * Math.pow(config.SUBDIVISION_FACTOR, level)
   const apparentSize = levelSize * zoom // How big it appears on screen
-  const normalizedSize = apparentSize / GRID_CONFIG.REFERENCE_SIZE
+  const normalizedSize = apparentSize / config.REFERENCE_SIZE
   
-  // Opacity peaks when apparent size equals reference size
-  // Fades out when too small (< 0.25x) or too large (> 4x)
-  let opacity = 0
+  // Calculate base opacity based on size
+  let baseOpacity = 0
   
   if (normalizedSize < 0.25) {
-    opacity = 0 // Too small to see
+    baseOpacity = 0 // Too small to see
   } else if (normalizedSize < 1) {
     // Fade in as size approaches reference
-    opacity = (normalizedSize - 0.25) / 0.75
+    baseOpacity = (normalizedSize - 0.25) / 0.75
   } else if (normalizedSize < 4) {
     // Full opacity when close to reference size
-    opacity = 1
+    baseOpacity = 1
   } else if (normalizedSize < 16) {
     // Fade out as it gets too large
-    opacity = 1 - (normalizedSize - 4) / 12
+    baseOpacity = 1 - (normalizedSize - 4) / 12
   } else {
-    opacity = 0 // Too large
+    baseOpacity = 0 // Too large
   }
   
-  return Math.max(0, Math.min(1, opacity)) * GRID_CONFIG.STROKE_OPACITY
+  // Apply the opacity curve
+  const curvedOpacity = applyOpacityCurve(baseOpacity, config.OPACITY_CURVE, config.CURVE_STEEPNESS)
+  
+  return Math.max(0, Math.min(1, curvedOpacity)) * config.STROKE_OPACITY
 }
 
 // Get visible grid levels based on zoom
-function getVisibleLevels(zoom: number): number[] {
+function getVisibleLevels(zoom: number, config: ReturnType<typeof getGridConfig>): number[] {
   // Calculate which level has spacing closest to reference size
-  // When zoom = 1, level 0 (40px) is at reference
-  // When zoom = 4, level -1 (10px) appears as 40px
-  // When zoom = 0.25, level 1 (160px) appears as 40px
-  const idealLevel = -Math.log(zoom) / Math.log(4)
+  const idealLevel = -Math.log(zoom) / Math.log(config.SUBDIVISION_FACTOR)
   const centerLevel = Math.round(idealLevel)
   
-  // Always show 4 consecutive levels centered around the ideal level
-  return [
-    centerLevel - 1,
-    centerLevel,
-    centerLevel + 1,
-    centerLevel + 2
-  ]
+  // Show the configured number of consecutive levels centered around the ideal level
+  const levels: number[] = []
+  const halfLevels = Math.floor(config.LEVELS_VISIBLE / 2)
+  const startLevel = centerLevel - halfLevels + (config.LEVELS_VISIBLE % 2 === 0 ? 1 : 0)
+  
+  for (let i = 0; i < config.LEVELS_VISIBLE; i++) {
+    const level = startLevel + i
+    // Only add levels that are >= minLevel
+    if (level >= config.MIN_LEVEL) {
+      levels.push(level)
+    }
+  }
+  
+  return levels
 }
 
 // Calculate grid levels with proper opacity
-function calculateGridLevels(zoom: number): GridLevel[] {
-  const visibleLevels = getVisibleLevels(zoom)
-  const levels: GridLevel[] = []
+function calculateGridLevels(zoom: number, config: ReturnType<typeof getGridConfig>): GridLevel[] {
+  const visibleLevels = getVisibleLevels(zoom, config)
+  const allLevels: GridLevel[] = []
   
   visibleLevels.forEach(level => {
-    const spacing = GRID_CONFIG.REFERENCE_SIZE * Math.pow(4, level)
-    const opacity = calculateLevelOpacity(level, zoom)
+    const spacing = config.REFERENCE_SIZE * Math.pow(config.SUBDIVISION_FACTOR, level)
+    const opacity = calculateLevelOpacity(level, zoom, config)
     
-    if (opacity > GRID_CONFIG.MIN_OPACITY) {
-      levels.push({
+    if (opacity > config.MIN_OPACITY) {
+      allLevels.push({
         spacing,
         opacity,
         lineWidth: 1,
-        color: GRID_CONFIG.STROKE_COLOR
+        color: config.STROKE_COLOR
       })
     }
   })
   
-  return levels.reverse() // Draw coarsest first
+  // Sort by opacity (highest first) and limit to MAX_VISIBLE_GRIDS
+  allLevels.sort((a, b) => b.opacity - a.opacity)
+  const limitedLevels = allLevels.slice(0, config.MAX_VISIBLE_GRIDS)
+  
+  // Sort by spacing for rendering (coarsest first)
+  return limitedLevels.sort((a, b) => b.spacing - a.spacing)
 }
 
 export const HierarchicalGrid = React.memo(function HierarchicalGrid({ width, height, zoom, pan, gridType = 'lines' }: HierarchicalGridProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const store = useMapEditor()
   
   // Convert SVG coordinates to canvas coordinates
   const svgToCanvas = useCallback((x: number, y: number) => {
@@ -113,9 +174,9 @@ export const HierarchicalGrid = React.memo(function HierarchicalGrid({ width, he
     const normalizedX = (x - pan.x) / viewBoxWidth
     const normalizedY = (y - pan.y) / viewBoxHeight
     
-    // Convert to canvas pixels with rounding to prevent sub-pixel issues
-    const canvasX = Math.round(normalizedX * width * 2) / 2  // Snap to half-pixels
-    const canvasY = Math.round(normalizedY * height * 2) / 2
+    // Convert to canvas pixels
+    const canvasX = normalizedX * width
+    const canvasY = normalizedY * height
     
     return { x: canvasX, y: canvasY }
   }, [width, height, zoom, pan])
@@ -127,6 +188,9 @@ export const HierarchicalGrid = React.memo(function HierarchicalGrid({ width, he
     
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+    
+    // Get current configuration
+    const config = getGridConfig()
     
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -146,7 +210,7 @@ export const HierarchicalGrid = React.memo(function HierarchicalGrid({ width, he
     }
     
     // Get grid levels
-    const levels = calculateGridLevels(zoom)
+    const levels = calculateGridLevels(zoom, config)
     
     // Draw debug info (comment out for production)
     /*
@@ -251,6 +315,28 @@ export const HierarchicalGrid = React.memo(function HierarchicalGrid({ width, he
         ctx.beginPath()
         ctx.arc(origin.x, origin.y, 3, 0, Math.PI * 2)
         ctx.fill()
+      }
+    }
+    
+    // Draw snap grid points for debugging
+    if ((window as any).__SHOW_SNAP_POINTS && store) {
+      const snapGridSize = store.view.gridSize
+      ctx.globalAlpha = 1
+      ctx.fillStyle = '#FF0000'
+      
+      // Calculate snap grid points in view
+      const snapStartX = Math.floor(visibleBounds.left / snapGridSize) * snapGridSize
+      const snapEndX = Math.ceil(visibleBounds.right / snapGridSize) * snapGridSize
+      const snapStartY = Math.floor(visibleBounds.top / snapGridSize) * snapGridSize
+      const snapEndY = Math.ceil(visibleBounds.bottom / snapGridSize) * snapGridSize
+      
+      for (let x = snapStartX; x <= snapEndX; x += snapGridSize) {
+        for (let y = snapStartY; y <= snapEndY; y += snapGridSize) {
+          const pos = svgToCanvas(x, y)
+          ctx.beginPath()
+          ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2)
+          ctx.fill()
+        }
       }
     }
     

@@ -14,6 +14,7 @@ import { BezierDrawTool } from '../drawing/BezierDrawTool'
 import { TerritoryTablePanel } from '../panels/TerritoryTablePanel'
 import { ZoomIndicator } from '../ui/ZoomIndicator'
 import { GestureHint } from '../ui/GestureHint'
+import { DebugPanel } from '../debug/DebugPanel'
 import { cn } from '@/lib/utils'
 import styles from './MapCanvas.module.css'
 import type { Territory, Point } from '@/lib/lms/optimized-map-data'
@@ -741,6 +742,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
   // Handle zoom with wheel
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (!containerSize.width || !containerSize.height) return
+    
+    // Check if the wheel event is happening over a panel
+    const target = e.target as HTMLElement
+    const isOverPanel = target.closest('[data-panel]') || 
+                       target.closest('.z-50') || // Debug panel has z-50
+                       target.closest('.z-40')    // Territory panel has z-40
+    
+    if (isOverPanel) {
+      // Don't handle wheel events over panels
+      return
+    }
     
     e.preventDefault()
     e.stopPropagation()
@@ -1592,6 +1604,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
         isOpen={store.territoryTable.isOpen}
         onClose={() => store.toggleTerritoryTable()}
       />
+      
+      {/* Debug Panel */}
+      <DebugPanel />
       
       {/* Debug info - remove in production */}
       <div className="absolute top-2 right-2 bg-black/50 text-white rounded px-2 py-1 text-xs font-mono space-y-1">
