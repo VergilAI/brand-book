@@ -12,6 +12,12 @@ Visual editor for creating territory-based maps with optimized border system.
 - Draw tool shortcut changed from P to D
 - UI consistency improvements with design system buttons
 - Snap indicator moved to bottom center
+- **NEW**: Sophisticated constant-density dynamic grid system
+  - Always shows consistent number of grid lines (3-4 major, 6-8 minor)
+  - Smooth transitions with fractal-like structure
+  - Powers of 2 and 5 spacing (1, 2, 5, 10, 20, 50, 100, etc.)
+  - Three-level visual hierarchy with different opacities
+  - Toggle with G key, Shift+G for grid type (lines/dots)
 
 ## Key Context
 - Maps use separate border elements (each border rendered once)

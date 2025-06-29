@@ -4,11 +4,18 @@ import React, { useCallback, useRef, useEffect, useState } from 'react'
 import { useMapEditor } from '../../hooks/useMapEditor'
 import { usePointerPosition } from '../../hooks/usePointerPosition'
 import { useSnapping } from '../../hooks/useSnapping'
-import { GridOverlay } from './GridOverlay'
+import { useGestureDetection } from '../../hooks/useGestureDetection'
+import { useInertiaScroll } from '../../hooks/useInertiaScroll'
+// import { useSmoothZoom } from '../../hooks/useSmoothZoom' // Replaced with useSmoothZoomController
+import { useSmoothZoomController } from '../../hooks/useSmoothZoomController'
+import { HierarchicalGrid } from './HierarchicalGrid'
 import { SnapIndicators } from './SnapIndicators'
 import { BezierDrawTool } from '../drawing/BezierDrawTool'
 import { TerritoryTablePanel } from '../panels/TerritoryTablePanel'
+import { ZoomIndicator } from '../ui/ZoomIndicator'
+import { GestureHint } from '../ui/GestureHint'
 import { cn } from '@/lib/utils'
+import styles from './MapCanvas.module.css'
 import type { Territory, Point } from '@/lib/lms/optimized-map-data'
 import type { BezierPoint } from '../../types/editor'
 import type { SnapIndicator } from '../../types/snapping'
@@ -190,6 +197,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
   const lastPan = useRef(store.view.pan)
   const lastMousePos = useRef({ x: 0, y: 0 })
   const canvasRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false)
+  const [zoomDisplayTimer, setZoomDisplayTimer] = useState<NodeJS.Timeout | null>(null)
+  
+  // Gesture state to prevent confusion between pan and zoom
+  const lastGestureType = useRef<'pan' | 'zoom' | null>(null)
+  const gestureTimeout = useRef<NodeJS.Timeout | null>(null)
+  const initialGestureScale = useRef<number>(1)
+  const initialZoom = useRef<number>(1)
+  const [gestureHint, setGestureHint] = useState<{ show: boolean; message: string }>({ show: false, message: '' })
+  const [gridType, setGridType] = useState<'lines' | 'dots'>('lines')
   
   // Territory table is managed by the store now
   
@@ -211,6 +229,79 @@ export function MapCanvas({ className }: MapCanvasProps) {
   // Duplicate preview state
   const [duplicatePreviewOffset, setDuplicatePreviewOffset] = React.useState<Point | null>(null)
   
+  // Gesture handling
+  const inertiaScroll = useInertiaScroll({
+    friction: 0.92,
+    minVelocity: 0.5,
+    onUpdate: (deltaX, deltaY) => {
+      store.setPan({
+        x: store.view.pan.x - deltaX / store.view.zoom,
+        y: store.view.pan.y - deltaY / store.view.zoom
+      })
+    }
+  })
+  
+  // Enhanced smooth zoom controller
+  const {
+    wheelZoom,
+    pinchZoom,
+    setZoomLevel,
+    instantPan,
+    addPanMomentum,
+    endGesture,
+    currentZoom,
+    targetZoom
+  } = useSmoothZoomController({
+    zoom: store.view.zoom,
+    pan: store.view.pan,
+    setZoom: store.setZoom,
+    setPan: store.setPan
+  })
+  
+  // Update container size
+  useEffect(() => {
+    const updateSize = () => {
+      if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect()
+        setContainerSize({ width: rect.width, height: rect.height })
+      }
+    }
+    
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    
+    const resizeObserver = new ResizeObserver(updateSize)
+    if (canvasRef.current) {
+      resizeObserver.observe(canvasRef.current)
+    }
+    
+    return () => {
+      window.removeEventListener('resize', updateSize)
+      resizeObserver.disconnect()
+    }
+  }, [])
+  
+  // Track if user has used gestures (for hints)
+  const hasUsedGestures = useRef({
+    spacePan: false,
+    trackpadPan: false,
+    pinchZoom: false
+  })
+  
+  const gesture = useGestureDetection({
+    // Disabled - we handle wheel events directly in handleWheel
+    onPan: () => {},
+    onZoom: () => {},
+    onGestureEnd: () => {},
+    onSpacePanStart: () => {
+      // Show hint for first-time space pan
+      if (!hasUsedGestures.current.spacePan) {
+        hasUsedGestures.current.spacePan = true
+        setGestureHint({ show: true, message: 'Hold Space + drag to pan' })
+      }
+    }
+  })
+  
   // Shape placement preview
   const [shapePlacementPreview, setShapePlacementPreview] = React.useState<{ path: string; position: Point } | null>(null)
   
@@ -229,12 +320,15 @@ export function MapCanvas({ className }: MapCanvasProps) {
       return
     }
     
-    if (e.button === 1 || (e.button === 0 && e.shiftKey) || (e.button === 0 && store.tool === 'move')) {
-      // Middle mouse, Shift+left click, or move tool for pan
+    if (e.button === 1 || (e.button === 0 && e.shiftKey) || (e.button === 0 && store.tool === 'move') || (e.button === 0 && gesture.gestureState.isSpacePanning)) {
+      // Middle mouse, Shift+left click, move tool, or Space+drag for pan
       isDragging.current = true
       lastPan.current = store.view.pan
       lastMousePos.current = { x: e.clientX, y: e.clientY }
       e.currentTarget.setPointerCapture(e.pointerId)
+      
+      // Stop any ongoing inertia
+      inertiaScroll.stopInertia()
       return
     }
     
@@ -416,7 +510,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
         }
       }
     }
-  }, [store, position, updatePosition, getSnappedPoint])
+  }, [store, position, updatePosition, getSnappedPoint, gesture, inertiaScroll])
   
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (isAreaSelecting.current) {
@@ -428,10 +522,13 @@ export function MapCanvas({ className }: MapCanvasProps) {
       const dx = e.clientX - lastMousePos.current.x
       const dy = e.clientY - lastMousePos.current.y
       
-      store.setPan({
+      instantPan({
         x: lastPan.current.x - dx / store.view.zoom,
         y: lastPan.current.y - dy / store.view.zoom
       })
+      
+      // Track velocity for inertia
+      gesture.handleMouseMove(e as unknown as MouseEvent)
     } else if (store.editing.isDraggingVertex && store.editing.draggedVertex !== null) {
       // Move vertex with snapping
       const rawPoint = position.svg
@@ -580,12 +677,18 @@ export function MapCanvas({ className }: MapCanvasProps) {
         setSnapIndicators([])
       }
     }
-  }, [store, updatePosition, position, getSnappedPoint, getSnappedDrawingPoint])
+  }, [store, updatePosition, position, getSnappedPoint, getSnappedDrawingPoint, gesture])
   
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (isDragging.current) {
       isDragging.current = false
       e.currentTarget.releasePointerCapture(e.pointerId)
+      
+      // Inertia disabled to prevent bouncing
+      // const velocity = gesture.getVelocity()
+      // if (Math.abs(velocity.x) > 50 || Math.abs(velocity.y) > 50) {
+      //   inertiaScroll.startInertia(velocity)
+      // }
     } else if (store.editing.isDraggingVertex || store.editing.isDraggingHandle) {
       // End vertex or handle dragging
       store.endDragging()
@@ -633,53 +736,125 @@ export function MapCanvas({ className }: MapCanvasProps) {
         hasMoved.current = false
       }, 10)
     }
-  }, [store, position])
+  }, [store, position, gesture, inertiaScroll])
   
   // Handle zoom with wheel
   const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (!svgRef.current) return
+    if (!containerSize.width || !containerSize.height) return
     
-    const scaleFactor = e.deltaY > 0 ? 0.92 : 1.08
-    const newZoom = Math.max(0.1, Math.min(5, store.view.zoom * scaleFactor))
+    e.preventDefault()
+    e.stopPropagation()
     
-    // Get mouse position relative to the SVG element
-    const rect = svgRef.current.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left
-    const mouseY = e.clientY - rect.top
-    
-    // Calculate viewBox dimensions based on actual SVG aspect ratio
-    const svgAspectRatio = rect.width / rect.height
-    const baseWidth = 1000 // Use a base width for consistent scaling
-    const baseHeight = baseWidth / svgAspectRatio
-    
-    // Get current viewBox dimensions
-    const currentViewBoxWidth = baseWidth / store.view.zoom
-    const currentViewBoxHeight = baseHeight / store.view.zoom
-    
-    // Convert mouse position to normalized coordinates (0 to 1)
-    const normalizedX = mouseX / rect.width
-    const normalizedY = mouseY / rect.height
-    
-    // Calculate mouse position in current SVG coordinates
-    const mouseInSVG = {
-      x: store.view.pan.x + normalizedX * currentViewBoxWidth,
-      y: store.view.pan.y + normalizedY * currentViewBoxHeight
+    // Clear gesture timeout
+    if (gestureTimeout.current) {
+      clearTimeout(gestureTimeout.current)
     }
     
-    // Calculate new viewBox dimensions
-    const newViewBoxWidth = baseWidth / newZoom
-    const newViewBoxHeight = baseHeight / newZoom
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect) return
     
-    // Calculate new pan to keep the mouse position fixed during zoom
-    const newPan = {
-      x: mouseInSVG.x - normalizedX * newViewBoxWidth,
-      y: mouseInSVG.y - normalizedY * newViewBoxHeight
+    const center = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
     }
     
-    // Update both zoom and pan together
-    store.setZoom(newZoom)
-    store.setPan(newPan)
-  }, [store, svgRef])
+    // Detect gesture type based on macOS trackpad behavior:
+    // - Pinch zoom: ALWAYS has ctrlKey = true on macOS
+    // - Two-finger scroll: No ctrlKey, ANY deltaX or deltaY
+    // - Mouse wheel: Larger deltaY values (usually > 50), always integer, no deltaX
+    
+    const isPinchZoom = e.ctrlKey
+    const hasHorizontalMovement = Math.abs(e.deltaX) > 0
+    const hasFractionalDelta = (e.deltaY % 1 !== 0) || (e.deltaX % 1 !== 0)
+    
+    // Mouse wheels typically have larger delta values (> 50) and are always integers
+    // Trackpad two-finger scrolls have smaller deltas and often (but not always) fractional
+    const isLikelyMouseWheel = !isPinchZoom && 
+                               !hasHorizontalMovement && 
+                               !hasFractionalDelta && 
+                               Math.abs(e.deltaY) > 50
+    
+    // IMPORTANT: If it's not a pinch zoom and not a mouse wheel, it's a two-finger pan
+    const isTwoFingerPan = !isPinchZoom && !isLikelyMouseWheel
+    
+    
+    // Determine gesture type, considering previous gesture for consistency
+    let currentGesture: 'pan' | 'zoom' = isTwoFingerPan ? 'pan' : 'zoom'
+    
+    // If we recently did a different gesture, wait a bit before switching
+    if (lastGestureType.current && lastGestureType.current !== currentGesture) {
+      // Use previous gesture type for consistency during rapid movements
+      currentGesture = lastGestureType.current
+    }
+    
+    if (currentGesture === 'pan') {
+      // Two-finger pan on trackpad - direct update, no momentum
+      const deltaX = -e.deltaX
+      const deltaY = -e.deltaY
+      
+      instantPan({
+        x: store.view.pan.x - deltaX / store.view.zoom,
+        y: store.view.pan.y - deltaY / store.view.zoom
+      })
+    } else {
+      // Zoom (either pinch zoom or mouse wheel)
+      const delta = -e.deltaY
+      wheelZoom(delta, center, containerSize)
+      
+      // Show zoom indicator
+      setShowZoomIndicator(true)
+      if (zoomDisplayTimer) {
+        clearTimeout(zoomDisplayTimer)
+      }
+      const timer = setTimeout(() => {
+        setShowZoomIndicator(false)
+      }, 2000)
+      setZoomDisplayTimer(timer)
+    }
+    
+    // Update last gesture type
+    lastGestureType.current = currentGesture
+    
+    // Reset gesture type after a short delay
+    gestureTimeout.current = setTimeout(() => {
+      lastGestureType.current = null
+    }, 100) // 100ms delay to prevent rapid switching
+  }, [containerSize, wheelZoom, instantPan, store, store.view.zoom, store.view.pan])
+  
+  // Safari gesture events support (for better trackpad handling)
+  const handleGestureStart = useCallback((e: any) => {
+    e.preventDefault()
+    lastGestureType.current = 'zoom'
+    initialGestureScale.current = e.scale || 1
+    initialZoom.current = store.view.zoom
+  }, [store.view.zoom])
+  
+  const handleGestureChange = useCallback((e: any) => {
+    e.preventDefault()
+    if (!containerSize.width || !containerSize.height) return
+    
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect) return
+    
+    const center = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    }
+    
+    // Calculate relative scale from the start of the gesture
+    const relativeScale = e.scale / initialGestureScale.current
+    const targetZoom = initialZoom.current * relativeScale
+    
+    // Set zoom directly to avoid cumulative multiplication
+    setZoomLevel(targetZoom, center, containerSize)
+  }, [containerSize, setZoomLevel])
+  
+  const handleGestureEnd = useCallback((e: any) => {
+    e.preventDefault()
+    lastGestureType.current = null
+    // Trigger zoom momentum
+    endGesture()
+  }, [endGesture])
   
   // Prevent page scrolling when over canvas
   useEffect(() => {
@@ -694,10 +869,22 @@ export function MapCanvas({ className }: MapCanvasProps) {
     // Use passive: false to ensure preventDefault works
     canvasElement.addEventListener('wheel', preventScroll, { passive: false })
     
+    // Add Safari gesture event listeners if available
+    if ('GestureEvent' in window) {
+      canvasElement.addEventListener('gesturestart', handleGestureStart as any)
+      canvasElement.addEventListener('gesturechange', handleGestureChange as any)
+      canvasElement.addEventListener('gestureend', handleGestureEnd as any)
+    }
+    
     return () => {
       canvasElement.removeEventListener('wheel', preventScroll)
+      if ('GestureEvent' in window) {
+        canvasElement.removeEventListener('gesturestart', handleGestureStart as any)
+        canvasElement.removeEventListener('gesturechange', handleGestureChange as any)
+        canvasElement.removeEventListener('gestureend', handleGestureEnd as any)
+      }
     }
-  }, [])
+  }, [handleGestureStart, handleGestureChange, handleGestureEnd])
 
   // Handle double-click for editing
   const handleDoubleClick = useCallback((e: React.MouseEvent, territoryId: string) => {
@@ -792,7 +979,13 @@ export function MapCanvas({ className }: MapCanvasProps) {
       } else if (e.key.toLowerCase() === 'h' && !store.editing.isEditing) {
         store.setTool('move')
       } else if (e.key.toLowerCase() === 'g') {
-        store.toggleGrid()
+        if (e.shiftKey) {
+          // Shift+G to toggle grid type
+          setGridType(prev => prev === 'lines' ? 'dots' : 'lines')
+        } else {
+          // G to toggle grid visibility
+          store.toggleGrid()
+        }
       } else if (e.key.toLowerCase() === 's') {
         // Toggle snapping
         store.toggleSnapping()
@@ -837,7 +1030,26 @@ export function MapCanvas({ className }: MapCanvasProps) {
       window.removeEventListener('keydown', handleKeyDownForAlt)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [store, position.svg])
+  }, [store, position.svg, setGridType])
+  
+  // Handle gesture keyboard events
+  useEffect(() => {
+    const handleGestureKeyDown = (e: KeyboardEvent) => {
+      gesture.handleKeyDown(e)
+    }
+    
+    const handleGestureKeyUp = (e: KeyboardEvent) => {
+      gesture.handleKeyUp(e)
+    }
+    
+    window.addEventListener('keydown', handleGestureKeyDown)
+    window.addEventListener('keyup', handleGestureKeyUp)
+    
+    return () => {
+      window.removeEventListener('keydown', handleGestureKeyDown)
+      window.removeEventListener('keyup', handleGestureKeyUp)
+    }
+  }, [gesture])
   
   // Calculate viewBox with dynamic aspect ratio
   const svgAspectRatio = svgRef.current ? 
@@ -860,7 +1072,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
   return (
     <div 
       ref={canvasRef}
-      className={cn("relative w-full h-full overflow-hidden bg-gray-100", className)}
+      className={cn(
+        "relative w-full h-full overflow-hidden bg-white",
+        styles.canvas,
+        gesture.isGesturing() && styles.gesturing,
+        className
+      )}
       onWheel={handleWheel}
       style={{ 
         userSelect: 'none',
@@ -878,11 +1095,20 @@ export function MapCanvas({ className }: MapCanvasProps) {
     >
       <svg
         ref={svgRef}
-        className="w-full h-full cursor-crosshair"
+        className="absolute inset-0 w-full h-full cursor-crosshair"
         viewBox={viewBox}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        onPointerDown={(e) => {
+          handlePointerDown(e)
+          gesture.handleMouseDown(e.nativeEvent as MouseEvent)
+        }}
+        onPointerMove={(e) => {
+          handlePointerMove(e)
+          gesture.handleMouseMove(e.nativeEvent as MouseEvent)
+        }}
+        onPointerUp={(e) => {
+          handlePointerUp(e)
+          gesture.handleMouseUp()
+        }}
         onPointerLeave={(e) => {
           // End any ongoing area selection when leaving the SVG
           if (isAreaSelecting.current) {
@@ -893,7 +1119,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
           handlePointerUp(e)
         }}
         style={{
-          cursor: isDragging.current ? 'grabbing' : 
+          cursor: gesture.gestureState.isSpacePanning && !isDragging.current ? 'grab' :
+                  isDragging.current ? 'grabbing' : 
                   isMovingTerritories.current ? 'grabbing' :
                   isAreaSelecting.current ? 'crosshair' :
                   store.tool === 'move' ? 'grab' :
@@ -902,13 +1129,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   'default'
         }}
       >
-        {/* Grid overlay */}
-        {store.view.showGrid && (
-          <GridOverlay 
-            gridSize={store.view.gridSize} 
-            viewBox={viewBox}
-          />
-        )}
+        {/* SVG Grid removed - now using Canvas HierarchicalGrid */}
         
         {/* Existing territories */}
         <g className="territories">
@@ -1273,6 +1494,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
         <SnapIndicators indicators={snapIndicators} zoom={store.view.zoom} />
       </svg>
       
+      {/* Canvas grid layer - render above SVG so it's on top */}
+      {store.view.showGrid && containerSize.width > 0 && containerSize.height > 0 && (
+        <HierarchicalGrid
+          width={containerSize.width}
+          height={containerSize.height}
+          zoom={store.view.zoom}
+          pan={store.view.pan}
+          gridType={gridType}
+        />
+      )}
+      
       {/* Position display */}
       <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs font-mono">
         {position.svg.x}, {position.svg.y}
@@ -1290,16 +1522,24 @@ export function MapCanvas({ className }: MapCanvasProps) {
         </div>
       )}
       
-      {/* Zoom display */}
-      <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs">
-        {Math.round(store.view.zoom * 100)}%
-      </div>
+      {/* Zoom display - hide when zoom indicator is showing */}
+      {!showZoomIndicator && (
+        <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs">
+          {Math.round(currentZoom * 100)}%
+        </div>
+      )}
+      
+      {/* Zoom indicator */}
+      {showZoomIndicator && <ZoomIndicator zoom={currentZoom} />}
+      
+      {/* Gesture hint */}
+      <GestureHint show={gestureHint.show} message={gestureHint.message} />
       
       {/* Center button */}
       <button
         onClick={() => {
-          store.setPan({ x: -450, y: -250 })
-          store.setZoom(1)
+          instantPan({ x: -450, y: -250 })
+          setZoomLevel(1)
         }}
         className="absolute bottom-2 right-20 inline-flex items-center justify-center h-8 px-3 text-xs font-medium rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all"
         title="Center map (reset view)"
@@ -1320,11 +1560,54 @@ export function MapCanvas({ className }: MapCanvasProps) {
         </div>
       )}
       
+      {/* Grid type indicator */}
+      {store.view.showGrid && (
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800/90 backdrop-blur-sm text-white rounded px-2 py-1 text-xs flex items-center gap-1">
+          {gridType === 'lines' ? (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white">
+              <line x1="0" y1="4" x2="12" y2="4" stroke="currentColor" strokeWidth="1"/>
+              <line x1="0" y1="8" x2="12" y2="8" stroke="currentColor" strokeWidth="1"/>
+              <line x1="4" y1="0" x2="4" y2="12" stroke="currentColor" strokeWidth="1"/>
+              <line x1="8" y1="0" x2="8" y2="12" stroke="currentColor" strokeWidth="1"/>
+            </svg>
+          ) : (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white">
+              <circle cx="2" cy="2" r="1" fill="currentColor"/>
+              <circle cx="6" cy="2" r="1" fill="currentColor"/>
+              <circle cx="10" cy="2" r="1" fill="currentColor"/>
+              <circle cx="2" cy="6" r="1" fill="currentColor"/>
+              <circle cx="6" cy="6" r="1" fill="currentColor"/>
+              <circle cx="10" cy="6" r="1" fill="currentColor"/>
+              <circle cx="2" cy="10" r="1" fill="currentColor"/>
+              <circle cx="6" cy="10" r="1" fill="currentColor"/>
+              <circle cx="10" cy="10" r="1" fill="currentColor"/>
+            </svg>
+          )}
+          Grid: {gridType === 'lines' ? 'Lines' : 'Dots'} (Shift+G)
+        </div>
+      )}
+      
       {/* Territory Table Panel */}
       <TerritoryTablePanel 
         isOpen={store.territoryTable.isOpen}
         onClose={() => store.toggleTerritoryTable()}
       />
+      
+      {/* Debug info - remove in production */}
+      <div className="absolute top-2 right-2 bg-black/50 text-white rounded px-2 py-1 text-xs font-mono space-y-1">
+        <div>Canvas: {containerSize.width}×{containerSize.height}</div>
+        <div>Zoom: {currentZoom.toFixed(3)} → {targetZoom.toFixed(3)}</div>
+        <div>Grid Spacing: {calculatePrimaryGridSpacing(currentZoom).toFixed(1)}</div>
+      </div>
     </div>
   )
+}
+
+// Helper to calculate primary grid spacing for debug display
+function calculatePrimaryGridSpacing(zoom: number): number {
+  const baseSpacing = 50
+  const idealSpacing = baseSpacing / zoom
+  const log4 = Math.log(idealSpacing) / Math.log(4)
+  const roundedLog4 = Math.round(log4)
+  return Math.pow(4, roundedLog4)
 }
