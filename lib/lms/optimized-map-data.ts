@@ -12,6 +12,7 @@ export interface Territory {
   center: Point
   fillPath: string
   borderSegments: string[] // IDs of borders that form this territory
+  zIndex?: number // Optional for backward compatibility
 }
 
 export interface Border {

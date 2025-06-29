@@ -228,13 +228,22 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     const centerPoints = state.drawing.bezierPath.map(bp => ({ x: bp.x, y: bp.y }))
     const center = calculateCenter(centerPoints)
     
+    // Calculate the highest zIndex for new territories
+    let maxZIndex = 0
+    Object.values(state.map.territories).forEach(t => {
+      if (t.zIndex !== undefined && t.zIndex > maxZIndex) {
+        maxZIndex = t.zIndex
+      }
+    })
+    
     const newTerritory: Territory = {
       id,
       name: `Territory ${Object.keys(state.map.territories).length + 1}`,
       continent: 'unassigned',
       center,
       fillPath: path,
-      borderSegments: []
+      borderSegments: [],
+      zIndex: maxZIndex + 1 // New territories go on top
     }
     
     set(state => ({
@@ -849,10 +858,18 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     const deltaX = cursorPosition ? pasteOffset.x - state.clipboard.offset.x : pasteOffset.x
     const deltaY = cursorPosition ? pasteOffset.y - state.clipboard.offset.y : pasteOffset.y
     
+    // Calculate the highest zIndex for new territories
+    let maxZIndex = 0
+    Object.values(state.map.territories).forEach(t => {
+      if (t.zIndex !== undefined && t.zIndex > maxZIndex) {
+        maxZIndex = t.zIndex
+      }
+    })
+    
     const newTerritories: Territory[] = []
     const newSelection = new Set<string>()
     
-    state.clipboard.territories.forEach(territory => {
+    state.clipboard.territories.forEach((territory, index) => {
       const id = `territory-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       
       const newTerritory: Territory = {
@@ -863,7 +880,8 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
           x: territory.center.x + deltaX,
           y: territory.center.y + deltaY
         },
-        fillPath: moveSvgPath(territory.fillPath, deltaX, deltaY)
+        fillPath: moveSvgPath(territory.fillPath, deltaX, deltaY),
+        zIndex: maxZIndex + index + 1 // Place pasted territories on top in order
       }
       
       newTerritories.push(newTerritory)
@@ -898,10 +916,18 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     
     if (territoriesToDuplicate.length === 0) return
     
+    // Calculate the highest zIndex for new territories
+    let maxZIndex = 0
+    Object.values(state.map.territories).forEach(t => {
+      if (t.zIndex !== undefined && t.zIndex > maxZIndex) {
+        maxZIndex = t.zIndex
+      }
+    })
+    
     const newTerritories: Territory[] = []
     const newSelection = new Set<string>()
     
-    territoriesToDuplicate.forEach(territory => {
+    territoriesToDuplicate.forEach((territory, index) => {
       const id = `territory-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       
       const newTerritory: Territory = {
@@ -912,7 +938,8 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
           x: territory.center.x + defaultOffset.x,
           y: territory.center.y + defaultOffset.y
         },
-        fillPath: moveSvgPath(territory.fillPath, defaultOffset.x, defaultOffset.y)
+        fillPath: moveSvgPath(territory.fillPath, defaultOffset.x, defaultOffset.y),
+        zIndex: maxZIndex + index + 1 // Place duplicates on top in order
       }
       
       newTerritories.push(newTerritory)
@@ -1006,13 +1033,22 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       const path = shapeLibrary.generateShapePath(shape)
       const center = position
       
+      // Calculate the highest zIndex for new territories
+      let maxZIndex = 0
+      Object.values(state.map.territories).forEach(t => {
+        if (t.zIndex !== undefined && t.zIndex > maxZIndex) {
+          maxZIndex = t.zIndex
+        }
+      })
+      
       const newTerritory: Territory = {
         id,
         name: shape.name,
         continent: 'unassigned',
         center,
         fillPath: moveSvgPath(path, position.x - shape.defaultSize.width / 2, position.y - shape.defaultSize.height / 2),
-        borderSegments: []
+        borderSegments: [],
+        zIndex: maxZIndex + 1 // New territories go on top
       }
       
       set(state => ({
@@ -1079,7 +1115,134 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       sortColumn: column,
       sortDirection: direction
     }
-  }))
+  })),
+  
+  // Z-order management actions
+  bringToFront: (territoryId) => set(state => {
+    const territories = { ...state.map.territories }
+    const territory = territories[territoryId]
+    if (!territory) return state
+    
+    // Find the highest zIndex
+    let maxZIndex = 0
+    Object.values(territories).forEach(t => {
+      if (t.zIndex !== undefined && t.zIndex > maxZIndex) {
+        maxZIndex = t.zIndex
+      }
+    })
+    
+    // Set this territory's zIndex to be higher
+    territories[territoryId] = {
+      ...territory,
+      zIndex: maxZIndex + 1
+    }
+    
+    return {
+      map: {
+        ...state.map,
+        territories
+      }
+    }
+  }),
+  
+  sendToBack: (territoryId) => set(state => {
+    const territories = { ...state.map.territories }
+    const territory = territories[territoryId]
+    if (!territory) return state
+    
+    // Find the lowest zIndex
+    let minZIndex = 0
+    Object.values(territories).forEach(t => {
+      if (t.zIndex !== undefined && t.zIndex < minZIndex) {
+        minZIndex = t.zIndex
+      }
+    })
+    
+    // Set this territory's zIndex to be lower
+    territories[territoryId] = {
+      ...territory,
+      zIndex: minZIndex - 1
+    }
+    
+    return {
+      map: {
+        ...state.map,
+        territories
+      }
+    }
+  }),
+  
+  bringForward: (territoryId) => set(state => {
+    const territories = { ...state.map.territories }
+    const territory = territories[territoryId]
+    if (!territory) return state
+    
+    const currentZ = territory.zIndex || 0
+    
+    // Find territories with higher zIndex
+    const higherTerritories = Object.entries(territories)
+      .filter(([id, t]) => id !== territoryId && (t.zIndex || 0) > currentZ)
+      .sort((a, b) => (a[1].zIndex || 0) - (b[1].zIndex || 0))
+    
+    if (higherTerritories.length > 0) {
+      // Swap with the next higher territory
+      const nextHigher = higherTerritories[0]
+      const nextZ = nextHigher[1].zIndex || 0
+      
+      territories[territoryId] = {
+        ...territory,
+        zIndex: nextZ
+      }
+      
+      territories[nextHigher[0]] = {
+        ...nextHigher[1],
+        zIndex: currentZ
+      }
+    }
+    
+    return {
+      map: {
+        ...state.map,
+        territories
+      }
+    }
+  }),
+  
+  sendBackward: (territoryId) => set(state => {
+    const territories = { ...state.map.territories }
+    const territory = territories[territoryId]
+    if (!territory) return state
+    
+    const currentZ = territory.zIndex || 0
+    
+    // Find territories with lower zIndex
+    const lowerTerritories = Object.entries(territories)
+      .filter(([id, t]) => id !== territoryId && (t.zIndex || 0) < currentZ)
+      .sort((a, b) => (b[1].zIndex || 0) - (a[1].zIndex || 0))
+    
+    if (lowerTerritories.length > 0) {
+      // Swap with the next lower territory
+      const nextLower = lowerTerritories[0]
+      const nextZ = nextLower[1].zIndex || 0
+      
+      territories[territoryId] = {
+        ...territory,
+        zIndex: nextZ
+      }
+      
+      territories[nextLower[0]] = {
+        ...nextLower[1],
+        zIndex: currentZ
+      }
+    }
+    
+    return {
+      map: {
+        ...state.map,
+        territories
+      }
+    }
+  })
 }))
 
 // Helper functions

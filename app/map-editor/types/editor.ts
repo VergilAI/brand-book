@@ -159,6 +159,12 @@ export interface MapEditorState {
   toggleTerritoryTable: () => void
   setTerritoryTableTab: (tab: 'territories' | 'continents') => void
   setTerritoryTableSort: (column: string, direction: 'asc' | 'desc') => void
+  
+  // Z-order management actions
+  bringToFront: (territoryId: string) => void
+  sendToBack: (territoryId: string) => void
+  bringForward: (territoryId: string) => void
+  sendBackward: (territoryId: string) => void
 }
 
 export interface PointerPosition {

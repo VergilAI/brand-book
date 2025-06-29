@@ -230,6 +230,14 @@ export function MapCanvas({ className }: MapCanvasProps) {
   // Duplicate preview state
   const [duplicatePreviewOffset, setDuplicatePreviewOffset] = React.useState<Point | null>(null)
   
+  // Context menu state
+  const [contextMenu, setContextMenu] = React.useState<{
+    show: boolean
+    x: number
+    y: number
+    territoryId: string | null
+  }>({ show: false, x: 0, y: 0, territoryId: null })
+  
   // Gesture handling
   const inertiaScroll = useInertiaScroll({
     friction: 0.92,
@@ -310,6 +318,30 @@ export function MapCanvas({ className }: MapCanvasProps) {
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault() // Prevent default behaviors like text selection
     updatePosition(e)
+    
+    // Hide context menu on any click
+    if (contextMenu.show) {
+      setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+    }
+    
+    // Handle right-click for context menu
+    if (e.button === 2) {
+      const point = position.svg
+      const clickedTerritory = Object.values(store.map.territories).reverse().find(territory => {
+        return isPointInTerritory(point, territory)
+      })
+      
+      const rect = canvasRef.current?.getBoundingClientRect()
+      if (rect) {
+        setContextMenu({
+          show: true,
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          territoryId: clickedTerritory ? clickedTerritory.id : null
+        })
+      }
+      return
+    }
     
     // Handle shape placement mode
     if (store.templateLibrary.placementMode.active && e.button === 0) {
@@ -410,7 +442,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
       const point = position.svg
       
       // Check if clicking on any territory (selected or not)
-      const clickedTerritory = Object.values(store.map.territories).find(territory => {
+      // Reverse the array to check topmost (last rendered) territories first
+      const clickedTerritory = Object.values(store.map.territories).reverse().find(territory => {
         return isPointInTerritory(point, territory)
       })
       
@@ -1104,7 +1137,19 @@ export function MapCanvas({ className }: MapCanvasProps) {
           setShowAreaSelect(false)
         }
       }}
+      onContextMenu={(e) => e.preventDefault()} // Prevent browser context menu
     >
+      {/* Canvas grid layer - render as background below SVG */}
+      {store.view.showGrid && containerSize.width > 0 && containerSize.height > 0 && (
+        <HierarchicalGrid
+          width={containerSize.width}
+          height={containerSize.height}
+          zoom={store.view.zoom}
+          pan={store.view.pan}
+          gridType={gridType}
+        />
+      )}
+      
       <svg
         ref={svgRef}
         className="absolute inset-0 w-full h-full cursor-crosshair"
@@ -1145,7 +1190,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
         
         {/* Existing territories */}
         <g className="territories">
-          {Object.values(store.map.territories).map(territory => {
+          {Object.values(store.map.territories)
+            .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0)) // Sort by zIndex
+            .map(territory => {
             const isSelected = store.selection.territories.has(territory.id)
             
             // Check if territory would be selected by current area selection
@@ -1506,17 +1553,6 @@ export function MapCanvas({ className }: MapCanvasProps) {
         <SnapIndicators indicators={snapIndicators} zoom={store.view.zoom} />
       </svg>
       
-      {/* Canvas grid layer - render above SVG so it's on top */}
-      {store.view.showGrid && containerSize.width > 0 && containerSize.height > 0 && (
-        <HierarchicalGrid
-          width={containerSize.width}
-          height={containerSize.height}
-          zoom={store.view.zoom}
-          pan={store.view.pan}
-          gridType={gridType}
-        />
-      )}
-      
       {/* Position display */}
       <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs font-mono">
         {position.svg.x}, {position.svg.y}
@@ -1607,6 +1643,189 @@ export function MapCanvas({ className }: MapCanvasProps) {
       
       {/* Debug Panel */}
       <DebugPanel />
+      
+      {/* Context Menu */}
+      {contextMenu.show && (
+        <div
+          className="absolute bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          {contextMenu.territoryId ? (
+            // Territory-specific context menu
+            <>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => {
+              store.bringToFront(contextMenu.territoryId!)
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+              <rect x="6" y="2" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
+            </svg>
+            Bring to Front
+          </button>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => {
+              store.bringForward(contextMenu.territoryId!)
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+              <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
+            </svg>
+            Bring Forward
+          </button>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => {
+              store.sendBackward(contextMenu.territoryId!)
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
+              <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+            </svg>
+            Send Backward
+          </button>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => {
+              store.sendToBack(contextMenu.territoryId!)
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="6" y="2" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+              <rect x="2" y="6" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
+            </svg>
+            Send to Back
+          </button>
+          <div className="border-t border-gray-200 my-1"></div>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => {
+              store.copyTerritories([contextMenu.territoryId!])
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="10" height="10" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
+              <rect x="4" y="4" width="10" height="10" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
+            </svg>
+            Copy
+          </button>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => {
+              store.duplicateTerritories([contextMenu.territoryId!])
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="8" height="8" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
+              <rect x="6" y="6" width="8" height="8" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
+            </svg>
+            Duplicate
+          </button>
+          <div className="border-t border-gray-200 my-1"></div>
+          <button
+            className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 text-red-600 flex items-center gap-2"
+            onClick={() => {
+              store.deleteTerritory(contextMenu.territoryId!)
+              setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 2V3H2V5H3V13C3 13.5523 3.44772 14 4 14H12C12.5523 14 13 13.5523 13 13V5H14V3H10V2H6ZM5 5H11V12H5V5ZM7 7V10H8V7H7ZM9 7V10H10V7H9Z" fill="#DC2626"/>
+            </svg>
+            Delete
+          </button>
+            </>
+          ) : (
+            // Canvas context menu (no territory selected)
+            <>
+              <button
+                className={`w-full px-4 py-2 text-sm text-left flex items-center gap-2 ${
+                  store.clipboard && store.clipboard.territories.length > 0
+                    ? 'hover:bg-gray-100'
+                    : 'text-gray-400 cursor-not-allowed'
+                }`}
+                onClick={() => {
+                  if (store.clipboard && store.clipboard.territories.length > 0) {
+                    store.pasteTerritories(position.svg)
+                    setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+                  }
+                }}
+                disabled={!store.clipboard || store.clipboard.territories.length === 0}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="2" width="10" height="10" fill="none" stroke={store.clipboard && store.clipboard.territories.length > 0 ? '#6B7280' : '#D1D5DB'} strokeWidth="1.5"/>
+                  <rect x="4" y="4" width="10" height="10" fill="white" stroke={store.clipboard && store.clipboard.territories.length > 0 ? '#3B82F6' : '#D1D5DB'} strokeWidth="1.5"/>
+                  <path d="M6 8H12M6 10H12M6 12H10" stroke={store.clipboard && store.clipboard.territories.length > 0 ? '#3B82F6' : '#D1D5DB'} strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                Paste {store.clipboard && store.clipboard.territories.length > 0 ? `(${store.clipboard.territories.length} item${store.clipboard.territories.length > 1 ? 's' : ''})` : ''}
+              </button>
+              <div className="border-t border-gray-200 my-1"></div>
+              <button
+                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+                onClick={() => {
+                  store.selectTerritoriesInArea(0, 0, 999999, 999999, false)
+                  setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="2" width="12" height="12" rx="1" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="2 2"/>
+                  <rect x="4" y="4" width="3" height="3" fill="#3B82F6"/>
+                  <rect x="9" y="4" width="3" height="3" fill="#3B82F6"/>
+                  <rect x="4" y="9" width="3" height="3" fill="#3B82F6"/>
+                  <rect x="9" y="9" width="3" height="3" fill="#3B82F6"/>
+                </svg>
+                Select All
+              </button>
+              <button
+                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+                onClick={() => {
+                  store.toggleGrid()
+                  setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <line x1="2" y1="2" x2="14" y2="2" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="2" y1="6" x2="14" y2="6" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="2" y1="10" x2="14" y2="10" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="2" y1="14" x2="14" y2="14" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="2" y1="2" x2="2" y2="14" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="6" y1="2" x2="6" y2="14" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="10" y1="2" x2="10" y2="14" stroke="#6B7280" strokeWidth="1"/>
+                  <line x1="14" y1="2" x2="14" y2="14" stroke="#6B7280" strokeWidth="1"/>
+                </svg>
+                {store.view.showGrid ? 'Hide Grid' : 'Show Grid'}
+              </button>
+              <button
+                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
+                onClick={() => {
+                  store.toggleSnapping()
+                  setContextMenu({ show: false, x: 0, y: 0, territoryId: null })
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="2" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
+                  <rect x="9" y="2" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
+                  <rect x="2" y="9" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
+                  <rect x="9" y="9" width="5" height="5" fill={isSnappingEnabled ? '#3B82F6' : '#D1D5DB'}/>
+                </svg>
+                {isSnappingEnabled ? 'Disable Snapping' : 'Enable Snapping'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
