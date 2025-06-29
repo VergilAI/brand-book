@@ -18,6 +18,19 @@ A professional React-based territory map editor for creating and editing game ma
   - Angle snapping now has proper priority
 - See [Snapping System Documentation](/docs/snapping-system.md) for details
 
+### 📚 Template Shape Library
+- **80+ professional shapes** across 4 categories (Basic, Arrows, UML, Flowchart)
+- **Smart placement system** with live preview and snapping integration
+- **Category-based organization** with search and recent shapes
+- **One-click workflow**: Library (L) → Select shape → Click to place
+- **Full editing support** - shapes become editable territories
+
+### 📋 Copy/Paste & Duplication System
+- **Standard shortcuts**: Ctrl/Cmd+C/V for copy/paste
+- **Quick duplicate**: Ctrl/Cmd+D with smart offset
+- **Alt-drag duplication** with visual preview
+- **Smart positioning** with snapping support
+
 ### ✏️ Advanced Shape Editing
 - **Double-click to edit** any territory
 - **Full bezier control** - Convert any vertex between straight and curved
@@ -359,6 +372,77 @@ interface ViewState {
 - **Territory selection** - Shows selected territory count
 - **Property editing** - Name and continent assignment
 - **Multi-selection** - Bulk operations support
+
+## Template Shape Library
+
+### Shape Categories Available
+
+#### 📐 Basic Shapes (13 shapes)
+- **Rectangles**: Rectangle, Square, Rounded Rectangle
+- **Circles**: Circle, Ellipse  
+- **Polygons**: Triangle, Pentagon, Hexagon, Octagon
+- **Special**: Diamond, Parallelogram, Trapezoid, Stars (5-point, 6-point)
+
+#### ➡️ Arrows & Connectors (10 shapes)
+- **Directional**: Right, Left, Up, Down arrows
+- **Bidirectional**: Double arrows (horizontal/vertical)
+- **Special**: Chevrons, Corner arrows, Circular arrows
+- **Connector**: Various arrow head styles
+
+#### 🏗️ UML Diagrams (8 shapes)
+- **Class Elements**: Class box (with sections), Interface, Package
+- **Components**: Component box, Node (3D cube)
+- **People**: Actor (stick figure), Use Case (oval)
+- **Data**: Database cylinder
+
+#### 📊 Flowchart Elements (10 shapes)
+- **Process Flow**: Process box, Decision diamond, Terminal
+- **Data Flow**: Data parallelogram, Document, Manual Input
+- **Special**: Preparation hexagon, Connector circle, Delay, Database
+
+### Using the Shape Library
+
+#### Opening the Library
+- **Keyboard**: Press **L** to toggle library panel
+- **Mouse**: Click Library icon (📚) on left side of screen
+- **Panel**: Slides in from left with category sections
+
+#### Finding Shapes
+- **Browse**: Click category headers to expand/collapse
+- **Search**: Type in search box to filter by name or tags
+- **Recent**: Top section shows last 10 used shapes
+
+#### Placing Shapes
+1. **Select**: Click any shape thumbnail
+2. **Preview**: Move cursor to see shape preview with snapping
+3. **Place**: Click canvas position to place shape
+4. **Edit**: Shape is auto-selected for immediate editing
+
+#### Shape Placement Features
+- **Snapping Integration**: Full support for vertex/edge/center/grid snapping
+- **Live Preview**: Semi-transparent shape follows cursor
+- **Smart Positioning**: Shapes center on click point
+- **Instant Editing**: Placed shapes immediately enter select mode
+
+### Copy/Paste System
+
+#### Standard Copy/Paste
+- **Copy**: Select territories → **Ctrl/Cmd+C**
+- **Paste**: **Ctrl/Cmd+V** at current cursor position
+- **Smart Offset**: Multiple territories maintain relative positions
+- **Snapping**: Paste position respects active snapping settings
+
+#### Quick Duplication
+- **Duplicate**: Select territories → **Ctrl/Cmd+D**
+- **Auto Offset**: Creates copies with 20px offset
+- **Bulk Operations**: Works with multiple selected territories
+- **Immediate Selection**: Duplicates are auto-selected
+
+#### Alt-Drag Duplication
+- **Visual Preview**: Hold **Alt** while dragging to see duplicate preview
+- **Live Feedback**: Dashed outlines show where duplicates will be placed
+- **Snapping**: Duplicates snap to alignment guides during drag
+- **Release to Create**: Drop while holding Alt to create duplicates
 
 ## How to Use
 

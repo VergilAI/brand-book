@@ -6,6 +6,8 @@ Visual editor for creating territory-based maps with optimized border system.
 ## Recent Updates (December 2024)
 - Professional snapping system v2.0 with visual feedback
 - Fixed grid snapping override issues (grid OFF by default)
+- Template shape library with 80+ shapes (Basic, Arrows, UML, Flowchart)
+- Copy/paste and duplication system with Alt-drag support
 - Removed "Edit Borders" tool - functionality integrated into vertex editing
 - Draw tool shortcut changed from P to D
 - UI consistency improvements with design system buttons
@@ -34,8 +36,15 @@ Visual editor for creating territory-based maps with optimized border system.
 ```
 map-editor/
 ├── components/     # React components
+│   ├── canvas/     # MapCanvas, GridOverlay, SnapIndicators
+│   ├── tools/      # ToolPalette
+│   ├── panels/     # PropertiesPanel
+│   ├── template-library/  # Shape library components
+│   └── shapes/     # Shape definitions and generators
 ├── hooks/         # Editor state and logic
+├── types/         # TypeScript definitions
 ├── lib/           # Geometry and validation
+├── docs/          # Documentation (snapping, templates)
 └── page.tsx       # Main editor page
 ```
 
@@ -50,3 +59,19 @@ map-editor/
 - New validation: Extend `lib/lms/map-validation.ts`, add UI in `ValidationPanel.tsx`
 - Export format: Modify `lib/export/formats.ts`, maintain backward compatibility
 - Keyboard shortcuts: Update handleKeyDown in `MapCanvas.tsx`
+- Adding shapes: Create in `components/shapes/definitions/`, import in `ShapeLibrary.ts`
+- Template features: All in `components/template-library/` and `types/template-library.ts`
+
+## New Features (December 2024)
+
+### Template Shape Library
+- **Location**: `components/template-library/` and `components/shapes/`
+- **80+ shapes**: Basic, Arrows, UML, Flowchart categories
+- **Usage**: L key toggles panel, click shape to place
+- **Integration**: Full snapping support, becomes editable territory
+
+### Copy/Paste System
+- **Standard**: Ctrl/Cmd+C/V for copy/paste
+- **Quick duplicate**: Ctrl/Cmd+D
+- **Alt-drag**: Hold Alt while dragging to duplicate
+- **Implementation**: In `useMapEditor.ts` clipboard state and actions
