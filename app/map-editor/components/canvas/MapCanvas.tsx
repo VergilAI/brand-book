@@ -16,7 +16,7 @@ import { ZoomIndicator } from '../ui/ZoomIndicator'
 import { GestureHint } from '../ui/GestureHint'
 import { DebugPanel } from '../debug/DebugPanel'
 import { cn } from '@/lib/utils'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Crosshair } from 'lucide-react'
 import {
   BringToFrontIcon,
   BringForwardIcon,
@@ -1609,13 +1609,19 @@ export function MapCanvas({ className }: MapCanvasProps) {
       {/* Center button */}
       <button
         onClick={() => {
-          instantPan({ x: -450, y: -250 })
+          // Calculate viewBox dimensions at zoom level 1
+          const baseWidth = 1000
+          const baseHeight = baseWidth / svgAspectRatio
+          // To center origin (0,0), set pan to negative half of viewBox dimensions
+          const centerX = -baseWidth / 2
+          const centerY = -baseHeight / 2
+          instantPan({ x: centerX, y: centerY })
           setZoomLevel(1)
         }}
-        className="absolute bottom-2 right-20 inline-flex items-center justify-center h-8 px-3 text-xs font-medium rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all"
+        className="absolute bottom-2 right-20 inline-flex items-center justify-center h-8 w-8 rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all"
         title="Center map (reset view)"
       >
-        Center
+        <Crosshair size={16} />
       </button>
       
       {/* Snap indicator */}

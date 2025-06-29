@@ -34,7 +34,7 @@ export function Toolbar() {
   
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-      <div className="flex items-center gap-1 px-2 py-1.5 bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-gray-200">
+      <div className="flex items-center gap-1 px-2 py-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200">
         {/* Main tools */}
         <div className="flex items-center gap-1">
           {tools.map(tool => (
