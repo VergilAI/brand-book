@@ -7,7 +7,7 @@ import { X, ChevronUp, ChevronDown, MapPin, Globe } from 'lucide-react'
 import type { Territory, Continent } from '@/lib/lms/optimized-map-data'
 import styles from './ScrollablePanel.module.css'
 
-type SortField = 'name' | 'continent' | 'borderCount' | 'centerX' | 'centerY'
+type SortField = 'name' | 'continent' | 'borderCount' | 'centerX' | 'centerY' | 'zIndex'
 type SortDirection = 'asc' | 'desc'
 
 interface TerritoryTablePanelProps {
@@ -107,6 +107,9 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
           break
         case 'centerY':
           compareValue = a.center.y - b.center.y
+          break
+        case 'zIndex':
+          compareValue = (a.zIndex || 0) - (b.zIndex || 0)
           break
       }
       
@@ -301,6 +304,15 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
                     <SortIcon field="centerY" />
                   </button>
                 </th>
+                <th className="text-center">
+                  <button
+                    onClick={() => handleSort('zIndex')}
+                    className="w-full px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
+                  >
+                    Z-Index
+                    <SortIcon field="zIndex" />
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -331,6 +343,9 @@ export function TerritoryTablePanel({ isOpen, onClose }: TerritoryTablePanelProp
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 text-right font-mono">
                       {Math.round(territory.center.y)}
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500 text-center font-mono">
+                      {territory.zIndex || 0}
                     </td>
                   </tr>
                 )

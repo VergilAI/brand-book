@@ -4,6 +4,12 @@
 Visual editor for creating territory-based maps with optimized border system.
 
 ## Recent Updates (December 2024)
+- **NEW**: Z-order management system with visual layering
+  - Right-click context menus for territories and canvas
+  - Properties panel shows z-index with layer control buttons
+  - Territory table includes sortable Z-Index column
+  - Territories render in proper back-to-front order
+  - Smart defaults: new territories placed on top
 - Professional snapping system v2.0 with visual feedback
 - Fixed grid snapping override issues (grid OFF by default)
 - Template shape library with 80+ shapes (Basic, Arrows, UML, Flowchart)
@@ -75,6 +81,26 @@ map-editor/
 3. Test with sample maps before implementing new features
 4. Performance target: 60fps with 100+ territories
 
+## Z-Order Management
+
+### Architecture
+- Territories have optional `zIndex` property (backward compatible)
+- Rendering sorts territories by zIndex before mapping to SVG
+- Hit detection reverses array to check topmost territories first
+- Grid renders before SVG element to stay in background
+
+### Z-Index Actions (in `useMapEditor.ts`)
+- `bringToFront(id)` - Sets zIndex higher than all others
+- `sendToBack(id)` - Sets zIndex lower than all others  
+- `bringForward(id)` - Swaps with next higher territory
+- `sendBackward(id)` - Swaps with next lower territory
+
+### UI Integration
+- **Context Menu**: Right-click on territory or canvas
+- **Properties Panel**: Z-index input with layer buttons
+- **Territory Table**: Sortable Z-Index column
+- **Keyboard**: T toggles table, right-click for context menu
+
 ## Common Tasks
 - Adding tool: Create in `components/tools/`, register in `ToolPalette.tsx` (ToolType = 'select' | 'pen' | 'connect' | 'move')
 - New validation: Extend `lib/lms/map-validation.ts`, add UI in `ValidationPanel.tsx`
@@ -84,6 +110,22 @@ map-editor/
 - Template features: All in `components/template-library/` and `types/template-library.ts`
 - Grid customization: Use DebugPanel in development or modify `HierarchicalGrid.tsx` defaults
 - Debug features: Add to `components/debug/DebugPanel.tsx`
+- Z-order changes: Update actions in `useMapEditor.ts`, UI in context menu and panels
+
+## CRITICAL: Z-Order Hit Detection
+**Always sort territories by zIndex before hit detection!** See `docs/z-order-hit-detection.md` for details.
+```typescript
+// CORRECT - Matches visual stacking order
+const clicked = Object.values(territories)
+  .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+  .reverse()
+  .find(t => isPointInTerritory(point, t))
+
+// WRONG - Ignores z-order
+const clicked = Object.values(territories)
+  .reverse()
+  .find(t => isPointInTerritory(point, t))
+```
 
 ## New Features (December 2024)
 

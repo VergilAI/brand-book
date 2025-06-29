@@ -106,6 +106,64 @@ export function PropertiesPanel() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Z-Index (Layer Order)
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={territory.zIndex || 0}
+                  onChange={(e) => store.updateTerritory(territoryId, { 
+                    zIndex: Number(e.target.value)
+                  })}
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => store.sendToBack(territoryId)}
+                    className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
+                    title="Send to Back"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="6" y="2" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+                      <rect x="2" y="6" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => store.sendBackward(territoryId)}
+                    className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
+                    title="Send Backward"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
+                      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => store.bringForward(territoryId)}
+                    className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
+                    title="Bring Forward"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+                      <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => store.bringToFront(territoryId)}
+                    className="p-1.5 text-gray-600 hover:bg-gray-100 rounded border border-gray-300"
+                    title="Bring to Front"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+                      <rect x="6" y="2" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 SVG Path
               </label>
               <textarea

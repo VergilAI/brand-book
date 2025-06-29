@@ -6,6 +6,23 @@ A professional React-based territory map editor for creating and editing game ma
 
 ## Latest Updates (December 2024)
 
+### 🎨 Z-Order Management System
+- **Layer Control**: Full control over territory stacking order with z-index support
+- **Right-Click Context Menu**: 
+  - On territories: Bring to Front/Forward, Send to Back/Backward, Copy, Duplicate, Delete
+  - On canvas: Paste (with clipboard count), Select All, Toggle Grid/Snapping
+- **Visual Feedback**: Territories render in proper z-order from back to front
+- **Multiple Interfaces**:
+  - Context menu for quick access
+  - Properties panel with z-index input and layer buttons
+  - Territory table with sortable Z-Index column
+- **Smart Defaults**: New territories automatically placed on top
+- **Consistent Ordering**: Duplicated and pasted territories maintain relative order
+- **Critical Bug Fix (Dec 2024)**: 
+  - Fixed hit detection to respect z-order (territories must be sorted by zIndex before reversing)
+  - Both click and right-click now correctly select the topmost visible territory
+  - See `/docs/z-order-hit-detection.md` for implementation details
+
 ### 🧲 Professional Snapping System v2.0
 - **Magnetic alignment** with visual feedback for precise territory placement
 - **Multiple snap modes**: Vertices, edges, centers, grid (OFF by default), and angle constraints
@@ -348,6 +365,7 @@ interface Territory {
   center: Point
   fillPath: string        // SVG path for territory shape
   borderSegments: string[] // Border IDs that form territory boundary
+  zIndex?: number         // Layer order (optional for backward compatibility)
 }
 ```
 
@@ -379,10 +397,18 @@ interface ViewState {
 - **Grid controls** - Toggle and size adjustment
 - **Drawing options** - Snap-to-grid when drawing
 
-### Properties Panel
+### Properties Panel (Right Side)
 - **Territory selection** - Shows selected territory count
-- **Property editing** - Name and continent assignment
+- **Property editing** - Name, continent, center coordinates
+- **Z-Index control** - Input field with layer order buttons
 - **Multi-selection** - Bulk operations support
+- **Auto-appears** - Shows when territory is selected
+
+### Territory Table (Press T)
+- **Sortable columns** - Name, Continent, Borders, X/Y Coords, Z-Index
+- **Click to select** - Selects territory and pans to it
+- **Live updates** - Reflects current map state
+- **Tab switching** - Territories and Continents views
 
 ## Template Shape Library
 
@@ -529,7 +555,9 @@ interface ViewState {
 - **Ctrl/Cmd+V** - Paste territories at cursor position
 - **Ctrl/Cmd+D** - Duplicate selected territories with offset
 - **L** - Toggle template shape library
+- **T** - Toggle territory table view
 - **Alt** (hold while dragging) - Duplicate territories instead of moving
+- **Right-click** - Open context menu (on territory or canvas)
 
 ### Visual Feedback Reference
 

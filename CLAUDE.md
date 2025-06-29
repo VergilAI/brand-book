@@ -146,7 +146,7 @@ Each major module has its own CLAUDE.md file with detailed information:
 - `/app/vergil-main/CLAUDE.md` - Vergil platform landing documentation
 - `/app/vergil-learn/CLAUDE.md` - Vergil Learn landing documentation
 - `/app/lms/CLAUDE.md` - LMS module documentation
-- `/app/map-editor/CLAUDE.md` - Map editor with snapping, templates, copy/paste
+- `/app/map-editor/CLAUDE.md` - Map editor with z-order management, snapping, templates, copy/paste
 - `/components/CLAUDE.md` - Component library documentation
 - `/public/data/CLAUDE.md` - Data files documentation
 

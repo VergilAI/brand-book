@@ -327,9 +327,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
     // Handle right-click for context menu
     if (e.button === 2) {
       const point = position.svg
-      const clickedTerritory = Object.values(store.map.territories).reverse().find(territory => {
-        return isPointInTerritory(point, territory)
-      })
+      const clickedTerritory = Object.values(store.map.territories)
+        .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+        .reverse()
+        .find(territory => {
+          return isPointInTerritory(point, territory)
+        })
       
       const rect = canvasRef.current?.getBoundingClientRect()
       if (rect) {
@@ -442,10 +445,13 @@ export function MapCanvas({ className }: MapCanvasProps) {
       const point = position.svg
       
       // Check if clicking on any territory (selected or not)
-      // Reverse the array to check topmost (last rendered) territories first
-      const clickedTerritory = Object.values(store.map.territories).reverse().find(territory => {
-        return isPointInTerritory(point, territory)
-      })
+      // Sort by zIndex first, then reverse to check topmost (last rendered) territories first
+      const clickedTerritory = Object.values(store.map.territories)
+        .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+        .reverse()
+        .find(territory => {
+          return isPointInTerritory(point, territory)
+        })
       
       if (clickedTerritory) {
         // Handle selection logic carefully to preserve multi-selection during drag
