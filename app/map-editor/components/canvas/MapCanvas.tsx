@@ -630,39 +630,56 @@ export function MapCanvas({ className }: MapCanvasProps) {
         
         // Only apply movement if we've crossed the threshold
         if (hasMoved.current) {
-          // Get the potential new center position
-          const potentialCenter = {
-            x: selectionCenter.x + rawDeltaX,
-            y: selectionCenter.y + rawDeltaY
-          }
-          
-          // Apply snapping to the center, excluding selected territories
-          const excludeIds = selectedTerritories.map(t => t.id)
-          const { point: snappedCenter, indicators } = getSnappedPoint(potentialCenter, excludeIds)
-          setSnapIndicators(indicators)
-          
-          // Calculate snapped deltas
-          const snappedDeltaX = snappedCenter.x - selectionCenter.x
-          const snappedDeltaY = snappedCenter.y - selectionCenter.y
-          
-          // Move territories with snapped deltas (only if not duplicating)
-          if (selectedTerritories.length > 0) {
-            if (!e.altKey) {
+          if (!e.altKey) {
+            // Normal move - calculate new position and move territories
+            const potentialCenter = {
+              x: selectionCenter.x + rawDeltaX,
+              y: selectionCenter.y + rawDeltaY
+            }
+            
+            // Apply snapping to the center, excluding selected territories
+            const excludeIds = selectedTerritories.map(t => t.id)
+            const { point: snappedCenter, indicators } = getSnappedPoint(potentialCenter, excludeIds)
+            setSnapIndicators(indicators)
+            
+            // Calculate snapped deltas
+            const snappedDeltaX = snappedCenter.x - selectionCenter.x
+            const snappedDeltaY = snappedCenter.y - selectionCenter.y
+            
+            // Move territories
+            if (selectedTerritories.length > 0) {
               store.moveTerritories(
                 selectedTerritories.map(t => t.id), 
                 snappedDeltaX, 
                 snappedDeltaY
               )
-              // Update start position based on snapped movement
+              // Update start position based on snapped movement (only for non-Alt moves)
               moveStartPos.current = {
                 x: moveStartPos.current.x + snappedDeltaX,
                 y: moveStartPos.current.y + snappedDeltaY
               }
-              setDuplicatePreviewOffset(null)
-            } else {
-              // Show duplicate preview
-              setDuplicatePreviewOffset({ x: snappedDeltaX, y: snappedDeltaY })
             }
+            setDuplicatePreviewOffset(null)
+          } else {
+            // Alt is held - show duplicate preview WITHOUT moving original territories
+            // Calculate where the center of selection would be if we moved it
+            const potentialCenter = {
+              x: selectionCenter.x + rawDeltaX,
+              y: selectionCenter.y + rawDeltaY
+            }
+            
+            // Apply snapping to the potential center position
+            const excludeIds = selectedTerritories.map(t => t.id)
+            const { point: snappedCenter, indicators } = getSnappedPoint(potentialCenter, excludeIds)
+            setSnapIndicators(indicators)
+            
+            // Calculate the preview offset - this is how much to translate each territory
+            const previewOffset = { 
+              x: snappedCenter.x - selectionCenter.x, 
+              y: snappedCenter.y - selectionCenter.y 
+            }
+            
+            setDuplicatePreviewOffset(previewOffset)
           }
         }
       }
@@ -1263,7 +1280,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
         
         {/* Duplicate preview */}
         {duplicatePreviewOffset && store.selection.territories.size > 0 && (
-          <g className="duplicate-preview" opacity="0.5">
+          <g className="duplicate-preview">
             {Array.from(store.selection.territories).map(territoryId => {
               const territory = store.map.territories[territoryId]
               if (!territory) return null
@@ -1272,16 +1289,14 @@ export function MapCanvas({ className }: MapCanvasProps) {
               const transform = `translate(${duplicatePreviewOffset.x}, ${duplicatePreviewOffset.y})`
               
               return (
-                <path
-                  key={`preview-${territory.id}`}
-                  d={territory.fillPath}
-                  fill="#6366F1"
-                  stroke="#6366F1"
-                  strokeWidth="2"
-                  strokeDasharray="4 2"
-                  transform={transform}
-                  className="pointer-events-none"
-                />
+                <g key={`preview-${territory.id}`} transform={transform}>
+                  <path
+                    d={territory.fillPath}
+                    fill="#6366F1"
+                    fillOpacity="0.4"
+                    style={{ pointerEvents: 'none' }}
+                  />
+                </g>
               )
             })}
           </g>
