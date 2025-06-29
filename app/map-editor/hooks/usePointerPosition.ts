@@ -27,7 +27,7 @@ export function usePointerPosition(gridSize: number, snapToGrid: boolean) {
     if (!ctm) return
     
     const svgPoint = pt.matrixTransform(ctm.inverse())
-    const svg = { x: Math.round(svgPoint.x), y: Math.round(svgPoint.y) }
+    const svg = { x: svgPoint.x, y: svgPoint.y }
     
     // Calculate grid-snapped position
     const grid = snapToGrid

@@ -4,13 +4,18 @@
 
 A professional React-based territory map editor for creating and editing game maps with territory-based gameplay. The editor provides an SVG canvas with pan/zoom functionality, advanced drawing tools, professional snapping system, and a complete UI for map creation.
 
-## Recent Updates (Phase 2)
+## Recent Updates (Phase 2 - December 2024)
 
-### 🧲 Professional Snapping System
+### 🧲 Professional Snapping System v2.0
 - **Magnetic alignment** with visual feedback for precise territory placement
-- **Multiple snap modes**: Vertices, edges, centers, grid, and angle constraints
-- **Smart guides** show alignment with other territories
+- **Multiple snap modes**: Vertices, edges, centers, grid (OFF by default), and angle constraints
+- **Smart guides** show alignment with other territories and highlight what you're aligning with
 - **Works everywhere**: Drawing, editing vertices, and moving territories
+- **Fixed Issues**:
+  - Grid snapping no longer overrides other snap types
+  - Preview elements now respect snap settings
+  - Removed hidden coordinate rounding that caused unwanted grid alignment
+  - Angle snapping now has proper priority
 - See [Snapping System Documentation](/docs/snapping-system.md) for details
 
 ### ✏️ Advanced Shape Editing
@@ -18,6 +23,22 @@ A professional React-based territory map editor for creating and editing game ma
 - **Full bezier control** - Convert any vertex between straight and curved
 - **Add/delete vertices** - Click edges to add, DELETE key to remove
 - **Industry-standard** controls matching Illustrator/Figma
+
+### 📋 Copy/Paste & Duplication
+- **Copy/Paste** - Ctrl/Cmd+C to copy, Ctrl/Cmd+V to paste at cursor
+- **Quick Duplicate** - Ctrl/Cmd+D duplicates with 20px offset
+- **Alt-Drag Duplicate** - Hold Alt while dragging to duplicate instead of move
+- **Visual Preview** - See duplicate preview while Alt-dragging
+- **Smart Positioning** - Paste positions relative to cursor with snapping
+
+### 🎨 UI Improvements
+- **Tool Updates**:
+  - Removed "Edit Borders" tool (functionality integrated into vertex editing)
+  - Renamed "Move/Pan" to "Pan" for clarity
+  - Changed Draw tool shortcut from P to D
+- **Button Styling**: Import/Export and Center buttons now use consistent design system styles
+- **Properties Panel**: Improved coordinate display with proper X/Y labels
+- **Snap Indicator**: Moved from top-right to bottom-center for better visibility
 
 ## Architecture
 
@@ -61,14 +82,13 @@ app/map-editor/
 
 #### Available Tools
 - **Select (V)** - Select and manipulate territories with area selection and drag-to-move
-- **Move/Pan (H)** - Pan the canvas view
-- **Draw Territory (P)** - Create new territories by drawing polygons
-- **Edit Borders (B)** - *Future: Edit territory borders*
+- **Pan (H)** - Pan the canvas view
+- **Draw Territory (D)** - Create new territories by drawing polygons
 - **Sea Routes (C)** - *Future: Create connections between territories*
 
 #### Tool Implementation
 ```typescript
-export type ToolType = 'select' | 'pen' | 'border' | 'connect' | 'move'
+export type ToolType = 'select' | 'pen' | 'connect' | 'move'
 ```
 
 ### 2. Drawing System
@@ -229,9 +249,10 @@ const endX = Math.ceil((x + width + padding) / gridSize) * gridSize
 
 #### Keyboard Shortcuts
 - **V** - Select tool
-- **P** - Pen/draw tool  
-- **H** - Move/pan tool
+- **D** - Draw tool (pen)
+- **H** - Pan tool
 - **G** - Toggle grid
+- **S** - Toggle snapping
 - **Escape** - Cancel drawing or clear selection
 - **Enter** - Finish drawing (when drawing)
 - **Delete/Backspace** - Delete selected territories
@@ -392,12 +413,18 @@ interface ViewState {
 ### Keyboard Shortcuts
 
 - **V** - Select tool (area selection, territory movement)
-- **P** - Pen/draw tool (create territories)
-- **H** - Move/pan tool (canvas navigation)
+- **D** - Draw tool (create territories)
+- **H** - Pan tool (canvas navigation)
 - **G** - Toggle grid visibility
+- **S** - Toggle snapping on/off
+- **Alt** (hold) - Temporarily disable snapping
 - **Escape** - Cancel current drawing or clear selection
 - **Enter** - Finish drawing territory (when drawing)
 - **Delete/Backspace** - Delete selected territories
+- **Ctrl/Cmd+C** - Copy selected territories
+- **Ctrl/Cmd+V** - Paste territories at cursor position
+- **Ctrl/Cmd+D** - Duplicate selected territories with offset
+- **Alt** (hold while dragging) - Duplicate territories instead of moving
 
 ### Visual Feedback Reference
 
@@ -521,6 +548,11 @@ interface ViewState {
 
 ---
 
-*Last updated: 2025-06-28*
-*Version: Phase 1 Complete with Advanced Selection System*
-*Features: Complete territory selection, area selection with live preview, drag-to-move, accurate hit detection, zoom-to-cursor, and canvas isolation*
+*Last updated: December 2024*
+*Version: Phase 2 Complete - Professional Snapping System v2.0*
+*Major Features:*
+- Complete territory selection and editing system
+- Professional snapping with visual feedback and alignment guides
+- Fixed grid snapping override issues and coordinate rounding
+- Improved UI consistency and tool organization
+- Full bezier editing support with industry-standard controls

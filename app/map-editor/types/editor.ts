@@ -3,7 +3,7 @@
 import type { MapData, Territory, Border, Point } from '@/lib/lms/optimized-map-data'
 import type { SnapState } from './snapping'
 
-export type ToolType = 'select' | 'pen' | 'border' | 'connect' | 'move'
+export type ToolType = 'select' | 'pen' | 'connect' | 'move'
 
 export interface BezierPoint extends Point {
   type: 'anchor'
@@ -47,6 +47,11 @@ export interface EditingState {
   vertexPositions: BezierPoint[]
 }
 
+export interface ClipboardState {
+  territories: Territory[]
+  offset: Point // Offset from original position for smart paste
+}
+
 export interface MapEditorState {
   // Map data
   map: MapData
@@ -68,6 +73,9 @@ export interface MapEditorState {
   
   // Snapping state
   snapping: SnapState
+  
+  // Clipboard state
+  clipboard: ClipboardState | null
   
   // Actions
   setTool: (tool: ToolType) => void
@@ -117,6 +125,11 @@ export interface MapEditorState {
   updateSnapSettings: (settings: Partial<SnapState['settings']>) => void
   toggleSnapping: () => void
   setTemporarySnapDisabled: (disabled: boolean) => void
+  
+  // Copy/Paste actions
+  copyTerritories: (territoryIds: string[]) => void
+  pasteTerritories: (cursorPosition?: Point) => void
+  duplicateTerritories: (territoryIds: string[], offset?: Point) => void
 }
 
 export interface PointerPosition {

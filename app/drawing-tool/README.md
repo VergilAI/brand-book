@@ -2,6 +2,15 @@
 
 A professional bezier-based vector drawing tool built with React and TypeScript. Create smooth shapes with industry-standard bezier curve controls.
 
+## Recent Updates (December 2024)
+
+### 🧲 Snapping System v2.0 Fixes
+- **Fixed grid snapping override** - Grid no longer forces alignment when disabled
+- **Removed hidden coordinate rounding** - No more unwanted 1-pixel grid snapping
+- **Fixed preview sync** - Drawing preview now respects snap settings
+- **Improved angle snapping** - Now has proper priority and visual feedback
+- **Grid OFF by default** - More intuitive default behavior
+
 ## Features
 
 ### 🎨 Advanced Drawing
@@ -31,15 +40,15 @@ A professional bezier-based vector drawing tool built with React and TypeScript.
 - **Move/Pan (H)** - Navigate the canvas
 - **Draw (P)** - Create new shapes
 
-### 🧲 Smart Snapping System
-- **Vertex Snapping** - Snap to existing shape vertices
-- **Edge Snapping** - Snap to edges and midpoints
-- **Center Snapping** - Snap to shape centers
-- **Grid Snapping** - Align to grid points
-- **Angle Snapping** - Lock to 45° increments
-- **Alignment Guides** - Dynamic guidelines for perfect alignment
-- **Visual Feedback** - Color-coded snap indicators
-- **Customizable** - Adjust snap distance and toggle types
+### 🧲 Smart Snapping System v2.0
+- **Vertex Snapping** - Snap to existing shape vertices (red indicators)
+- **Edge Snapping** - Snap to edges and midpoints (blue/green indicators)
+- **Center Snapping** - Snap to shape centers (orange crosshair)
+- **Grid Snapping** - Align to grid points (gray indicators, OFF by default)
+- **Angle Snapping** - Lock to 45° increments (orange guide lines)
+- **Alignment Guides** - Dynamic guidelines show what you're aligning with
+- **Visual Feedback** - Color-coded indicators and aligned element highlighting
+- **Customizable** - Adjust snap distance (5-50px) and toggle individual types
 
 ### 🎨 Shape Properties
 - **Fill color** - Customizable fill

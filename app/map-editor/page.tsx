@@ -45,10 +45,10 @@ export default function MapEditorPage() {
           </div>
           
           <div className="flex gap-2">
-            <button className="px-3 py-1 text-sm bg-white rounded shadow-sm border hover:bg-gray-50">
+            <button className="inline-flex items-center justify-center h-8 px-3 text-sm font-medium rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all">
               Import
             </button>
-            <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700">
+            <button className="inline-flex items-center justify-center h-8 px-3 text-sm font-medium rounded-md bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 transition-all">
               Export
             </button>
           </div>

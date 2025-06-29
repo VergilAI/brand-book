@@ -116,10 +116,7 @@ interface DrawingCanvasProps {
 
 export function DrawingCanvas({ className }: DrawingCanvasProps) {
   const store = useDrawingTool()
-  const { position, updatePosition, svgRef } = usePointerPosition(
-    store.view.gridSize,
-    false // Never apply grid snapping in usePointerPosition - we handle it in snapping logic
-  )
+  const { position, updatePosition, svgRef } = usePointerPosition()
   const { getSnappedPoint, getSnappedDrawingPoint, isSnappingEnabled } = useSnapping()
   
   const isDragging = useRef(false)
@@ -141,6 +138,9 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
   
   // Snapping state
   const [snapIndicators, setSnapIndicators] = React.useState<SnapIndicator[]>([])
+  
+  // Store current raw position for rendering (without grid snap)
+  const currentRawPosition = useRef<Point>({ x: 0, y: 0 })
   
   // Handle pointer events based on current tool
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -219,10 +219,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       
       if (closestEdge.distance < edgeThreshold) {
         // Add vertex on edge
-        const snappedPoint = store.drawing.snapToGrid ? 
-          { x: Math.round(closestEdge.point.x / store.view.gridSize) * store.view.gridSize,
-            y: Math.round(closestEdge.point.y / store.view.gridSize) * store.view.gridSize }
-          : closestEdge.point
+        // Use the unified snapping system instead of manual grid snapping
+        const { point: snappedPoint } = getSnappedPoint(closestEdge.point)
         store.addVertexOnEdge(closestEdge.index, snappedPoint)
         return
       }
@@ -307,7 +305,19 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
     }
     
     if (store.tool === 'pen' && e.button === 0) {
-      const rawPoint = position.svg
+      // Get current SVG position directly from event
+      const getCurrentSvgPosition = (): Point => {
+        if (!svgRef.current) return { x: 0, y: 0 }
+        const pt = svgRef.current.createSVGPoint()
+        pt.x = e.clientX
+        pt.y = e.clientY
+        const ctm = svgRef.current.getScreenCTM()
+        if (!ctm) return { x: 0, y: 0 }
+        const svgPoint = pt.matrixTransform(ctm.inverse())
+        return { x: svgPoint.x, y: svgPoint.y }
+      }
+      
+      const rawPoint = getCurrentSvgPosition()
       const previousPoint = store.drawing.bezierPath.length > 0 ? 
         store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
       
@@ -345,6 +355,21 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
     }
     updatePosition(e)
     
+    // Get current SVG position directly from event
+    const getCurrentSvgPosition = (): Point => {
+      if (!svgRef.current) return { x: 0, y: 0 }
+      const pt = svgRef.current.createSVGPoint()
+      pt.x = e.clientX
+      pt.y = e.clientY
+      const ctm = svgRef.current.getScreenCTM()
+      if (!ctm) return { x: 0, y: 0 }
+      const svgPoint = pt.matrixTransform(ctm.inverse())
+      return { x: svgPoint.x, y: svgPoint.y }
+    }
+    
+    const currentSvgPos = getCurrentSvgPosition()
+    currentRawPosition.current = currentSvgPos // Store for rendering
+    
     if (isDragging.current) {
       const dx = e.clientX - lastMousePos.current.x
       const dy = e.clientY - lastMousePos.current.y
@@ -355,21 +380,19 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       })
     } else if (store.editing.isDraggingVertex && store.editing.draggedVertex !== null) {
       // Move vertex with snapping
-      const rawPoint = position.svg
-      const { point: snappedPoint, indicators } = getSnappedPoint(rawPoint)
+      const { point: snappedPoint, indicators } = getSnappedPoint(currentSvgPos)
       setSnapIndicators(indicators)
       store.updateVertexPosition(store.editing.draggedVertex, snappedPoint)
     } else if (store.editing.isDraggingHandle && store.editing.draggedHandle !== null) {
       // Move control handle
-      const point = position.svg // Don't snap control handles to grid
       store.updateControlHandle(
         store.editing.draggedHandle.vertex,
         store.editing.draggedHandle.type,
-        point
+        currentSvgPos
       )
     } else if (isMovingShapes.current) {
       // Move selected shapes with snapping
-      const rawPos = position.svg
+      const rawPos = currentSvgPos
       
       // Calculate the center of all selected shapes for snapping
       const selectedShapes = Array.from(store.selection.shapes)
@@ -433,12 +456,11 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       }
     } else if (store.drawing.isDraggingHandle && store.tool === 'pen') {
       // Update bezier handle during drag only when using pen tool
-      const rawPoint = position.svg
       const previousPoint = store.drawing.bezierPath.length > 1 ? 
         store.drawing.bezierPath[store.drawing.bezierPath.length - 2] : undefined
       
       // Apply snapping for handle drag
-      const { point: snappedPoint, indicators } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      const { point: snappedPoint, indicators } = getSnappedDrawingPoint(currentSvgPos, previousPoint)
       setSnapIndicators(indicators)
       store.updateDragHandle(snappedPoint)
     } else if (isAreaSelecting.current) {
@@ -457,19 +479,17 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         height: viewBoxHeight
       }
       
-      areaSelectEnd.current = clampToCanvasBounds(position.svg, viewBounds)
+      areaSelectEnd.current = clampToCanvasBounds(currentSvgPos, viewBounds)
     } else if (store.tool === 'pen' && store.drawing.isDrawing && !store.drawing.isDraggingHandle) {
       // Update snap indicators during pen tool movement when drawing
-      const rawPoint = position.svg
       const previousPoint = store.drawing.bezierPath.length > 0 ? 
         store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
       
-      const { indicators } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      const { indicators } = getSnappedDrawingPoint(currentSvgPos, previousPoint)
       setSnapIndicators(indicators)
     } else if (store.tool === 'pen' && !store.drawing.isDrawing) {
       // Update snap indicators during pen tool movement when not drawing
-      const rawPoint = position.svg
-      const { indicators } = getSnappedPoint(rawPoint)
+      const { indicators } = getSnappedPoint(currentSvgPos)
       setSnapIndicators(indicators)
     } else {
       // Clear snap indicators when not in a snapping mode
@@ -477,7 +497,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         setSnapIndicators([])
       }
     }
-  }, [store, updatePosition, position, snapIndicators, getSnappedPoint, getSnappedDrawingPoint])
+  }, [store, updatePosition, getSnappedPoint, getSnappedDrawingPoint])
   
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (isDragging.current) {
@@ -937,7 +957,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             {/* Live preview line from last point to cursor */}
             {!store.drawing.isDraggingHandle && store.drawing.bezierPath.length > 0 && (() => {
               const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
-              const rawPoint = position.svg
+              const rawPoint = currentRawPosition.current
               
               // Apply snapping to preview line
               const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, lastPoint)
@@ -961,7 +981,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             {/* Show close indicator when near start */}
             {store.drawing.bezierPath.length > 2 && (() => {
               const firstPoint = store.drawing.bezierPath[0]
-              const rawPoint = position.svg
+              const rawPoint = currentRawPosition.current
               const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
               
               // Apply snapping
@@ -1001,7 +1021,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
             {/* Show control handles when dragging */}
             {store.drawing.isDraggingHandle && store.drawing.dragStartPoint && (() => {
               const dragStart = store.drawing.dragStartPoint
-              const rawPoint = position.svg
+              const rawPoint = currentRawPosition.current
               const previousPoint = store.drawing.bezierPath.length > 1 ? 
                 store.drawing.bezierPath[store.drawing.bezierPath.length - 2] : undefined
               
@@ -1056,7 +1076,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
         
         {/* Cursor position indicator */}
         {store.tool === 'pen' && (() => {
-          const rawPoint = position.svg
+          const rawPoint = currentRawPosition.current
           const lastPoint = store.drawing.isDrawing && store.drawing.bezierPath.length > 0 ? 
             store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
           
@@ -1082,7 +1102,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
       
       {/* Position display */}
       <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs font-mono">
-        {position.svg.x}, {position.svg.y}
+        {currentRawPosition.current.x}, {currentRawPosition.current.y}
       </div>
       
       {/* Editing mode indicator */}

@@ -26,9 +26,8 @@ interface Tool {
 
 const tools: Tool[] = [
   { id: 'select', name: 'Select', icon: <MousePointer2 size={20} />, shortcut: 'V' },
-  { id: 'move', name: 'Move/Pan', icon: <Hand size={20} />, shortcut: 'H' },
-  { id: 'pen', name: 'Draw Territory', icon: <Pen size={20} />, shortcut: 'P' },
-  { id: 'border', name: 'Edit Borders', icon: <Spline size={20} />, shortcut: 'B' },
+  { id: 'move', name: 'Pan', icon: <Hand size={20} />, shortcut: 'H' },
+  { id: 'pen', name: 'Draw Territory', icon: <Pen size={20} />, shortcut: 'D' },
   { id: 'connect', name: 'Sea Routes', icon: <Link size={20} />, shortcut: 'C' },
 ]
 

@@ -32,7 +32,6 @@ export interface DrawingState {
   isDrawing: boolean
   bezierPath: BezierPoint[]
   previewPath: string
-  snapToGrid: boolean
   autoClose: boolean
   showControlPoints: boolean
   isDraggingHandle: boolean
@@ -123,7 +122,6 @@ export interface DrawingToolState {
   setPan: (pan: Point) => void
   toggleGrid: () => void
   setGridSize: (size: number) => void
-  setSnapToGrid: (snap: boolean) => void
   
   // Shape movement and area selection
   moveShapes: (shapeIds: string[], deltaX: number, deltaY: number) => void
@@ -152,5 +150,4 @@ export interface DrawingToolState {
 export interface PointerPosition {
   screen: Point // Screen coordinates
   svg: Point    // SVG coordinates
-  grid: Point   // Snapped to grid
 }

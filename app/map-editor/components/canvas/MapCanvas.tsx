@@ -144,6 +144,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
   // Snapping state
   const [snapIndicators, setSnapIndicators] = React.useState<SnapIndicator[]>([])
   
+  // Duplicate preview state
+  const [duplicatePreviewOffset, setDuplicatePreviewOffset] = React.useState<Point | null>(null)
+  
   // Handle pointer events based on current tool
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault() // Prevent default behaviors like text selection
@@ -220,11 +223,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
       }
       
       if (closestEdge.distance < edgeThreshold) {
-        // Add vertex on edge
-        const snappedPoint = store.drawing.snapToGrid ? 
-          { x: Math.round(closestEdge.point.x / store.view.gridSize) * store.view.gridSize,
-            y: Math.round(closestEdge.point.y / store.view.gridSize) * store.view.gridSize }
-          : closestEdge.point
+        // Add vertex on edge - apply proper snapping
+        const { point: snappedPoint } = getSnappedPoint(closestEdge.point)
         store.addVertexOnEdge(closestEdge.index, snappedPoint)
         return
       }
@@ -339,7 +339,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
         }
       }
     }
-  }, [store, position, updatePosition])
+  }, [store, position, updatePosition, getSnappedPoint])
   
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (isAreaSelecting.current) {
@@ -418,17 +418,23 @@ export function MapCanvas({ className }: MapCanvasProps) {
           const snappedDeltaX = snappedCenter.x - selectionCenter.x
           const snappedDeltaY = snappedCenter.y - selectionCenter.y
           
-          // Move territories with snapped deltas
+          // Move territories with snapped deltas (only if not duplicating)
           if (selectedTerritories.length > 0) {
-            store.moveTerritories(
-              selectedTerritories.map(t => t.id), 
-              snappedDeltaX, 
-              snappedDeltaY
-            )
-            // Update start position based on snapped movement
-            moveStartPos.current = {
-              x: moveStartPos.current.x + snappedDeltaX,
-              y: moveStartPos.current.y + snappedDeltaY
+            if (!e.altKey) {
+              store.moveTerritories(
+                selectedTerritories.map(t => t.id), 
+                snappedDeltaX, 
+                snappedDeltaY
+              )
+              // Update start position based on snapped movement
+              moveStartPos.current = {
+                x: moveStartPos.current.x + snappedDeltaX,
+                y: moveStartPos.current.y + snappedDeltaY
+              }
+              setDuplicatePreviewOffset(null)
+            } else {
+              // Show duplicate preview
+              setDuplicatePreviewOffset({ x: snappedDeltaX, y: snappedDeltaY })
             }
           }
         }
@@ -460,8 +466,26 @@ export function MapCanvas({ className }: MapCanvasProps) {
       }
       
       areaSelectEnd.current = clampToCanvasBounds(position.svg, viewBounds)
+    } else if (store.tool === 'pen' && store.drawing.isDrawing && !store.drawing.isDraggingHandle) {
+      // Update snap indicators during pen tool movement when drawing
+      const rawPoint = position.svg
+      const previousPoint = store.drawing.bezierPath.length > 0 ? 
+        store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
+      
+      const { indicators } = getSnappedDrawingPoint(rawPoint, previousPoint)
+      setSnapIndicators(indicators)
+    } else if (store.tool === 'pen' && !store.drawing.isDrawing) {
+      // Update snap indicators during pen tool movement when not drawing
+      const rawPoint = position.svg
+      const { indicators } = getSnappedPoint(rawPoint)
+      setSnapIndicators(indicators)
+    } else {
+      // Clear snap indicators when not in a snapping mode
+      if (snapIndicators.length > 0) {
+        setSnapIndicators([])
+      }
     }
-  }, [store, updatePosition, position])
+  }, [store, updatePosition, position, getSnappedPoint, getSnappedDrawingPoint])
   
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (isDragging.current) {
@@ -492,9 +516,21 @@ export function MapCanvas({ className }: MapCanvasProps) {
       setShowAreaSelect(false)
       e.currentTarget.releasePointerCapture(e.pointerId)
     } else if (isMovingTerritories.current) {
+      // Check if Alt/Option key is held for duplicate
+      if (e.altKey && hasMoved.current) {
+        // Calculate final offset for duplicate
+        const finalDeltaX = position.svg.x - moveStartPos.current.x
+        const finalDeltaY = position.svg.y - moveStartPos.current.y
+        
+        // Duplicate selected territories at the new position
+        const selectedIds = Array.from(store.selection.territories)
+        store.duplicateTerritories(selectedIds, { x: finalDeltaX, y: finalDeltaY })
+      }
+      
       // Complete territory movement
       isMovingTerritories.current = false
       setSnapIndicators([]) // Clear snap indicators
+      setDuplicatePreviewOffset(null) // Clear duplicate preview
       e.currentTarget.releasePointerCapture(e.pointerId)
       
       // Reset hasMoved after a small delay to prevent onClick from firing on drag end
@@ -608,7 +644,29 @@ export function MapCanvas({ className }: MapCanvasProps) {
         return
       }
       
-      if (e.key === 'Escape') {
+      // Check for Ctrl/Cmd shortcuts first
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'c' || e.key === 'C') {
+          // Copy selected territories
+          e.preventDefault()
+          if (store.selection.territories.size > 0) {
+            store.copyTerritories(Array.from(store.selection.territories))
+          }
+        } else if (e.key === 'v' || e.key === 'V') {
+          // Paste territories at current cursor position
+          e.preventDefault()
+          store.pasteTerritories(position.svg)
+        } else if (e.key === 'd' || e.key === 'D') {
+          // Duplicate selected territories with small offset
+          e.preventDefault()
+          if (store.selection.territories.size > 0) {
+            store.duplicateTerritories(Array.from(store.selection.territories))
+          }
+        } else if (e.key === 's' || e.key === 'S') {
+          // Ctrl/Cmd+S - could be used for save in the future
+          e.preventDefault()
+        }
+      } else if (e.key === 'Escape') {
         if (store.editing.isEditing) {
           store.stopEditingTerritory()
         } else if (store.drawing.isDrawing) {
@@ -630,13 +688,13 @@ export function MapCanvas({ className }: MapCanvasProps) {
         })
       } else if (e.key.toLowerCase() === 'v' && !store.editing.isEditing) {
         store.setTool('select')
-      } else if (e.key.toLowerCase() === 'p' && !store.editing.isEditing) {
+      } else if (e.key.toLowerCase() === 'd' && !store.editing.isEditing) {
         store.setTool('pen')
       } else if (e.key.toLowerCase() === 'h' && !store.editing.isEditing) {
         store.setTool('move')
       } else if (e.key.toLowerCase() === 'g') {
         store.toggleGrid()
-      } else if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey) {
+      } else if (e.key.toLowerCase() === 's') {
         // Toggle snapping
         store.toggleSnapping()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -795,6 +853,32 @@ export function MapCanvas({ className }: MapCanvasProps) {
           })}
         </g>
         
+        {/* Duplicate preview */}
+        {duplicatePreviewOffset && store.selection.territories.size > 0 && (
+          <g className="duplicate-preview" opacity="0.5">
+            {Array.from(store.selection.territories).map(territoryId => {
+              const territory = store.map.territories[territoryId]
+              if (!territory) return null
+              
+              // Create a transformed path for the preview
+              const transform = `translate(${duplicatePreviewOffset.x}, ${duplicatePreviewOffset.y})`
+              
+              return (
+                <path
+                  key={`preview-${territory.id}`}
+                  d={territory.fillPath}
+                  fill="#6366F1"
+                  stroke="#6366F1"
+                  strokeWidth="2"
+                  strokeDasharray="4 2"
+                  transform={transform}
+                  className="pointer-events-none"
+                />
+              )
+            })}
+          </g>
+        )}
+        
         {/* Vertex editing visualization */}
         {store.editing.isEditing && store.editing.vertexPositions.length > 0 && (
           <g className="vertex-editing">
@@ -919,7 +1003,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
             {/* Live preview line from last point to cursor */}
             {!store.drawing.isDraggingHandle && store.drawing.bezierPath.length > 0 && (() => {
               const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
-              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              const rawPoint = position.svg
+              
+              // Apply snapping to preview line
+              const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, lastPoint)
+              const currentPoint = snappedPoint
               
               return (
                 <line
@@ -939,10 +1027,14 @@ export function MapCanvas({ className }: MapCanvasProps) {
             {/* Show close indicator when near start */}
             {store.drawing.bezierPath.length > 2 && (() => {
               const firstPoint = store.drawing.bezierPath[0]
-              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              const rawPoint = position.svg
+              const lastPoint = store.drawing.bezierPath[store.drawing.bezierPath.length - 1]
+              
+              // Apply snapping
+              const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, lastPoint)
               const distance = Math.sqrt(
-                Math.pow(currentPoint.x - firstPoint.x, 2) + 
-                Math.pow(currentPoint.y - firstPoint.y, 2)
+                Math.pow(snappedPoint.x - firstPoint.x, 2) + 
+                Math.pow(snappedPoint.y - firstPoint.y, 2)
               )
               
               return distance < 10 ? (
@@ -975,7 +1067,13 @@ export function MapCanvas({ className }: MapCanvasProps) {
             {/* Show control handles when dragging */}
             {store.drawing.isDraggingHandle && store.drawing.dragStartPoint && (() => {
               const dragStart = store.drawing.dragStartPoint
-              const currentPoint = store.drawing.snapToGrid ? position.grid : position.svg
+              const rawPoint = position.svg
+              const previousPoint = store.drawing.bezierPath.length > 1 ? 
+                store.drawing.bezierPath[store.drawing.bezierPath.length - 2] : undefined
+              
+              // Apply snapping to handle
+              const { point: snappedPoint } = getSnappedDrawingPoint(rawPoint, previousPoint)
+              const currentPoint = snappedPoint
               
               return (
                 <g>
@@ -1023,15 +1121,26 @@ export function MapCanvas({ className }: MapCanvasProps) {
         )}
         
         {/* Cursor position indicator */}
-        {store.tool === 'pen' && (
-          <circle
-            cx={store.drawing.snapToGrid ? position.grid.x : position.svg.x}
-            cy={store.drawing.snapToGrid ? position.grid.y : position.svg.y}
-            r="3"
-            fill="#6366F1"
-            className="pointer-events-none"
-          />
-        )}
+        {store.tool === 'pen' && (() => {
+          const rawPoint = position.svg
+          const lastPoint = store.drawing.isDrawing && store.drawing.bezierPath.length > 0 ? 
+            store.drawing.bezierPath[store.drawing.bezierPath.length - 1] : undefined
+          
+          // Apply snapping to cursor
+          const { point: snappedPoint } = lastPoint ? 
+            getSnappedDrawingPoint(rawPoint, lastPoint) : 
+            getSnappedPoint(rawPoint)
+          
+          return (
+            <circle
+              cx={snappedPoint.x}
+              cy={snappedPoint.y}
+              r="3"
+              fill="#6366F1"
+              className="pointer-events-none"
+            />
+          )
+        })()}
         
         {/* Snap indicators */}
         <SnapIndicators indicators={snapIndicators} zoom={store.view.zoom} />
@@ -1065,7 +1174,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
           store.setPan({ x: -450, y: -250 })
           store.setZoom(1)
         }}
-        className="absolute bottom-2 right-20 bg-white/90 backdrop-blur-sm rounded px-3 py-1 text-xs hover:bg-white transition-colors border border-gray-200"
+        className="absolute bottom-2 right-20 inline-flex items-center justify-center h-8 px-3 text-xs font-medium rounded-md border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all"
         title="Center map (reset view)"
       >
         Center
@@ -1073,7 +1182,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
       
       {/* Snap indicator */}
       {isSnappingEnabled && (
-        <div className="absolute top-2 right-2 bg-blue-600/90 backdrop-blur-sm text-white rounded px-2 py-1 text-xs flex items-center gap-1">
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-blue-600/90 backdrop-blur-sm text-white rounded px-2 py-1 text-xs flex items-center gap-1">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white">
             <rect x="1" y="1" width="4" height="4" fill="currentColor"/>
             <rect x="7" y="1" width="4" height="4" fill="currentColor"/>

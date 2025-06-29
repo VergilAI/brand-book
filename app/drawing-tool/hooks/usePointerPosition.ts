@@ -3,11 +3,10 @@
 import { useState, useCallback, useRef } from 'react'
 import type { Point, PointerPosition } from '../types/drawing'
 
-export function usePointerPosition(gridSize: number, snapToGrid: boolean) {
+export function usePointerPosition() {
   const [position, setPosition] = useState<PointerPosition>({
     screen: { x: 0, y: 0 },
-    svg: { x: 0, y: 0 },
-    grid: { x: 0, y: 0 }
+    svg: { x: 0, y: 0 }
   })
   
   const svgRef = useRef<SVGSVGElement>(null)
@@ -27,18 +26,10 @@ export function usePointerPosition(gridSize: number, snapToGrid: boolean) {
     if (!ctm) return
     
     const svgPoint = pt.matrixTransform(ctm.inverse())
-    const svg = { x: Math.round(svgPoint.x), y: Math.round(svgPoint.y) }
+    const svg = { x: svgPoint.x, y: svgPoint.y }
     
-    // Calculate grid-snapped position
-    const grid = snapToGrid
-      ? {
-          x: Math.round(svg.x / gridSize) * gridSize,
-          y: Math.round(svg.y / gridSize) * gridSize
-        }
-      : svg
-    
-    setPosition({ screen, svg, grid })
-  }, [gridSize, snapToGrid])
+    setPosition({ screen, svg })
+  }, [])
   
   return {
     position,
@@ -47,9 +38,3 @@ export function usePointerPosition(gridSize: number, snapToGrid: boolean) {
   }
 }
 
-export function snapToGridPoint(point: Point, gridSize: number): Point {
-  return {
-    x: Math.round(point.x / gridSize) * gridSize,
-    y: Math.round(point.y / gridSize) * gridSize
-  }
-}

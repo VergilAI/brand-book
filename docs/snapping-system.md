@@ -58,13 +58,18 @@ The snapping system provides magnetic alignment assistance for precise shape cre
 1. **Snap Points**: Colored circles showing active snap targets
 2. **Snap Lines**: Dashed lines from cursor to snap point
 3. **Alignment Guides**: Extended dashed lines for alignment
-4. **Status Indicator**: "Snap ON" badge in top-right when active
+4. **Status Indicator**: "Snap ON" badge in bottom center when active
 
 ### Settings Panel
 
 Located in the Tool Palette with the following options:
 - Master enable/disable toggle
-- Individual snap type toggles (Vertices, Edges, Centers, Angles)
+- Individual snap type toggles:
+  - Vertices - Snap to shape vertices
+  - Edges - Snap to shape edges and midpoints
+  - Centers - Snap to shape center points
+  - Grid - Snap to grid intersections (OFF by default)
+  - Angles (45°) - Constrain to 45-degree increments
 - Snap distance adjustment (5-50px)
 - Visual feedback controls
 
@@ -331,3 +336,14 @@ getSnappedDrawingPoint(
   - Added snapping during shape movement
   - Fixed duplicate alignment guides
   - Improved visual feedback for centers
+
+- **v2.0.0** - Major fixes and improvements
+  - Fixed grid snapping override issues
+  - Removed all hidden Math.round() operations
+  - Fixed preview elements not respecting snap settings
+  - Added proper coordinate transformation without rounding
+  - Grid snapping now OFF by default
+  - Fixed angle snapping priority system
+  - Improved visual feedback with crosshair for centers
+  - Status indicator moved to bottom center
+  - Fixed dependency array issues preventing updates

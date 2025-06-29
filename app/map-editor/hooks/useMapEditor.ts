@@ -68,7 +68,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       vertexSnap: true,
       edgeSnap: true,
       centerSnap: true,
-      gridSnap: true,
+      gridSnap: false, // Grid snapping OFF by default
       guideSnap: true,
       snapDistance: 15,
       showSnapIndicators: true,
@@ -76,6 +76,8 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       angleSnapIncrement: 45
     }
   } as SnapState,
+  
+  clipboard: null,
   
   // Tool actions
   setTool: (tool) => set({ tool }),
@@ -789,7 +791,131 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       ...state.snapping,
       temporaryDisabled: disabled
     }
-  }))
+  })),
+  
+  // Copy/Paste actions
+  copyTerritories: (territoryIds) => {
+    const state = get()
+    const territoriesToCopy = territoryIds
+      .map(id => state.map.territories[id])
+      .filter(Boolean)
+    
+    if (territoriesToCopy.length === 0) return
+    
+    // Calculate the center of all territories
+    const allPoints = territoriesToCopy.flatMap(t => {
+      const vertices = parseSvgPathToBezierPoints(t.fillPath)
+      return vertices.map(v => ({ x: v.x, y: v.y }))
+    })
+    const centerPoint = calculateCenter(allPoints)
+    
+    set({
+      clipboard: {
+        territories: territoriesToCopy.map(t => ({
+          ...t,
+          id: `${t.id}-copy` // Temporary ID that will be replaced on paste
+        })),
+        offset: centerPoint
+      }
+    })
+  },
+  
+  pasteTerritories: (cursorPosition) => {
+    const state = get()
+    if (!state.clipboard || state.clipboard.territories.length === 0) return
+    
+    // Calculate offset from clipboard center to paste position
+    const pasteOffset = cursorPosition || { x: 20, y: 20 } // Default offset if no cursor position
+    const deltaX = cursorPosition ? pasteOffset.x - state.clipboard.offset.x : pasteOffset.x
+    const deltaY = cursorPosition ? pasteOffset.y - state.clipboard.offset.y : pasteOffset.y
+    
+    const newTerritories: Territory[] = []
+    const newSelection = new Set<string>()
+    
+    state.clipboard.territories.forEach(territory => {
+      const id = `territory-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      
+      const newTerritory: Territory = {
+        ...territory,
+        id,
+        name: `${territory.name} Copy`,
+        center: {
+          x: territory.center.x + deltaX,
+          y: territory.center.y + deltaY
+        },
+        fillPath: moveSvgPath(territory.fillPath, deltaX, deltaY)
+      }
+      
+      newTerritories.push(newTerritory)
+      newSelection.add(id)
+    })
+    
+    // Add all new territories to the map
+    const updatedTerritories = { ...state.map.territories }
+    newTerritories.forEach(t => {
+      updatedTerritories[t.id] = t
+    })
+    
+    set({
+      map: {
+        ...state.map,
+        territories: updatedTerritories
+      },
+      selection: {
+        ...state.selection,
+        territories: newSelection
+      }
+    })
+  },
+  
+  duplicateTerritories: (territoryIds, offset) => {
+    const state = get()
+    const defaultOffset = offset || { x: 20, y: 20 }
+    
+    const territoriesToDuplicate = territoryIds
+      .map(id => state.map.territories[id])
+      .filter(Boolean)
+    
+    if (territoriesToDuplicate.length === 0) return
+    
+    const newTerritories: Territory[] = []
+    const newSelection = new Set<string>()
+    
+    territoriesToDuplicate.forEach(territory => {
+      const id = `territory-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      
+      const newTerritory: Territory = {
+        ...territory,
+        id,
+        name: `${territory.name} Copy`,
+        center: {
+          x: territory.center.x + defaultOffset.x,
+          y: territory.center.y + defaultOffset.y
+        },
+        fillPath: moveSvgPath(territory.fillPath, defaultOffset.x, defaultOffset.y)
+      }
+      
+      newTerritories.push(newTerritory)
+      newSelection.add(id)
+    })
+    
+    // Add all new territories to the map
+    const updatedTerritories = { ...state.map.territories }
+    newTerritories.forEach(t => {
+      updatedTerritories[t.id] = t
+    })
+    
+    set({
+      map: {
+        ...state.map,
+        territories: updatedTerritories
+      },
+      selection: {
+        ...state.selection,
+        territories: newSelection
+      }
+    })
+  }
 }))
 
 // Helper functions

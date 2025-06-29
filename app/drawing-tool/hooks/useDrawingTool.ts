@@ -35,7 +35,6 @@ export const useDrawingTool = create<DrawingToolState>((set, get) => ({
     isDrawing: false,
     bezierPath: [],
     previewPath: '',
-    snapToGrid: true,
     autoClose: true,
     showControlPoints: true,
     isDraggingHandle: false,
@@ -71,7 +70,7 @@ export const useDrawingTool = create<DrawingToolState>((set, get) => ({
       vertexSnap: true,
       edgeSnap: true,
       centerSnap: true,
-      gridSnap: true,
+      gridSnap: false, // Grid snapping OFF by default
       guideSnap: true,
       snapDistance: 15,
       showSnapIndicators: true,
@@ -285,9 +284,6 @@ export const useDrawingTool = create<DrawingToolState>((set, get) => ({
   })),
   
   // Drawing settings
-  setSnapToGrid: (snapToGrid) => set(state => ({
-    drawing: { ...state.drawing, snapToGrid }
-  })),
   
   setShowControlPoints: (showControlPoints) => set(state => ({
     drawing: { ...state.drawing, showControlPoints }
@@ -827,8 +823,8 @@ function calculateCenter(points: Point[]): Point {
   )
   
   return {
-    x: Math.round(sum.x / points.length),
-    y: Math.round(sum.y / points.length)
+    x: sum.x / points.length,
+    y: sum.y / points.length
   }
 }
 
