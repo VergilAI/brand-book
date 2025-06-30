@@ -55,8 +55,8 @@ The primary landing page for the Vergil platform, featuring:
 - `FeatureCard` - Feature presentation cards
 - `CTASection` - Call-to-action blocks
 - `Navigation` - Landing page navigation
-- `NeuralNetwork` - Background animations
-- `IrisPattern` - Brand visual elements
+- `RadialHeatmap` - Data visualization
+- Gradient backgrounds - Brand visual elements
 
 ## Design Principles
 

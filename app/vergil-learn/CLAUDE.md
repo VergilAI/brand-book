@@ -57,7 +57,7 @@ Product-specific landing for the educational platform featuring:
 - `Navigation` - Landing page navigation
 
 ### Shared Components
-- `IrisPattern` - Brand visual elements
+- `RadialHeatmap` - Skills visualization
 - UI components from `/components/ui/`
 
 ## Design Principles

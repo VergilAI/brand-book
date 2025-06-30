@@ -3,17 +3,16 @@
 import { LearnFooter } from '@/components/landing/learn-footer'
 import { Button } from '@/components/ui/button'
 import { Mail, Calendar, User } from 'lucide-react'
-import { IrisPattern } from '@/components/vergil/iris-pattern'
 
 export default function ContactPage() {
   return (
     <main className="min-h-screen bg-pure-light">
       
-      {/* Hero Section with Iris Pattern Background */}
+      {/* Hero Section with Gradient Background */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 flex items-center justify-center opacity-5">
-          <IrisPattern variant="cosmic" size="xl" className="scale-150" />
+          <div className="w-[800px] h-[800px] rounded-full bg-gradient-to-br from-cosmic-purple/20 via-electric-violet/10 to-transparent blur-3xl" />
         </div>
         
         {/* Content */}

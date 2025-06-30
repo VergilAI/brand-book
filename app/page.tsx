@@ -2,7 +2,6 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { VergilLogo } from "@/components/vergil/vergil-logo"
-import { IrisPattern } from "@/components/vergil/iris-pattern"
 import { BookOpen, Rocket, GraduationCap, Brain, ArrowRight } from "lucide-react"
 
 export default function HomePage() {
@@ -10,7 +9,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-6">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden opacity-5">
-        <IrisPattern variant="cosmic" size="xl" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-cosmic-purple/30 to-transparent blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full bg-gradient-to-tr from-electric-violet/30 to-transparent blur-3xl" />
       </div>
       
       <div className="relative z-10 max-w-6xl w-full text-center space-y-12">

@@ -75,17 +75,6 @@ Related components in:
 
 ## Brand Components
 
-### Neural Network (`/components/vergil/neural-network.tsx`)
-- SVG-based visualization with animated connections
-- Floating particles with deterministic positioning
-- Default configuration included
-
-### Iris Pattern (`/components/vergil/iris-pattern.tsx`)
-- Multi-layered pattern representing consciousness
-- Variants: default, cosmic, electric, synaptic
-- Sizes: sm, md, lg, xl
-- Breathing animations
-
 ### Graph Constellation Persistent (`/components/vergil/graph-constellation-persistent.tsx`)
 - Advanced interactive graph with staged animations
 - Floating "petals on water" motion
@@ -103,7 +92,7 @@ Related components in:
 ### For Developers
 1. Use VergilLogo or DynamicLogo components
 2. Reference color system with proper contrast
-3. Apply IrisPattern for backgrounds
+3. Use gradient backgrounds for visual effects
 4. Use GraphConstellationPersistent for data viz
 
 ## Common Patterns
@@ -117,8 +106,8 @@ Related components in:
   <CardContent>...</CardContent>
 </Card>
 
-// Iris background
-<IrisPattern variant="cosmic" size="lg" />
+// Gradient background
+<div className="absolute inset-0 bg-gradient-to-br from-cosmic-purple/20 via-electric-violet/10 to-transparent blur-3xl" />
 
 // Graph visualization
 <GraphConstellationPersistent
@@ -133,7 +122,7 @@ Related components in:
 
 The brand book embodies "living" design:
 - Elements breathe and pulse subtly
-- Neural patterns create organic connections
-- Gradients flow naturally
+- Gradient patterns create organic atmospheres
+- Colors flow naturally
 - Everything responds to interaction
 - Interface feels intelligent and alive

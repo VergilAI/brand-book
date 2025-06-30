@@ -59,9 +59,9 @@ const colorInventory = {
             section: "Visualization colors"
           },
           {
-            file: "components/vergil/neural-network.tsx",
-            context: "Node connections and animations",
-            route: "Various pages using NeuralNetwork component",
+            file: "components/vergil/streamgraph-background.tsx",
+            context: "Data visualization animations",
+            route: "Various pages using streamgraph",
             section: "Background effects"
           }
         ]

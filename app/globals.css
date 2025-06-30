@@ -171,26 +171,6 @@ body {
   background: radial-gradient(circle at center, rgba(99,102,241,0.2) 0%, transparent 70%);
 }
 
-/* Iris Pattern */
-.iris-pattern {
-  background: radial-gradient(
-    circle at center,
-    transparent 30%,
-    rgba(99, 102, 241, 0.1) 40%,
-    transparent 50%,
-    rgba(167, 139, 250, 0.05) 60%,
-    transparent 70%
-  );
-  animation: iris-pulse 6s ease-in-out infinite;
-}
-
-/* Neural Network Background */
-.neural-bg {
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 20%, rgba(129, 140, 248, 0.1) 0%, transparent 50%);
-}
 
 /* Brand Keyframe Animations */
 @keyframes breathing {
@@ -230,11 +210,6 @@ body {
   100% { stroke-dashoffset: 0; opacity: 0; }
 }
 
-@keyframes iris-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  33% { transform: scale(1.05); opacity: 0.8; }
-  66% { transform: scale(1.02); opacity: 1; }
-}
 
 /* Iris Rays Animations */
 @keyframes pulse-slow {
@@ -246,9 +221,6 @@ body {
   animation: pulse-slow 3s ease-in-out infinite;
 }
 
-.animate-iris-pulse {
-  animation: iris-pulse 4s ease-in-out infinite;
-}
 
 /* Blob Animation */
 .animate-blob {

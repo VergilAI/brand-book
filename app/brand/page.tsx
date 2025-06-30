@@ -57,12 +57,6 @@ export default function ComponentsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Link href="/elements/iris" className="block text-cosmic-purple hover:underline">
-                  Iris Pattern
-                </Link>
-                <Link href="/components/neural-network" className="block text-cosmic-purple hover:underline">
-                  Neural Network
-                </Link>
                 <Link href="/components/logo" className="block text-cosmic-purple hover:underline">
                   Logo Components
                 </Link>

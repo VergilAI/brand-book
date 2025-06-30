@@ -1,6 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { IrisPattern } from "@/components/vergil/iris-pattern"
-import { NeuralNetwork } from "@/components/vergil/neural-network"
 import { Heart, Zap, Activity, Waves } from "lucide-react"
 
 export default function BreathingEffects() {
@@ -110,22 +108,26 @@ export default function BreathingEffects() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="brand-card">
               <CardHeader>
-                <CardTitle className="text-h4">Iris Pattern Breathing</CardTitle>
-                <CardDescription>Multi-layered breathing with staggered timing</CardDescription>
+                <CardTitle className="text-h4">Gradient Breathing</CardTitle>
+                <CardDescription>Organic gradient patterns with breathing animation</CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center py-8">
-                <IrisPattern size="lg" variant="synaptic" />
+                <div className="w-64 h-64 relative">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-purple/40 to-electric-violet/20 blur-2xl animate-breathing" />
+                  <div className="absolute inset-4 rounded-full bg-gradient-to-tr from-synaptic-blue/30 to-transparent blur-xl animate-breathing animation-delay-2000" />
+                </div>
               </CardContent>
             </Card>
 
             <Card className="brand-card">
               <CardHeader>
-                <CardTitle className="text-h4">Neural Network Breathing</CardTitle>
-                <CardDescription>Connected elements with synchronized life</CardDescription>
+                <CardTitle className="text-h4">Consciousness Flow</CardTitle>
+                <CardDescription>Flowing consciousness gradient with life</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64">
-                  <NeuralNetwork />
+                <div className="h-64 relative overflow-hidden rounded-lg">
+                  <div className="absolute inset-0 consciousness-gradient animate-gradient-shift opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
                 </div>
               </CardContent>
             </Card>

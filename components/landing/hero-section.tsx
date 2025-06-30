@@ -6,8 +6,6 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { VergilLogo } from '@/components/vergil/vergil-logo'
-import { IrisPattern } from '@/components/vergil/iris-pattern'
-import { NeuralNetwork } from '@/components/vergil/neural-network'
 import { ArrowRight, Play, Sparkles } from 'lucide-react'
 
 /**
@@ -122,25 +120,20 @@ export function HeroSection({
         <div className="absolute inset-0 overflow-hidden">
           {isNeuralVariant && (
             <div className="absolute inset-0 opacity-20">
-              <NeuralNetwork animated={animated} />
+              {/* Neural pattern removed - use gradient background instead */}
+              <div className="absolute inset-0 bg-gradient-to-br from-cosmic-purple/20 via-electric-violet/10 to-transparent" />
             </div>
           )}
           
           {(variant === 'consciousness' || isCosmicVariant) && (
             <>
               <div className="absolute top-10 right-10 opacity-10">
-                <IrisPattern 
-                  variant="cosmic" 
-                  size="xl" 
-                  animated={animated}
-                />
+                {/* Consciousness gradient pattern */}
+                <div className="w-96 h-96 rounded-full bg-gradient-to-br from-cosmic-purple/30 to-transparent blur-3xl" />
               </div>
               <div className="absolute bottom-20 left-10 opacity-5">
-                <IrisPattern 
-                  variant="electric" 
-                  size="lg" 
-                  animated={animated}
-                />
+                {/* Electric gradient pattern */}
+                <div className="w-80 h-80 rounded-full bg-gradient-to-tr from-electric-violet/30 to-transparent blur-3xl" />
               </div>
             </>
           )}
@@ -319,10 +312,12 @@ export function HeroSection({
                 {animated && (
                   <>
                     <div className="absolute -top-4 -right-4 animate-breathing">
-                      <IrisPattern variant="electric" size="sm" />
+                      {/* Electric glow effect */}
+                      <div className="w-16 h-16 rounded-full bg-electric-violet/30 blur-xl" />
                     </div>
                     <div className="absolute -bottom-4 -left-4 animate-pulse-glow">
-                      <IrisPattern variant="synaptic" size="sm" />
+                      {/* Synaptic glow effect */}
+                      <div className="w-16 h-16 rounded-full bg-synaptic-blue/30 blur-xl" />
                     </div>
                   </>
                 )}

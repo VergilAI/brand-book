@@ -23,7 +23,6 @@ Core UI components with unified design system:
 Brand-specific components expressing living intelligence:
 - `vergil-logo.tsx` - Official logo component (variants: logo, mark, wordmark)
 - `dynamic-logo.tsx` - Logo with color filters and animations
-- `neural-network.tsx` - SVG neural network visualization
 - `graph-constellation.tsx` - Basic D3 graph
 - `graph-constellation-persistent.tsx` - Advanced graph with floating motion
 - `vergil-sidebar.tsx` - Brand book navigation sidebar
@@ -205,7 +204,7 @@ const componentVariants = cva(
 import { Button } from '@/components/ui/button'
 
 // Brand components  
-import { NeuralNetwork } from '@/components/vergil/neural-network'
+import { RadialHeatmap } from '@/components/vergil/radial-heatmap'
 
 // Landing patterns
 import { HeroSection } from '@/components/landing/hero-section'
@@ -238,7 +237,7 @@ components/
 
 ### Migration Priority
 1. **High**: Button, Card, Badge (most reused)
-2. **Medium**: Brand components (NeuralNetwork, Logo)
+2. **Medium**: Brand components (RadialHeatmap, Logo)
 3. **Low**: Module-specific components
 
 ## Component Best Practices

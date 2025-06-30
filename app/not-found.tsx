@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { IrisPattern } from '@/components/vergil/iris-pattern'
 import { VergilLogo } from '@/components/vergil/vergil-logo'
 import { ArrowLeft, Home, Construction } from 'lucide-react'
 
@@ -13,7 +12,7 @@ export default function NotFound() {
       <Card className="max-w-2xl w-full relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
-          <IrisPattern variant="cosmic" size="xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cosmic-purple/20 via-electric-violet/10 to-transparent" />
         </div>
         
         <CardContent className="relative z-10 p-12 text-center space-y-8">
@@ -28,9 +27,7 @@ export default function NotFound() {
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3 text-6xl font-bold">
               <span className="gradient-text">4</span>
-              <div className="animate-breathing">
-                <IrisPattern variant="electric" size="sm" />
-              </div>
+              <div className="animate-breathing w-12 h-12 rounded-full bg-electric-violet/30 blur-xl" />
               <span className="gradient-text">4</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground">
@@ -84,9 +81,6 @@ export default function NotFound() {
               </Button>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/visual/logo">Logo</Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/elements/iris">Iris Pattern</Link>
               </Button>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/motion/breathing">Motion</Link>

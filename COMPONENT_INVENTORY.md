@@ -69,10 +69,8 @@ Location: `/components/vergil/`
 ### Visual Patterns
 | Component | File | Description | Variants/Features | Usage |
 |-----------|------|-------------|-------------------|--------|
-| **IrisPattern** | `iris-pattern.tsx` | Iris visualization | Variants: default, cosmic, electric, synaptic<br>Sizes: sm, md, lg, xl<br>Breathing animation | Backgrounds, decoration |
 | **IrisRays** | `iris-rays.tsx` | Iris with light rays | Variants: default, cosmic, electric, synaptic, awakening<br>Intensity: subtle, moderate, intense | Hero sections |
 | **LightRays** | `light-rays.tsx` | Radial light pattern | Colors: apple (multicolor), consciousness | Backgrounds |
-| **NeuralNetwork** | `neural-network.tsx` | Neural visualization | Customizable nodes/edges, animated connections | AI/ML visualization |
 | **StreamgraphBackground** | `streamgraph-background.tsx` | Animated streamgraph | Flowing data visualization | Background effects |
 
 ### Data Visualization
@@ -177,7 +175,7 @@ Location: `/components/docs/`
 - Should be brand-agnostic with theme support
 
 **Brand** - Vergil-specific components
-- VergilLogo, IrisPattern, NeuralNetwork
+- VergilLogo, RadialHeatmap, StreamgraphBackground
 - All visualization components
 
 **Patterns** - Composite components
@@ -194,7 +192,7 @@ Keep module-specific components in their respective directories:
 
 #### High Priority (Most Reused)
 1. Button, Card, Input, Select, Badge
-2. VergilLogo, IrisPattern
+2. VergilLogo, RadialHeatmap
 3. HeroSection, FeatureCard
 4. Navigation components
 

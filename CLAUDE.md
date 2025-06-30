@@ -37,7 +37,7 @@ components/
 1. **Vergil Learn Components** - HIGHEST PRIORITY (fully approved, do not modify)
    - LearnHero, UserJourneyCarousel, Navigation, LearnFooter
 2. **Core UI Components** - Unified system (Card with all variants, Button, Input, etc.)
-3. **Brand Components** - Vergil-specific (NeuralNetwork, IrisPattern, logos)
+3. **Brand Components** - Vergil-specific (RadialHeatmap, StreamgraphBackground, logos)
 4. **Module Components** - Product-specific (LMS CourseCard, GameInterface)
 
 ### Unified Card System
