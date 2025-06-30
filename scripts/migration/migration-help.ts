@@ -35,6 +35,7 @@ class MigrationHelper {
         command: 'migrate:extract',
         description: 'Scans codebase for hardcoded values and replaces them with temporary tokens',
         outputs: ['migration-discovery.json', 'migration-discovery-summary.md'],
+        note: '⚠️  Use migrate:extract:safe for non-breaking extraction with CSS generation',
       },
       {
         number: 2,
@@ -70,6 +71,9 @@ class MigrationHelper {
       console.log(`${stage.number}. **${stage.name}**`);
       console.log(`   Command: npm run ${stage.command}`);
       console.log(`   ${stage.description}`);
+      if (stage.note) {
+        console.log(`   ${stage.note}`);
+      }
       console.log(`   Outputs: ${stage.outputs.join(', ')}\n`);
     });
   }
@@ -82,7 +86,12 @@ class MigrationHelper {
       {
         command: 'npm run migrate:extract',
         description: 'Stage 1: Extract hardcoded values and create temporary tokens',
-        options: [],
+        options: ['⚠️  Original version - may break UI during extraction'],
+      },
+      {
+        command: 'npm run migrate:extract:safe',
+        description: 'Stage 1: Safe extraction with CSS generation (recommended)',
+        options: ['✅ Generates migration-tokens.css before replacements', '✅ Non-breaking extraction'],
       },
       {
         command: 'npm run migrate:review',
@@ -147,8 +156,8 @@ class MigrationHelper {
     console.log('💡 Common Usage Examples:');
     console.log('--------------------------\n');
     
-    console.log('🟢 **First-time migration:**');
-    console.log('   npm run migrate:extract');
+    console.log('🟢 **First-time migration (safe method):**');
+    console.log('   npm run migrate:extract:safe  # Non-breaking extraction');
     console.log('   npm run migrate:review');
     console.log('   npm run migrate:validate');
     console.log('   npm run migrate:generate-rules');
@@ -181,6 +190,10 @@ class MigrationHelper {
       {
         problem: 'Stage fails with "file not found" error',
         solution: 'Run previous stages first. Each stage depends on outputs from previous stages.',
+      },
+      {
+        problem: 'UI breaks after running migrate:extract',
+        solution: 'Use "npm run migrate:extract:safe" instead - it generates CSS definitions first.',
       },
       {
         problem: 'Validation shows blocking errors',
@@ -292,8 +305,9 @@ class MigrationHelper {
     
     // Check what stage to run next
     if (!fs.existsSync(path.join(reportsDir, 'migration-discovery.json'))) {
-      console.log('1. Run: npm run migrate:extract');
-      console.log('   Start the migration by discovering hardcoded values\n');
+      console.log('1. Run: npm run migrate:extract:safe');
+      console.log('   Start the migration by discovering hardcoded values (safe method)');
+      console.log('   Or use: npm run migrate:extract (original method)\n');
     } else if (!fs.existsSync(path.join(reportsDir, 'migration-mappings.json'))) {
       console.log('1. Run: npm run migrate:review');
       console.log('   Review and map extracted values to semantic tokens\n');
