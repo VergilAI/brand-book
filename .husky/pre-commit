@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run token enforcement linting
+echo "🔍 Checking design token compliance..."
+npm run lint:tokens
+
+# Validate token definitions
+echo "✅ Validating token definitions..."
+npm run validate-tokens
+
+# Run lint-staged for staged files
+npx lint-staged

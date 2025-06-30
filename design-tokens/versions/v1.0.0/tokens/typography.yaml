@@ -1,0 +1,10 @@
+typography:
+  font-display:
+    value: '''Lato'', -apple-system, BlinkMacSystemFont, ''Segoe UI'', sans-serif'
+    comment: Typography token
+  font-sans:
+    value: '''Inter'', -apple-system, BlinkMacSystemFont, ''Segoe UI'', sans-serif'
+    comment: Typography token
+  font-serif:
+    value: Georgia, 'Times New Roman', serif
+    comment: Typography token

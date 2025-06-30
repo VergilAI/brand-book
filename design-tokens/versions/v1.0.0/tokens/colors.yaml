@@ -1,0 +1,174 @@
+colors:
+  legacy:
+    cosmic-purple:
+      value: '#6366F1'
+      comment: Legacy V1 color token
+    electric-violet:
+      value: '#A78BFA'
+      comment: Legacy V1 color token
+    luminous-indigo:
+      value: '#818CF8'
+      comment: Legacy V1 color token
+    "cosmic-purple), var(--electric-violet), var(--luminous-indigo));\n  background-size":
+      value: 200% 200%
+      comment: Legacy V1 color token
+    "cosmic-purple) 0%, var(--electric-violet) 50%, var(--luminous-indigo) 100%);\n}\n\n.awakening-gradient {\n  background":
+      value: >-
+        linear-gradient(90deg, var(--cosmic-purple) 0%, var(--synaptic-blue)
+        100%)
+      comment: Legacy V1 color token
+    "electric-violet) 0%, var(--neural-pink) 100%);\n}\n\n.light-ray-gradient {\n  background":
+      value: >-
+        radial-gradient(circle at center, rgba(99,102,241,0.2) 0%, transparent
+        70%)
+      comment: Legacy V1 color token
+    "cosmic-purple) 0%, var(--electric-violet) 100%);\n  color":
+      value: white
+      comment: Legacy V1 color token
+    "cosmic-purple), var(--electric-violet));\n  -webkit-background-clip":
+      value: text
+      comment: Legacy V1 color token
+  brand:
+    purple-500:
+      value: '#6366F1'
+      comment: Brand color token
+    violet-500:
+      value: '#A78BFA'
+      comment: Brand color token
+    indigo-500:
+      value: '#818CF8'
+      comment: Brand color token
+    cyan-500:
+      value: '#10B981'
+      comment: Brand color token
+    blue-500:
+      value: '#3B82F6'
+      comment: Brand color token
+    purple:
+      value: '#7B00FF'
+      comment: Brand color token
+    purple-light:
+      value: '#9933FF'
+      comment: Brand color token
+    purple-lighter:
+      value: '#BB66FF'
+      comment: Brand color token
+    purple-lightest:
+      value: '#D199FF'
+      comment: Brand color token
+    full-black:
+      value: '#000000'
+      comment: Brand color token
+    off-black:
+      value: '#1D1D1F'
+      comment: Brand color token
+    full-white:
+      value: '#FFFFFF'
+      comment: Brand color token
+    off-white:
+      value: '#F5F5F7'
+      comment: Brand color token
+    success:
+      value: var(--phosphor-cyan)
+      comment: Brand color token
+    error:
+      value: '#E51C23'
+      comment: Brand color token
+    warning:
+      value: var(--neural-pink)
+      comment: Brand color token
+    info:
+      value: var(--synaptic-blue)
+      comment: Brand color token
+  neutral:
+    whisper-gray:
+      value: '#F8F9FA'
+      comment: Neutral color token
+    mist-gray:
+      value: '#E5E7EB'
+      comment: Neutral color token
+    stone-gray:
+      value: '#9CA3AF'
+      comment: Neutral color token
+    midnight-black:
+      value: '#1E293B'
+      comment: Neutral color token
+    gray-400:
+      value: '#9CA3AF'
+      comment: Neutral color token
+    gray-500:
+      value: '#6B7280'
+      comment: Neutral color token
+    gray-600:
+      value: '#4B5563'
+      comment: Neutral color token
+    gray-700:
+      value: '#374151'
+      comment: Neutral color token
+    gray-800:
+      value: '#1F2937'
+      comment: Neutral color token
+    gray-900:
+      value: '#111827'
+      comment: Neutral color token
+    blue-gray:
+      value: '#94A3B8'
+      comment: Neutral color token
+    pure-black:
+      value: '#000000'
+      comment: Neutral color token
+    pure-white:
+      value: '#FFFFFF'
+      comment: Neutral color token
+    color-whisper-gray:
+      value: '#F8F9FA'
+      comment: Neutral color token
+    color-mist-gray:
+      value: '#E5E7EB'
+      comment: Neutral color token
+    color-stone-gray:
+      value: '#9CA3AF'
+      comment: Neutral color token
+    color-gray-400:
+      value: '#9CA3AF'
+      comment: Neutral color token
+    color-gray-500:
+      value: '#6B7280'
+      comment: Neutral color token
+    color-gray-600:
+      value: '#4B5563'
+      comment: Neutral color token
+    color-gray-700:
+      value: '#374151'
+      comment: Neutral color token
+    color-gray-800:
+      value: '#1F2937'
+      comment: Neutral color token
+    color-gray-900:
+      value: '#111827'
+      comment: Neutral color token
+    color-blue-gray:
+      value: '#94A3B8'
+      comment: Neutral color token
+    color-vergil-white:
+      value: '#F5F5F7'
+      comment: Neutral color token
+    color-pure-black:
+      value: '#000000'
+      comment: Neutral color token
+    color-pure-white:
+      value: '#FFFFFF'
+      comment: Neutral color token
+  functional:
+    color-vergil-success:
+      value: '#0F8A0F'
+      comment: Functional color token
+    color-vergil-error:
+      value: '#E51C23'
+      comment: Functional color token
+    color-vergil-warning:
+      value: '#FFC700'
+      comment: Functional color token
+    color-vergil-info:
+      value: '#0087FF'
+      comment: Functional color token

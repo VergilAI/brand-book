@@ -3,18 +3,25 @@ export const tailwindTokens = {
   "theme": {
     "extend": {
       "colors": {
-        "cosmic-purple": "#6366F1",
-        "electric-violet": "#A78BFA",
-        "luminous-indigo": "#818CF8",
-        "phosphor-cyan": "#10B981",
-        "synaptic-blue": "#3B82F6",
-        "neural-pink": "#F472B6",
-        "deep-space": "#0F172A",
-        "pure-light": "#FFFFFF",
-        "soft-light": "#FAFAFA",
-        "whisper-gray": "#F8F9FA",
-        "mist-gray": "#E5E7EB",
-        "stone-gray": "#9CA3AF"
+        "vergil-purple": "#7B00FF",
+        "vergil-purple-light": "#9933FF",
+        "vergil-purple-lighter": "#BB66FF",
+        "vergil-purple-lightest": "#D199FF",
+        "vergil-full-black": "#000000",
+        "vergil-off-black": "#1D1D1F",
+        "vergil-full-white": "#FFFFFF",
+        "vergil-off-white": "#F5F5F7",
+        "vergil-footnote-text": "#6C6C6D",
+        "vergil-emphasis-bg": "#F0F0F2",
+        "vergil-emphasis-input-bg": "#FAFAFC",
+        "vergil-emphasis-text": "#303030",
+        "vergil-emphasis-input-text": "#323232",
+        "vergil-emphasis-button-hover": "#272729",
+        "vergil-success": "#0F8A0F",
+        "vergil-error": "#E51C23",
+        "vergil-warning": "#FFC700",
+        "vergil-info": "#0087FF",
+        "cosmic-purple": "#6366F1"
       },
       "fontFamily": {
         "sans": "Inter, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",

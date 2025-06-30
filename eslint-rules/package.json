@@ -1,0 +1,27 @@
+{
+  "name": "@vergil/eslint-plugin-tokens",
+  "version": "1.0.0",
+  "description": "ESLint plugin for enforcing Vergil design token usage",
+  "main": "index.js",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "design-tokens",
+    "design-system",
+    "vergil"
+  ],
+  "author": "Vergil AI",
+  "license": "MIT",
+  "peerDependencies": {
+    "eslint": ">=7.0.0"
+  },
+  "dependencies": {
+    "eslint": "^8.0.0"
+  },
+  "files": [
+    "index.js",
+    "rules/",
+    "utils/",
+    "docs/"
+  ]
+}

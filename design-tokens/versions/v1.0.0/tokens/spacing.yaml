@@ -1,0 +1,16 @@
+spacing:
+  radius:
+    value: 0.625rem
+    comment: Spacing token
+  radius-sm:
+    value: calc(var(--radius) - 4px)
+    comment: Spacing token
+  radius-md:
+    value: calc(var(--radius) - 2px)
+    comment: Spacing token
+  radius-lg:
+    value: var(--radius)
+    comment: Spacing token
+  radius-xl:
+    value: calc(var(--radius) + 4px)
+    comment: Spacing token

@@ -11,6 +11,8 @@ const config: StorybookConfig = {
   addons: [
     "@storybook/addon-docs",
     "@storybook/addon-onboarding",
+    "./addons/version-switcher.ts",
+    "./addons/toolbar-version-switcher.ts",
   ],
   framework: {
     name: "@storybook/nextjs",

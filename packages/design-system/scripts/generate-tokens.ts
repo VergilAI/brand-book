@@ -22,9 +22,19 @@ function generateCSSVariables() {
     css += `  --color-primary-${toKebabCase(key)}: ${value};\n`;
   });
   
-  Object.entries(tokens.colors.accent).forEach(([key, value]) => {
-    css += `  --color-accent-${toKebabCase(key)}: ${value};\n`;
-  });
+  // Legacy colors (if they exist)
+  if (tokens.colors.legacy) {
+    Object.entries(tokens.colors.legacy).forEach(([key, value]) => {
+      css += `  --color-legacy-${toKebabCase(key)}: ${value};\n`;
+    });
+  }
+  
+  // Emphasis colors
+  if (tokens.colors.emphasis) {
+    Object.entries(tokens.colors.emphasis).forEach(([key, value]) => {
+      css += `  --color-emphasis-${toKebabCase(key)}: ${value};\n`;
+    });
+  }
   
   Object.entries(tokens.colors.foundation).forEach(([key, value]) => {
     css += `  --color-foundation-${toKebabCase(key)}: ${value};\n`;
@@ -77,18 +87,34 @@ function generateTailwindConfig() {
     theme: {
       extend: {
         colors: {
-          'cosmic-purple': tokens.colors.primary.cosmicPurple,
-          'electric-violet': tokens.colors.primary.electricViolet,
-          'luminous-indigo': tokens.colors.primary.luminousIndigo,
-          'phosphor-cyan': tokens.colors.accent.phosphorCyan,
-          'synaptic-blue': tokens.colors.accent.synapticBlue,
-          'neural-pink': tokens.colors.accent.neuralPink,
-          'deep-space': tokens.colors.foundation.deepSpace,
-          'pure-light': tokens.colors.foundation.pureLight,
-          'soft-light': tokens.colors.foundation.softLight,
-          'whisper-gray': tokens.colors.foundation.whisperGray,
-          'mist-gray': tokens.colors.foundation.mistGray,
-          'stone-gray': tokens.colors.foundation.stoneGray,
+          // Primary brand colors
+          'vergil-purple': tokens.colors.primary.vergilPurple,
+          'vergil-purple-light': tokens.colors.primary.vergilPurpleLight,
+          'vergil-purple-lighter': tokens.colors.primary.vergilPurpleLighter,
+          'vergil-purple-lightest': tokens.colors.primary.vergilPurpleLightest,
+          
+          // Foundation colors
+          'vergil-full-black': tokens.colors.foundation.fullBlack,
+          'vergil-off-black': tokens.colors.foundation.offBlack,
+          'vergil-full-white': tokens.colors.foundation.fullWhite,
+          'vergil-off-white': tokens.colors.foundation.offWhite,
+          
+          // Emphasis hierarchy
+          'vergil-footnote-text': tokens.colors.emphasis.footnoteText,
+          'vergil-emphasis-bg': tokens.colors.emphasis.bg,
+          'vergil-emphasis-input-bg': tokens.colors.emphasis.inputBg,
+          'vergil-emphasis-text': tokens.colors.emphasis.text,
+          'vergil-emphasis-input-text': tokens.colors.emphasis.inputText,
+          'vergil-emphasis-button-hover': tokens.colors.emphasis.buttonHover,
+          
+          // Semantic colors
+          'vergil-success': tokens.colors.semantic.success,
+          'vergil-error': tokens.colors.semantic.error,
+          'vergil-warning': tokens.colors.semantic.warning,
+          'vergil-info': tokens.colors.semantic.info,
+          
+          // Legacy (deprecated)
+          'cosmic-purple': tokens.colors.legacy.cosmicPurple,
         },
         fontFamily: tokens.typography.fonts,
         fontSize: tokens.typography.sizes,

@@ -1,0 +1,120 @@
+name: Design Token Compliance
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  token-compliance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build design tokens
+      run: npm run build:tokens
+      
+    - name: Validate token definitions
+      run: npm run validate-tokens
+      
+    - name: Check token compliance
+      run: npm run lint:tokens
+      
+    - name: Check for hardcoded values
+      run: npm run scan:hardcoded
+      
+    - name: Run full linting
+      run: npm run lint
+      
+    - name: Type check
+      run: npx tsc --noEmit
+      
+    - name: Generate compliance report
+      run: |
+        echo "## Design Token Compliance Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Count violations
+        VIOLATIONS=$(npm run lint:tokens 2>&1 | grep -c "error\|warning" || true)
+        echo "- ESLint Violations: $VIOLATIONS" >> $GITHUB_STEP_SUMMARY
+        
+        # Check token import coverage
+        TOKEN_IMPORTS=$(grep -r "import.*tokens" --include="*.tsx" --include="*.ts" . | wc -l || true)
+        STYLE_FILES=$(find . -name "*.tsx" -o -name "*.ts" | grep -v node_modules | grep -v .next | wc -l || true)
+        echo "- Token Import Coverage: $TOKEN_IMPORTS/$STYLE_FILES files" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for deprecated tokens
+        DEPRECATED=$(grep -r "cosmic-purple\|electric-violet\|luminous-indigo" --include="*.tsx" --include="*.ts" . | wc -l || true)
+        echo "- Deprecated Token Usage: $DEPRECATED instances" >> $GITHUB_STEP_SUMMARY
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "$VIOLATIONS" -gt 0 ]; then
+          echo "❌ Token compliance check failed with $VIOLATIONS violations" >> $GITHUB_STEP_SUMMARY
+          echo "Please run \`npm run lint:fix\` to auto-fix violations" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ All token compliance checks passed!" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          
+          try {
+            // Run token compliance check
+            const lintOutput = execSync('npm run lint:tokens 2>&1', { encoding: 'utf8' });
+            const violations = (lintOutput.match(/error|warning/g) || []).length;
+            
+            // Count deprecated usage
+            const deprecatedOutput = execSync('grep -r "cosmic-purple\\|electric-violet\\|luminous-indigo" --include="*.tsx" --include="*.ts" . || true', { encoding: 'utf8' });
+            const deprecatedCount = deprecatedOutput.split('\n').filter(line => line.trim()).length;
+            
+            let comment = `## 🎨 Design Token Compliance Report\n\n`;
+            
+            if (violations === 0 && deprecatedCount === 0) {
+              comment += `✅ **All token compliance checks passed!**\n\n`;
+              comment += `- No hardcoded values detected\n`;
+              comment += `- No deprecated tokens found\n`;
+              comment += `- Token-first architecture maintained\n`;
+            } else {
+              comment += `❌ **Token compliance issues detected:**\n\n`;
+              if (violations > 0) {
+                comment += `- **${violations} ESLint violations** found\n`;
+              }
+              if (deprecatedCount > 0) {
+                comment += `- **${deprecatedCount} deprecated token usages** found\n`;
+              }
+              comment += `\n### 🔧 How to fix:\n`;
+              comment += `1. Run \`npm run lint:fix\` to auto-fix violations\n`;
+              comment += `2. Review auto-fixes for correctness\n`;
+              comment += `3. Manually replace remaining hardcoded values\n`;
+              comment += `4. Use tokens from \`@/tokens\` instead\n\n`;
+              comment += `### 📚 Resources:\n`;
+              comment += `- [Token Documentation](./eslint-rules/docs/README.md)\n`;
+              comment += `- [Color System V2](./docs/color-system-v2.md)\n`;
+              comment += `- [Design Token Guide](./design-tokens/README.md)\n`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.error('Error generating compliance report:', error);
+          }

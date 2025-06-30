@@ -1,0 +1,112 @@
+{
+  "version": "2.1.0-dev",
+  "name": "Active Development v2.1.0-dev",
+  "description": "Active development version for design tokens",
+  "releaseDate": "2025-06-30T21:49:20.534Z",
+  "status": "development",
+  "semver": {
+    "major": 2,
+    "minor": 1,
+    "patch": 0,
+    "prerelease": "dev"
+  },
+  "breakingChanges": [],
+  "compatibility": {
+    "upgradeFrom": [
+      "2.0.0"
+    ],
+    "downgradeTo": [
+      "2.0.0"
+    ],
+    "migrationPaths": [],
+    "platforms": {
+      "css": true,
+      "scss": true,
+      "javascript": true,
+      "typescript": true,
+      "tailwind": true
+    },
+    "tools": {
+      "buildScript": "npm run build:tokens",
+      "validationScript": "npm run validate-tokens"
+    }
+  },
+  "deprecations": [],
+  "build": {
+    "timestamp": "2025-06-30T21:49:20.534Z",
+    "builder": "design-token-builder",
+    "environment": "development",
+    "config": {
+      "platforms": [
+        "css",
+        "scss",
+        "javascript",
+        "typescript",
+        "tailwind"
+      ],
+      "optimization": false,
+      "validation": true
+    },
+    "outputs": {},
+    "stats": {
+      "totalTokens": 0,
+      "newTokens": 0,
+      "changedTokens": 0,
+      "removedTokens": 0,
+      "buildTime": 0
+    }
+  },
+  "sources": {
+    "files": {},
+    "structure": {
+      "categories": [],
+      "totalTokens": 0,
+      "tokensByCategory": {}
+    },
+    "validation": {
+      "syntax": false,
+      "references": false,
+      "consistency": false,
+      "accessibility": false
+    }
+  },
+  "migrations": {
+    "from": [],
+    "to": []
+  },
+  "validation": {
+    "syntax": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.534Z"
+    },
+    "references": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.534Z"
+    },
+    "accessibility": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.534Z"
+    },
+    "performance": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.534Z"
+    },
+    "coverage": {
+      "tokens": 0,
+      "platforms": 0,
+      "components": 0
+    },
+    "quality": {
+      "score": 0,
+      "criteria": []
+    }
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "version": "2.0.0",
+  "name": "YAML Design Tokens v2.0.0",
+  "description": "YAML-based design token system with Apple-inspired monochrome palette",
+  "releaseDate": "2025-06-30T21:49:20.531Z",
+  "status": "stable",
+  "semver": {
+    "major": 2,
+    "minor": 0,
+    "patch": 0
+  },
+  "breakingChanges": [],
+  "compatibility": {
+    "upgradeFrom": [
+      "1.0.0"
+    ],
+    "downgradeTo": [],
+    "migrationPaths": [],
+    "platforms": {
+      "css": true,
+      "scss": true,
+      "javascript": true,
+      "typescript": true,
+      "tailwind": true
+    },
+    "tools": {
+      "buildScript": "npm run build:tokens",
+      "validationScript": "npm run validate-tokens"
+    }
+  },
+  "deprecations": [],
+  "build": {
+    "timestamp": "2025-06-30T21:49:20.531Z",
+    "builder": "style-dictionary",
+    "environment": "production",
+    "config": {
+      "platforms": [
+        "css",
+        "scss",
+        "javascript",
+        "typescript",
+        "tailwind"
+      ],
+      "optimization": true,
+      "validation": true
+    },
+    "outputs": {
+      "tailwind-theme.js": {
+        "file": "tailwind-theme.js",
+        "size": 2967,
+        "hash": "sha256-1751320160531"
+      },
+      "tokens.css": {
+        "file": "tokens.css",
+        "size": 21199,
+        "hash": "sha256-1751320160531"
+      },
+      "tokens.json": {
+        "file": "tokens.json",
+        "size": 32517,
+        "hash": "sha256-1751320160531"
+      },
+      "tokens.scss": {
+        "file": "tokens.scss",
+        "size": 19190,
+        "hash": "sha256-1751320160531"
+      },
+      "tokens.ts": {
+        "file": "tokens.ts",
+        "size": 18382,
+        "hash": "sha256-1751320160531"
+      }
+    },
+    "stats": {
+      "totalTokens": 553,
+      "newTokens": 0,
+      "changedTokens": 0,
+      "removedTokens": 0,
+      "buildTime": 0
+    }
+  },
+  "sources": {
+    "files": {},
+    "structure": {
+      "categories": [],
+      "totalTokens": 0,
+      "tokensByCategory": {}
+    },
+    "validation": {
+      "syntax": false,
+      "references": false,
+      "consistency": false,
+      "accessibility": false
+    }
+  },
+  "migrations": {
+    "from": [],
+    "to": []
+  },
+  "validation": {
+    "syntax": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.532Z"
+    },
+    "references": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.532Z"
+    },
+    "accessibility": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.532Z"
+    },
+    "performance": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.532Z"
+    },
+    "coverage": {
+      "tokens": 0,
+      "platforms": 0,
+      "components": 0
+    },
+    "quality": {
+      "score": 0,
+      "criteria": []
+    }
+  }
+}

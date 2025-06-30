@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0",
+  "name": "Legacy CSS Design Tokens v1.0.0",
+  "description": "Original CSS custom properties system",
+  "releaseDate": "2024-01-01T00:00:00.000Z",
+  "status": "archived",
+  "semver": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "breakingChanges": [],
+  "compatibility": {
+    "upgradeFrom": [],
+    "downgradeTo": [],
+    "migrationPaths": [
+      "2.0.0"
+    ],
+    "platforms": {
+      "css": true,
+      "scss": false,
+      "javascript": false,
+      "typescript": false,
+      "tailwind": true
+    },
+    "tools": {
+      "buildScript": "manual",
+      "validationScript": "none"
+    }
+  },
+  "deprecations": [],
+  "build": {
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "builder": "manual-extraction",
+    "environment": "legacy",
+    "config": {
+      "platforms": [
+        "css"
+      ],
+      "optimization": false,
+      "validation": false
+    },
+    "outputs": {
+      "tokens.css": {
+        "file": "tokens.css",
+        "size": 14840,
+        "hash": "legacy-css-tokens"
+      }
+    },
+    "stats": {
+      "totalTokens": 68,
+      "newTokens": 0,
+      "changedTokens": 0,
+      "removedTokens": 0,
+      "buildTime": 0
+    }
+  },
+  "sources": {
+    "files": {},
+    "structure": {
+      "categories": [],
+      "totalTokens": 0,
+      "tokensByCategory": {}
+    },
+    "validation": {
+      "syntax": false,
+      "references": false,
+      "consistency": false,
+      "accessibility": false
+    }
+  },
+  "migrations": {
+    "from": [],
+    "to": []
+  },
+  "validation": {
+    "syntax": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.518Z"
+    },
+    "references": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.518Z"
+    },
+    "accessibility": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.518Z"
+    },
+    "performance": {
+      "passed": false,
+      "errors": [],
+      "warnings": [],
+      "timestamp": "2025-06-30T21:49:20.518Z"
+    },
+    "coverage": {
+      "tokens": 0,
+      "platforms": 0,
+      "components": 0
+    },
+    "quality": {
+      "score": 0,
+      "criteria": []
+    }
+  }
+}

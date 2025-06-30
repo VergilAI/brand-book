@@ -51,14 +51,19 @@ The Card component now includes all variants:
 - `gradient` - With consciousness gradient
 - `outlined` - With border emphasis
 
-### Token-First Development
+### Token-First Development (MANDATORY)
 ```typescript
-// ❌ NEVER use arbitrary values
+// ❌ NEVER use arbitrary values or hardcoded colors
 <div className="bg-[#6366F1]" />
+<div className="bg-[#7B00FF]" />
+<div style={{ color: '#7B00FF' }} />
 
-// ✅ ALWAYS use design tokens
-<div className="bg-cosmic-purple" />
+// ✅ ALWAYS use V2 design tokens
+<div className="bg-vergil-purple" />
+<div className="text-vergil-off-black" />
 ```
+
+**CRITICAL RULE**: Every component MUST use only design tokens. No hardcoded values allowed.
 
 ## CLAUDE.md File Guidelines
 
@@ -111,13 +116,15 @@ Example hierarchy:
 - Import syntax: `@import "tailwindcss"` (NOT `@tailwind base/components/utilities`)
 - Config file: `tailwind.config.js` (JavaScript, not TypeScript)
 
-### Brand Guidelines
+### Brand Guidelines (V2 TOKEN SYSTEM)
 - **Logo Strategy**: All logos are white by default - always use on dark/colored backgrounds
-- **Color System v2**: Apple-inspired monochrome palette with subtle attention hierarchy
-  - Primary: vergil-purple (#7B00FF), vergil-off-black (#1D1D1F), vergil-off-white (#F5F5F7)
-  - Attention: vergil-emphasis-bg, vergil-emphasis-dropdown-bg, vergil-emphasis-text, vergil-emphasis-button
-  - See `/stories/ColorSystemV2.stories.tsx` and `/app/brand/visual/colors-v2/` for full documentation
-- **Animations**: Incorporate "living system" breathing effects
+- **Color System V2**: MANDATORY Apple-inspired monochrome palette
+  - **Primary Brand**: `vergil-purple` (#7B00FF) - THE brand color
+  - **Neutrals**: `vergil-off-black` (#1D1D1F), `vergil-off-white` (#F5F5F7)  
+  - **Emphasis**: `vergil-emphasis-bg`, `vergil-emphasis-text`, `vergil-emphasis-button-hover`
+  - **DEPRECATED**: `cosmic-purple` (#6366F1) - DO NOT USE V1 colors
+  - **Token Source**: `/design-tokens/source/colors.yaml` - SINGLE SOURCE OF TRUTH
+- **Animations**: Incorporate "living system" breathing effects using token-based values
 
 ### Component Organization
 - `/components/ui/` - Core UI components (unified Card, Button, Input, etc.)
@@ -133,13 +140,51 @@ Example hierarchy:
 - Use existing libraries - check package.json first
 - Maintain accessibility (WCAG AA standards)
 
-## Development
+## MANDATORY: Centralized Design System Commands
 
+### Component Creation (ALWAYS REQUIRED)
 ```bash
-npm run dev    # Start development server
-npm run build  # Build for production
-npm run start  # Start production server
+# NEVER create components manually - ALWAYS use the scaffolding tool
+npm run create:component ComponentName -- --category=ui
+
+# This generates: Component.tsx, stories, tests with V2 tokens only
+# Manual component creation is FORBIDDEN
 ```
+
+### Quality Assurance (REQUIRED BEFORE COMMITS)
+```bash
+npm run scan:hardcoded     # Scan for hardcoded values (REQUIRED)
+npm run lint:tokens        # Check token violations (REQUIRED)
+npm run validate-tokens    # Ensure CSS/TS alignment (REQUIRED)
+```
+
+### Token Management (CENTRALIZED ONLY)
+```bash
+npm run build:tokens       # Build tokens from YAML sources
+npm run watch:tokens       # Watch token sources during development
+```
+
+### Coverage & Reporting
+```bash
+npm run report:all         # Generate complete coverage reports
+npm run report:coverage    # Component health scores
+npm run report:trends      # Historical trend analysis
+```
+
+### Development Commands
+```bash
+npm run dev               # Start development server
+npm run build             # Build for production
+npm run start             # Start production server
+```
+
+### CRITICAL ENFORCEMENT RULES
+
+1. **NEVER create components manually** - Always use `npm run create:component`
+2. **NEVER commit without validation** - Run `npm run lint:tokens` first
+3. **NEVER use hardcoded values** - Token-first development only
+4. **ALWAYS validate token alignment** - Run `npm run validate-tokens`
+5. **ALWAYS check coverage** - Run `npm run report:all` weekly
 
 ## Module-Specific Documentation
 
@@ -153,11 +198,22 @@ Each major module has its own CLAUDE.md file with detailed information:
 - `/components/CLAUDE.md` - Component library documentation
 - `/public/data/CLAUDE.md` - Data files documentation
 
-## Additional Documentation
+## CENTRALIZED DESIGN SYSTEM DOCUMENTATION
 
+### Core System Files
+- `/design-tokens/source/` - YAML token definitions (SINGLE SOURCE OF TRUTH)
+- `/generated/` - Auto-generated token outputs (CSS, TS, JSON, Tailwind)
+- `/scripts/` - Automation and validation tools
+- `/reports/` - Coverage and quality reports
+- `/eslint-rules/` - Token enforcement rules
+- `/docs/component-inventory.md` - Complete component health tracking
+
+### Additional Documentation
 - `/docs/snapping-system.md` - Comprehensive snapping system documentation
 - `/docs/template-library.md` - Template shape library documentation
 - `/app/map-editor/docs/template-library-plan.md` - Implementation plan and status
+- `/docs/hardcoded-values-scanner.md` - Hardcoded value detection system
+- `/docs/eslint-token-enforcement.md` - Token enforcement rules documentation
 
 ## Deployment
 
@@ -204,5 +260,27 @@ git push origin deploy-brand-book
 
 **Repository Structure:**
 - Single monorepo containing all modules
-- Module separation through routing and deployment branches
-- Shared component library across all modules
+- Module separation through routing and deployment branches  
+- **Centralized design system** with YAML-based token management
+- **Automated quality enforcement** through ESLint rules and pre-commit hooks
+- **Complete coverage tracking** for components, tokens, and system health
+- **Single source of truth** for all design decisions
+
+## SYSTEM QUALITY METRICS
+
+**Current Status** (run `npm run report:all` for latest):
+- 82 total components tracked
+- 34% average component health score
+- 37% Storybook coverage
+- 2% test coverage (CRITICAL - needs improvement)
+- 29% V2 token adoption (migration in progress)
+- 2,323 hardcoded values detected (needs token migration)
+- 6,511 ESLint token violations (enforcement active)
+
+**Quality Goals**:
+- 100% component health scores
+- 100% Storybook coverage (MANDATORY)
+- 100% test coverage
+- 100% V2 token adoption
+- ZERO hardcoded values
+- ZERO ESLint violations

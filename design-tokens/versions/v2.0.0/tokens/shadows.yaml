@@ -1,0 +1,247 @@
+# Vergil Design System - Shadow Tokens
+# Elevation and depth system
+
+shadows:
+  # =============================================================================
+  # ELEVATION LEVELS - Consistent shadow hierarchy
+  # =============================================================================
+  
+  elevation:
+    # Base level - no elevation
+    0:
+      value: "none"
+      comment: "No shadow - flat on surface"
+    
+    # Subtle elevation
+    1:
+      value: "0 1px 3px rgba(0, 0, 0, 0.05)"
+      comment: "Subtle lift - cards, inputs"
+      
+    2:
+      value: "0 2px 6px rgba(0, 0, 0, 0.07)"
+      comment: "Light elevation - hover states"
+      
+    # Medium elevation
+    3:
+      value: "0 4px 12px rgba(0, 0, 0, 0.08)"
+      comment: "Medium lift - dropdowns"
+      
+    4:
+      value: "0 6px 16px rgba(0, 0, 0, 0.1)"
+      comment: "Noticeable elevation - modals"
+      
+    # High elevation
+    5:
+      value: "0 8px 24px rgba(0, 0, 0, 0.12)"
+      comment: "High elevation - popovers"
+      
+    6:
+      value: "0 12px 32px rgba(0, 0, 0, 0.15)"
+      comment: "Very high - sticky elements"
+      
+    # Extreme elevation
+    7:
+      value: "0 16px 48px rgba(0, 0, 0, 0.18)"
+      comment: "Extreme elevation - overlays"
+      
+    8:
+      value: "0 24px 64px rgba(0, 0, 0, 0.25)"
+      comment: "Maximum elevation - critical overlays"
+  
+  # =============================================================================
+  # BRAND SHADOWS - Purple-tinted shadows
+  # =============================================================================
+  
+  brand:
+    # Subtle brand shadows
+    sm:
+      value: "0 2px 8px rgba(123, 0, 255, 0.08)"
+      comment: "Small brand shadow"
+      
+    md:
+      value: "0 4px 16px rgba(123, 0, 255, 0.12)"
+      comment: "Medium brand shadow"
+      
+    lg:
+      value: "0 8px 32px rgba(123, 0, 255, 0.16)"
+      comment: "Large brand shadow"
+      
+    xl:
+      value: "0 16px 48px rgba(123, 0, 255, 0.2)"
+      comment: "Extra large brand shadow"
+    
+    # Brand glow effects
+    glow:
+      sm:
+        value: "0 0 16px rgba(123, 0, 255, 0.3)"
+        comment: "Small purple glow"
+        
+      md:
+        value: "0 0 32px rgba(123, 0, 255, 0.4)"
+        comment: "Medium purple glow"
+        
+      lg:
+        value: "0 0 64px rgba(123, 0, 255, 0.5)"
+        comment: "Large purple glow"
+  
+  # =============================================================================
+  # LAYERED SHADOWS - Complex shadow compositions
+  # =============================================================================
+  
+  layered:
+    # Card shadows with multiple layers
+    card:
+      default:
+        value: "0 4px 24px rgba(99, 102, 241, 0.05), 0 1px 3px rgba(0, 0, 0, 0.05)"
+        comment: "Default card shadow"
+        
+      hover:
+        value: "0 8px 32px rgba(99, 102, 241, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)"
+        comment: "Card hover shadow"
+        
+      active:
+        value: "0 2px 16px rgba(99, 102, 241, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05)"
+        comment: "Card pressed shadow"
+    
+    # Button shadows
+    button:
+      default:
+        value: "0 2px 8px rgba(0, 0, 0, 0.08)"
+        comment: "Default button shadow"
+        
+      hover:
+        value: "0 4px 12px rgba(0, 0, 0, 0.12)"
+        comment: "Button hover shadow"
+        
+      active:
+        value: "0 1px 4px rgba(0, 0, 0, 0.1)"
+        comment: "Button pressed shadow"
+        
+      primary:
+        value: "0 4px 16px rgba(123, 0, 255, 0.25)"
+        comment: "Primary button shadow"
+    
+    # Modal and overlay shadows
+    modal:
+      value: "0 24px 48px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1)"
+      comment: "Modal window shadow"
+      
+    dropdown:
+      value: "0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)"
+      comment: "Dropdown menu shadow"
+      
+    tooltip:
+      value: "0 4px 12px rgba(0, 0, 0, 0.15)"
+      comment: "Tooltip shadow"
+  
+  # =============================================================================
+  # INSET SHADOWS - Inner shadows for depth
+  # =============================================================================
+  
+  inset:
+    # Subtle insets
+    sm:
+      value: "inset 0 1px 2px rgba(0, 0, 0, 0.05)"
+      comment: "Small inset - input fields"
+      
+    md:
+      value: "inset 0 2px 4px rgba(0, 0, 0, 0.08)"
+      comment: "Medium inset - pressed states"
+      
+    lg:
+      value: "inset 0 4px 8px rgba(0, 0, 0, 0.1)"
+      comment: "Large inset - wells"
+    
+    # Brand insets
+    brand:
+      value: "inset 0 2px 4px rgba(123, 0, 255, 0.1)"
+      comment: "Brand colored inset"
+      
+    # Focus ring insets
+    focus:
+      value: "inset 0 0 0 2px rgba(123, 0, 255, 0.5)"
+      comment: "Focus ring inset"
+  
+  # =============================================================================
+  # TEXT SHADOWS - Typography depth effects
+  # =============================================================================
+  
+  text:
+    # Subtle text shadows
+    sm:
+      value: "0 1px 2px rgba(0, 0, 0, 0.1)"
+      comment: "Subtle text shadow"
+      
+    md:
+      value: "0 2px 4px rgba(0, 0, 0, 0.15)"
+      comment: "Medium text shadow"
+      
+    lg:
+      value: "0 4px 8px rgba(0, 0, 0, 0.2)"
+      comment: "Strong text shadow"
+    
+    # Glow effects
+    glow:
+      purple:
+        value: "0 0 16px rgba(123, 0, 255, 0.5)"
+        comment: "Purple text glow"
+        
+      white:
+        value: "0 0 16px rgba(255, 255, 255, 0.5)"
+        comment: "White text glow"
+    
+    # Embossed effect
+    emboss:
+      value: "0 1px 0 rgba(255, 255, 255, 0.5), 0 -1px 0 rgba(0, 0, 0, 0.1)"
+      comment: "Embossed text effect"
+  
+  # =============================================================================
+  # SEMANTIC SHADOWS - Context-specific shadows
+  # =============================================================================
+  
+  semantic:
+    # Interactive elements
+    interactive:
+      rest:
+        value: "{elevation.1}"
+        comment: "Resting interactive element"
+        
+      hover:
+        value: "{elevation.3}"
+        comment: "Hovered interactive element"
+        
+      active:
+        value: "{inset.sm}"
+        comment: "Active/pressed state"
+        
+      focus:
+        value: "0 0 0 3px rgba(123, 0, 255, 0.25)"
+        comment: "Focus ring shadow"
+    
+    # Content containers
+    container:
+      card:
+        value: "{layered.card.default}"
+        comment: "Card container shadow"
+        
+      section:
+        value: "{elevation.2}"
+        comment: "Section separator shadow"
+        
+      modal:
+        value: "{layered.modal}"
+        comment: "Modal container shadow"
+    
+    # Navigation elements
+    navigation:
+      header:
+        value: "0 2px 8px rgba(0, 0, 0, 0.1)"
+        comment: "Header/navbar shadow"
+        
+      sidebar:
+        value: "2px 0 8px rgba(0, 0, 0, 0.05)"
+        comment: "Sidebar shadow"
+        
+      footer:
+        value: "0 -2px 8px rgba(0, 0, 0, 0.05)"
+        comment: "Footer shadow"

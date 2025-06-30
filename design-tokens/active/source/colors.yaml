@@ -1,0 +1,283 @@
+# Vergil Design System - Color Tokens
+# Version 2.0 - Apple-inspired monochrome with subtle attention hierarchy
+# This file is the single source of truth for all color decisions
+
+colors:
+  # =============================================================================
+  # BRAND COLORS - V2 System
+  # =============================================================================
+  
+  brand:
+    # Primary brand purple - THE Vergil purple
+    purple:
+      value: "#7B00FF"
+      comment: "Primary brand purple - used for key brand moments"
+      
+    # Purple scale for interactions
+    purple-light:
+      value: "#9933FF"
+      comment: "Hover states and secondary brand elements"
+      
+    purple-lighter:
+      value: "#BB66FF"
+      comment: "Dark theme primary color"
+      
+    purple-lightest:
+      value: "#D199FF"
+      comment: "Dark theme secondary color"
+  
+  # =============================================================================
+  # NEUTRAL PALETTE - Apple-inspired monochrome
+  # =============================================================================
+  
+  neutral:
+    # Pure colors - use sparingly
+    black:
+      value: "#000000"
+      comment: "Full black - backgrounds only"
+      
+    white:
+      value: "#FFFFFF"
+      comment: "Full white - backgrounds only"
+      
+    # Off-colors - primary usage
+    off-black:
+      value: "#1D1D1F"
+      comment: "Primary text color, replaces pure black"
+      
+    off-white:
+      value: "#F5F5F7"
+      comment: "Text on dark backgrounds, light containers"
+  
+  # =============================================================================
+  # ATTENTION HIERARCHY - Subtle emphasis system
+  # =============================================================================
+  
+  emphasis:
+    # Background colors for emphasis
+    bg:
+      value: "#F0F0F2"
+      comment: "Temporary headers and sections needing attention"
+      
+    # Interactive elements within emphasis areas
+    input-bg:
+      value: "#FAFAFC"
+      comment: "Dropdowns, inputs within emphasis areas"
+      
+    # Text colors for emphasis
+    text:
+      value: "#303030"
+      comment: "Text directly on emphasis-bg"
+      
+    input-text:
+      value: "#323232"
+      comment: "Darker text inside emphasis inputs"
+      
+    # Interactive states
+    button-hover:
+      value: "#272729"
+      comment: "Button hover state"
+      
+    # Supporting text
+    footnote:
+      value: "#6C6C6D"
+      comment: "Small footnote text on off-white bg"
+  
+  # =============================================================================
+  # FUNCTIONAL COLORS - System feedback
+  # =============================================================================
+  
+  functional:
+    success:
+      value: "#0F8A0F"
+      comment: "Success states and positive feedback"
+      
+    error:
+      value: "#E51C23"
+      comment: "Error states and destructive actions"
+      
+    warning:
+      value: "#FFC700"
+      comment: "Warning states and caution feedback"
+      
+    info:
+      value: "#0087FF"
+      comment: "Informational states and hints"
+  
+  # =============================================================================
+  # LEGACY V1 COLORS - Deprecated, use V2 instead
+  # =============================================================================
+  
+  legacy:
+    # Original purple system
+    cosmic-purple:
+      value: "#6366F1"
+      comment: "DEPRECATED - Use brand.purple instead"
+      deprecated: true
+      
+    electric-violet:
+      value: "#A78BFA"
+      comment: "DEPRECATED - Use brand.purple-light instead"
+      deprecated: true
+      
+    luminous-indigo:
+      value: "#818CF8"
+      comment: "DEPRECATED - Use brand.purple-lighter instead"
+      deprecated: true
+      
+    # Original accent colors
+    phosphor-cyan:
+      value: "#10B981"
+      comment: "DEPRECATED - Consider functional colors instead"
+      deprecated: true
+      
+    synaptic-blue:
+      value: "#3B82F6"
+      comment: "DEPRECATED - Consider functional.info instead"
+      deprecated: true
+      
+    neural-pink:
+      value: "#F472B6"
+      comment: "DEPRECATED - Consider brand.purple-lightest instead"
+      deprecated: true
+  
+  # =============================================================================
+  # SEMANTIC ALIASES - Context-specific color mappings
+  # =============================================================================
+  
+  semantic:
+    # Text hierarchy
+    text:
+      primary:
+        value: "{neutral.off-black}"
+        comment: "Primary text color"
+        
+      secondary:
+        value: "{emphasis.footnote}"
+        comment: "Secondary/supporting text"
+        
+      inverse:
+        value: "{neutral.off-white}"
+        comment: "Text on dark backgrounds"
+        
+      emphasis:
+        value: "{emphasis.text}"
+        comment: "Emphasized text"
+    
+    # Background hierarchy
+    background:
+      primary:
+        value: "{neutral.white}"
+        comment: "Primary background"
+        
+      secondary:
+        value: "{neutral.off-white}"
+        comment: "Secondary background/containers"
+        
+      emphasis:
+        value: "{emphasis.bg}"
+        comment: "Emphasis sections"
+        
+      inverse:
+        value: "{neutral.black}"
+        comment: "Dark mode primary background"
+    
+    # Interactive elements
+    interactive:
+      primary:
+        value: "{brand.purple}"
+        comment: "Primary buttons and CTAs"
+        
+      primary-hover:
+        value: "{brand.purple-light}"
+        comment: "Primary hover state"
+        
+      secondary:
+        value: "{neutral.off-black}"
+        comment: "Secondary buttons"
+        
+      secondary-hover:
+        value: "{emphasis.button-hover}"
+        comment: "Secondary hover state"
+    
+    # Borders and dividers
+    border:
+      default:
+        value: "rgba(29, 29, 31, 0.1)"
+        comment: "Default border color"
+        
+      emphasis:
+        value: "rgba(123, 0, 255, 0.1)"
+        comment: "Purple-tinted borders"
+  
+  # =============================================================================
+  # GRADIENTS - Brand gradient system
+  # =============================================================================
+  
+  gradients:
+    # Primary brand gradient
+    consciousness:
+      value: "linear-gradient(135deg, #7B00FF 0%, #9933FF 50%, #BB66FF 100%)"
+      comment: "Primary brand gradient - living intelligence"
+      
+    # Subtle background gradient
+    ambient:
+      value: "radial-gradient(circle at center, rgba(123, 0, 255, 0.1) 0%, transparent 70%)"
+      comment: "Subtle ambient lighting effect"
+      
+    # Legacy gradients for backwards compatibility
+    cosmic-legacy:
+      value: "linear-gradient(135deg, #6366F1 0%, #A78BFA 50%, #818CF8 100%)"
+      comment: "DEPRECATED - Use consciousness gradient"
+      deprecated: true
+  
+  # =============================================================================
+  # SPECIAL PURPOSE COLORS - Tool and component specific
+  # =============================================================================
+  
+  tools:
+    # Selection states
+    selection:
+      primary:
+        value: "#8B5CF6"
+        comment: "Primary selection color for tools"
+        
+      secondary:
+        value: "#6366F1"
+        comment: "Secondary selection state"
+    
+    # Editor specific
+    editor:
+      vertex:
+        value: "#1E40AF"
+        comment: "Selected vertices in editors"
+        
+      snap-center:
+        value: "#FF6600"
+        comment: "Center snap indicator"
+        
+      grid:
+        value: "rgba(29, 29, 31, 0.05)"
+        comment: "Grid lines in editors"
+    
+    # Data visualization
+    chart:
+      series1:
+        value: "#7B00FF"
+        comment: "Primary data series"
+        
+      series2:
+        value: "#0087FF"
+        comment: "Secondary data series"
+        
+      series3:
+        value: "#0F8A0F"
+        comment: "Tertiary data series"
+        
+      series4:
+        value: "#FFC700"
+        comment: "Fourth data series"
+        
+      series5:
+        value: "#E51C23"
+        comment: "Fifth data series"

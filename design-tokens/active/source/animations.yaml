@@ -1,0 +1,348 @@
+# Vergil Design System - Animation Tokens
+# Living system animations and transitions
+
+animations:
+  # =============================================================================
+  # DURATION - Animation timing values
+  # =============================================================================
+  
+  duration:
+    instant:
+      value: "0ms"
+      comment: "No animation"
+      
+    fast:
+      value: "150ms"
+      comment: "Quick interactions"
+      
+    normal:
+      value: "300ms"
+      comment: "Standard transitions"
+      
+    slow:
+      value: "500ms"
+      comment: "Deliberate animations"
+      
+    slower:
+      value: "700ms"
+      comment: "Emphasis animations"
+      
+    slowest:
+      value: "1000ms"
+      comment: "Major transitions"
+    
+    # Living system durations
+    breathing:
+      value: "4000ms"
+      comment: "Breathing animation cycle"
+      
+    pulse:
+      value: "2000ms"
+      comment: "Pulse glow cycle"
+      
+    gradient:
+      value: "8000ms"
+      comment: "Gradient shift cycle"
+      
+    flow:
+      value: "1000ms"
+      comment: "Energy flow cycle"
+      
+    synaptic:
+      value: "3000ms"
+      comment: "Synaptic pulse cycle"
+  
+  # =============================================================================
+  # EASING - Animation curves
+  # =============================================================================
+  
+  easing:
+    # Standard easings
+    linear:
+      value: "linear"
+      comment: "No easing - constant speed"
+      
+    ease:
+      value: "ease"
+      comment: "Browser default easing"
+      
+    ease-in:
+      value: "ease-in"
+      comment: "Accelerate from zero"
+      
+    ease-out:
+      value: "ease-out"
+      comment: "Decelerate to zero"
+      
+    ease-in-out:
+      value: "ease-in-out"
+      comment: "Accelerate and decelerate"
+    
+    # Custom cubic beziers
+    smooth:
+      value: "cubic-bezier(0.4, 0, 0.2, 1)"
+      comment: "Smooth natural motion"
+      
+    bounce:
+      value: "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+      comment: "Playful bounce effect"
+      
+    natural:
+      value: "cubic-bezier(0.4, 0, 0.6, 1)"
+      comment: "Natural deceleration"
+      
+    sharp:
+      value: "cubic-bezier(0.4, 0, 1, 1)"
+      comment: "Quick sharp motion"
+      
+    elastic:
+      value: "cubic-bezier(0.5, 1.5, 0.5, -0.5)"
+      comment: "Elastic overshoot"
+  
+  # =============================================================================
+  # KEYFRAMES - Reusable animation sequences
+  # =============================================================================
+  
+  keyframes:
+    # Living system animations
+    breathing:
+      description: "Gentle scale and opacity breathing"
+      keyframes:
+        "0%, 100%":
+          transform: "scale(1)"
+          opacity: "0.8"
+        "50%":
+          transform: "scale(1.03)"
+          opacity: "1"
+      
+    pulse-glow:
+      description: "Pulsing glow effect"
+      keyframes:
+        "0%, 100%":
+          opacity: "0.6"
+        "50%":
+          opacity: "1"
+      
+    gradient-shift:
+      description: "Flowing gradient background"
+      keyframes:
+        "0%":
+          backgroundPosition: "0% 50%"
+        "50%":
+          backgroundPosition: "100% 50%"
+        "100%":
+          backgroundPosition: "0% 50%"
+      
+    energy-flow:
+      description: "Energy flowing through connections"
+      keyframes:
+        "0%":
+          strokeDashoffset: "24"
+        "100%":
+          strokeDashoffset: "0"
+      
+    synaptic-pulse:
+      description: "Neural synaptic firing"
+      keyframes:
+        "0%":
+          opacity: "0.3"
+          transform: "scale(0.8)"
+        "50%":
+          opacity: "1"
+          transform: "scale(1)"
+        "100%":
+          opacity: "0.3"
+          transform: "scale(0.8)"
+      
+    neural-flow:
+      description: "Neural pathway activation"
+      keyframes:
+        "0%":
+          strokeDashoffset: "100"
+          opacity: "0"
+        "50%":
+          opacity: "1"
+        "100%":
+          strokeDashoffset: "0"
+          opacity: "0"
+    
+    # UI animations
+    fade-in:
+      description: "Fade in from transparent"
+      keyframes:
+        "0%":
+          opacity: "0"
+        "100%":
+          opacity: "1"
+      
+    fade-out:
+      description: "Fade out to transparent"
+      keyframes:
+        "0%":
+          opacity: "1"
+        "100%":
+          opacity: "0"
+      
+    slide-up:
+      description: "Slide up from below"
+      keyframes:
+        "0%":
+          transform: "translateY(100%)"
+          opacity: "0"
+        "100%":
+          transform: "translateY(0)"
+          opacity: "1"
+      
+    slide-down:
+      description: "Slide down from above"
+      keyframes:
+        "0%":
+          transform: "translateY(-100%)"
+          opacity: "0"
+        "100%":
+          transform: "translateY(0)"
+          opacity: "1"
+      
+    scale-in:
+      description: "Scale in from small"
+      keyframes:
+        "0%":
+          transform: "scale(0.8)"
+          opacity: "0"
+        "100%":
+          transform: "scale(1)"
+          opacity: "1"
+      
+    spin:
+      description: "Continuous rotation"
+      keyframes:
+        "0%":
+          transform: "rotate(0deg)"
+        "100%":
+          transform: "rotate(360deg)"
+      
+    bounce:
+      description: "Bounce animation"
+      keyframes:
+        "0%, 100%":
+          transform: "translateY(0)"
+        "50%":
+          transform: "translateY(-20px)"
+    
+    # Special effects
+    ripple:
+      description: "Ripple effect from center"
+      keyframes:
+        "0%":
+          transform: "scale(0)"
+          opacity: "1"
+        "100%":
+          transform: "scale(4)"
+          opacity: "0"
+      
+    shimmer:
+      description: "Loading shimmer effect"
+      keyframes:
+        "0%":
+          backgroundPosition: "-200% 0"
+        "100%":
+          backgroundPosition: "200% 0"
+  
+  # =============================================================================
+  # TRANSITIONS - Predefined transition combinations
+  # =============================================================================
+  
+  transitions:
+    # Base transitions
+    default:
+      property: "all"
+      duration: "{duration.normal}"
+      easing: "{easing.smooth}"
+      comment: "Default transition for most interactions"
+      
+    fast:
+      property: "all"
+      duration: "{duration.fast}"
+      easing: "{easing.smooth}"
+      comment: "Quick transitions for responsive feedback"
+      
+    slow:
+      property: "all"
+      duration: "{duration.slow}"
+      easing: "{easing.natural}"
+      comment: "Deliberate transitions for emphasis"
+    
+    # Property-specific transitions
+    opacity:
+      property: "opacity"
+      duration: "{duration.normal}"
+      easing: "{easing.linear}"
+      comment: "Opacity-only transitions"
+      
+    transform:
+      property: "transform"
+      duration: "{duration.normal}"
+      easing: "{easing.smooth}"
+      comment: "Transform-only transitions"
+      
+    colors:
+      property: "background-color, border-color, color"
+      duration: "{duration.fast}"
+      easing: "{easing.linear}"
+      comment: "Color transitions"
+    
+    # Interactive element transitions
+    button:
+      property: "all"
+      duration: "{duration.fast}"
+      easing: "{easing.smooth}"
+      comment: "Button interaction transitions"
+      
+    card:
+      property: "transform, box-shadow"
+      duration: "{duration.normal}"
+      easing: "{easing.smooth}"
+      comment: "Card hover transitions"
+      
+    link:
+      property: "color, border-color"
+      duration: "{duration.fast}"
+      easing: "{easing.linear}"
+      comment: "Link hover transitions"
+  
+  # =============================================================================
+  # ANIMATION CLASSES - Ready-to-use animation utilities
+  # =============================================================================
+  
+  classes:
+    # Living system animations
+    vergil-breathing:
+      animation: "breathing {duration.breathing} {easing.ease-in-out} infinite"
+      comment: "Apply breathing effect"
+      
+    vergil-pulse:
+      animation: "pulse-glow {duration.pulse} {easing.ease-in-out} infinite"
+      comment: "Apply pulse glow effect"
+      
+    vergil-gradient:
+      animation: "gradient-shift {duration.gradient} {easing.linear} infinite"
+      backgroundSize: "200% 200%"
+      comment: "Apply shifting gradient"
+      
+    energy-flow:
+      animation: "energy-flow {duration.flow} {easing.linear} infinite"
+      strokeDasharray: "12 12"
+      comment: "Apply energy flow to SVG paths"
+    
+    # Entrance animations
+    animate-in:
+      animation: "fade-in {duration.normal} {easing.smooth} forwards"
+      comment: "Fade in entrance"
+      
+    slide-in-up:
+      animation: "slide-up {duration.normal} {easing.smooth} forwards"
+      comment: "Slide up entrance"
+      
+    scale-in:
+      animation: "scale-in {duration.normal} {easing.bounce} forwards"
+      comment: "Scale in entrance"

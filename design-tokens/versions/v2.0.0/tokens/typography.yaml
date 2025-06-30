@@ -1,0 +1,317 @@
+# Vergil Design System - Typography Tokens
+# This file defines all typography-related design decisions
+
+typography:
+  # =============================================================================
+  # FONT FAMILIES
+  # =============================================================================
+  
+  families:
+    display:
+      value: "'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      comment: "Display font for headings and emphasis"
+      
+    sans:
+      value: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      comment: "Primary body font"
+      
+    serif:
+      value: "Georgia, 'Times New Roman', serif"
+      comment: "Serif font for special content"
+      
+    mono:
+      value: "'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace"
+      comment: "Monospace font for code"
+  
+  # =============================================================================
+  # FONT SIZES - Using modular scale (1.25 ratio)
+  # =============================================================================
+  
+  sizes:
+    # Base size
+    base:
+      value: "16px"
+      comment: "Base font size - 1rem"
+    
+    # Smaller sizes
+    xs:
+      value: "12px"
+      comment: "0.75rem - Small labels, captions"
+      
+    sm:
+      value: "14px"
+      comment: "0.875rem - Secondary text, footnotes"
+    
+    # Larger sizes
+    md:
+      value: "16px"
+      comment: "1rem - Body text default"
+      
+    lg:
+      value: "18px"
+      comment: "1.125rem - Lead paragraphs"
+      
+    xl:
+      value: "20px"
+      comment: "1.25rem - Small headings"
+      
+    2xl:
+      value: "24px"
+      comment: "1.5rem - Section headings"
+      
+    3xl:
+      value: "30px"
+      comment: "1.875rem - Page headings"
+      
+    4xl:
+      value: "36px"
+      comment: "2.25rem - Hero headings"
+      
+    5xl:
+      value: "48px"
+      comment: "3rem - Display headings"
+      
+    6xl:
+      value: "60px"
+      comment: "3.75rem - Extra large display"
+      
+    7xl:
+      value: "72px"
+      comment: "4.5rem - Marketing hero"
+      
+    8xl:
+      value: "96px"
+      comment: "6rem - Oversized display"
+  
+  # =============================================================================
+  # FONT WEIGHTS
+  # =============================================================================
+  
+  weights:
+    thin:
+      value: "100"
+      comment: "Thin weight - use sparingly"
+      
+    light:
+      value: "300"
+      comment: "Light weight - elegant headings"
+      
+    regular:
+      value: "400"
+      comment: "Regular weight - body text"
+      
+    medium:
+      value: "500"
+      comment: "Medium weight - UI labels"
+      
+    semibold:
+      value: "600"
+      comment: "Semibold - emphasis"
+      
+    bold:
+      value: "700"
+      comment: "Bold - strong emphasis"
+      
+    black:
+      value: "900"
+      comment: "Black weight - maximum emphasis"
+  
+  # =============================================================================
+  # LINE HEIGHTS
+  # =============================================================================
+  
+  lineHeights:
+    none:
+      value: "1"
+      comment: "No line height - single spacing"
+      
+    tight:
+      value: "1.25"
+      comment: "Tight line height - headings"
+      
+    snug:
+      value: "1.375"
+      comment: "Snug line height - subheadings"
+      
+    normal:
+      value: "1.5"
+      comment: "Normal line height - body text"
+      
+    relaxed:
+      value: "1.625"
+      comment: "Relaxed line height - readable body"
+      
+    loose:
+      value: "2"
+      comment: "Loose line height - spacious text"
+  
+  # =============================================================================
+  # LETTER SPACING
+  # =============================================================================
+  
+  letterSpacing:
+    tighter:
+      value: "-0.05em"
+      comment: "Tighter spacing - large headings"
+      
+    tight:
+      value: "-0.025em"
+      comment: "Tight spacing - headings"
+      
+    normal:
+      value: "0"
+      comment: "Normal spacing - body text"
+      
+    wide:
+      value: "0.025em"
+      comment: "Wide spacing - uppercase text"
+      
+    wider:
+      value: "0.05em"
+      comment: "Wider spacing - special emphasis"
+      
+    widest:
+      value: "0.1em"
+      comment: "Widest spacing - extreme emphasis"
+  
+  # =============================================================================
+  # TEXT STYLES - Composed typography patterns
+  # =============================================================================
+  
+  styles:
+    # Display styles
+    display:
+      large:
+        family: "{families.display}"
+        size: "{sizes.7xl}"
+        weight: "{weights.light}"
+        lineHeight: "{lineHeights.tight}"
+        letterSpacing: "{letterSpacing.tighter}"
+        comment: "Large display headings"
+        
+      medium:
+        family: "{families.display}"
+        size: "{sizes.5xl}"
+        weight: "{weights.light}"
+        lineHeight: "{lineHeights.tight}"
+        letterSpacing: "{letterSpacing.tight}"
+        comment: "Medium display headings"
+        
+      small:
+        family: "{families.display}"
+        size: "{sizes.4xl}"
+        weight: "{weights.regular}"
+        lineHeight: "{lineHeights.tight}"
+        letterSpacing: "{letterSpacing.tight}"
+        comment: "Small display headings"
+    
+    # Heading styles
+    heading:
+      h1:
+        family: "{families.display}"
+        size: "{sizes.3xl}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.tight}"
+        letterSpacing: "{letterSpacing.tight}"
+        comment: "Page title headings"
+        
+      h2:
+        family: "{families.display}"
+        size: "{sizes.2xl}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.snug}"
+        letterSpacing: "{letterSpacing.tight}"
+        comment: "Section headings"
+        
+      h3:
+        family: "{families.sans}"
+        size: "{sizes.xl}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.snug}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Subsection headings"
+        
+      h4:
+        family: "{families.sans}"
+        size: "{sizes.lg}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Component headings"
+        
+      h5:
+        family: "{families.sans}"
+        size: "{sizes.md}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Small headings"
+        
+      h6:
+        family: "{families.sans}"
+        size: "{sizes.sm}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.wide}"
+        textTransform: "uppercase"
+        comment: "Tiny headings / labels"
+    
+    # Body styles
+    body:
+      large:
+        family: "{families.sans}"
+        size: "{sizes.lg}"
+        weight: "{weights.regular}"
+        lineHeight: "{lineHeights.relaxed}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Lead paragraphs"
+        
+      regular:
+        family: "{families.sans}"
+        size: "{sizes.md}"
+        weight: "{weights.regular}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Body paragraphs"
+        
+      small:
+        family: "{families.sans}"
+        size: "{sizes.sm}"
+        weight: "{weights.regular}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Small body text"
+    
+    # UI styles
+    ui:
+      label:
+        family: "{families.sans}"
+        size: "{sizes.sm}"
+        weight: "{weights.medium}"
+        lineHeight: "{lineHeights.tight}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Form labels and UI text"
+        
+      caption:
+        family: "{families.sans}"
+        size: "{sizes.xs}"
+        weight: "{weights.regular}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Helper text and captions"
+        
+      button:
+        family: "{families.sans}"
+        size: "{sizes.sm}"
+        weight: "{weights.semibold}"
+        lineHeight: "{lineHeights.tight}"
+        letterSpacing: "{letterSpacing.wide}"
+        comment: "Button text"
+        
+      code:
+        family: "{families.mono}"
+        size: "{sizes.sm}"
+        weight: "{weights.regular}"
+        lineHeight: "{lineHeights.normal}"
+        letterSpacing: "{letterSpacing.normal}"
+        comment: "Inline code"
