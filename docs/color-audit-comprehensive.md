@@ -2,7 +2,7 @@
 
 Generated: 2025-06-30 // yehhaaa random comment
 
-## Summary of Findings
+
 
 This document catalogs EVERY color found in the codebase, including:
 - Colors defined in our brand book (v1 and v2)
