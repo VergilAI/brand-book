@@ -23,6 +23,42 @@ export default {
         'stone-gray': '#9CA3AF',
         'deep-space': '#0F172A',
         
+        // Selection & Tool colors
+        'selection-purple': 'var(--selection-purple)',
+        'selection-primary': 'var(--selection-primary)',
+        
+        // Gray scale (to replace Tailwind defaults)
+        'gray-400': 'var(--gray-400)',
+        'gray-500': 'var(--gray-500)',
+        'gray-600': 'var(--gray-600)',
+        'gray-700': 'var(--gray-700)',
+        'gray-800': 'var(--gray-800)',
+        'gray-900': 'var(--gray-900)',
+        
+        // Additional colors found in codebase
+        'orange-brand': 'var(--orange-brand)',
+        'blue-dark': 'var(--blue-dark)',
+        'blue-bright': 'var(--blue-bright)',
+        'blue-light': 'var(--blue-light)',
+        'blue-gray': 'var(--blue-gray)',
+        'blue-medium': 'var(--blue-medium)',
+        'cyan-bright': 'var(--cyan-bright)',
+        
+        // Brand v2 - Monochrome System
+        'vergil-purple': 'var(--vergil-purple)',
+        'vergil-purple-light': 'var(--vergil-purple-light)',
+        'vergil-purple-lighter': 'var(--vergil-purple-lighter)',
+        'vergil-purple-lightest': 'var(--vergil-purple-lightest)',
+        'vergil-text': 'var(--vergil-text)',
+        'vergil-white': 'var(--vergil-white)',
+        'vergil-success': 'var(--vergil-success)',
+        'vergil-error': 'var(--vergil-error)',
+        'vergil-warning': 'var(--vergil-warning)',
+        'vergil-warning-active': 'var(--vergil-warning-active)',
+        'vergil-info': 'var(--vergil-info)',
+        'pure-black': 'var(--pure-black)',
+        'pure-white': 'var(--pure-white)',
+        
         // shadcn/ui theme integration - these use CSS variables
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',

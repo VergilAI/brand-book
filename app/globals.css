@@ -33,6 +33,54 @@
   --luminous-gold: #F59E0B;
   --vivid-red: #EF4444;
   --midnight-black: #1E293B;
+  
+  /* Selection & Hover States */
+  --selection-purple: #8B5CF6; /* Used in drawing tools for hover/selection */
+  --selection-primary: #6366F1; /* Used for primary selection */
+  
+  /* Grays - Tailwind defaults being used locally */
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  
+  /* Tool-specific colors */
+  --map-selection: #8B5CF6; /* Map editor selection state */
+  --drawing-selection: #8B5CF6; /* Drawing tool selection */
+  --bezier-handle: #8B5CF6; /* Bezier curve handles */
+  --territory-player6: #8B5CF6; /* LMS territory game player 6 */
+  --vertex-selected: #1E40AF; /* Selected vertices in editors */
+  --snap-center: #FF6600; /* Center snap indicator */
+  
+  /* One-off colors that need semantic names */
+  --orange-brand: #FF6600;
+  --blue-dark: #1E40AF;
+  --blue-bright: #0066FF;
+  --blue-light: #60A5FA;
+  --blue-gray: #94A3B8;
+  --blue-medium: #2563EB;
+  --cyan-bright: #06B6D4;
+  
+  /* Brand Book v2 Colors - Monochrome System */
+  --vergil-purple: #7B00FF; /* THE brand purple */
+  --vergil-purple-light: #9933FF; /* Hover states */
+  --vergil-purple-lighter: #BB66FF; /* Dark theme primary */
+  --vergil-purple-lightest: #D199FF; /* Dark theme secondary */
+  --vergil-text: #1D1D1F; /* Apple-inspired black */
+  --vergil-white: #F5F5F7; /* Apple-inspired off-white */
+  
+  /* Functional Colors v2 */
+  --vergil-success: #0F8A0F;
+  --vergil-error: #E51C23;
+  --vergil-warning: #FFC700;
+  --vergil-warning-active: #FFB833; /* Lightbulb/active states */
+  --vergil-info: #0087FF;
+  
+  /* Pure colors for backwards compatibility */
+  --pure-black: #000000;
+  --pure-white: #FFFFFF;
 
   /* Typography scale */
   --font-display: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -314,6 +362,40 @@ body {
   --color-vergil-indigo-500: #818CF8;
   --color-vergil-cyan-500: #10B981;
   --color-vergil-blue-500: #3B82F6;
+  
+  /* All found colors as CSS variables */
+  --color-selection-purple: #8B5CF6;
+  --color-selection-primary: #6366F1;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+  --color-orange-brand: #FF6600;
+  --color-blue-dark: #1E40AF;
+  --color-blue-bright: #0066FF;
+  --color-blue-light: #60A5FA;
+  --color-blue-gray: #94A3B8;
+  --color-blue-medium: #2563EB;
+  --color-cyan-bright: #06B6D4;
+  --color-vertex-selected: #1E40AF;
+  --color-snap-center: #FF6600;
+  
+  /* Brand v2 colors */
+  --color-vergil-purple: #7B00FF;
+  --color-vergil-purple-light: #9933FF;
+  --color-vergil-purple-lighter: #BB66FF;
+  --color-vergil-purple-lightest: #D199FF;
+  --color-vergil-text: #1D1D1F;
+  --color-vergil-white: #F5F5F7;
+  --color-vergil-success: #0F8A0F;
+  --color-vergil-error: #E51C23;
+  --color-vergil-warning: #FFC700;
+  --color-vergil-warning-active: #FFB833;
+  --color-vergil-info: #0087FF;
+  --color-pure-black: #000000;
+  --color-pure-white: #FFFFFF;
   
   /* System design tokens */
   --radius-sm: calc(var(--radius) - 4px);
