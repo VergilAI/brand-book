@@ -1,4 +1,4 @@
-# V2 Color Migration Strategy - Complete Approach //comment
+# V2 Color Migration Strategy - Complete Approach
 
 ## Overview
 This document outlines the correct approach for migrating from V1 colors (hex values and old CSS variables) to the V2 semantic color system, with lessons learned from the initial attempt.
