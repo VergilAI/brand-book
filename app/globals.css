@@ -68,14 +68,26 @@
   --vergil-purple-light: #9933FF; /* Hover states */
   --vergil-purple-lighter: #BB66FF; /* Dark theme primary */
   --vergil-purple-lightest: #D199FF; /* Dark theme secondary */
-  --vergil-text: #1D1D1F; /* Apple-inspired black */
-  --vergil-white: #F5F5F7; /* Apple-inspired off-white */
+  --cosmic-purple: #6366F1; /* DEPRECATED - Legacy v1 purple, use vergil-purple instead */
+  
+  /* Apple-Inspired Neutral Palette */
+  --vergil-full-black: #000000; /* Full black - backgrounds only */
+  --vergil-off-black: #1D1D1F; /* Off-black - primary text */
+  --vergil-full-white: #FFFFFF; /* Full white - backgrounds only */
+  --vergil-off-white: #F5F5F7; /* Off-white - text on dark, containers */
+  
+  /* Subtle Attention Hierarchy (Apple-inspired) */
+  --vergil-footnote-text: #6C6C6D; /* Small footnote text on off-white bg */
+  --vergil-emphasis-bg: #F0F0F2; /* Temporary headers needing attention */
+  --vergil-emphasis-input-bg: #FAFAFC; /* Interactive elements (dropdowns, inputs) within emphasis areas */
+  --vergil-emphasis-text: #303030; /* Text directly on emphasis-bg */
+  --vergil-emphasis-input-text: #323232; /* Darker text inside emphasis-input-bg elements */
+  --vergil-emphasis-button-hover: #272729; /* Button hover state */
   
   /* Functional Colors v2 */
   --vergil-success: #0F8A0F;
   --vergil-error: #E51C23;
   --vergil-warning: #FFC700;
-  --vergil-warning-active: #FFB833; /* Lightbulb/active states */
   --vergil-info: #0087FF;
   
   /* Pure colors for backwards compatibility */
@@ -364,7 +376,6 @@ body {
   --color-vergil-success: #0F8A0F;
   --color-vergil-error: #E51C23;
   --color-vergil-warning: #FFC700;
-  --color-vergil-warning-active: #FFB833;
   --color-vergil-info: #0087FF;
   --color-pure-black: #000000;
   --color-pure-white: #FFFFFF;

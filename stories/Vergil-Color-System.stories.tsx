@@ -17,34 +17,22 @@ const vergilColorSystem = {
     primary: {
       50: '#F3E5FF',   // Lightest tint
       100: '#E6CCFF',  // Very light
-      200: '#D199FF',  // Light (dark theme primary)
-      300: '#BB66FF',  // Light medium (dark theme secondary)
-      400: '#9933FF',  // Medium
-      500: '#7B00FF',  // Main brand purple - THE Vergil color
+      200: '#D199FF',  // vergil-purple-lightest - Dark theme secondary
+      300: '#BB66FF',  // vergil-purple-lighter - Dark theme primary
+      400: '#9933FF',  // vergil-purple-light - Hover states
+      500: '#7B00FF',  // vergil-purple - Main brand purple
       600: '#6600CC',  // Dark medium
       700: '#520099',  // Dark
       800: '#3D0066',  // Very dark
       900: '#290033',  // Darkest
     },
-    // Functional yellows - NOT secondary colors
-    functional: {
-      lightbulb: '#FFB833',  // 400 - Active/on states
-      warning: '#FFC700',    // 500 - Warning messages
-      warningLight: '#FFEDCC', // 100 - Warning backgrounds
-      warningDark: '#CC9F00',  // 600 - Warning borders
+    // Deprecated - cosmic-purple from v1
+    deprecated: {
+      'cosmic-purple': '#6366F1', // DEPRECATED - Use vergil-purple (#7B00FF) instead
     },
-    // DEPRECATED - Keep for reference but don't use as secondary
-    secondary: {
-      50: '#FFF8E5',   // Lightest yellow
-      100: '#FFEDCC',
-      200: '#FFDB99',
-      300: '#FFC966',
-      400: '#FFB833',
-      500: '#FFC700',  // Main yellow complement
-      600: '#CC9F00',
-      700: '#997700',
-      800: '#664F00',
-      900: '#332800',
+    // Functional yellow - NOT a secondary color
+    functional: {
+      warning: '#FFC700',    // Warning messages only
     },
     // Consciousness Gradient (for hero sections and special effects)
     gradient: {
@@ -123,16 +111,7 @@ const vergilColorSystem = {
       900: '#330000',
     },
     warning: {
-      50: '#FFF8E5',
-      100: '#FFEDCC',
-      200: '#FFDB99',
-      300: '#FFC966',
-      400: '#FFB833',
-      500: '#FFA500',  // Main warning orange
-      600: '#CC8400',
-      700: '#996300',
-      800: '#664200',
-      900: '#332100',
+      500: '#FFC700',  // Main warning yellow
     },
     info: {
       50: '#E5F3FF',
@@ -148,20 +127,28 @@ const vergilColorSystem = {
     }
   },
   
-  // Neutral Colors
+  // Neutral Colors - Apple-Inspired
   neutral: {
-    0: '#FFFFFF',
-    50: '#FAFAFA',
-    100: '#F5F5F5',
-    200: '#E5E5E7',  // Apple-inspired light gray
-    300: '#D1D1D3',
-    400: '#A1A1A6',
-    500: '#8E8E93',  // Apple mid-gray
-    600: '#636366',
-    700: '#48484A',
-    800: '#3A3A3C',
-    900: '#1D1D1F',  // Apple-inspired black
-    950: '#000000',
+    primary: {
+      'vergil-full-black': '#000000',     // Backgrounds only, never text
+      'vergil-off-black': '#1D1D1F',      // Primary text color
+      'vergil-full-white': '#FFFFFF',     // Backgrounds only, never text  
+      'vergil-off-white': '#F5F5F7',      // Text on dark, soft containers
+    },
+    scale: {
+      0: '#FFFFFF',    // vergil-full-white
+      50: '#FAFAFA',   
+      100: '#F5F5F7',  // vergil-off-white
+      200: '#E5E5E7',  // Apple-inspired light gray
+      300: '#D1D1D3',
+      400: '#A1A1A6',
+      500: '#8E8E93',  // Apple mid-gray
+      600: '#636366',
+      700: '#48484A',
+      800: '#3A3A3C',
+      900: '#1D1D1F',  // vergil-off-black
+      950: '#000000',  // vergil-full-black
+    }
   },
   
   // Interface Colors (for UI elements)
@@ -364,68 +351,47 @@ export const CompleteColorSystem: Story = {
           </div>
         </div>
       </div>
-      
-      {/* Apple-Inspired Text Colors */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 my-8">
-        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-          <span className="text-amber-600">⚠️</span>
-          Critical: Apple-Inspired Text Colors
-        </h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h4 className="font-medium mb-2">Never Use Pure White/Black</h4>
-            <ul className="text-sm space-y-2 text-gray-700">
-              <li>❌ <code className="bg-gray-100 px-1 rounded">text-white</code> → ✅ <code className="bg-gray-100 px-1 rounded">text-vergil-white</code> (#F5F5F7)</li>
-              <li>❌ <code className="bg-gray-100 px-1 rounded">text-black</code> → ✅ <code className="bg-gray-100 px-1 rounded">text-vergil-text</code> (#1D1D1F)</li>
-              <li>❌ <code className="bg-gray-100 px-1 rounded">#FFFFFF</code> → ✅ <code className="bg-gray-100 px-1 rounded">#F5F5F7</code></li>
-              <li>❌ <code className="bg-gray-100 px-1 rounded">#000000</code> → ✅ <code className="bg-gray-100 px-1 rounded">#1D1D1F</code></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium mb-2">Why This Matters</h4>
-            <ul className="text-sm space-y-2 text-gray-700">
-              <li>• <strong>Premium Feel:</strong> Apple's off-white/off-black creates sophistication</li>
-              <li>• <strong>Eye Comfort:</strong> Reduces harsh contrast and eye strain</li>
-              <li>• <strong>Better Readability:</strong> Softer tones improve long-form reading</li>
-              <li>• <strong>Brand Consistency:</strong> Aligns with our premium positioning</li>
-            </ul>
-          </div>
+
+      {/* Core Brand Colors */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Primary Purple Scale - Our Singular Brand Color</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+          {Object.entries(vergilColorSystem.core.primary).map(([key, value]) => (
+            <div key={key} className="space-y-2">
+              <div 
+                className="h-16 rounded-lg border border-gray-200 shadow-sm"
+                style={{ backgroundColor: value }}
+              />
+              <div className="text-xs">
+                <div className="font-medium">
+                  {key === '500' && 'vergil-purple'}
+                  {key === '400' && 'vergil-purple-light'}
+                  {key === '300' && 'vergil-purple-lighter'}
+                  {key === '200' && 'vergil-purple-lightest'}
+                  {!['200', '300', '400', '500'].includes(key) && key}
+                </div>
+                <div className="text-gray-500">{value}</div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="mt-4 flex gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-12 h-12 rounded border border-gray-300" style={{ backgroundColor: '#FFFFFF' }} />
+        
+        {/* Deprecated cosmic-purple */}
+        <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <h4 className="font-medium text-red-800 mb-2">Deprecated Color</h4>
+          <div className="flex items-center gap-4">
+            <div 
+              className="w-16 h-16 rounded-lg border border-gray-200"
+              style={{ backgroundColor: vergilColorSystem.core.deprecated['cosmic-purple'] }}
+            />
             <div>
-              <div className="text-xs text-gray-500">Pure White</div>
-              <div className="text-xs font-mono">#FFFFFF</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-12 h-12 rounded border border-gray-300" style={{ backgroundColor: '#F5F5F7' }} />
-            <div>
-              <div className="text-xs text-gray-500">Vergil White</div>
-              <div className="text-xs font-mono">#F5F5F7 ✓</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-12 h-12 rounded border border-gray-300" style={{ backgroundColor: '#000000' }} />
-            <div>
-              <div className="text-xs text-gray-500">Pure Black</div>
-              <div className="text-xs font-mono">#000000</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-12 h-12 rounded border border-gray-300" style={{ backgroundColor: '#1D1D1F' }} />
-            <div>
-              <div className="text-xs text-gray-500">Vergil Text</div>
-              <div className="text-xs font-mono">#1D1D1F ✓</div>
+              <div className="font-medium">cosmic-purple (DEPRECATED)</div>
+              <div className="text-sm text-gray-600">{vergilColorSystem.core.deprecated['cosmic-purple']}</div>
+              <div className="text-xs text-red-600 mt-1">Use vergil-purple (#7B00FF) instead</div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Core Brand Colors */}
-      <ColorGrid title="Primary Purple Scale - Our Singular Brand Color" colors={vergilColorSystem.core.primary} />
-      <ColorGrid title="Functional Yellow Scale (Not a Secondary Color)" colors={vergilColorSystem.core.secondary} />
       
       {/* Consciousness Gradient */}
       <div>
@@ -497,8 +463,98 @@ export const CompleteColorSystem: Story = {
         </div>
       </div>
 
-      {/* Neutral Scale */}
-      <ColorGrid title="Neutral Scale" colors={vergilColorSystem.neutral} />
+      {/* Neutral Colors */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Primary Neutral Colors - Apple-Inspired</h3>
+        <p className="text-sm text-gray-600 mb-6">
+          A sophisticated monochrome system with clear usage rules. Never use pure white/black for text.
+        </p>
+        
+        {/* Primary Neutrals */}
+        <div className="grid gap-4 mb-8">
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Full Black */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-start gap-4">
+                <div 
+                  className="w-20 h-20 rounded-md border border-gray-300"
+                  style={{ backgroundColor: vergilColorSystem.neutral.primary['vergil-full-black'] }}
+                />
+                <div className="flex-1">
+                  <h4 className="font-semibold">vergil-full-black</h4>
+                  <p className="text-sm text-gray-600">{vergilColorSystem.neutral.primary['vergil-full-black']}</p>
+                  <p className="text-xs text-gray-500 mt-2">Backgrounds only, never for text</p>
+                  <div className="text-xs mt-1">
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded">Dark mode bg</span>
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded ml-1">Hero sections</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Off Black */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-start gap-4">
+                <div 
+                  className="w-20 h-20 rounded-md border border-gray-300"
+                  style={{ backgroundColor: vergilColorSystem.neutral.primary['vergil-off-black'] }}
+                />
+                <div className="flex-1">
+                  <h4 className="font-semibold">vergil-off-black</h4>
+                  <p className="text-sm text-gray-600">{vergilColorSystem.neutral.primary['vergil-off-black']}</p>
+                  <p className="text-xs text-gray-500 mt-2">Primary text color on light backgrounds</p>
+                  <div className="text-xs mt-1">
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded">Body text</span>
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded ml-1">Headlines</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Full White */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-start gap-4">
+                <div 
+                  className="w-20 h-20 rounded-md border border-gray-300"
+                  style={{ backgroundColor: vergilColorSystem.neutral.primary['vergil-full-white'] }}
+                />
+                <div className="flex-1">
+                  <h4 className="font-semibold">vergil-full-white</h4>
+                  <p className="text-sm text-gray-600">{vergilColorSystem.neutral.primary['vergil-full-white']}</p>
+                  <p className="text-xs text-gray-500 mt-2">Backgrounds only, never for text</p>
+                  <div className="text-xs mt-1">
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded">Page bg</span>
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded ml-1">Cards</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Off White */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-start gap-4">
+                <div 
+                  className="w-20 h-20 rounded-md border border-gray-300"
+                  style={{ backgroundColor: vergilColorSystem.neutral.primary['vergil-off-white'] }}
+                />
+                <div className="flex-1">
+                  <h4 className="font-semibold">vergil-off-white</h4>
+                  <p className="text-sm text-gray-600">{vergilColorSystem.neutral.primary['vergil-off-white']}</p>
+                  <p className="text-xs text-gray-500 mt-2">Text on dark backgrounds, soft containers</p>
+                  <div className="text-xs mt-1">
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded">Dark text</span>
+                    <span className="inline-block bg-gray-100 px-2 py-0.5 rounded ml-1">Sections</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Full Neutral Scale */}
+        <h4 className="font-medium mb-3">Complete Neutral Scale</h4>
+        <ColorGrid title="" colors={vergilColorSystem.neutral.scale} showHex={true} />
+      </div>
 
       {/* Visualization Colors */}
       <div>
@@ -647,7 +703,6 @@ export const CompleteColorSystem: Story = {
             <h4 className="font-medium mb-2">Functional Colors</h4>
             <ul className="space-y-1 text-gray-600">
               <li>• Yellow (#FFC700) - Warnings only</li>
-              <li>• Yellow (#FFB833) - Active/on states (lightbulb, lightning)</li>
               <li>• Green (#0F8A0F) - Success only</li>
               <li>• Red (#E51C23) - Errors only</li>
               <li>• Blue (#0087FF) - Info only</li>
@@ -674,14 +729,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Core brand
+        // Core brand purples
         'vergil-purple': '#7B00FF',
-        'vergil-yellow': '#FFC700',
+        'vergil-purple-light': '#9933FF',
+        'vergil-purple-lighter': '#BB66FF',
+        'vergil-purple-lightest': '#D199FF',
+        
+        // Deprecated (remove in next major version)
+        'cosmic-purple': '#6366F1', // Use vergil-purple instead
         
         // Semantic
         'vergil-success': '#0F8A0F',
         'vergil-error': '#E51C23',
-        'vergil-warning': '#FFA500',
+        'vergil-warning': '#FFC700',
         'vergil-info': '#0087FF',
         
         // Text

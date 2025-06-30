@@ -113,7 +113,10 @@ Example hierarchy:
 
 ### Brand Guidelines
 - **Logo Strategy**: All logos are white by default - always use on dark/colored backgrounds
-- **Color System**: Use brand color tokens (cosmic-purple, electric-violet, etc.)
+- **Color System v2**: Apple-inspired monochrome palette with subtle attention hierarchy
+  - Primary: vergil-purple (#7B00FF), vergil-off-black (#1D1D1F), vergil-off-white (#F5F5F7)
+  - Attention: vergil-emphasis-bg, vergil-emphasis-dropdown-bg, vergil-emphasis-text, vergil-emphasis-button
+  - See `/stories/ColorSystemV2.stories.tsx` and `/app/brand/visual/colors-v2/` for full documentation
 - **Animations**: Incorporate "living system" breathing effects
 
 ### Component Organization

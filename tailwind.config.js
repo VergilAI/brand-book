@@ -49,13 +49,28 @@ export default {
         'vergil-purple-light': 'var(--vergil-purple-light)',
         'vergil-purple-lighter': 'var(--vergil-purple-lighter)',
         'vergil-purple-lightest': 'var(--vergil-purple-lightest)',
-        'vergil-text': 'var(--vergil-text)',
-        'vergil-white': 'var(--vergil-white)',
+        
+        // Apple-Inspired Neutral Palette
+        'vergil-full-black': 'var(--vergil-full-black)',
+        'vergil-off-black': 'var(--vergil-off-black)',
+        'vergil-full-white': 'var(--vergil-full-white)',
+        'vergil-off-white': 'var(--vergil-off-white)',
+        
+        // Subtle Attention Hierarchy
+        'vergil-footnote-text': 'var(--vergil-footnote-text)',
+        'vergil-emphasis-bg': 'var(--vergil-emphasis-bg)',
+        'vergil-emphasis-input-bg': 'var(--vergil-emphasis-input-bg)',
+        'vergil-emphasis-text': 'var(--vergil-emphasis-text)',
+        'vergil-emphasis-input-text': 'var(--vergil-emphasis-input-text)',
+        'vergil-emphasis-button-hover': 'var(--vergil-emphasis-button-hover)',
+        
+        // Functional Colors v2
         'vergil-success': 'var(--vergil-success)',
         'vergil-error': 'var(--vergil-error)',
         'vergil-warning': 'var(--vergil-warning)',
-        'vergil-warning-active': 'var(--vergil-warning-active)',
         'vergil-info': 'var(--vergil-info)',
+        
+        // Legacy
         'pure-black': 'var(--pure-black)',
         'pure-white': 'var(--pure-white)',
         
