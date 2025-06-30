@@ -19,15 +19,36 @@ const TooltipContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 overflow-hidden rounded-lg bg-gray-800/95 backdrop-blur-sm px-3 py-2 text-sm text-white shadow-xl border border-gray-700",
-        "animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-        "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "relative z-50 overflow-visible rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-lg border border-gray-200",
+        "data-[state=delayed-open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95",
+        "data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+        "data-[side=bottom]:data-[state=delayed-open]:slide-in-from-top-1",
+        "data-[side=left]:data-[state=delayed-open]:slide-in-from-right-1",
+        "data-[side=right]:data-[state=delayed-open]:slide-in-from-left-1",
+        "data-[side=top]:data-[state=delayed-open]:slide-in-from-bottom-1",
+        "transition-all duration-200 ease-out",
         className
       )}
       {...props}
     >
       {props.children}
-      <TooltipPrimitive.Arrow className="fill-gray-800" width={11} height={6} />
+      {/* Custom arrow with border */}
+      <svg 
+        className="absolute -top-[6px] left-1/2 -translate-x-1/2"
+        width="12" 
+        height="6" 
+        viewBox="0 0 12 6" 
+        style={{ overflow: 'visible' }}
+      >
+        <path 
+          d="M 0 6 L 6 0 L 12 6" 
+          fill="white" 
+          stroke="rgb(229 231 235)" 
+          strokeWidth="1"
+          strokeLinejoin="miter"
+        />
+      </svg>
     </TooltipPrimitive.Content>
   </TooltipPrimitive.Portal>
 ))

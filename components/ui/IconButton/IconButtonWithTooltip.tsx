@@ -12,7 +12,7 @@ export interface IconButtonWithTooltipProps extends IconButtonProps {
 
 export function IconButtonWithTooltip({ 
   tooltip,
-  tooltipDelay = 700, // Industry standard delay
+  tooltipDelay = 500, // Slightly faster for better responsiveness
   tooltipSide = "bottom",
   ...props 
 }: IconButtonWithTooltipProps) {
