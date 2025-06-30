@@ -448,6 +448,26 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Reset list styles for TipTap editor */
+  .ProseMirror ul,
+  .ProseMirror ol {
+    list-style: revert;
+    margin-left: 2rem !important; /* Force lists to indent RIGHT */
+    padding-left: 0 !important;
+  }
+  
+  .ProseMirror li {
+    display: list-item;
+    margin-left: 0 !important;
+    padding-left: 0.5rem !important; /* Space after bullet/number */
+  }
+  
+  /* Ensure lists don't move left compared to paragraphs */
+  .ProseMirror > p {
+    margin-left: 0;
+    padding-left: 0;
+  }
 }
 
 /* Carousel Smooth Scrolling Enhancement */

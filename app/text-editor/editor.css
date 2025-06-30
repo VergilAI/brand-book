@@ -1,0 +1,70 @@
+/* TipTap Editor Styles */
+.ProseMirror {
+  @apply min-h-full text-base leading-relaxed text-deep-space dark:text-pure-light;
+}
+
+.ProseMirror:focus {
+  @apply outline-none;
+}
+
+.ProseMirror > * + * {
+  @apply mt-3;
+}
+
+.ProseMirror p {
+  @apply mb-4;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  @apply font-bold mb-4;
+}
+
+/* Text selection */
+.ProseMirror ::selection {
+  @apply bg-cosmic-purple/20;
+}
+
+/* Placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-stone-gray dark:text-gray-500 float-left h-0 pointer-events-none;
+  content: attr(data-placeholder);
+}
+
+/* Text alignment */
+.ProseMirror p[style*="text-align: center"] {
+  @apply text-center;
+}
+
+.ProseMirror p[style*="text-align: right"] {
+  @apply text-right;
+}
+
+.ProseMirror p[style*="text-align: justify"] {
+  @apply text-justify;
+}
+
+/* Text formatting */
+.ProseMirror strong {
+  @apply font-bold;
+}
+
+.ProseMirror em {
+  @apply italic;
+}
+
+.ProseMirror u {
+  @apply underline;
+}
+
+.ProseMirror s {
+  @apply line-through;
+}
+
+/* Lists are styled in globals.css to ensure they take precedence over Tailwind resets */
