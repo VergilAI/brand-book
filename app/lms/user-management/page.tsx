@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Trash2, UserCheck, AlertTriangle, X, Check, Mail } from 'lucide-react'
+import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card } from '@/components/ui/Card'
@@ -22,7 +22,7 @@ interface User {
   id: string
   name: string
   email: string
-  role: 'student' | 'instructor' | 'administrator'
+  role: string
   status: 'ahead' | 'on_track' | 'falling_behind' | 'drastically_behind'
   severity: 'low' | 'medium' | 'high'
   avatar?: string
@@ -35,12 +35,20 @@ interface User {
   totalHours: number
 }
 
+// Mock roles data matching the roles page
+const mockRoles = [
+  { id: '1', name: 'Super Admin', color: '#7B00FF' },
+  { id: '2', name: 'Admin', color: '#0087FF' },
+  { id: '3', name: 'Manager', color: '#10B981' },
+  { id: '4', name: 'Instructor', color: '#FFC700' }
+]
+
 const mockUsers: User[] = [
   {
     id: '1',
     name: 'Sarah Chen',
     email: 'sarah.chen@company.com',
-    role: 'student',
+    role: 'Manager',
     status: 'ahead',
     severity: 'high',
     lastLogin: '2024-01-15T10:30:00',
@@ -55,7 +63,7 @@ const mockUsers: User[] = [
     id: '2',
     name: 'Michael Rodriguez',
     email: 'michael.r@company.com',
-    role: 'instructor',
+    role: 'Instructor',
     status: 'on_track',
     severity: 'low',
     lastLogin: '2024-01-15T14:20:00',
@@ -70,7 +78,7 @@ const mockUsers: User[] = [
     id: '3',
     name: 'Emma Thompson',
     email: 'emma.t@company.com',
-    role: 'student',
+    role: 'Manager',
     status: 'falling_behind',
     severity: 'medium',
     lastLogin: '2024-01-01T09:00:00',
@@ -85,7 +93,7 @@ const mockUsers: User[] = [
     id: '4',
     name: 'James Wilson',
     email: 'james.wilson@company.com',
-    role: 'administrator',
+    role: 'Admin',
     status: 'on_track',
     severity: 'low',
     lastLogin: '2024-01-15T16:45:00',
@@ -100,7 +108,7 @@ const mockUsers: User[] = [
     id: '5',
     name: 'Lisa Anderson',
     email: 'lisa.a@company.com',
-    role: 'student',
+    role: 'Manager',
     status: 'drastically_behind',
     severity: 'high',
     lastLogin: '2023-12-20T11:30:00',
@@ -115,7 +123,7 @@ const mockUsers: User[] = [
     id: '6',
     name: 'David Kim',
     email: 'david.kim@company.com',
-    role: 'student',
+    role: 'Manager',
     status: 'on_track',
     severity: 'medium',
     lastLogin: '2024-01-15T09:15:00',
@@ -130,7 +138,7 @@ const mockUsers: User[] = [
     id: '7',
     name: 'Rachel Green',
     email: 'rachel.g@company.com',
-    role: 'instructor',
+    role: 'Instructor',
     status: 'on_track',
     severity: 'low',
     lastLogin: '2024-01-14T16:30:00',
@@ -145,7 +153,7 @@ const mockUsers: User[] = [
     id: '8',
     name: 'Alex Johnson',
     email: 'alex.j@company.com',
-    role: 'student',
+    role: 'Manager',
     status: 'on_track',
     severity: 'low',
     lastLogin: '2024-01-15T11:45:00',
@@ -158,40 +166,94 @@ const mockUsers: User[] = [
   }
 ]
 
+interface FilterState {
+  roles: string[]
+  statuses: string[]
+  progressRanges: string[]
+}
+
+interface SortState {
+  field: keyof User | null
+  direction: 'asc' | 'desc' | null
+}
+
 export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
-  const [sortField, setSortField] = useState<keyof User>('name')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [sortState, setSortState] = useState<SortState>({ field: null, direction: null })
   const [showBulkActions, setShowBulkActions] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importPreview, setImportPreview] = useState<any[]>([])
+  const [importErrors, setImportErrors] = useState<string[]>([])
+  const [filters, setFilters] = useState<FilterState>({
+    roles: [],
+    statuses: [],
+    progressRanges: []
+  })
+
+  // Define progress ranges
+  const progressRanges = [
+    { id: '0-25', label: '0-25%', min: 0, max: 25 },
+    { id: '25-50', label: '25-50%', min: 25, max: 50 },
+    { id: '50-75', label: '50-75%', min: 50, max: 75 },
+    { id: '75-100', label: '75-100%', min: 75, max: 100 }
+  ]
 
   const filteredAndSortedUsers = useMemo(() => {
+    // Define status order for sorting
+    const statusOrder = {
+      'ahead': 0,
+      'on_track': 1,
+      'falling_behind': 2,
+      'drastically_behind': 3
+    }
     let filtered = mockUsers.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            user.email.toLowerCase().includes(searchQuery.toLowerCase())
       
-      return matchesSearch
+      const matchesRole = filters.roles.length === 0 || filters.roles.includes(user.role)
+      const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(user.status)
+      
+      const matchesProgress = filters.progressRanges.length === 0 || 
+        filters.progressRanges.some(rangeId => {
+          const range = progressRanges.find(r => r.id === rangeId)
+          if (!range) return false
+          return user.overallProgress >= range.min && user.overallProgress <= range.max
+        })
+      
+      return matchesSearch && matchesRole && matchesStatus && matchesProgress
     })
 
-    filtered.sort((a, b) => {
-      const aValue = a[sortField]
-      const bValue = b[sortField]
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue)
-      }
-      
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
-      }
-      
-      return 0
-    })
+    if (sortState.field && sortState.direction) {
+      filtered.sort((a, b) => {
+        const aValue = a[sortState.field!]
+        const bValue = b[sortState.field!]
+        
+        // Special handling for status field
+        if (sortState.field === 'status') {
+          const aOrder = statusOrder[aValue as keyof typeof statusOrder]
+          const bOrder = statusOrder[bValue as keyof typeof statusOrder]
+          return sortState.direction === 'asc' ? aOrder - bOrder : bOrder - aOrder
+        }
+        
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return sortState.direction === 'asc' 
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue)
+        }
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sortState.direction === 'asc' ? aValue - bValue : bValue - aValue
+        }
+        
+        return 0
+      })
+    }
 
     return filtered
-  }, [searchQuery, sortField, sortDirection])
+  }, [searchQuery, sortState, filters, progressRanges])
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -210,22 +272,23 @@ export default function UserManagementPage() {
   }
 
   const handleSort = (field: keyof User) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    if (sortState.field === field) {
+      if (sortState.direction === 'asc') {
+        setSortState({ field, direction: 'desc' })
+      } else if (sortState.direction === 'desc') {
+        setSortState({ field: null, direction: null })
+      }
     } else {
-      setSortField(field)
-      setSortDirection('asc')
+      setSortState({ field, direction: 'asc' })
     }
   }
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'administrator': return 'default'
-      case 'instructor': return 'secondary'
-      case 'student': return 'outline'
-      default: return 'outline'
-    }
+  const getSortIcon = (field: keyof User) => {
+    if (sortState.field !== field) return null
+    return sortState.direction === 'asc' ? '' : 'rotate-180'
   }
+
+  const activeFiltersCount = filters.roles.length + filters.statuses.length + filters.progressRanges.length
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -254,6 +317,175 @@ export default function UserManagementPage() {
       case 'low': return 'success'
       default: return 'outline'
     }
+  }
+
+  const handleDownloadTemplate = () => {
+    const templateContent = [
+      'Name,Email,Role,Phone,Location,Department,Manager',
+      'John Doe,john.doe@example.com,Manager,+1 (555) 123-4567,New York,Engineering,Jane Smith',
+      'Jane Smith,jane.smith@example.com,Admin,,San Francisco,HR,',
+      'Bob Johnson,bob.j@example.com,Instructor,+1 (555) 987-6543,Chicago,Training,John Doe'
+    ].join('\n')
+
+    const blob = new Blob([templateContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'user_import_template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+
+  const parseCSV = (text: string): any[] => {
+    const lines = text.split('\n').filter(line => line.trim())
+    if (lines.length < 2) return []
+    
+    const headers = lines[0].split(',').map(h => h.trim())
+    const users = []
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim())
+      const user: any = {}
+      headers.forEach((header, index) => {
+        user[header.toLowerCase()] = values[index] || ''
+      })
+      users.push(user)
+    }
+    
+    return users
+  }
+
+  const validateImportData = (users: any[]): string[] => {
+    const errors: string[] = []
+    const existingEmails = mockUsers.map(u => u.email.toLowerCase())
+    const importEmails = new Set<string>()
+    const validRoles = mockRoles.map(r => r.name.toLowerCase())
+
+    users.forEach((user, index) => {
+      const rowNum = index + 2 // +2 because row 1 is headers, and index starts at 0
+      
+      // Check required fields
+      if (!user.name || !user.name.trim()) {
+        errors.push(`Row ${rowNum}: Name is required`)
+      }
+      
+      if (!user.email || !user.email.trim()) {
+        errors.push(`Row ${rowNum}: Email is required`)
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+        errors.push(`Row ${rowNum}: Invalid email format`)
+      } else if (existingEmails.includes(user.email.toLowerCase())) {
+        errors.push(`Row ${rowNum}: Email already exists in the system`)
+      } else if (importEmails.has(user.email.toLowerCase())) {
+        errors.push(`Row ${rowNum}: Duplicate email in import file`)
+      } else {
+        importEmails.add(user.email.toLowerCase())
+      }
+      
+      if (!user.role || !user.role.trim()) {
+        errors.push(`Row ${rowNum}: Role is required`)
+      } else if (!validRoles.includes(user.role.toLowerCase())) {
+        errors.push(`Row ${rowNum}: Invalid role. Must be one of: ${mockRoles.map(r => r.name).join(', ')}`)
+      }
+    })
+    
+    return errors
+  }
+
+  const handleFileUpload = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      setImportErrors(['File size exceeds 5MB limit'])
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const text = e.target?.result as string
+      const users = parseCSV(text)
+      
+      if (users.length === 0) {
+        setImportErrors(['No valid data found in file'])
+        return
+      }
+      
+      const errors = validateImportData(users)
+      setImportErrors(errors)
+      
+      if (errors.length === 0) {
+        // Transform data to match our format
+        const transformedUsers = users.map(user => ({
+          name: user.name,
+          email: user.email,
+          role: mockRoles.find(r => r.name.toLowerCase() === user.role.toLowerCase())?.name || user.role,
+          phone: user.phone || '',
+          location: user.location || '',
+          department: user.department || '',
+          manager: user.manager || ''
+        }))
+        setImportPreview(transformedUsers)
+      }
+      
+      setImportFile(file)
+    }
+    
+    reader.readAsText(file)
+  }
+
+  const handleImport = () => {
+    // In a real application, this would make an API call
+    console.log('Importing users:', importPreview)
+    
+    // Simulate successful import
+    alert(`Successfully imported ${importPreview.length} users`)
+    
+    // Reset modal
+    setShowImportModal(false)
+    setImportFile(null)
+    setImportPreview([])
+    setImportErrors([])
+    
+    // In a real app, you would refresh the user list here
+  }
+
+  const handleExport = () => {
+    // Helper to escape CSV values
+    const escapeCSV = (value: any): string => {
+      if (value === null || value === undefined) return ''
+      const str = String(value)
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    }
+
+    // Convert users to CSV format
+    const headers = ['Name', 'Email', 'Role', 'Status', 'Progress (%)', 'Courses Enrolled', 'Courses Completed', 'Last Login', 'Join Date']
+    const csvContent = [
+      headers.join(','),
+      ...filteredAndSortedUsers.map(user => [
+        escapeCSV(user.name),
+        escapeCSV(user.email),
+        escapeCSV(user.role),
+        escapeCSV(user.status),
+        escapeCSV(user.overallProgress),
+        escapeCSV(user.coursesEnrolled),
+        escapeCSV(user.coursesCompleted),
+        escapeCSV(new Date(user.lastLogin).toISOString()),
+        escapeCSV(user.joinDate)
+      ].join(','))
+    ].join('\n')
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
   }
 
   const formatDate = (dateString: string) => {
@@ -319,7 +551,25 @@ export default function UserManagementPage() {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={showFilters ? 'bg-vergil-purple/10 text-vergil-purple border-vergil-purple' : ''}
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-vergil-purple text-white rounded-full text-xs">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExport}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
@@ -331,6 +581,92 @@ export default function UserManagementPage() {
                 </Link>
               </div>
             </div>
+
+            {/* Filters Panel */}
+            {showFilters && (
+              <div className="mt-4 p-4 bg-vergil-off-white rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Role Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-2">Role</label>
+                    <div className="space-y-2">
+                      {mockRoles.map(role => (
+                        <label key={role.id} className="flex items-center gap-2">
+                          <Checkbox
+                            checked={filters.roles.includes(role.name)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setFilters({ ...filters, roles: [...filters.roles, role.name] })
+                              } else {
+                                setFilters({ ...filters, roles: filters.roles.filter(r => r !== role.name) })
+                              }
+                            }}
+                          />
+                          <span className="text-sm">{role.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Status Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-2">Status</label>
+                    <div className="space-y-2">
+                      {['ahead', 'on_track', 'falling_behind', 'drastically_behind'].map(status => (
+                        <label key={status} className="flex items-center gap-2">
+                          <Checkbox
+                            checked={filters.statuses.includes(status)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setFilters({ ...filters, statuses: [...filters.statuses, status] })
+                              } else {
+                                setFilters({ ...filters, statuses: filters.statuses.filter(s => s !== status) })
+                              }
+                            }}
+                          />
+                          <span className="text-sm">{getStatusLabel(status)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Progress Range Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-2">Progress Range</label>
+                    <div className="space-y-2">
+                      {progressRanges.map(range => (
+                        <label key={range.id} className="flex items-center gap-2">
+                          <Checkbox
+                            checked={filters.progressRanges.includes(range.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setFilters({ ...filters, progressRanges: [...filters.progressRanges, range.id] })
+                              } else {
+                                setFilters({ ...filters, progressRanges: filters.progressRanges.filter(r => r !== range.id) })
+                              }
+                            }}
+                          />
+                          <span className="text-sm">{range.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                {activeFiltersCount > 0 && (
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFilters({ roles: [], statuses: [], progressRanges: [] })}
+                    >
+                      Clear all filters
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Bulk Actions */}
             {selectedUsers.length > 0 && (
@@ -393,8 +729,8 @@ export default function UserManagementPage() {
                       className="flex items-center gap-1 text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider hover:text-vergil-off-black"
                     >
                       User
-                      {sortField === 'name' && (
-                        <ChevronDown className={`w-3 h-3 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} />
+                      {sortState.field === 'name' && (
+                        <ChevronDown className={`w-3 h-3 transition-transform ${getSortIcon('name')}`} />
                       )}
                     </button>
                   </th>
@@ -404,8 +740,8 @@ export default function UserManagementPage() {
                       className="flex items-center gap-1 text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider hover:text-vergil-off-black"
                     >
                       Role
-                      {sortField === 'role' && (
-                        <ChevronDown className={`w-3 h-3 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} />
+                      {sortState.field === 'role' && (
+                        <ChevronDown className={`w-3 h-3 transition-transform ${getSortIcon('role')}`} />
                       )}
                     </button>
                   </th>
@@ -415,8 +751,8 @@ export default function UserManagementPage() {
                       className="flex items-center gap-1 text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider hover:text-vergil-off-black"
                     >
                       Status
-                      {sortField === 'status' && (
-                        <ChevronDown className={`w-3 h-3 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} />
+                      {sortState.field === 'status' && (
+                        <ChevronDown className={`w-3 h-3 transition-transform ${getSortIcon('status')}`} />
                       )}
                     </button>
                   </th>
@@ -426,8 +762,8 @@ export default function UserManagementPage() {
                       className="flex items-center gap-1 text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider hover:text-vergil-off-black"
                     >
                       Progress
-                      {sortField === 'overallProgress' && (
-                        <ChevronDown className={`w-3 h-3 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} />
+                      {sortState.field === 'overallProgress' && (
+                        <ChevronDown className={`w-3 h-3 transition-transform ${getSortIcon('overallProgress')}`} />
                       )}
                     </button>
                   </th>
@@ -437,8 +773,8 @@ export default function UserManagementPage() {
                       className="flex items-center gap-1 text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider hover:text-vergil-off-black"
                     >
                       Last Active
-                      {sortField === 'lastLogin' && (
-                        <ChevronDown className={`w-3 h-3 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} />
+                      {sortState.field === 'lastLogin' && (
+                        <ChevronDown className={`w-3 h-3 transition-transform ${getSortIcon('lastLogin')}`} />
                       )}
                     </button>
                   </th>
@@ -474,6 +810,9 @@ export default function UserManagementPage() {
                       </Link>
                     </td>
                     <td className="px-6 py-4">
+                      <span className="font-medium text-sm text-vergil-off-black">
+                        {user.role}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       {user.status === 'ahead' ? (
@@ -550,6 +889,220 @@ export default function UserManagementPage() {
             </div>
           </div>
         </Card>
+
+        {/* Import Modal */}
+        {showImportModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-vergil-off-black">Import Users</h3>
+                    <p className="text-sm text-vergil-off-black/60 mt-1">
+                      Upload a CSV file to import multiple users at once
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowImportModal(false)
+                      setImportFile(null)
+                      setImportPreview([])
+                      setImportErrors([])
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6">
+                {!importFile ? (
+                  <div className="space-y-4">
+                    {/* File Upload */}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-vergil-off-black mb-2">
+                        Drag and drop your CSV file here, or click to browse
+                      </p>
+                      <p className="text-sm text-vergil-off-black/60 mb-4">
+                        Maximum file size: 5MB
+                      </p>
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleFileUpload(file)
+                          }
+                        }}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <label htmlFor="file-upload" className="inline-block">
+                        <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 cursor-pointer">
+                          Select File
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Template Download */}
+                    <Card variant="outlined" className="p-4">
+                      <div className="flex items-start gap-3">
+                        <FileText className="w-5 h-5 text-vergil-purple mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-vergil-off-black mb-1">
+                            Need a template?
+                          </h4>
+                          <p className="text-sm text-vergil-off-black/60 mb-3">
+                            Download our CSV template with the correct format and example data
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleDownloadTemplate}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download Template
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Format Requirements */}
+                    <div className="bg-vergil-off-white rounded-lg p-4">
+                      <h4 className="font-medium text-vergil-off-black mb-2">
+                        CSV Format Requirements
+                      </h4>
+                      <ul className="space-y-1 text-sm text-vergil-off-black/60">
+                        <li>• Required columns: Name, Email, Role</li>
+                        <li>• Optional columns: Phone, Location, Department, Manager</li>
+                        <li>• Roles must be one of: {mockRoles.map(r => r.name).join(', ')}</li>
+                        <li>• Dates should be in YYYY-MM-DD format</li>
+                        <li>• Email addresses must be unique</li>
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* File Info */}
+                    <div className="bg-vergil-off-white rounded-lg p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-vergil-purple" />
+                        <div>
+                          <p className="font-medium text-vergil-off-black">{importFile.name}</p>
+                          <p className="text-sm text-vergil-off-black/60">
+                            {(importFile.size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setImportFile(null)
+                          setImportPreview([])
+                          setImportErrors([])
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+
+                    {/* Errors */}
+                    {importErrors.length > 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                          <div className="flex-1">
+                            <h4 className="font-medium text-red-900 mb-1">
+                              Validation Errors
+                            </h4>
+                            <ul className="space-y-1 text-sm text-red-700">
+                              {importErrors.map((error, index) => (
+                                <li key={index}>• {error}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Preview */}
+                    {importPreview.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-vergil-off-black mb-2">
+                          Preview ({importPreview.length} users)
+                        </h4>
+                        <div className="border border-gray-200 rounded-lg overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                              <tr>
+                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Name</th>
+                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Email</th>
+                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Role</th>
+                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {importPreview.slice(0, 5).map((user, index) => (
+                                <tr key={index}>
+                                  <td className="px-4 py-2">{user.name}</td>
+                                  <td className="px-4 py-2">{user.email}</td>
+                                  <td className="px-4 py-2">{user.role}</td>
+                                  <td className="px-4 py-2">
+                                    <Badge variant="success" className="text-xs">Valid</Badge>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          {importPreview.length > 5 && (
+                            <div className="px-4 py-2 bg-gray-50 text-sm text-vergil-off-black/60">
+                              And {importPreview.length - 5} more users...
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-vergil-off-black/60">
+                    {importFile && importErrors.length === 0 && importPreview.length > 0
+                      ? `Ready to import ${importPreview.length} users`
+                      : 'Select a file to continue'}
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowImportModal(false)
+                        setImportFile(null)
+                        setImportPreview([])
+                        setImportErrors([])
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleImport}
+                      disabled={!importFile || importErrors.length > 0 || importPreview.length === 0}
+                      className="bg-vergil-purple hover:bg-vergil-purple-lighter"
+                    >
+                      Import Users
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   )
