@@ -39,47 +39,47 @@ global:
   # Z-index scale for layering
   zIndex:
     deep:
-      value: -999
+      value: "-999"
       comment: "Deep background layers"
       
     default:
-      value: 0
+      value: "0"
       comment: "Default stacking context"
       
     dropdown:
-      value: 1000
+      value: "1000"
       comment: "Dropdown menus"
       
     sticky:
-      value: 1100
+      value: "1100"
       comment: "Sticky elements"
       
     fixed:
-      value: 1200
+      value: "1200"
       comment: "Fixed headers/footers"
       
     modalBackdrop:
-      value: 1300
+      value: "1300"
       comment: "Modal backdrop overlay"
       
     modal:
-      value: 1400
+      value: "1400"
       comment: "Modal content"
       
     popover:
-      value: 1500
+      value: "1500"
       comment: "Popovers and tooltips"
       
     tooltip:
-      value: 1600
+      value: "1600"
       comment: "Tooltip layer"
       
     notification:
-      value: 1700
+      value: "1700"
       comment: "Toast notifications"
       
     maximum:
-      value: 9999
+      value: "9999"
       comment: "Maximum z-index"
   
   # Breakpoints for responsive design
