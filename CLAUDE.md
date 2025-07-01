@@ -186,7 +186,7 @@ Common tokens you'll use:
 
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 (IMPORTANT: v4 syntax, not v3)
+- **Styling**: Tailwind CSS v3 (IMPORTANT: Only use v3 patterns)
 - **UI Components**: Custom components + Radix UI primitives
 - **Animations**: Framer Motion
 - **Data Visualization**: D3.js
@@ -282,6 +282,99 @@ import { BRAND_COLORS } from '../config';
 ```
 
 Remember: The tokens are your ONLY source of truth. If it's not in tokens, it doesn't exist until the user decides how to handle it.
+
+## 🎯 Tailwind CSS v3 Patterns
+
+### IMPORTANT: Only Use Tailwind v3 Syntax
+
+We use Tailwind CSS v3. Always use v3 patterns:
+
+#### ✅ Correct v3 Patterns:
+
+**1. Directives in CSS:**
+```css
+/* In globals.css or any CSS file */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+**2. Arbitrary Values with Brackets:**
+```jsx
+// Only when absolutely necessary and tokens don't exist
+<div className="w-[300px] h-[45px]">
+```
+
+**3. Color Opacity Modifiers:**
+```jsx
+// v3 pattern using /opacity
+<div className="bg-brand-purple/50 text-neutral-off-black/80">
+```
+
+**4. Responsive Prefixes:**
+```jsx
+<div className="md:flex lg:grid sm:hidden">
+```
+
+**5. Dark Mode with class strategy:**
+```jsx
+<div className="dark:bg-neutral-off-black dark:text-neutral-off-white">
+```
+
+#### ❌ Never Use v4 Patterns:
+
+```css
+/* ❌ WRONG - v4 import syntax */
+@import "tailwindcss";
+
+/* ❌ WRONG - v4 theme function */
+.custom { color: theme('colors.brand.purple'); }
+
+/* ❌ WRONG - v4 custom variants */
+@custom-variant dark (&:is(.dark *));
+```
+
+#### Common v3 Patterns for Token Usage:
+
+**1. Using Generated Token Classes:**
+```jsx
+// Colors from generated tokens
+<div className="bg-brand-purple text-neutral-off-white">
+<div className="border-scales-gray-200">
+
+// Spacing from generated tokens  
+<div className="p-4 m-8 gap-2">
+
+// Border radius from generated tokens
+<div className="rounded-md">
+```
+
+**2. Hover/Focus States:**
+```jsx
+<button className="bg-brand-purple hover:bg-brand-purple-light focus:ring-2 focus:ring-brand-purple/50">
+```
+
+**3. Combining with CVA:**
+```tsx
+const buttonVariants = cva(
+  "rounded-md font-medium transition-colors",
+  {
+    variants: {
+      variant: {
+        primary: "bg-brand-purple text-white hover:bg-brand-purple-light",
+        secondary: "bg-neutral-off-white text-neutral-off-black hover:bg-scales-gray-50"
+      }
+    }
+  }
+)
+```
+
+**4. Group Hover (v3 syntax):**
+```jsx
+<div className="group">
+  <div className="group-hover:text-brand-purple">
+</div>
+```
 
 ### Brand Color Reference
 - **Primary Brand**: `brand-purple` - Use via Tailwind or `tokens.colors.brand.purple`
