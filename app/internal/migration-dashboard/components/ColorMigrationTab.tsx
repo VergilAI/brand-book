@@ -126,7 +126,7 @@ function SyncStatusIndicator({ color }: { color: ColorData }) {
       </div>
       
       {showTooltip && color.syncDetails && (
-        <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg min-w-[200px]">
+        <div className="absolute z-50 bottom-full right-0 mb-2 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg min-w-[200px]">
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <span>YAML:</span>
@@ -151,7 +151,7 @@ function SyncStatusIndicator({ color }: { color: ColorData }) {
               </span>
             </div>
           </div>
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+          <div className="absolute bottom-0 right-6 transform translate-y-full">
             <div className="border-8 border-transparent border-t-gray-900"></div>
           </div>
         </div>
@@ -641,7 +641,7 @@ export function ColorMigrationTab() {
                     const isExpanded = expandedColors.has(key);
                     
                     return (
-                      <Card key={key} className="overflow-hidden">
+                      <Card key={key} className="overflow-visible">
               {/* Color Header */}
               <div 
                 className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
@@ -718,21 +718,13 @@ export function ColorMigrationTab() {
                     </span>
                   </div>
                   
-                  {/* Keep Fully Migrated indicator */}
+                  {/* Health Status */}
                   {color.isFullyMigrated && (
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-green-600">Fully Migrated</span>
+                      <span className="text-green-600">Healthy</span>
                     </div>
                   )}
-                </div>
-
-                {/* Health Status */}
-                <div className="flex items-center gap-2">
-                  {getHealthIcon(color.healthScore)}
-                  <span className="text-sm font-medium">
-                    {getHealthLabel(color.healthScore)}
-                  </span>
                 </div>
               </div>
 
@@ -944,7 +936,7 @@ export function ColorMigrationTab() {
                   {yamlStandalone.map(([key, color]) => {
                     const isColorExpanded = expandedColors.has(key);
                     return (
-                      <Card key={key} className="overflow-hidden">
+                      <Card key={key} className="overflow-visible">
                         {/* Same color rendering as in scales */}
                         <div 
                           className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
