@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const generatedTheme = require('./generated/tailwind-theme.js');
+
 export default {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,8 +10,15 @@ export default {
   ],
   theme: {
     extend: {
+      // Import all generated tokens
+      ...generatedTheme,
+      
+      // Additional custom extensions that aren't in tokens yet
       colors: {
-        // Vergil Brand Colors
+        // Import generated colors
+        ...generatedTheme.colors,
+        
+        // Vergil Brand Colors (legacy references using CSS vars)
         'cosmic-purple': '#6366F1',
         'electric-violet': '#A78BFA',
         'luminous-indigo': '#818CF8',
@@ -127,6 +136,7 @@ export default {
         },
       },
       borderRadius: {
+        ...generatedTheme.borderRadius,
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
