@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils'
  */
 
 interface VergilLogoProps {
-  variant?: 'logo' | 'mark' | 'wordmark' | 'white' | 'dark'
+  variant?: 'logo' | 'mark' | 'mark-dark' | 'wordmark' | 'white' | 'dark'
   size?: 'sm' | 'md' | 'lg' | 'xl'
   animated?: boolean
   className?: string
@@ -56,20 +56,22 @@ export function VergilLogo({
   const logoSrc = {
     logo: '/logos/vergil-logo.svg',
     mark: '/logos/vergil-mark.svg',
+    'mark-dark': '/logos/vergil-mark-black.svg',
     wordmark: '/logos/vergil-wordmark.svg',
     white: '/logos/vergil-logo-white.svg',
-    dark: '/logos/vergil-logo-dark.svg'
+    dark: '/logos/vergil-logo-black.svg'
   }
 
   const altText = {
     logo: 'Vergil Logo',
     mark: 'Vergil Mark',
+    'mark-dark': 'Vergil Mark (Dark)',
     wordmark: 'Vergil Wordmark',
     white: 'Vergil Logo (White)',
     dark: 'Vergil Logo (Dark)'
   }
 
-  const isMarkOnly = variant === 'mark'
+  const isMarkOnly = variant === 'mark' || variant === 'mark-dark'
   const dimensions = isMarkOnly ? markSizeConfig[size] : sizeConfig[size]
 
   return (
