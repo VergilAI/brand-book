@@ -106,10 +106,8 @@ export default function NewUserPage() {
     
     // Simulate API call
     setTimeout(() => {
-      console.log('Creating user:', {
-        ...formData,
-        enrolledCourses: selectedCourses
-      })
+      // Create user with form data and selected courses
+      // In production, this would make an API call
       router.push('/lms/user-management')
     }, 1000)
   }

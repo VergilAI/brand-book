@@ -2,25 +2,20 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Edit2, Trash2, Move, Save, X, ChevronDown, ChevronRight, Users, Maximize2, Grid, Mail, MessageSquare, AlertTriangle, TrendingDown, Phone, User as UserIcon, Info } from 'lucide-react'
+import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users } from 'lucide-react'
+import { UserManagementHeader } from '@/components/lms/user-management-header'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
 import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
-interface DragState {
-  isDragging: boolean
-  draggedNodeId: string | null
-  offset: { x: number; y: number }
-  startPos: { x: number; y: number }
-}
 
 interface ViewState {
   zoom: number
   pan: { x: number; y: number }
   showGrid: boolean
-  viewMode: 'roles' | 'users'
+  viewMode: 'roles' | 'users' | 'employees'
   focusedRoleId?: string
 }
 
@@ -30,43 +25,19 @@ export default function OrganisationOverviewPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [roles, setRoles] = useState<Role[]>(updateRoleUserCounts(initialRoles))
   const [users, setUsers] = useState<User[]>(mockUsers)
-  const [editMode, setEditMode] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
-  const [dragState, setDragState] = useState<DragState>({
-    isDragging: false,
-    draggedNodeId: null,
-    offset: { x: 0, y: 0 },
-    startPos: { x: 0, y: 0 }
-  })
   const [viewState, setViewState] = useState<ViewState>({
-    zoom: 1.2,
-    pan: { x: -100, y: -20 },
+    zoom: 1.0,
+    pan: { x: -250, y: -20 },
     showGrid: true,
     viewMode: 'roles'
   })
   const [isPanning, setIsPanning] = useState(false)
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 })
   const [showZoomIndicator, setShowZoomIndicator] = useState(false)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const [openStatusDropdown, setOpenStatusDropdown] = useState<string | null>(null)
   const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null)
-  const transitionTimeout = useRef<NodeJS.Timeout | null>(null)
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (openStatusDropdown) {
-        const target = event.target as HTMLElement
-        if (!target.closest('.relative')) {
-          setOpenStatusDropdown(null)
-        }
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [openStatusDropdown])
 
   // Calculate SVG viewBox to show all content
   const calculateViewBox = () => {
@@ -130,19 +101,7 @@ export default function OrganisationOverviewPage() {
       }
     }
     
-    if (clickedRole && editMode) {
-      // Start dragging role
-      setDragState({
-        isDragging: true,
-        draggedNodeId: clickedRole.id,
-        offset: {
-          x: point.x - clickedRole.position!.x,
-          y: point.y - clickedRole.position!.y
-        },
-        startPos: clickedRole.position!
-      })
-      setSelectedRole(clickedRole.id)
-    } else if (!clickedRole) {
+    if (!clickedRole) {
       // Only start panning if we didn't click on a role
       setIsPanning(true)
       setLastMousePos({ x: e.clientX, y: e.clientY })
@@ -154,26 +113,7 @@ export default function OrganisationOverviewPage() {
 
   // Handle mouse move
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (dragState.isDragging && dragState.draggedNodeId && editMode) {
-      const point = getSVGPoint(e.clientX, e.clientY)
-      
-      // Calculate new position
-      let newX = point.x - dragState.offset.x
-      let newY = point.y - dragState.offset.y
-      
-      // Snap to grid if enabled
-      if (viewState.showGrid) {
-        const gridSize = 50
-        newX = Math.round(newX / gridSize) * gridSize
-        newY = Math.round(newY / gridSize) * gridSize
-      }
-      
-      setRoles(prev => prev.map(role => 
-        role.id === dragState.draggedNodeId
-          ? { ...role, position: { x: newX, y: newY } }
-          : role
-      ))
-    } else if (isPanning) {
+    if (isPanning) {
       const dx = e.clientX - lastMousePos.x
       const dy = e.clientY - lastMousePos.y
       
@@ -187,15 +127,9 @@ export default function OrganisationOverviewPage() {
       
       setLastMousePos({ x: e.clientX, y: e.clientY })
     }
-  }, [dragState, editMode, isPanning, lastMousePos, viewState.showGrid, viewState.zoom, getSVGPoint])
+  }, [isPanning, lastMousePos, viewState.zoom])
 
   const handleMouseUp = useCallback(() => {
-    setDragState({
-      isDragging: false,
-      draggedNodeId: null,
-      offset: { x: 0, y: 0 },
-      startPos: { x: 0, y: 0 }
-    })
     setIsPanning(false)
   }, [])
 
@@ -283,7 +217,7 @@ export default function OrganisationOverviewPage() {
   const handleResetView = () => {
     setViewState({
       zoom: 1.2,
-      pan: { x: -100, y: -20 },
+      pan: { x: -250, y: -20 },
       showGrid: viewState.showGrid
     })
   }
@@ -315,8 +249,8 @@ export default function OrganisationOverviewPage() {
           fill="none"
           stroke="#E5E7EB"
           strokeWidth="2"
-          strokeDasharray={editMode ? "5,5" : undefined}
-          className={editMode ? "animate-pulse" : ""}
+          strokeDasharray={undefined}
+          className=""
         />
       )
     })
@@ -410,7 +344,7 @@ export default function OrganisationOverviewPage() {
     setViewState(prev => ({
       ...prev,
       zoom: 1.2,
-      pan: { x: -100, y: -20 },
+      pan: { x: -250, y: -20 },
       viewMode: 'roles',
       focusedRoleId: undefined
     }))
@@ -426,11 +360,11 @@ export default function OrganisationOverviewPage() {
 
   // Handle role click
   const handleRoleClick = useCallback((roleId: string) => {
-    if (editMode) return
+    return
     // Set the selected role
     setSelectedRole(roleId)
     setSelectedUser(null) // Clear any selected user
-  }, [editMode])
+  }, [])
 
 
   // Render role node
@@ -438,7 +372,7 @@ export default function OrganisationOverviewPage() {
     if (!role.position) return null
     
     const isSelected = selectedRole === role.id
-    const isDragging = dragState.draggedNodeId === role.id
+    const isDragging = false
     
     // Calculate subordinate progress
     const getAllSubordinates = (roleId: string): User[] => {
@@ -462,7 +396,7 @@ export default function OrganisationOverviewPage() {
         key={role.id}
         transform={`translate(${role.position.x}, ${role.position.y})`}
         className={`${isDragging ? 'opacity-50' : ''}`}
-        style={{ cursor: editMode ? 'move' : 'pointer' }}
+        style={{ cursor: 'pointer' }}
       >
         {/* Shadow */}
         <rect
@@ -622,7 +556,7 @@ export default function OrganisationOverviewPage() {
         
         
         {/* Edit mode indicator */}
-        {editMode && (
+        {false && (
           <g transform={`translate(${cardWidth - 40}, ${cardHeight - 22})`}>
             <rect
               x="0"
@@ -653,7 +587,7 @@ export default function OrganisationOverviewPage() {
           width={cardWidth}
           height={cardHeight}
           fill="transparent"
-          style={{ cursor: editMode ? 'move' : 'pointer' }}
+          style={{ cursor: 'pointer' }}
           onClick={(e) => {
             e.stopPropagation()
             handleRoleClick(role.id)
@@ -808,7 +742,7 @@ export default function OrganisationOverviewPage() {
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation()
-                console.log('Send Slack message to', user.name)
+                // Send Slack message
               }}
             />
             <text
@@ -835,7 +769,7 @@ export default function OrganisationOverviewPage() {
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 e.stopPropagation()
-                console.log('Edit user', user.name)
+                // Edit user action
               }}
             />
             <text
@@ -880,87 +814,314 @@ export default function OrganisationOverviewPage() {
     )
   }
 
+  // Build employee hierarchy
+  const buildEmployeeHierarchy = () => {
+    // Create a simple hierarchy for demo
+    // Super Admins at top
+    const superAdmins = users.filter(u => u.roleId === '1')
+    
+    // For demo, create a mapping of who reports to whom
+    const reportingStructure: Record<string, string[]> = {
+      'u1': ['u3', 'u4'], // Sarah Johnson (Super Admin) manages Emily and David (Admins)
+      'u2': ['u5', 'u6'], // Michael Chen (Super Admin) manages Lisa and Robert (Admins)
+      'u3': ['u8', 'u9'], // Emily (Admin) manages Jennifer and William (Managers)
+      'u4': ['u10', 'u11'], // David (Admin) manages Jessica and Christopher (Managers)
+      'u5': ['u12'], // Lisa (Admin) manages Amanda (Manager)
+      'u8': ['u13', 'u14'], // Jennifer (Manager) manages Daniel and Michelle (Instructors)
+      'u9': ['u15', 'u16'], // William (Manager) manages Brian and Stephanie (Instructors)
+      'u13': ['u19', 'u20', 'u21'], // Daniel (Instructor) manages some Employees
+      'u14': ['u22', 'u23'], // Michelle (Instructor) manages some Employees
+    }
+    
+    const getDirectReports = (managerId: string): User[] => {
+      const reportIds = reportingStructure[managerId] || []
+      return users.filter(u => reportIds.includes(u.id))
+    }
+    
+    return { topLevelEmployees: superAdmins, getDirectReports }
+  }
+  
+  // Calculate positions for employee tree
+  const calculateEmployeePositions = () => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    const { topLevelEmployees, getDirectReports } = buildEmployeeHierarchy()
+    
+    const levelHeight = 100
+    const nodeWidth = 180
+    const nodeHeight = 100
+    const minHorizontalSpacing = 20
+    
+    // Track occupied spaces to prevent overlap
+    const levelOccupancy: Record<number, Array<{start: number, end: number}>> = {}
+    
+    // Helper to check if space is available
+    const isSpaceAvailable = (x: number, y: number, width: number): boolean => {
+      const level = Math.round(y / levelHeight)
+      if (!levelOccupancy[level]) return true
+      
+      return !levelOccupancy[level].some(space => 
+        (x < space.end && x + width > space.start)
+      )
+    }
+    
+    // Helper to mark space as occupied
+    const markSpaceOccupied = (x: number, y: number, width: number) => {
+      const level = Math.round(y / levelHeight)
+      if (!levelOccupancy[level]) levelOccupancy[level] = []
+      levelOccupancy[level].push({ start: x, end: x + width })
+    }
+    
+    // Calculate the width needed for a subtree
+    const calculateSubtreeWidth = (employee: User): number => {
+      const directReports = getDirectReports(employee.id)
+      if (directReports.length === 0) return nodeWidth
+      
+      let totalWidth = 0
+      directReports.forEach((report, index) => {
+        if (index > 0) totalWidth += minHorizontalSpacing
+        totalWidth += calculateSubtreeWidth(report)
+      })
+      
+      return Math.max(totalWidth, nodeWidth)
+    }
+    
+    // Recursive function to position employees
+    const positionEmployee = (employee: User, x: number, y: number): void => {
+      // Find available position if current is occupied
+      let finalX = x
+      while (!isSpaceAvailable(finalX, y, nodeWidth)) {
+        finalX += nodeWidth + minHorizontalSpacing
+      }
+      
+      positions[employee.id] = { x: finalX, y }
+      markSpaceOccupied(finalX, y, nodeWidth)
+      
+      const directReports = getDirectReports(employee.id)
+      if (directReports.length === 0) return
+      
+      // Calculate total width needed for children
+      const childrenWidth = directReports.reduce((sum, report, index) => {
+        return sum + calculateSubtreeWidth(report) + (index > 0 ? minHorizontalSpacing : 0)
+      }, 0)
+      
+      // Start position for first child (center children under parent)
+      let childX = finalX + (nodeWidth - childrenWidth) / 2
+      
+      // Position each child
+      directReports.forEach((report, index) => {
+        const reportWidth = calculateSubtreeWidth(report)
+        const reportX = childX + reportWidth / 2 - nodeWidth / 2
+        positionEmployee(report, reportX, y + levelHeight)
+        childX += reportWidth + minHorizontalSpacing
+      })
+    }
+    
+    // Position all top-level employees
+    const totalTopLevelWidth = topLevelEmployees.reduce((sum, emp, index) => {
+      return sum + calculateSubtreeWidth(emp) + (index > 0 ? minHorizontalSpacing * 2 : 0)
+    }, 0)
+    
+    let startX = 400 - totalTopLevelWidth / 2 // Center the tree
+    
+    topLevelEmployees.forEach((employee, index) => {
+      const treeWidth = calculateSubtreeWidth(employee)
+      positionEmployee(employee, startX + treeWidth / 2 - nodeWidth / 2, 50)
+      startX += treeWidth + minHorizontalSpacing * 2
+    })
+    
+    return positions
+  }
+  
+  // Render employee connections
+  const renderEmployeeConnections = () => {
+    const { getDirectReports } = buildEmployeeHierarchy()
+    const positions = calculateEmployeePositions()
+    const cardWidth = 180
+    const cardHeight = 80
+    
+    return users.flatMap(manager => {
+      const directReports = getDirectReports(manager.id)
+      if (directReports.length === 0) return []
+      
+      const managerPos = positions[manager.id]
+      if (!managerPos) return []
+      
+      return directReports.map(report => {
+        const reportPos = positions[report.id]
+        if (!reportPos) return null
+        
+        // Calculate connection points
+        const startX = managerPos.x + cardWidth / 2
+        const startY = managerPos.y + cardHeight
+        const endX = reportPos.x + cardWidth / 2
+        const endY = reportPos.y
+        
+        // Create curved path with shorter curves for compact design
+        const midY = startY + (endY - startY) * 0.4
+        const path = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`
+        
+        return (
+          <path
+            key={`${manager.id}-${report.id}`}
+            d={path}
+            stroke="#D1D5DB"
+            strokeWidth="1.5"
+            fill="none"
+            strokeDasharray="3,3"
+          />
+        )
+      }).filter(Boolean)
+    })
+  }
+  
+  // Render employee node
+  const renderEmployeeNode = (employee: User) => {
+    const positions = calculateEmployeePositions()
+    const position = positions[employee.id]
+    if (!position) return null
+    
+    const role = roles.find(r => r.id === employee.roleId)
+    const cardWidth = 180
+    const cardHeight = 80
+    
+    return (
+      <g
+        key={employee.id}
+        transform={`translate(${position.x}, ${position.y})`}
+      >
+        {/* Card shadow */}
+        <rect
+          x="2"
+          y="2"
+          width={cardWidth}
+          height={cardHeight}
+          rx="6"
+          fill="#00000010"
+        />
+        
+        {/* Card background */}
+        <rect
+          x="0"
+          y="0"
+          width={cardWidth}
+          height={cardHeight}
+          rx="6"
+          fill="white"
+          stroke={selectedUser === employee.id ? '#7B00FF' : '#E5E7EB'}
+          strokeWidth={selectedUser === employee.id ? '2' : '1'}
+        />
+        
+        {/* Employee info */}
+        <g transform="translate(10, 10)">
+          {/* Avatar */}
+          <circle
+            cx="15"
+            cy="20"
+            r="15"
+            fill={role?.color || '#7B00FF'}
+            opacity="0.15"
+          />
+          <text
+            x="15"
+            y="25"
+            textAnchor="middle"
+            fontSize="12"
+            fontWeight="bold"
+            fill={role?.color || '#7B00FF'}
+          >
+            {employee.name.split(' ').map(n => n[0]).join('')}
+          </text>
+          
+          {/* Name and role */}
+          <text
+            x="38"
+            y="16"
+            fontSize="13"
+            fontWeight="600"
+            fill="#1D1D1F"
+          >
+            {employee.name.length > 18 ? employee.name.slice(0, 16) + '...' : employee.name}
+          </text>
+          <text
+            x="38"
+            y="30"
+            fontSize="11"
+            fill="#6B7280"
+          >
+            {role?.name || 'Unknown Role'}
+          </text>
+        </g>
+        
+        {/* Compact progress indicator */}
+        <g transform={`translate(10, ${cardHeight - 22})`}>
+          <rect
+            x="0"
+            y="0"
+            width={cardWidth - 20}
+            height="3"
+            rx="1.5"
+            fill="#E5E7EB"
+          />
+          <rect
+            x="0"
+            y="0"
+            width={(cardWidth - 20) * ((employee.completionRate || 0) / 100)}
+            height="3"
+            rx="1.5"
+            fill={
+              (employee.completionRate || 0) >= 80 ? '#10B981' :
+              (employee.completionRate || 0) >= 60 ? '#F59E0B' :
+              '#EF4444'
+            }
+          />
+          <text
+            x={cardWidth - 20}
+            y="2"
+            fontSize="10"
+            fill="#6B7280"
+            textAnchor="end"
+            alignmentBaseline="middle"
+          >
+            {employee.completionRate || 0}%
+          </text>
+        </g>
+        
+        {/* Status indicator dot */}
+        <circle
+          cx={cardWidth - 10}
+          cy="10"
+          r="4"
+          fill={
+            employee.status === 'ahead' || employee.status === 'on_track' ? '#10B981' :
+            employee.status === 'at_risk' ? '#F59E0B' :
+            '#EF4444'
+          }
+        />
+        
+        {/* Click overlay */}
+        <rect
+          x="0"
+          y="0"
+          width={cardWidth}
+          height={cardHeight}
+          fill="transparent"
+          style={{ cursor: 'pointer' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            setSelectedUser(employee.id)
+            setSelectedRole(null)
+          }}
+        />
+      </g>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-vergil-off-white">
       <div className="h-screen flex flex-col">
-        {/* Header */}
-        <div className="px-4 sm:px-6 lg:px-8 py-4 border-b border-gray-200 bg-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-vergil-off-black">
-                {viewState.viewMode === 'users' 
-                  ? `${roles.find(r => r.id === viewState.focusedRoleId)?.name || 'Unknown'} Team` 
-                  : 'Organization Hierarchy'
-                }
-              </h1>
-              <p className="text-vergil-off-black/60">
-                {viewState.viewMode === 'users'
-                  ? 'Individual team members and their details'
-                  : 'Visual representation of your organization structure'
-                }
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResetView}
-                title="Reset View"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setViewState(prev => ({ ...prev, showGrid: !prev.showGrid }))}
-                className={viewState.showGrid ? 'bg-vergil-purple/10 text-vergil-purple' : ''}
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-              
-              <div className="w-px h-8 bg-gray-200" />
-              
-              <Link href="/lms/user-management/roles">
-                <Button variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Manage Roles
-                </Button>
-              </Link>
-              
-              <Button
-                onClick={() => setEditMode(!editMode)}
-                className={editMode ? 'bg-vergil-purple hover:bg-vergil-purple-lighter' : ''}
-              >
-                {editMode ? (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Hierarchy
-                  </>
-                ) : (
-                  <>
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Edit Hierarchy
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        <div className="px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-200">
-          <nav className="flex space-x-8">
-            <Link href="/lms/user-management" className="py-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Users
-            </Link>
-            <Link href="/lms/user-management/organisation-overview" className="py-4 px-1 border-b-2 border-vergil-purple text-vergil-purple font-medium text-sm">
-              Organisation Overview
-            </Link>
-            <Link href="/lms/user-management/roles" className="py-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Roles
-            </Link>
-          </nav>
+        {/* Header with Tabs */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 bg-white">
+          <UserManagementHeader noMargin />
         </div>
 
         {/* Main Canvas and Details */}
@@ -973,6 +1134,34 @@ export default function OrganisationOverviewPage() {
               className="flex-1 relative bg-gray-50"
               onWheel={handleWheel}
             >
+            {/* View Toggle */}
+            <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-md p-1">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setViewState(prev => ({ ...prev, viewMode: 'roles' }))}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    viewState.viewMode === 'roles'
+                      ? 'bg-vergil-purple text-white'
+                      : 'text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-gray-100'
+                  }`}
+                >
+                  <Users className="w-4 h-4 inline-block mr-2" />
+                  Roles
+                </button>
+                <button
+                  onClick={() => setViewState(prev => ({ ...prev, viewMode: 'employees' }))}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    viewState.viewMode === 'employees'
+                      ? 'bg-vergil-purple text-white'
+                      : 'text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-gray-100'
+                  }`}
+                >
+                  <UserIcon className="w-4 h-4 inline-block mr-2" />
+                  Employees
+                </button>
+              </div>
+            </div>
+            
             <svg
               ref={canvasRef}
               className="w-full h-full"
@@ -980,7 +1169,7 @@ export default function OrganisationOverviewPage() {
               onMouseDown={handleMouseDown}
               style={{ 
                 cursor: isPanning ? 'grabbing' : 'grab',
-                transition: isTransitioning ? 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none'
+                transition: 'none'
               }}
             >
               {/* Grid */}
@@ -1030,6 +1219,24 @@ export default function OrganisationOverviewPage() {
                       </foreignObject>
                     )
                   })}
+                </g>
+              )}
+              
+              {/* Employee connections (only show in employees view) */}
+              {viewState.viewMode === 'employees' && (
+                <g>
+                  {renderEmployeeConnections()}
+                </g>
+              )}
+              
+              {/* Employees (only show in employees view) */}
+              {viewState.viewMode === 'employees' && (
+                <g>
+                  {users.length > 0 ? users.map(renderEmployeeNode) : (
+                    <text x="400" y="200" textAnchor="middle" fontSize="16" fill="#6B7280">
+                      No employees found
+                    </text>
+                  )}
                 </g>
               )}
             </svg>
@@ -1112,7 +1319,7 @@ export default function OrganisationOverviewPage() {
                                   variant="outline"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    console.log('Send Slack message to', user.name)
+                                    // Send Slack message
                                   }}
                                   className="bg-purple-600 text-white border-purple-600 hover:bg-purple-700"
                                 >
@@ -1124,7 +1331,7 @@ export default function OrganisationOverviewPage() {
                                   variant="outline"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    console.log('Edit user', user.name)
+                                    // Edit user action
                                   }}
                                 >
                                   <Edit2 className="w-4 h-4 mr-1" />
@@ -1178,7 +1385,7 @@ export default function OrganisationOverviewPage() {
             )}
             
             {/* Instructions */}
-            {editMode && (
+            {false && (
               <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 max-w-sm">
                 <h4 className="font-medium text-vergil-off-black mb-2">Editing Mode</h4>
                 <ul className="space-y-1 text-sm text-vergil-off-black/70">
@@ -1191,7 +1398,7 @@ export default function OrganisationOverviewPage() {
             )}
             
             {/* Pan hint */}
-            {!editMode && (
+            {true && (
               <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-sm px-3 py-2 text-sm text-vergil-off-black/60">
                 Click and drag to pan • Pinch to zoom
               </div>
@@ -1206,25 +1413,44 @@ export default function OrganisationOverviewPage() {
           </div>
 
           {/* Details Panel */}
-          <div className="w-[480px] bg-white border-l border-gray-200 p-8 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-vergil-off-black">
-                {selectedUser ? 'User Details' : 
-                 selectedRole ? 'Role Details' : 
-                 viewState.viewMode === 'users' ? 'User Details' : 'Role Details'}
-              </h3>
-              {viewState.viewMode === 'users' && !selectedUser && !selectedRole && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={goBackToRoles}
-                >
-                  ← Back to Roles
-                </Button>
-              )}
-            </div>
+          <div className="w-[480px] bg-vergil-off-white/30 border-l border-vergil-off-black/10 p-8 overflow-y-auto">
+            {/* Back button at the top */}
+            {(selectedUser || selectedRole) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedUser(null)
+                  setSelectedRole(null)
+                }}
+                className="mb-4 text-vergil-off-black/60 hover:text-vergil-off-black -ml-2"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            )}
             
-            {(viewState.viewMode === 'users' && selectedUser) || (viewState.viewMode === 'roles' && selectedUser) ? (
+            {(selectedUser || selectedRole || viewState.viewMode === 'users' || viewState.viewMode === 'employees') && (
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-vergil-off-black">
+                  {selectedUser ? 'User Profile' : 
+                   selectedRole ? 'Team Details' : 
+                   'User Profile'}
+                </h3>
+                {viewState.viewMode === 'users' && !selectedUser && !selectedRole && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goBackToRoles}
+                    className="text-vergil-off-black/60 hover:text-vergil-off-black"
+                  >
+                    ← Back to Roles
+                  </Button>
+                )}
+              </div>
+            )}
+            
+            {(viewState.viewMode === 'users' && selectedUser) || (viewState.viewMode === 'roles' && selectedUser) || (viewState.viewMode === 'employees' && selectedUser) ? (
               // User Details with Personal Statistics
               <div className="space-y-6">
                 {(() => {
@@ -1244,145 +1470,146 @@ export default function OrganisationOverviewPage() {
                   return (
                     <>
                       {/* User Header */}
-                      <div className="border-b border-gray-200 pb-6">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(null)
-                            // If we're in roles view and came from a role, show that role again
-                            if (viewState.viewMode === 'roles' && user.roleId) {
-                              setSelectedRole(user.roleId)
-                            }
-                          }}
-                          className="mb-4"
-                        >
-                          ← Back
-                        </Button>
+                      <div className="border-b border-vergil-off-black/10 pb-6">
                         <div className="flex items-center gap-4">
                           <div
-                            className="w-14 h-14 rounded-full flex items-center justify-center text-white font-semibold text-lg"
+                            className="w-16 h-16 rounded-full flex items-center justify-center text-vergil-off-white font-semibold text-xl shadow-lg"
                             style={{ backgroundColor: role?.color || '#7B00FF' }}
                           >
                             {user.name.split(' ').map(n => n[0]).join('')}
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-vergil-off-black">{user.name}</h4>
-                            <p className="text-sm text-vergil-off-black/60">{role?.name || 'Unknown Role'}</p>
-                            <p className="text-xs text-vergil-off-black/50 mt-1">Last active: {lastActive}</p>
+                            <h4 className="text-xl font-semibold text-vergil-off-black">{user.name}</h4>
+                            <p className="text-sm font-medium text-vergil-off-black/70">{role?.name || 'Unknown Role'}</p>
+                            <div className="flex items-center gap-4 mt-2">
+                              <Badge 
+                                variant="default" 
+                                className={`text-xs ${
+                                  user.status === 'ahead' ? 'bg-cyan-100 text-cyan-800 border-cyan-300' :
+                                  user.status === 'on_track' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                  user.status === 'at_risk' ? 'bg-orange-100 text-orange-800 border-orange-300' :
+                                  'bg-red-100 text-red-700 border-red-200'
+                                }`}
+                              >
+                                {user.status === 'ahead' ? 'Ahead of Schedule' :
+                                 user.status === 'on_track' ? 'On Track' :
+                                 user.status === 'at_risk' ? 'At Risk' : 'Behind Schedule'}
+                              </Badge>
+                              <span className="text-xs text-vergil-off-black/50">Last logged in: {lastActive}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                       
                       {/* Contact Information */}
-                      <div>
+                      <div className="bg-vergil-off-white/50 rounded-lg p-4">
                         <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Contact Information</h5>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-vergil-off-black/40" />
-                            <span className="text-vergil-off-black">{user.email}</span>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
+                              <Mail className="w-4 h-4 text-vergil-purple" />
+                            </div>
+                            <span className="text-sm text-vergil-off-black">{user.email}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-vergil-off-black/40" />
-                            <span className="text-vergil-off-black">{user.phone}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
+                              <Phone className="w-4 h-4 text-vergil-purple" />
+                            </div>
+                            <span className="text-sm text-vergil-off-black">{user.phone}</span>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Learning Statistics */}
+                      {/* Progress Overview */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Learning Statistics</h5>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
-                            <p className="text-xl font-bold" style={{ 
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Progress Overview</h5>
+                        
+                        {/* Overall Progress */}
+                        <div className="bg-vergil-off-white/50 rounded-lg p-4 mb-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium text-vergil-off-black">Overall Progress</span>
+                            <span className="text-2xl font-bold" style={{ 
                               color: user.completionRate >= 80 ? '#10B981' : 
                                      user.completionRate >= 60 ? '#F59E0B' : '#EF4444' 
                             }}>
                               {user.completionRate}%
-                            </p>
+                            </span>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Average Score</p>
-                            <p className="text-xl font-bold text-vergil-off-black">{averageScore}%</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Courses</p>
-                            <p className="text-xl font-bold text-vergil-off-black">
-                              {coursesCompleted}/{totalCourses}
-                            </p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Time Spent</p>
-                            <p className="text-xl font-bold text-vergil-off-black">{hoursSpent}h</p>
+                          <div className="w-full bg-vergil-off-black/10 rounded-full h-3">
+                            <div 
+                              className="h-3 rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${user.completionRate}%`,
+                                backgroundColor: user.completionRate >= 80 ? '#10B981' : 
+                                                user.completionRate >= 60 ? '#F59E0B' : '#EF4444'
+                              }}
+                            />
                           </div>
                         </div>
                         
-                        {/* Progress Bar */}
-                        <div className="mt-3">
-                          <div className="flex justify-between text-xs text-vergil-off-black/60 mb-1">
-                            <span>Course Progress</span>
-                            <span>{coursesCompleted} completed, {coursesInProgress} in progress</span>
+                        {/* Course Stats Grid */}
+                        <div className="grid grid-cols-3 gap-3 mb-4">
+                          <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-vergil-purple">{coursesCompleted}</p>
+                            <p className="text-xs text-vergil-off-black/60">Completed</p>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="flex h-2 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-green-500"
-                                style={{ width: `${(coursesCompleted / totalCourses) * 100}%` }}
-                              />
-                              <div 
-                                className="bg-blue-500"
-                                style={{ width: `${(coursesInProgress / totalCourses) * 100}%` }}
-                              />
-                            </div>
+                          <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-blue-600">{coursesInProgress}</p>
+                            <p className="text-xs text-vergil-off-black/60">In Progress</p>
+                          </div>
+                          <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-vergil-off-black/40">{totalCourses - coursesCompleted - coursesInProgress}</p>
+                            <p className="text-xs text-vergil-off-black/60">Not Started</p>
                           </div>
                         </div>
                         
-                        {/* Streak */}
-                        <div className="flex items-center justify-between mt-3 p-3 bg-vergil-purple/5 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <div className="text-2xl">🔥</div>
-                            <div>
-                              <p className="text-sm font-medium text-vergil-off-black">{streak} day streak</p>
-                              <p className="text-xs text-vergil-off-black/60">Keep it up!</p>
-                            </div>
-                          </div>
-                          <Badge variant="default" className="bg-vergil-purple">
-                            {user.status?.replace('_', ' ')}
-                          </Badge>
+                        {/* Additional Stats */}
+                        <div className="bg-vergil-off-white/50 rounded-lg p-3">
+                          <p className="text-xs text-vergil-off-black/60 mb-1">Average Score</p>
+                          <p className="text-lg font-semibold text-vergil-off-black">{averageScore}%</p>
                         </div>
                       </div>
                       
                       {/* Actions */}
-                      <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Actions</h5>
+                      <div className="border-t border-vergil-off-black/10 pt-6">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Quick Actions</h5>
                         <div className="space-y-2">
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="w-full justify-start"
+                            className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
                             onClick={() => {
-                              console.log('Send Slack message to', user.name)
+                              window.location.href = `slack://user?team=T12345&id=${user.id}`
                             }}
                           >
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            Send Slack Message
+                            <div className="w-5 h-5 rounded bg-vergil-purple/10 flex items-center justify-center mr-3">
+                              <MessageSquare className="w-3 h-3 text-vergil-purple" />
+                            </div>
+                            <span className="text-vergil-off-black">Send Slack Message</span>
                           </Button>
                           <Button 
                             variant="outline" 
                             size="sm"
-                            className="w-full justify-start"
+                            className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
                             onClick={() => {
-                              console.log('Send email to', user.name)
+                              window.location.href = `mailto:${user.email}?subject=Training%20Progress%20Update`
                             }}
                           >
-                            <Mail className="w-4 h-4 mr-2" />
-                            Send Email
+                            <div className="w-5 h-5 rounded bg-vergil-purple/10 flex items-center justify-center mr-3">
+                              <Mail className="w-3 h-3 text-vergil-purple" />
+                            </div>
+                            <span className="text-vergil-off-black">Send Email</span>
                           </Button>
-                          <Link href={`/lms/user-management/users/${user.id}`}>
-                            <Button variant="outline" size="sm" className="w-full justify-start">
-                              <UserIcon className="w-4 h-4 mr-2" />
-                              View Full Profile
+                          <Link href={`/lms/user-management/${user.id}`}>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
+                            >
+                              <div className="w-5 h-5 rounded bg-vergil-purple/10 flex items-center justify-center mr-3">
+                                <UserIcon className="w-3 h-3 text-vergil-purple" />
+                              </div>
+                              <span className="text-vergil-off-black">View Full Profile</span>
                             </Button>
                           </Link>
                         </div>
@@ -1406,7 +1633,36 @@ export default function OrganisationOverviewPage() {
                     ? Math.round(roleUsers.reduce((sum, u) => sum + (u.completionRate || 0), 0) / roleUsers.length)
                     : 0
                   
-                  // Get all subordinates (direct and indirect)
+                  // Get all subordinates (direct and indirect) with manager info
+                  const getSubordinatesWithManager = (roleId: string): Array<User & { managerId?: string; managerName?: string }> => {
+                    const directUsers = users.filter(u => u.roleId === roleId)
+                    const childRoles = roles.filter(r => r.parentRole === roleId)
+                    
+                    const result: Array<User & { managerId?: string; managerName?: string }> = []
+                    
+                    // Add users from child roles with their manager info
+                    childRoles.forEach(childRole => {
+                      const childUsers = users.filter(u => u.roleId === childRole.id)
+                      const managersInParentRole = users.filter(u => u.roleId === roleId)
+                      
+                      childUsers.forEach(user => {
+                        // For simplicity, assign first manager in parent role as their manager
+                        const manager = managersInParentRole[0]
+                        result.push({
+                          ...user,
+                          managerId: manager?.id,
+                          managerName: manager?.name
+                        })
+                      })
+                      
+                      // Recursively get subordinates from deeper levels
+                      const deeperSubordinates = getSubordinatesWithManager(childRole.id)
+                      result.push(...deeperSubordinates)
+                    })
+                    
+                    return result
+                  }
+                  
                   const getAllSubordinates = (roleId: string): User[] => {
                     const directUsers = users.filter(u => u.roleId === roleId)
                     const childRoles = roles.filter(r => r.parentRole === roleId)
@@ -1415,19 +1671,22 @@ export default function OrganisationOverviewPage() {
                   }
                   
                   const allSubordinates = getAllSubordinates(role.id)
+                  const subordinatesWithManager = getSubordinatesWithManager(role.id)
                   const totalSubordinates = allSubordinates.length
                   const avgSubordinateProgress = totalSubordinates > 0
                     ? Math.round(allSubordinates.reduce((sum, u) => sum + (u.completionRate || 0), 0) / totalSubordinates)
                     : 0
                   
-                  // Count at-risk members
-                  const atRiskCount = roleUsers.filter(u => u.status === 'at_risk' || u.status === 'behind').length
+                  // Use team view metrics
+                  const currentViewUsers = roleUsers
+                  const currentAvgProgress = avgProgress
+                  const currentAtRiskCount = roleUsers.filter(u => u.status === 'at_risk' || u.status === 'behind').length
                   
                   return (
                     <>
                       {/* Role Header */}
                       <div className="border-b border-gray-200 pb-6">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 mb-4">
                           <div
                             className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-semibold text-lg"
                             style={{ backgroundColor: role.color }}
@@ -1444,87 +1703,186 @@ export default function OrganisationOverviewPage() {
                             </p>
                           </div>
                         </div>
+                        
                       </div>
                       
-                      {/* Key Statistics */}
+                      {/* Key Metrics */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Key Statistics</h5>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Key Metrics</h5>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Direct Members</p>
-                            <p className="text-xl font-bold text-vergil-off-black">{roleUsers.length}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Total Team Size</p>
-                            <p className="text-xl font-bold text-vergil-off-black">{totalSubordinates}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">Avg Progress</p>
-                            <p className="text-xl font-bold" style={{ color: avgProgress >= 80 ? '#10B981' : avgProgress >= 60 ? '#F59E0B' : '#EF4444' }}>
-                              {avgProgress}%
+                            <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
+                            <p className="text-2xl font-bold" style={{ 
+                              color: currentAvgProgress >= 80 ? '#10B981' : 
+                                     currentAvgProgress >= 60 ? '#F59E0B' : '#EF4444' 
+                            }}>
+                              {currentAvgProgress}%
                             </p>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-vergil-off-black/60">At Risk</p>
-                            <p className="text-xl font-bold" style={{ color: atRiskCount > 0 ? '#EF4444' : '#10B981' }}>
-                              {atRiskCount}
-                            </p>
+                            <p className="text-xs text-vergil-off-black/60">Total Members</p>
+                            <p className="text-2xl font-bold text-vergil-off-black">{currentViewUsers.length}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Ahead of Time</p>
+                            <p className="text-2xl font-bold text-cyan-800">{currentViewUsers.filter(u => u.status === 'ahead').length}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">On Track</p>
+                            <p className="text-2xl font-bold text-emerald-700">{currentViewUsers.filter(u => u.status === 'on_track').length}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Falling Behind</p>
+                            <p className="text-2xl font-bold text-orange-800">{currentViewUsers.filter(u => u.status === 'at_risk').length}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Drastically Behind</p>
+                            <p className="text-2xl font-bold text-red-700">{currentViewUsers.filter(u => u.status === 'behind').length}</p>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Team Members */}
-                      {roleUsers.length > 0 && (
-                        <div>
-                          <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Team Members</h5>
-                          <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {roleUsers.map(user => (
-                              <div 
-                                key={user.id} 
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedUser(user.id)
-                                  // Don't clear the role immediately to maintain context
-                                }}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                                    style={{ backgroundColor: role.color }}
-                                  >
-                                    {user.name.split(' ').map(n => n[0]).join('')}
+                      {/* Status Distribution */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Status Distribution</h5>
+                        <div className="space-y-3">
+                          {/* Calculate status counts for current view */}
+                          {(() => {
+                            const aheadCount = currentViewUsers.filter(u => u.status === 'ahead').length
+                            const onTrackCount = currentViewUsers.filter(u => u.status === 'on_track').length
+                            const atRiskCount = currentViewUsers.filter(u => u.status === 'at_risk').length
+                            const behindCount = currentViewUsers.filter(u => u.status === 'behind').length
+                            const totalCount = currentViewUsers.length
+                            
+                            return (
+                              <>
+                                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
+                                    <span className="text-sm font-bold text-cyan-800">{aheadCount} ({totalCount > 0 ? Math.round(aheadCount / totalCount * 100) : 0}%)</span>
                                   </div>
-                                  <div>
-                                    <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
-                                    <p className="text-xs text-vergil-off-black/60">{user.completionRate}% complete</p>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-cyan-600 h-2 rounded-full transition-all"
+                                      style={{ width: totalCount > 0 ? `${(aheadCount / totalCount) * 100}%` : '0%' }}
+                                    />
                                   </div>
                                 </div>
-                                <Badge 
-                                  variant={
-                                    user.status === 'on_track' ? 'default' : 
-                                    user.status === 'at_risk' ? 'secondary' : 'destructive'
-                                  }
-                                  className="text-xs"
+                                
+                                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-vergil-off-black">On Track</span>
+                                    <span className="text-sm font-bold text-emerald-700">{onTrackCount} ({totalCount > 0 ? Math.round(onTrackCount / totalCount * 100) : 0}%)</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-emerald-600 h-2 rounded-full transition-all"
+                                      style={{ width: totalCount > 0 ? `${(onTrackCount / totalCount) * 100}%` : '0%' }}
+                                    />
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
+                                    <span className="text-sm font-bold text-orange-800">{atRiskCount} ({totalCount > 0 ? Math.round(atRiskCount / totalCount * 100) : 0}%)</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-orange-600 h-2 rounded-full transition-all"
+                                      style={{ width: totalCount > 0 ? `${(atRiskCount / totalCount) * 100}%` : '0%' }}
+                                    />
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
+                                    <span className="text-sm font-bold text-red-700">{behindCount} ({totalCount > 0 ? Math.round(behindCount / totalCount * 100) : 0}%)</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-red-600 h-2 rounded-full transition-all"
+                                      style={{ width: totalCount > 0 ? `${(behindCount / totalCount) * 100}%` : '0%' }}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )
+                          })()}
+                        </div>
+                      </div>
+                      
+                      {/* Members List */}
+                      {currentViewUsers.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-semibold text-vergil-off-black mb-2">
+                            Users with this role
+                          </h5>
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {currentViewUsers.map(user => {
+                              const userRole = roles.find(r => r.id === user.roleId)
+                              const isSubordinate = false
+                              
+                              return (
+                                <div 
+                                  key={user.id} 
+                                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedUser(user.id)
+                                  }}
                                 >
-                                  {user.status?.replace('_', ' ')}
-                                </Badge>
-                              </div>
-                            ))}
+                                  <div className="flex items-center gap-3">
+                                    <div
+                                      className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                                      style={{ backgroundColor: userRole?.color || role.color }}
+                                    >
+                                      {user.name.split(' ').map(n => n[0]).join('')}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-vergil-off-black/60">{user.completionRate}% complete</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col items-end gap-1">
+                                    <Badge 
+                                      variant={
+                                        user.status === 'ahead' ? 'default' :
+                                        user.status === 'on_track' ? 'default' : 
+                                        user.status === 'at_risk' ? 'secondary' : 'destructive'
+                                      }
+                                      className={`text-xs ${
+                                        user.status === 'ahead' ? 'bg-cyan-100 text-cyan-800 border-cyan-300' :
+                                        user.status === 'on_track' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                        user.status === 'at_risk' ? 'bg-orange-100 text-orange-800 border-orange-300' :
+                                        'bg-red-100 text-red-700 border-red-200'
+                                      }`}
+                                    >
+                                      {user.status === 'ahead' ? 'Ahead' :
+                                       user.status === 'on_track' ? 'On Track' :
+                                       user.status === 'at_risk' ? 'At Risk' : 'Behind'}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              )
+                            })}
                           </div>
                         </div>
                       )}
                       
                       {/* Actions */}
-                      <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Actions</h5>
+                      <div className="border-t border-gray-200 pt-6">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Quick Actions</h5>
                         <div className="space-y-2">
                           <Button 
                             variant="outline" 
                             size="sm"
                             className="w-full justify-start"
                             onClick={() => {
-                              console.log('Send group email to', role.name, 'team')
+                              // Send group email
                             }}
                           >
                             <Mail className="w-4 h-4 mr-2" />
@@ -1535,18 +1893,12 @@ export default function OrganisationOverviewPage() {
                             size="sm"
                             className="w-full justify-start"
                             onClick={() => {
-                              console.log('Send group Slack message to', role.name, 'team')
+                              // Send group Slack message
                             }}
                           >
                             <MessageSquare className="w-4 h-4 mr-2" />
                             Send Team Slack
                           </Button>
-                          <Link href="/lms/user-management/roles">
-                            <Button variant="outline" size="sm" className="w-full justify-start">
-                              <Edit2 className="w-4 h-4 mr-2" />
-                              Edit Role
-                            </Button>
-                          </Link>
                         </div>
                       </div>
                     </>
@@ -1645,8 +1997,7 @@ export default function OrganisationOverviewPage() {
                         <div className="space-y-3">
                           <div className="relative">
                             <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-cyan-300 transition-all"
-                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'ahead' ? null : 'ahead')}
+                              className="bg-white border border-gray-200 rounded-lg p-3"
                             >
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
@@ -1659,50 +2010,10 @@ export default function OrganisationOverviewPage() {
                                 />
                               </div>
                             </div>
-                            {openStatusDropdown === 'ahead' && (
-                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
-                                <div className="p-2">
-                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
-                                    <p className="text-xs font-medium text-vergil-off-black/60">Ahead of Time Users</p>
-                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
-                                  </div>
-                                  {users.filter(u => u.status === 'ahead').map(user => {
-                                    const role = roles.find(r => r.id === user.roleId)
-                                    return (
-                                      <div
-                                        key={user.id}
-                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setSelectedUser(user.id)
-                                          setSelectedRole(null)
-                                          setOpenStatusDropdown(null)
-                                        }}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div
-                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
-                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
-                                          >
-                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
-                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
-                                          </div>
-                                        </div>
-                                        <span className="text-xs font-bold text-cyan-800">{user.completionRate}%</span>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            )}
                           </div>
                           <div className="relative">
                             <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all"
-                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'on_track' ? null : 'on_track')}
+                              className="bg-white border border-gray-200 rounded-lg p-3"
                             >
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm font-medium text-vergil-off-black">On Track</span>
@@ -1715,50 +2026,10 @@ export default function OrganisationOverviewPage() {
                                 />
                               </div>
                             </div>
-                            {openStatusDropdown === 'on_track' && (
-                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
-                                <div className="p-2">
-                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
-                                    <p className="text-xs font-medium text-vergil-off-black/60">On Track Users</p>
-                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
-                                  </div>
-                                  {users.filter(u => u.status === 'on_track').map(user => {
-                                    const role = roles.find(r => r.id === user.roleId)
-                                    return (
-                                      <div
-                                        key={user.id}
-                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setSelectedUser(user.id)
-                                          setSelectedRole(null)
-                                          setOpenStatusDropdown(null)
-                                        }}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div
-                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
-                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
-                                          >
-                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
-                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
-                                          </div>
-                                        </div>
-                                        <span className="text-xs font-bold text-emerald-700">{user.completionRate}%</span>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            )}
                           </div>
                           <div className="relative">
                             <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-orange-300 transition-all"
-                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'falling_behind' ? null : 'falling_behind')}
+                              className="bg-white border border-gray-200 rounded-lg p-3"
                             >
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
@@ -1771,50 +2042,10 @@ export default function OrganisationOverviewPage() {
                                 />
                               </div>
                             </div>
-                            {openStatusDropdown === 'falling_behind' && (
-                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
-                                <div className="p-2">
-                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
-                                    <p className="text-xs font-medium text-vergil-off-black/60">Falling Behind Users</p>
-                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
-                                  </div>
-                                  {users.filter(u => u.status === 'at_risk').map(user => {
-                                    const role = roles.find(r => r.id === user.roleId)
-                                    return (
-                                      <div
-                                        key={user.id}
-                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setSelectedUser(user.id)
-                                          setSelectedRole(null)
-                                          setOpenStatusDropdown(null)
-                                        }}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div
-                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
-                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
-                                          >
-                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
-                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
-                                          </div>
-                                        </div>
-                                        <span className="text-xs font-bold text-orange-800">{user.completionRate}%</span>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            )}
                           </div>
                           <div className="relative">
                             <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-red-300 transition-all"
-                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'drastically_behind' ? null : 'drastically_behind')}
+                              className="bg-white border border-gray-200 rounded-lg p-3"
                             >
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
@@ -1827,45 +2058,6 @@ export default function OrganisationOverviewPage() {
                                 />
                               </div>
                             </div>
-                            {openStatusDropdown === 'drastically_behind' && (
-                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
-                                <div className="p-2">
-                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
-                                    <p className="text-xs font-medium text-vergil-off-black/60">Drastically Behind Users</p>
-                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
-                                  </div>
-                                  {users.filter(u => u.status === 'behind').map(user => {
-                                    const role = roles.find(r => r.id === user.roleId)
-                                    return (
-                                      <div
-                                        key={user.id}
-                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setSelectedUser(user.id)
-                                          setSelectedRole(null)
-                                          setOpenStatusDropdown(null)
-                                        }}
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div
-                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
-                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
-                                          >
-                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                          </div>
-                                          <div>
-                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
-                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
-                                          </div>
-                                        </div>
-                                        <span className="text-xs font-bold text-red-700">{user.completionRate}%</span>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -1917,7 +2109,7 @@ export default function OrganisationOverviewPage() {
                             size="sm"
                             className="w-full justify-start"
                             onClick={() => {
-                              console.log('Send organization-wide announcement')
+                              // Send organization-wide announcement
                             }}
                           >
                             <Mail className="w-4 h-4 mr-2" />

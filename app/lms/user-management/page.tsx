@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle } from 'lucide-react'
 import Image from 'next/image'
+import { UserManagementHeader } from '@/components/lms/user-management-header'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -307,7 +308,7 @@ export default function UserManagementPage() {
 
   const handleImport = () => {
     // In a real application, this would make an API call
-    console.log('Importing users:', importPreview)
+    // Process import - would send to API in production
     
     // Simulate successful import
     alert(`Successfully imported ${importPreview.length} users`)
@@ -378,26 +379,8 @@ export default function UserManagementPage() {
   return (
     <div className="min-h-screen bg-vergil-off-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-vergil-off-black mb-2">User Management</h1>
-          <p className="text-vergil-off-black/70">Manage users, roles, and training severity levels</p>
-        </div>
-
-        {/* Toolbar */}
-        <div className="mb-6">
-          <nav className="flex space-x-8 border-b border-gray-200">
-            <Link href="/lms/user-management" className="pb-4 px-1 border-b-2 border-vergil-purple text-vergil-purple font-medium text-sm">
-              Users
-            </Link>
-            <Link href="/lms/user-management/organisation-overview" className="pb-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Organisation Overview
-            </Link>
-            <Link href="/lms/user-management/roles" className="pb-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Roles
-            </Link>
-          </nav>
-        </div>
+        {/* Header with Tabs */}
+        <UserManagementHeader />
 
 
         {/* Filters and Actions */}
