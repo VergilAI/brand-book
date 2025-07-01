@@ -227,8 +227,21 @@ function generateTypeScript(tokens: Record<string, TokenValue>): string {
   
   // Convert to string with proper formatting
   const nestedStr = JSON.stringify(nested, null, 2)
-    .replace(/"([^"]+)":/g, '$1:')
-    .replace(/"/g, "'");
+    .replace(/"([^"]+)":/g, (match, key) => {
+      // Keep quotes for keys that start with a number or contain special characters
+      if (/^\d|[^a-zA-Z0-9_$]/.test(key)) {
+        return `"${key}":`;
+      }
+      return `${key}:`;
+    })
+    // Handle font strings with internal quotes by escaping them
+    .replace(/"(.+?)"/g, (match, content) => {
+      // If the content contains quotes, escape them
+      if (content.includes("'")) {
+        return `"${content}"`;
+      }
+      return `'${content}'`;
+    });
   
   // Remove the opening brace since we already have it
   const contentLines = nestedStr.split('\n').slice(1, -1);
