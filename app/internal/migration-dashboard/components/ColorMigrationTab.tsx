@@ -15,12 +15,17 @@ import {
   ChevronRight,
   Search,
   Filter,
-  Download
+  Download,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 
 interface ColorData {
   value: string;
   normalizedValue: string;
+  scale?: string;
+  scaleStep?: string;
+  semanticNames: string[];
   instances: {
     hardcoded: ColorInstance[];
     inGeneratedTS: ColorInstance[];
@@ -49,6 +54,9 @@ interface ColorReport {
     overallHealthScore: number;
   };
   colors: Record<string, ColorData>;
+  scales: Record<string, string[]>;
+  yamlColors: string[];
+  nonYamlColors: string[];
   fileStats: {
     totalFilesScanned: number;
     filesWithHardcodedColors: number;
@@ -57,17 +65,129 @@ interface ColorReport {
 
 type FilterType = 'all' | 'fully-migrated' | 'partial' | 'unmapped' | 'hardcoded-only';
 
+// Helper component for scale status
+function ScaleStatusIndicators({ colors }: { colors: ColorData[] }) {
+  const stats = {
+    inYAML: colors.every(c => c.instances.inYAML.length > 0),
+    inTS: colors.every(c => c.instances.inGeneratedTS.length > 0),
+    inCSS: colors.every(c => c.instances.inGeneratedCSS.length > 0),
+    noHardcoded: colors.every(c => c.instances.hardcoded.length === 0),
+    
+    partialYAML: colors.some(c => c.instances.inYAML.length > 0),
+    partialTS: colors.some(c => c.instances.inGeneratedTS.length > 0),
+    partialCSS: colors.some(c => c.instances.inGeneratedCSS.length > 0),
+    partialNoHardcoded: colors.some(c => c.instances.hardcoded.length === 0),
+  };
+  
+  return (
+    <div className="flex items-center gap-4 text-xs">
+      <div className="flex items-center gap-1">
+        {stats.inYAML ? (
+          <CheckCircle className="w-3 h-3 text-green-600" />
+        ) : stats.partialYAML ? (
+          <AlertCircle className="w-3 h-3 text-yellow-600" />
+        ) : (
+          <XCircle className="w-3 h-3 text-gray-300" />
+        )}
+        <span className={stats.inYAML ? 'text-green-600' : stats.partialYAML ? 'text-yellow-600' : 'text-gray-400'}>
+          YAML
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        {stats.inTS ? (
+          <CheckCircle className="w-3 h-3 text-green-600" />
+        ) : stats.partialTS ? (
+          <AlertCircle className="w-3 h-3 text-yellow-600" />
+        ) : (
+          <XCircle className="w-3 h-3 text-gray-300" />
+        )}
+        <span className={stats.inTS ? 'text-green-600' : stats.partialTS ? 'text-yellow-600' : 'text-gray-400'}>
+          TS
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        {stats.inCSS ? (
+          <CheckCircle className="w-3 h-3 text-green-600" />
+        ) : stats.partialCSS ? (
+          <AlertCircle className="w-3 h-3 text-yellow-600" />
+        ) : (
+          <XCircle className="w-3 h-3 text-gray-300" />
+        )}
+        <span className={stats.inCSS ? 'text-green-600' : stats.partialCSS ? 'text-yellow-600' : 'text-gray-400'}>
+          CSS
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        {stats.noHardcoded ? (
+          <CheckCircle className="w-3 h-3 text-green-600" />
+        ) : stats.partialNoHardcoded ? (
+          <AlertCircle className="w-3 h-3 text-yellow-600" />
+        ) : (
+          <XCircle className="w-3 h-3 text-red-600" />
+        )}
+        <span className={stats.noHardcoded ? 'text-green-600' : stats.partialNoHardcoded ? 'text-yellow-600' : 'text-red-600'}>
+          {stats.noHardcoded ? 'No Hardcoded' : 'Hardcoded'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function ColorMigrationTab() {
   const [report, setReport] = useState<ColorReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedColors, setExpandedColors] = useState<Set<string>>(new Set());
+  const [expandedScales, setExpandedScales] = useState<Set<string>>(new Set(['purple', 'gray'])); // Start with main scales expanded
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<{
+    isInSync: boolean;
+    yamlLastModified: string;
+    generatedLastModified: string;
+    needsRegeneration: boolean;
+    details: any;
+  } | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
     fetchReport();
+    checkSyncStatus();
   }, []);
+
+  const checkSyncStatus = async () => {
+    try {
+      const response = await fetch('/api/migration/check-sync');
+      const data = await response.json();
+      setSyncStatus(data);
+    } catch (error) {
+      console.error('Failed to check sync status:', error);
+    }
+  };
+
+  const regenerateTokens = async () => {
+    setRegenerating(true);
+    try {
+      const response = await fetch('/api/migration/regenerate-tokens', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        // Reload sync status and report after successful regeneration
+        await checkSyncStatus();
+        await fetchReport();
+      } else {
+        console.error('Token regeneration failed:', data.error);
+        alert(`Token regeneration failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to regenerate tokens:', error);
+      alert('Failed to regenerate tokens. Check console for details.');
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   const fetchReport = async () => {
     try {
@@ -97,6 +217,18 @@ export function ColorMigrationTab() {
         next.delete(colorKey);
       } else {
         next.add(colorKey);
+      }
+      return next;
+    });
+  };
+
+  const toggleScale = (scale: string) => {
+    setExpandedScales(prev => {
+      const next = new Set(prev);
+      if (next.has(scale)) {
+        next.delete(scale);
+      } else {
+        next.add(scale);
       }
       return next;
     });
@@ -164,6 +296,58 @@ export function ColorMigrationTab() {
 
   return (
     <div className="space-y-6">
+      {/* Sync Status Card */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {syncStatus?.isInSync ? (
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-yellow-600" />
+              )}
+              <span className="font-medium">
+                {syncStatus?.isInSync ? 'YAML and Generated Files In Sync' : 'Files Out of Sync'}
+              </span>
+            </div>
+            {syncStatus && (
+              <div className="text-sm text-gray-600">
+                {syncStatus.needsRegeneration && (
+                  <span>YAML modified after generation • </span>
+                )}
+                Last generated: {new Date(syncStatus.generatedLastModified).toLocaleTimeString()}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={regenerateTokens}
+            disabled={regenerating || syncStatus?.isInSync}
+            className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${
+              syncStatus?.isInSync
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-vergil-purple text-white hover:bg-purple-700'
+            }`}
+          >
+            {regenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Regenerating...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4" />
+                Regenerate Tokens
+              </>
+            )}
+          </button>
+        </div>
+        {syncStatus?.details?.missingGenerated?.length > 0 && (
+          <div className="mt-3 text-sm text-red-600">
+            Missing generated files: {syncStatus.details.missingGenerated.join(', ')}
+          </div>
+        )}
+      </Card>
+
       {/* Summary Card */}
       <Card className="p-6">
         <h2 className="text-lg font-semibold mb-4">Color Migration Summary</h2>
@@ -251,13 +435,91 @@ export function ColorMigrationTab() {
         </div>
       </Card>
 
-      {/* Color List */}
-      <div className="space-y-4">
-        {filteredColors.map(([key, color]) => {
-          const isExpanded = expandedColors.has(key);
+      {/* Color List Grouped by Scales and YAML Status */}
+      <div className="space-y-6">
+        {/* Scale Colors (from YAML) */}
+        {Object.entries(report.scales || {}).map(([scaleName, colorKeys]) => {
+          const scaleColors = colorKeys
+            .map(key => [key, report.colors[key]] as [string, ColorData])
+            .filter(([key, color]) => {
+              // Apply filters
+              if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                if (!color.value.toLowerCase().includes(query) &&
+                    !color.normalizedValue.toLowerCase().includes(query) &&
+                    !color.semanticNames.some(name => name.toLowerCase().includes(query))) {
+                  return false;
+                }
+              }
+              
+              switch (filter) {
+                case 'fully-migrated':
+                  return color.isFullyMigrated;
+                case 'partial':
+                  return !color.isFullyMigrated && color.healthScore > 0;
+                case 'unmapped':
+                  return color.healthScore === 0;
+                case 'hardcoded-only':
+                  return color.instances.hardcoded.length > 0;
+                default:
+                  return true;
+              }
+            });
+          
+          if (scaleColors.length === 0) return null;
+          
+          const isScaleExpanded = expandedScales.has(scaleName);
+          const scaleHealthScore = Math.round(
+            scaleColors.reduce((sum, [_, color]) => sum + color.healthScore, 0) / scaleColors.length
+          );
           
           return (
-            <Card key={key} className="overflow-hidden">
+            <div key={scaleName} className="space-y-4">
+              {/* Scale Header */}
+              <div 
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleScale(scaleName)}
+              >
+                <div className="flex-shrink-0">
+                  {isScaleExpanded ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  }
+                </div>
+                <h3 className="text-lg font-medium capitalize">
+                  {scaleName} Scale
+                </h3>
+                <span className="text-sm text-gray-500">
+                  ({scaleColors.length} colors)
+                </span>
+                
+                {/* Scale Status Indicators */}
+                <div className="ml-4">
+                  <ScaleStatusIndicators colors={scaleColors.map(([_, c]) => c)} />
+                </div>
+                
+                <div className="ml-auto flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{scaleHealthScore}% healthy</span>
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        scaleHealthScore === 100 ? 'bg-green-500' :
+                        scaleHealthScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${scaleHealthScore}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Scale Colors */}
+              {isScaleExpanded && (
+                <div className="space-y-4 ml-8">
+                  {scaleColors.map(([key, color]) => {
+                    const isExpanded = expandedColors.has(key);
+                    
+                    return (
+                      <Card key={key} className="overflow-hidden">
               {/* Color Header */}
               <div 
                 className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
@@ -280,6 +542,11 @@ export function ColorMigrationTab() {
                 {/* Color Info */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
+                    {color.scale && color.scaleStep && (
+                      <span className="text-sm font-medium text-gray-700">
+                        {color.scale}-{color.scaleStep}:
+                      </span>
+                    )}
                     <code className="font-mono text-sm font-medium">{color.value}</code>
                     <button
                       onClick={(e) => {
@@ -297,6 +564,11 @@ export function ColorMigrationTab() {
                   <div className="text-sm text-gray-600 mt-1">
                     {color.totalInstances} total instances • {color.instances.hardcoded.length} hardcoded
                   </div>
+                  {color.semanticNames.length > 0 && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Also known as: {color.semanticNames.join(', ')}
+                    </div>
+                  )}
                 </div>
 
                 {/* Status Indicators */}
@@ -365,6 +637,20 @@ export function ColorMigrationTab() {
                           </div>
                         ))}
                       </div>
+                      
+                      {/* Semantic Names */}
+                      {color.semanticNames.length > 0 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <h5 className="text-xs font-medium text-gray-600 mb-1">Semantic Aliases</h5>
+                          <div className="space-y-1">
+                            {color.semanticNames.map((name, idx) => (
+                              <div key={idx} className="text-xs text-gray-600">
+                                <code className="bg-gray-100 px-2 py-0.5 rounded">{name}</code>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -450,12 +736,384 @@ export function ColorMigrationTab() {
                   </div>
                 </div>
               )}
-            </Card>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
+        
+        {/* YAML Standalone Colors (not in scales) */}
+        {(() => {
+          const yamlStandalone = report.yamlColors
+            .filter(colorKey => {
+              // Not in any scale
+              return !Object.values(report.scales || {}).flat().includes(colorKey);
+            })
+            .map(key => [key, report.colors[key]] as [string, ColorData])
+            .filter(([key, color]) => {
+              // Apply filters
+              if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                if (!color.value.toLowerCase().includes(query) &&
+                    !color.normalizedValue.toLowerCase().includes(query) &&
+                    !color.semanticNames.some(name => name.toLowerCase().includes(query))) {
+                  return false;
+                }
+              }
+              
+              switch (filter) {
+                case 'fully-migrated':
+                  return color.isFullyMigrated;
+                case 'partial':
+                  return !color.isFullyMigrated && color.healthScore > 0;
+                case 'unmapped':
+                  return color.healthScore === 0;
+                case 'hardcoded-only':
+                  return color.instances.hardcoded.length > 0;
+                default:
+                  return true;
+              }
+            });
+          
+          if (yamlStandalone.length === 0) return null;
+          
+          const isExpanded = expandedScales.has('yaml-standalone');
+          const healthScore = Math.round(
+            yamlStandalone.reduce((sum, [_, color]) => sum + color.healthScore, 0) / yamlStandalone.length
+          );
+          
+          return (
+            <div className="space-y-4">
+              <div 
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleScale('yaml-standalone')}
+              >
+                <div className="flex-shrink-0">
+                  {isExpanded ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  }
+                </div>
+                <h3 className="text-lg font-medium">
+                  YAML Standalone Colors
+                </h3>
+                <span className="text-sm text-gray-500">
+                  ({yamlStandalone.length} colors)
+                </span>
+                
+                {/* Status Indicators */}
+                <div className="ml-4">
+                  <ScaleStatusIndicators colors={yamlStandalone.map(([_, c]) => c)} />
+                </div>
+                
+                <div className="ml-auto flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{healthScore}% healthy</span>
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        healthScore === 100 ? 'bg-green-500' :
+                        healthScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${healthScore}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {isExpanded && (
+                <div className="space-y-4 ml-8">
+                  {yamlStandalone.map(([key, color]) => {
+                    const isColorExpanded = expandedColors.has(key);
+                    return (
+                      <Card key={key} className="overflow-hidden">
+                        {/* Same color rendering as in scales */}
+                        <div 
+                          className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
+                          onClick={() => toggleExpanded(key)}
+                        >
+                          <div className="flex-shrink-0">
+                            {isColorExpanded ? 
+                              <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                              <ChevronRight className="w-5 h-5 text-gray-400" />
+                            }
+                          </div>
+                          <div 
+                            className="w-12 h-12 rounded-md border-2 border-gray-300 flex-shrink-0"
+                            style={{ backgroundColor: color.value }}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <code className="font-mono text-sm font-medium">{color.value}</code>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(color.value);
+                                }}
+                                className="p-1 hover:bg-gray-100 rounded"
+                              >
+                                {copiedValue === color.value ? 
+                                  <Check className="w-3 h-3 text-green-600" /> : 
+                                  <Copy className="w-3 h-3 text-gray-400" />
+                                }
+                              </button>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {color.totalInstances} total instances • {color.instances.hardcoded.length} hardcoded
+                            </div>
+                            {color.semanticNames.length > 0 && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Also known as: {color.semanticNames.join(', ')}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                              {color.instances.inYAML.length > 0 ? 
+                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
+                                <XCircle className="w-4 h-4 text-gray-300" />
+                              }
+                              <span className={color.instances.inYAML.length > 0 ? 'text-green-600' : 'text-gray-400'}>
+                                YAML
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {color.instances.inGeneratedTS.length > 0 ? 
+                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
+                                <XCircle className="w-4 h-4 text-gray-300" />
+                              }
+                              <span className={color.instances.inGeneratedTS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
+                                TS
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {color.instances.inGeneratedCSS.length > 0 ? 
+                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
+                                <XCircle className="w-4 h-4 text-gray-300" />
+                              }
+                              <span className={color.instances.inGeneratedCSS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
+                                CSS
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {color.instances.hardcoded.length === 0 ? 
+                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
+                                <XCircle className="w-4 h-4 text-red-600" />
+                              }
+                              <span className={color.instances.hardcoded.length === 0 ? 'text-green-600' : 'text-red-600'}>
+                                {color.instances.hardcoded.length === 0 ? 'No Hardcoded' : 'Hardcoded'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {getHealthIcon(color.healthScore)}
+                            <span className="text-sm font-medium">
+                              {getHealthLabel(color.healthScore)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Expanded details - same as in scales */}
+                        {isColorExpanded && (
+                          <div className="border-t bg-gray-50 p-4 space-y-4">
+                            {/* Copy the expanded section from scales */}
+                            {/* ... rest of expanded content ... */}
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+        
+        {/* Non-YAML Colors */}
+        {(() => {
+          const nonYamlFiltered = report.nonYamlColors
+            .map(key => [key, report.colors[key]] as [string, ColorData])
+            .filter(([key, color]) => {
+              // Apply filters
+              if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                if (!color.value.toLowerCase().includes(query) &&
+                    !color.normalizedValue.toLowerCase().includes(query)) {
+                  return false;
+                }
+              }
+              
+              switch (filter) {
+                case 'fully-migrated':
+                  return false; // Non-YAML can't be fully migrated
+                case 'partial':
+                  return color.healthScore > 0;
+                case 'unmapped':
+                  return true; // All non-YAML are unmapped
+                case 'hardcoded-only':
+                  return color.instances.hardcoded.length > 0;
+                default:
+                  return true;
+              }
+            });
+          
+          if (nonYamlFiltered.length === 0) return null;
+          
+          const isExpanded = expandedScales.has('non-yaml');
+          
+          return (
+            <div className="space-y-4">
+              <div 
+                className="flex items-center gap-3 p-3 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100"
+                onClick={() => toggleScale('non-yaml')}
+              >
+                <div className="flex-shrink-0">
+                  {isExpanded ? 
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  }
+                </div>
+                <h3 className="text-lg font-medium text-red-900">
+                  Non-YAML Colors (Need Migration)
+                </h3>
+                <span className="text-sm text-red-700">
+                  ({nonYamlFiltered.length} colors)
+                </span>
+                
+                {/* Status Indicators - all will be red */}
+                <div className="ml-4">
+                  <ScaleStatusIndicators colors={nonYamlFiltered.map(([_, c]) => c)} />
+                </div>
+                
+                <div className="ml-auto">
+                  <span className="text-sm text-red-700 font-medium">0% healthy</span>
+                </div>
+              </div>
+              
+              {isExpanded && (
+                <div className="space-y-4 ml-8">
+                  {nonYamlFiltered.map(([key, color]) => {
+                    const isColorExpanded = expandedColors.has(key);
+                    return (
+                      <Card key={key} className="overflow-hidden border-red-200">
+                        {/* Same color rendering but with red accents */}
+                        <div 
+                          className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
+                          onClick={() => toggleExpanded(key)}
+                        >
+                          <div className="flex-shrink-0">
+                            {isColorExpanded ? 
+                              <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                              <ChevronRight className="w-5 h-5 text-gray-400" />
+                            }
+                          </div>
+                          <div 
+                            className="w-12 h-12 rounded-md border-2 border-red-300 flex-shrink-0"
+                            style={{ backgroundColor: color.value }}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <code className="font-mono text-sm font-medium">{color.value}</code>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(color.value);
+                                }}
+                                className="p-1 hover:bg-gray-100 rounded"
+                              >
+                                {copiedValue === color.value ? 
+                                  <Check className="w-3 h-3 text-green-600" /> : 
+                                  <Copy className="w-3 h-3 text-gray-400" />
+                                }
+                              </button>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {color.totalInstances} total instances • {color.instances.hardcoded.length} hardcoded
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                              <XCircle className="w-4 h-4 text-gray-300" />
+                              <span className="text-gray-400">YAML</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {color.instances.inGeneratedTS.length > 0 ? 
+                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
+                                <XCircle className="w-4 h-4 text-gray-300" />
+                              }
+                              <span className={color.instances.inGeneratedTS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
+                                TS
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {color.instances.inGeneratedCSS.length > 0 ? 
+                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
+                                <XCircle className="w-4 h-4 text-gray-300" />
+                              }
+                              <span className={color.instances.inGeneratedCSS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
+                                CSS
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <XCircle className="w-4 h-4 text-red-600" />
+                              <span className="text-red-600">Hardcoded</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <XCircle className="w-5 h-5 text-red-600" />
+                            <span className="text-sm font-medium text-red-600">
+                              Not in YAML
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Expanded details */}
+                        {isColorExpanded && (
+                          <div className="border-t bg-red-50 p-4 space-y-4">
+                            <div className="bg-red-100 p-3 rounded text-sm text-red-800">
+                              <strong>Migration Required:</strong> This color is not defined in the design system YAML.
+                              Consider adding it to the appropriate scale or as a standalone token.
+                            </div>
+                            
+                            {/* Hardcoded Instances */}
+                            {color.instances.hardcoded.length > 0 && (
+                              <div>
+                                <h4 className="text-sm font-medium text-red-700 mb-2">
+                                  Hardcoded Instances ({color.instances.hardcoded.length})
+                                </h4>
+                                <div className="max-h-64 overflow-y-auto space-y-2">
+                                  {color.instances.hardcoded.slice(0, 10).map((instance, idx) => (
+                                    <div key={idx} className="bg-white p-2 rounded text-xs font-mono">
+                                      <div className="flex items-center gap-2 text-gray-600 mb-1">
+                                        <FileCode className="w-3 h-3" />
+                                        <span>{instance.file}:{instance.line}</span>
+                                      </div>
+                                      <div className="text-gray-800 truncate">{instance.context}</div>
+                                    </div>
+                                  ))}
+                                  {color.instances.hardcoded.length > 10 && (
+                                    <p className="text-xs text-gray-500 text-center py-2">
+                                      ... and {color.instances.hardcoded.length - 10} more instances
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
-      {filteredColors.length === 0 && (
+      {report.colors && Object.keys(report.colors).length === 0 && (
         <Card className="p-12 text-center">
           <p className="text-gray-600">No colors match your filters.</p>
         </Card>

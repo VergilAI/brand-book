@@ -37,6 +37,9 @@ interface ColorInstance {
 interface ColorData {
   value: string;
   normalizedValue: string;
+  scale?: string;  // e.g., "purple", "gray", "red"
+  scaleStep?: string;  // e.g., "600", "50", "900"
+  semanticNames: string[];  // e.g., ["brand.purple", "semantic.interactive.primary"]
   instances: {
     hardcoded: ColorInstance[];
     inGeneratedTS: ColorInstance[];
@@ -58,6 +61,9 @@ interface ColorReport {
     overallHealthScore: number;
   };
   colors: Record<string, ColorData>;
+  scales: Record<string, string[]>;  // Group colors by scale
+  yamlColors: string[];  // Colors defined in YAML
+  nonYamlColors: string[];  // Colors not in YAML
   fileStats: {
     totalFilesScanned: number;
     filesWithHardcodedColors: number;
@@ -67,6 +73,7 @@ interface ColorReport {
 class ComprehensiveColorAnalyzer {
   private colors: Map<string, ColorData> = new Map();
   private yamlTokens: Map<string, string> = new Map();
+  private yamlReferences: Map<string, string> = new Map(); // Maps semantic names to color references
   private generatedTokens: Set<string> = new Set();
   private totalFilesScanned: number = 0;
 
@@ -76,13 +83,16 @@ class ComprehensiveColorAnalyzer {
     // Step 1: Load YAML tokens first
     await this.loadYAMLTokens();
     
-    // Step 2: Scan generated files to understand what's available
+    // Step 2: Resolve references to map semantic names
+    this.resolveSemanticNames();
+    
+    // Step 3: Scan generated files to understand what's available
     await this.scanGeneratedFiles();
     
-    // Step 3: Scan entire codebase for color usage
+    // Step 4: Scan entire codebase for color usage
     await this.scanCodebase();
     
-    // Step 4: Calculate health scores
+    // Step 5: Calculate health scores
     this.calculateHealthScores();
     
     // Step 5: Generate report
@@ -115,8 +125,8 @@ class ComprehensiveColorAnalyzer {
           const colorValue = value.value;
           
           if (this.isReference(colorValue)) {
-            // This is a reference like {scales.purple.600}, skip it
-            // We'll handle it after all colors are loaded
+            // Store the reference for later resolution
+            this.yamlReferences.set(tokenPath, colorValue);
             continue;
           }
           
@@ -124,11 +134,24 @@ class ComprehensiveColorAnalyzer {
           const normalizedColor = this.normalizeColor(colorValue);
           this.yamlTokens.set(tokenPath, normalizedColor);
           
+          // Extract scale information if this is within a scale
+          let scale: string | undefined;
+          let scaleStep: string | undefined;
+          
+          const pathParts = tokenPath.split('.');
+          if (pathParts[0] === 'scales' && pathParts.length >= 3) {
+            scale = pathParts[1];  // e.g., "purple", "gray"
+            scaleStep = pathParts[2];  // e.g., "600", "50"
+          }
+          
           // Initialize color data
           if (!this.colors.has(normalizedColor)) {
             this.colors.set(normalizedColor, {
               value: colorValue,
               normalizedValue: normalizedColor,
+              scale,
+              scaleStep,
+              semanticNames: [],
               instances: {
                 hardcoded: [],
                 inGeneratedTS: [],
@@ -142,6 +165,12 @@ class ComprehensiveColorAnalyzer {
           }
           
           const colorData = this.colors.get(normalizedColor)!;
+          // Update scale info if we have it
+          if (scale && !colorData.scale) {
+            colorData.scale = scale;
+            colorData.scaleStep = scaleStep;
+          }
+          
           colorData.instances.inYAML.push({
             path: `colors.${tokenPath}`,
             tokenName: tokenPath.replace(/\./g, '-')
@@ -157,6 +186,55 @@ class ComprehensiveColorAnalyzer {
   private isReference(value: string): boolean {
     // Check if the value is a reference like {scales.purple.600}
     return /^\{[^}]+\}$/.test(value.trim());
+  }
+  
+  private resolveSemanticNames() {
+    console.log('🔗 Resolving semantic references...');
+    
+    // For each reference, resolve it to its actual color
+    for (const [semanticPath, reference] of this.yamlReferences.entries()) {
+      // Extract the reference path (remove curly braces)
+      const refPath = reference.slice(1, -1);  // Remove { and }
+      
+      // Look up the actual color value
+      const actualColor = this.resolveReference(refPath);
+      
+      if (actualColor) {
+        // Find the color data and add this semantic name
+        const colorData = this.colors.get(actualColor);
+        if (colorData) {
+          colorData.semanticNames.push(`colors.${semanticPath}`);
+        }
+      }
+    }
+    
+    console.log(`✅ Resolved ${this.yamlReferences.size} semantic references\n`);
+  }
+  
+  private resolveReference(refPath: string): string | undefined {
+    // Handle nested references (e.g., brand.purple might reference scales.purple.600)
+    let currentPath = refPath;
+    let depth = 0;
+    const maxDepth = 5;  // Prevent infinite loops
+    
+    while (depth < maxDepth) {
+      // Check if we have a direct color value
+      if (this.yamlTokens.has(currentPath)) {
+        return this.yamlTokens.get(currentPath);
+      }
+      
+      // Check if this is itself a reference
+      if (this.yamlReferences.has(currentPath)) {
+        const nextRef = this.yamlReferences.get(currentPath)!;
+        currentPath = nextRef.slice(1, -1);  // Remove { and }
+        depth++;
+      } else {
+        // No resolution found
+        return undefined;
+      }
+    }
+    
+    return undefined;
   }
 
   private async scanGeneratedFiles() {
@@ -331,6 +409,9 @@ class ComprehensiveColorAnalyzer {
     return {
       value,
       normalizedValue: normalized,
+      scale: undefined,
+      scaleStep: undefined,
+      semanticNames: [],
       instances: {
         hardcoded: [],
         inGeneratedTS: [],
@@ -423,6 +504,41 @@ class ComprehensiveColorAnalyzer {
   private generateReport(): ColorReport {
     const colors = Object.fromEntries(this.colors);
     
+    // Group colors by scale
+    const scales: Record<string, string[]> = {};
+    const yamlColors: string[] = [];
+    const nonYamlColors: string[] = [];
+    
+    for (const [colorKey, colorData] of this.colors.entries()) {
+      // Separate YAML vs non-YAML
+      if (colorData.instances.inYAML.length > 0) {
+        yamlColors.push(colorKey);
+      } else {
+        nonYamlColors.push(colorKey);
+      }
+      
+      // Group by scale (only for YAML colors with scales)
+      if (colorData.scale && colorData.instances.inYAML.length > 0) {
+        if (!scales[colorData.scale]) {
+          scales[colorData.scale] = [];
+        }
+        scales[colorData.scale].push(colorKey);
+      }
+    }
+    
+    // Sort colors within each scale by their step value
+    for (const scale in scales) {
+      if (scale !== 'standalone') {
+        scales[scale].sort((a, b) => {
+          const colorA = this.colors.get(a)!;
+          const colorB = this.colors.get(b)!;
+          const stepA = parseInt(colorA.scaleStep || '0');
+          const stepB = parseInt(colorB.scaleStep || '0');
+          return stepA - stepB;
+        });
+      }
+    }
+    
     // Calculate summary stats
     const totalColors = this.colors.size;
     const fullyMigrated = Array.from(this.colors.values()).filter(c => c.isFullyMigrated).length;
@@ -450,6 +566,9 @@ class ComprehensiveColorAnalyzer {
         overallHealthScore: overallHealth
       },
       colors,
+      scales,
+      yamlColors,
+      nonYamlColors,
       fileStats: {
         totalFilesScanned: this.totalFilesScanned,
         filesWithHardcodedColors: filesWithHardcoded
