@@ -162,15 +162,20 @@ function SyncStatusIndicator({ color }: { color: ColorData }) {
 
 // Helper component for scale status
 function ScaleStatusIndicators({ colors }: { colors: ColorData[] }) {
+  const yamlColors = colors.filter(c => c.instances.inYAML.length > 0);
+  const syncStats = {
+    synced: yamlColors.filter(c => c.syncStatus === 'synced').length,
+    outOfSync: yamlColors.filter(c => c.syncStatus === 'outOfSync').length,
+    notPresent: yamlColors.filter(c => c.syncStatus === 'notPresent').length,
+  };
+  
   const stats = {
     inYAML: colors.every(c => c.instances.inYAML.length > 0),
-    inTS: colors.every(c => c.instances.inGeneratedTS.length > 0),
-    inCSS: colors.every(c => c.instances.inGeneratedCSS.length > 0),
+    allSynced: yamlColors.length > 0 && syncStats.synced === yamlColors.length,
+    someSynced: syncStats.synced > 0,
     noHardcoded: colors.every(c => c.instances.hardcoded.length === 0),
     
     partialYAML: colors.some(c => c.instances.inYAML.length > 0),
-    partialTS: colors.some(c => c.instances.inGeneratedTS.length > 0),
-    partialCSS: colors.some(c => c.instances.inGeneratedCSS.length > 0),
     partialNoHardcoded: colors.some(c => c.instances.hardcoded.length === 0),
   };
   
@@ -188,30 +193,30 @@ function ScaleStatusIndicators({ colors }: { colors: ColorData[] }) {
           YAML
         </span>
       </div>
+      
+      {/* Aggregate Sync Status */}
       <div className="flex items-center gap-1">
-        {stats.inTS ? (
+        {stats.allSynced ? (
           <CheckCircle className="w-3 h-3 text-green-600" />
-        ) : stats.partialTS ? (
-          <AlertCircle className="w-3 h-3 text-yellow-600" />
+        ) : syncStats.outOfSync > 0 ? (
+          <AlertCircle className="w-3 h-3 text-orange-500" />
+        ) : syncStats.notPresent > 0 ? (
+          <XCircle className="w-3 h-3 text-red-600" />
         ) : (
           <XCircle className="w-3 h-3 text-gray-300" />
         )}
-        <span className={stats.inTS ? 'text-green-600' : stats.partialTS ? 'text-yellow-600' : 'text-gray-400'}>
-          TS
+        <span className={
+          stats.allSynced ? 'text-green-600' : 
+          syncStats.outOfSync > 0 ? 'text-orange-500' :
+          syncStats.notPresent > 0 ? 'text-red-600' : 'text-gray-400'
+        }>
+          {syncStats.outOfSync > 0 && `${syncStats.outOfSync} Out of Sync`}
+          {syncStats.outOfSync === 0 && syncStats.notPresent > 0 && `${syncStats.notPresent} Not Present`}
+          {stats.allSynced && 'All Synced'}
+          {!stats.allSynced && syncStats.synced === 0 && yamlColors.length === 0 && 'N/A'}
         </span>
       </div>
-      <div className="flex items-center gap-1">
-        {stats.inCSS ? (
-          <CheckCircle className="w-3 h-3 text-green-600" />
-        ) : stats.partialCSS ? (
-          <AlertCircle className="w-3 h-3 text-yellow-600" />
-        ) : (
-          <XCircle className="w-3 h-3 text-gray-300" />
-        )}
-        <span className={stats.inCSS ? 'text-green-600' : stats.partialCSS ? 'text-yellow-600' : 'text-gray-400'}>
-          CSS
-        </span>
-      </div>
+      
       <div className="flex items-center gap-1">
         {stats.noHardcoded ? (
           <CheckCircle className="w-3 h-3 text-green-600" />
@@ -718,13 +723,28 @@ export function ColorMigrationTab() {
                     </span>
                   </div>
                   
-                  {/* Health Status */}
-                  {color.isFullyMigrated && (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-green-600">Healthy</span>
-                    </div>
-                  )}
+                  {/* Health Status - Always show */}
+                  <div className="flex items-center gap-2">
+                    {color.isFullyMigrated ? (
+                      <>
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <span className="text-sm font-medium text-green-600">Healthy</span>
+                      </>
+                    ) : (
+                      <>
+                        {color.healthScore > 0 ? (
+                          <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                        <span className={`text-sm font-medium ${
+                          color.healthScore > 0 ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {color.healthScore}% Migrated
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
