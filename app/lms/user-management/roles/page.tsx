@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Role, initialRoles, calculateNewRolePosition } from '@/lib/lms/roles-data'
+import { updateRoleUserCounts } from '@/lib/lms/mock-data'
 
 interface Privilege {
   id: string
@@ -69,7 +70,7 @@ const availablePrivileges: Privilege[] = [
 ]
 
 export default function RolesPage() {
-  const [roles, setRoles] = useState<Role[]>(initialRoles)
+  const [roles, setRoles] = useState<Role[]>(updateRoleUserCounts(initialRoles))
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingRole, setEditingRole] = useState<Role | null>(null)
@@ -183,9 +184,6 @@ export default function RolesPage() {
             </Link>
             <Link href="/lms/user-management/roles" className="pb-4 px-1 border-b-2 border-vergil-purple text-vergil-purple font-medium text-sm">
               Roles
-            </Link>
-            <Link href="/lms/user-management/analytics" className="pb-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Analytics
             </Link>
           </nav>
         </div>

@@ -17,154 +17,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { mockUsers, getRoleName } from '@/lib/lms/mock-data'
+import { initialRoles } from '@/lib/lms/roles-data'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: 'ahead' | 'on_track' | 'falling_behind' | 'drastically_behind'
-  severity: 'low' | 'medium' | 'high'
-  avatar?: string
-  lastLogin: string
-  joinDate: string
-  coursesEnrolled: number
-  coursesCompleted: number
-  overallProgress: number
-  certificatesEarned: number
-  totalHours: number
+// Map status for compatibility with existing UI
+const mapStatus = (status: string): 'ahead' | 'on_track' | 'falling_behind' | 'drastically_behind' => {
+  switch (status) {
+    case 'ahead': return 'ahead'
+    case 'on_track': return 'on_track'
+    case 'at_risk': return 'falling_behind'
+    case 'behind': return 'drastically_behind'
+    default: return 'on_track'
+  }
 }
 
-// Mock roles data matching the roles page
-const mockRoles = [
-  { id: '1', name: 'Super Admin', color: '#7B00FF' },
-  { id: '2', name: 'Admin', color: '#0087FF' },
-  { id: '3', name: 'Manager', color: '#10B981' },
-  { id: '4', name: 'Instructor', color: '#FFC700' }
-]
-
-const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@company.com',
-    role: 'Manager',
-    status: 'ahead',
-    severity: 'high',
-    lastLogin: '2024-01-15T10:30:00',
-    joinDate: '2023-06-15',
-    coursesEnrolled: 5,
-    coursesCompleted: 3,
-    overallProgress: 72,
-    certificatesEarned: 2,
-    totalHours: 45.5
-  },
-  {
-    id: '2',
-    name: 'Michael Rodriguez',
-    email: 'michael.r@company.com',
-    role: 'Instructor',
-    status: 'on_track',
-    severity: 'low',
-    lastLogin: '2024-01-15T14:20:00',
-    joinDate: '2023-03-20',
-    coursesEnrolled: 0,
-    coursesCompleted: 0,
-    overallProgress: 0,
-    certificatesEarned: 0,
-    totalHours: 120
-  },
-  {
-    id: '3',
-    name: 'Emma Thompson',
-    email: 'emma.t@company.com',
-    role: 'Manager',
-    status: 'falling_behind',
-    severity: 'medium',
-    lastLogin: '2024-01-01T09:00:00',
-    joinDate: '2023-09-10',
-    coursesEnrolled: 3,
-    coursesCompleted: 1,
-    overallProgress: 45,
-    certificatesEarned: 1,
-    totalHours: 22.3
-  },
-  {
-    id: '4',
-    name: 'James Wilson',
-    email: 'james.wilson@company.com',
-    role: 'Admin',
-    status: 'on_track',
-    severity: 'low',
-    lastLogin: '2024-01-15T16:45:00',
-    joinDate: '2023-01-05',
-    coursesEnrolled: 0,
-    coursesCompleted: 0,
-    overallProgress: 0,
-    certificatesEarned: 0,
-    totalHours: 0
-  },
-  {
-    id: '5',
-    name: 'Lisa Anderson',
-    email: 'lisa.a@company.com',
-    role: 'Manager',
-    status: 'drastically_behind',
-    severity: 'high',
-    lastLogin: '2023-12-20T11:30:00',
-    joinDate: '2023-08-22',
-    coursesEnrolled: 2,
-    coursesCompleted: 0,
-    overallProgress: 12,
-    certificatesEarned: 0,
-    totalHours: 5.5
-  },
-  {
-    id: '6',
-    name: 'David Kim',
-    email: 'david.kim@company.com',
-    role: 'Manager',
-    status: 'on_track',
-    severity: 'medium',
-    lastLogin: '2024-01-15T09:15:00',
-    joinDate: '2023-07-20',
-    coursesEnrolled: 4,
-    coursesCompleted: 2,
-    overallProgress: 50,
-    certificatesEarned: 1,
-    totalHours: 28.7
-  },
-  {
-    id: '7',
-    name: 'Rachel Green',
-    email: 'rachel.g@company.com',
-    role: 'Instructor',
-    status: 'on_track',
-    severity: 'low',
-    lastLogin: '2024-01-14T16:30:00',
-    joinDate: '2023-02-10',
-    coursesEnrolled: 0,
-    coursesCompleted: 0,
-    overallProgress: 0,
-    certificatesEarned: 0,
-    totalHours: 95
-  },
-  {
-    id: '8',
-    name: 'Alex Johnson',
-    email: 'alex.j@company.com',
-    role: 'Manager',
-    status: 'on_track',
-    severity: 'low',
-    lastLogin: '2024-01-15T11:45:00',
-    joinDate: '2023-09-05',
-    coursesEnrolled: 3,
-    coursesCompleted: 2,
-    overallProgress: 67,
-    certificatesEarned: 2,
-    totalHours: 34.2
-  }
-]
+// Transform the unified mock data to match the expected format
+const users = mockUsers.map(user => ({
+  ...user,
+  status: mapStatus(user.status),
+  overallProgress: user.completionRate,
+  severity: user.severity || 'low'
+}))
 
 interface FilterState {
   roles: string[]
@@ -173,7 +46,7 @@ interface FilterState {
 }
 
 interface SortState {
-  field: keyof User | null
+  field: string | null
   direction: 'asc' | 'desc' | null
 }
 
@@ -209,11 +82,11 @@ export default function UserManagementPage() {
       'falling_behind': 2,
       'drastically_behind': 3
     }
-    let filtered = mockUsers.filter(user => {
+    let filtered = users.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            user.email.toLowerCase().includes(searchQuery.toLowerCase())
       
-      const matchesRole = filters.roles.length === 0 || filters.roles.includes(user.role)
+      const matchesRole = filters.roles.length === 0 || filters.roles.includes(user.role || '')
       const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(user.status)
       
       const matchesProgress = filters.progressRanges.length === 0 || 
@@ -228,8 +101,8 @@ export default function UserManagementPage() {
 
     if (sortState.field && sortState.direction) {
       filtered.sort((a, b) => {
-        const aValue = a[sortState.field!]
-        const bValue = b[sortState.field!]
+        const aValue = (a as any)[sortState.field!]
+        const bValue = (b as any)[sortState.field!]
         
         // Special handling for status field
         if (sortState.field === 'status') {
@@ -357,13 +230,13 @@ export default function UserManagementPage() {
     return users
   }
 
-  const validateImportData = (users: any[]): string[] => {
+  const validateImportData = (importedUsers: any[]): string[] => {
     const errors: string[] = []
-    const existingEmails = mockUsers.map(u => u.email.toLowerCase())
+    const existingEmails = users.map(u => u.email.toLowerCase())
     const importEmails = new Set<string>()
-    const validRoles = mockRoles.map(r => r.name.toLowerCase())
+    const validRoles = initialRoles.map(r => r.name.toLowerCase())
 
-    users.forEach((user, index) => {
+    importedUsers.forEach((user, index) => {
       const rowNum = index + 2 // +2 because row 1 is headers, and index starts at 0
       
       // Check required fields
@@ -522,9 +395,6 @@ export default function UserManagementPage() {
             </Link>
             <Link href="/lms/user-management/roles" className="pb-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
               Roles
-            </Link>
-            <Link href="/lms/user-management/analytics" className="pb-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Analytics
             </Link>
           </nav>
         </div>

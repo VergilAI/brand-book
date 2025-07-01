@@ -2,23 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Plus, Edit2, Trash2, Move, Save, X, ChevronDown, ChevronRight, Users, Maximize2, Grid, Mail, MessageSquare, AlertTriangle, TrendingDown, Phone, User } from 'lucide-react'
+import { Plus, Edit2, Trash2, Move, Save, X, ChevronDown, ChevronRight, Users, Maximize2, Grid, Mail, MessageSquare, AlertTriangle, TrendingDown, Phone, User as UserIcon, Info } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
-
-interface User {
-  id: string
-  name: string
-  email: string
-  phone: string
-  roleId: string
-  position?: { x: number; y: number }
-  completionRate?: number
-  status?: 'on_track' | 'at_risk' | 'behind'
-  avatar?: string
-}
+import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
 interface DragState {
   isDragging: boolean
@@ -35,165 +24,15 @@ interface ViewState {
   focusedRoleId?: string
 }
 
-const mockUsers: User[] = [
-  // Super Admin
-  {
-    id: 'u1',
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@company.com',
-    phone: '+1 (555) 123-4567',
-    roleId: '1',
-    position: { x: 300, y: 200 },
-    completionRate: 100,
-    status: 'on_track'
-  },
-  
-  // Admins (spread horizontally with spacing)
-  {
-    id: 'u2',
-    name: 'Michael Chen',
-    email: 'michael.chen@company.com',
-    phone: '+1 (555) 234-5678',
-    roleId: '2',
-    position: { x: 100, y: 200 },
-    completionRate: 98,
-    status: 'on_track'
-  },
-  {
-    id: 'u3',
-    name: 'Emily Rodriguez',
-    email: 'emily.rodriguez@company.com',
-    phone: '+1 (555) 345-6789',
-    roleId: '2',
-    position: { x: 350, y: 200 },
-    completionRate: 92,
-    status: 'on_track'
-  },
-  {
-    id: 'u4',
-    name: 'David Kim',
-    email: 'david.kim@company.com',
-    phone: '+1 (555) 456-7890',
-    roleId: '2',
-    position: { x: 600, y: 200 },
-    completionRate: 95,
-    status: 'on_track'
-  },
-  
-  // Managers (spread horizontally with spacing)
-  {
-    id: 'u5',
-    name: 'Jessica Williams',
-    email: 'jessica.williams@company.com',
-    phone: '+1 (555) 567-8901',
-    roleId: '3',
-    position: { x: 200, y: 200 },
-    completionRate: 90,
-    status: 'at_risk'
-  },
-  {
-    id: 'u6',
-    name: 'Alex Thompson',
-    email: 'alex.thompson@company.com',
-    phone: '+1 (555) 678-9012',
-    roleId: '3',
-    position: { x: 470, y: 200 },
-    completionRate: 86,
-    status: 'at_risk'
-  },
-  
-  // Instructors (arranged in a grid with proper spacing)
-  {
-    id: 'u7',
-    name: 'Ryan Davis',
-    email: 'ryan.davis@company.com',
-    phone: '+1 (555) 789-0123',
-    roleId: '4',
-    position: { x: 50, y: 150 },
-    completionRate: 85,
-    status: 'behind'
-  },
-  {
-    id: 'u8',
-    name: 'Lisa Park',
-    email: 'lisa.park@company.com',
-    phone: '+1 (555) 890-1234',
-    roleId: '4',
-    position: { x: 300, y: 150 },
-    completionRate: 78,
-    status: 'behind'
-  },
-  {
-    id: 'u9',
-    name: 'James Wilson',
-    email: 'james.wilson@company.com',
-    phone: '+1 (555) 901-2345',
-    roleId: '4',
-    position: { x: 550, y: 150 },
-    completionRate: 82,
-    status: 'behind'
-  },
-  {
-    id: 'u10',
-    name: 'Maria Garcia',
-    email: 'maria.garcia@company.com',
-    phone: '+1 (555) 012-3456',
-    roleId: '4',
-    position: { x: 800, y: 150 },
-    completionRate: 80,
-    status: 'behind'
-  },
-  {
-    id: 'u11',
-    name: 'Kevin Lee',
-    email: 'kevin.lee@company.com',
-    phone: '+1 (555) 123-4560',
-    roleId: '4',
-    position: { x: 50, y: 320 },
-    completionRate: 88,
-    status: 'at_risk'
-  },
-  {
-    id: 'u12',
-    name: 'Amanda Brown',
-    email: 'amanda.brown@company.com',
-    phone: '+1 (555) 234-5601',
-    roleId: '4',
-    position: { x: 300, y: 320 },
-    completionRate: 83,
-    status: 'behind'
-  },
-  {
-    id: 'u13',
-    name: 'Daniel Martinez',
-    email: 'daniel.martinez@company.com',
-    phone: '+1 (555) 345-6012',
-    roleId: '4',
-    position: { x: 550, y: 320 },
-    completionRate: 79,
-    status: 'behind'
-  },
-  {
-    id: 'u14',
-    name: 'Jennifer Taylor',
-    email: 'jennifer.taylor@company.com',
-    phone: '+1 (555) 456-0123',
-    roleId: '4',
-    position: { x: 800, y: 320 },
-    completionRate: 84,
-    status: 'behind'
-  }
-]
 
 export default function OrganisationOverviewPage() {
   const canvasRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [roles, setRoles] = useState<Role[]>(initialRoles)
+  const [roles, setRoles] = useState<Role[]>(updateRoleUserCounts(initialRoles))
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [editMode, setEditMode] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
-  const [hoveredRole, setHoveredRole] = useState<string | null>(null)
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     draggedNodeId: null,
@@ -210,8 +49,24 @@ export default function OrganisationOverviewPage() {
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 })
   const [showZoomIndicator, setShowZoomIndicator] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [openStatusDropdown, setOpenStatusDropdown] = useState<string | null>(null)
   const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null)
   const transitionTimeout = useRef<NodeJS.Timeout | null>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openStatusDropdown) {
+        const target = event.target as HTMLElement
+        if (!target.closest('.relative')) {
+          setOpenStatusDropdown(null)
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openStatusDropdown])
 
   // Calculate SVG viewBox to show all content
   const calculateViewBox = () => {
@@ -240,21 +95,36 @@ export default function OrganisationOverviewPage() {
 
   // Handle mouse down
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Don't handle if the target is the rect element (already handled by onClick)
+    if ((e.target as SVGElement).tagName === 'rect') {
+      return
+    }
+    
     const point = getSVGPoint(e.clientX, e.clientY)
     
     // Check if clicking on a role node
     let clickedRole: Role | null = null
-    const cardWidth = 160
-    const cardHeight = 80
+    const cardWidth = 180
+    const cardHeight = 95
     
     for (const role of roles) {
       if (!role.position) continue
+      
+      // Calculate if this role has subordinates for accurate height
+      const getAllSubs = (roleId: string): User[] => {
+        const directUsers = users.filter(u => u.roleId === roleId)
+        const childRoles = roles.filter(r => r.parentRole === roleId)
+        const indirectUsers = childRoles.flatMap(childRole => getAllSubs(childRole.id))
+        return [...directUsers, ...indirectUsers]
+      }
+      const hasSubordinates = getAllSubs(role.id).length > 0
+      const actualHeight = hasSubordinates ? 95 : 75
       
       // Check if click is within card bounds
       if (point.x >= role.position.x && 
           point.x <= role.position.x + cardWidth &&
           point.y >= role.position.y && 
-          point.y <= role.position.y + cardHeight) {
+          point.y <= role.position.y + actualHeight) {
         clickedRole = role
         break
       }
@@ -272,13 +142,13 @@ export default function OrganisationOverviewPage() {
         startPos: clickedRole.position!
       })
       setSelectedRole(clickedRole.id)
-    } else if (clickedRole) {
-      // Just select the role
-      setSelectedRole(clickedRole.id)
-    } else {
-      // Start panning on empty space
+    } else if (!clickedRole) {
+      // Only start panning if we didn't click on a role
       setIsPanning(true)
       setLastMousePos({ x: e.clientX, y: e.clientY })
+      // Clear selections when clicking on empty space
+      setSelectedRole(null)
+      setSelectedUser(null)
     }
   }
 
@@ -554,20 +424,14 @@ export default function OrganisationOverviewPage() {
     setSelectedRole(null)
   }, [])
 
-  // Handle role click - always open the role view
+  // Handle role click
   const handleRoleClick = useCallback((roleId: string) => {
     if (editMode) return
-    setHoveredRole(null) // Clear hover state on click
-    // Always zoom into users for this role, regardless of current view mode
-    zoomToRole(roleId)
-  }, [editMode, zoomToRole])
-
-  // Clear hover state when entering edit mode
-  useEffect(() => {
-    if (editMode) {
-      setHoveredRole(null)
-    }
+    // Set the selected role
+    setSelectedRole(roleId)
+    setSelectedUser(null) // Clear any selected user
   }, [editMode])
+
 
   // Render role node
   const renderRoleNode = (role: Role) => {
@@ -576,9 +440,22 @@ export default function OrganisationOverviewPage() {
     const isSelected = selectedRole === role.id
     const isDragging = dragState.draggedNodeId === role.id
     
-    // Compact card dimensions
-    const cardWidth = 160
-    const cardHeight = 80
+    // Calculate subordinate progress
+    const getAllSubordinates = (roleId: string): User[] => {
+      const directUsers = users.filter(u => u.roleId === roleId)
+      const childRoles = roles.filter(r => r.parentRole === roleId)
+      const indirectUsers = childRoles.flatMap(childRole => getAllSubordinates(childRole.id))
+      return [...directUsers, ...indirectUsers]
+    }
+    
+    const allSubordinates = getAllSubordinates(role.id)
+    const avgSubordinateProgress = allSubordinates.length > 0
+      ? Math.round(allSubordinates.reduce((sum, u) => sum + (u.completionRate || 0), 0) / allSubordinates.length)
+      : 0
+    
+    // Card dimensions
+    const cardWidth = 180
+    const cardHeight = allSubordinates.length > 0 ? 95 : 75
     
     return (
       <g
@@ -586,8 +463,6 @@ export default function OrganisationOverviewPage() {
         transform={`translate(${role.position.x}, ${role.position.y})`}
         className={`${isDragging ? 'opacity-50' : ''}`}
         style={{ cursor: editMode ? 'move' : 'pointer' }}
-        onMouseEnter={() => !editMode && setHoveredRole(role.id)}
-        onMouseLeave={() => !editMode && setHoveredRole(null)}
       >
         {/* Shadow */}
         <rect
@@ -609,8 +484,6 @@ export default function OrganisationOverviewPage() {
           fill="white"
           stroke={isSelected ? role.color : '#E5E7EB'}
           strokeWidth={isSelected ? "2" : "1"}
-          onClick={() => handleRoleClick(role.id)}
-          style={{ cursor: editMode ? 'move' : 'pointer' }}
         />
         
         {/* Color accent bar */}
@@ -631,20 +504,20 @@ export default function OrganisationOverviewPage() {
         />
         
         {/* Content area */}
-        <g transform="translate(10, 12)">
+        <g transform="translate(12, 16)">
           {/* Role icon */}
           <circle
-            cx="12"
-            cy="12"
-            r="12"
+            cx="14"
+            cy="14"
+            r="14"
             fill={role.color}
             opacity="0.15"
           />
           <text
-            x="12"
-            y="16"
+            x="14"
+            y="18"
             textAnchor="middle"
-            fontSize="10"
+            fontSize="11"
             fontWeight="bold"
             fill={role.color}
           >
@@ -653,9 +526,9 @@ export default function OrganisationOverviewPage() {
           
           {/* Role name */}
           <text
-            x="32"
-            y="12"
-            fontSize="13"
+            x="36"
+            y="14"
+            fontSize="14"
             fontWeight="600"
             fill="#1D1D1F"
           >
@@ -664,9 +537,9 @@ export default function OrganisationOverviewPage() {
           
           {/* User count */}
           <text
-            x="32"
-            y="26"
-            fontSize="11"
+            x="36"
+            y="30"
+            fontSize="12"
             fill="#6B7280"
           >
             {role.usersCount} {role.usersCount === 1 ? 'user' : 'users'}
@@ -674,35 +547,83 @@ export default function OrganisationOverviewPage() {
         </g>
         
         
-        {/* Bottom info bar */}
-        <g transform={`translate(10, ${cardHeight - 22})`}>
-          {/* Role level indicator */}
-          <rect
-            x="0"
-            y="0"
-            width="6"
-            height="6"
-            rx="1"
-            fill={role.color}
-            opacity="0.3"
-          />
-          
-          {/* Shortened description */}
-          <text
-            x="10"
-            y="5"
-            fontSize="9"
-            fill="#9CA3AF"
-          >
-            {role.description && role.description.length > 28 
-              ? role.description.slice(0, 26) + '...' 
-              : role.description}
-          </text>
-        </g>
+        {/* Subordinate Progress Bar */}
+        {allSubordinates.length > 0 && (
+          <g transform={`translate(12, ${cardHeight - 30})`}>
+            {/* Progress label with info icon */}
+            <g>
+              <text
+                x="0"
+                y="0"
+                fontSize="11"
+                fill="#6B7280"
+                fontWeight="500"
+              >
+                Team Progress: {avgSubordinateProgress}%
+              </text>
+              
+              {/* Info icon */}
+              <g 
+                transform={`translate(${cardWidth - 40}, -6)`}
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={(e) => {
+                  e.stopPropagation()
+                  // Show tooltip
+                  const tooltip = document.getElementById(`tooltip-${role.id}`)
+                  if (tooltip) tooltip.style.display = 'block'
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation()
+                  // Hide tooltip
+                  const tooltip = document.getElementById(`tooltip-${role.id}`)
+                  if (tooltip) tooltip.style.display = 'none'
+                }}
+              >
+                <circle cx="5" cy="5" r="7" fill="#E5E7EB" />
+                <text
+                  x="5"
+                  y="8"
+                  textAnchor="middle"
+                  fontSize="9"
+                  fill="#6B7280"
+                  fontWeight="bold"
+                >
+                  i
+                </text>
+              </g>
+            </g>
+            
+            {/* Progress bar background */}
+            <rect
+              x="0"
+              y="8"
+              width={cardWidth - 24}
+              height="4"
+              rx="2"
+              fill="#E5E7EB"
+            />
+            
+            {/* Progress bar fill */}
+            <rect
+              x="0"
+              y="8"
+              width={(cardWidth - 24) * (avgSubordinateProgress / 100)}
+              height="4"
+              rx="2"
+              fill={
+                avgSubordinateProgress >= 80 ? '#10B981' :
+                avgSubordinateProgress >= 60 ? '#F59E0B' :
+                '#EF4444'
+              }
+            />
+          </g>
+        )}
+        
+        
         
         {/* Edit mode indicator */}
         {editMode && (
-          <g transform={`translate(${cardWidth - 35}, ${cardHeight - 20})`}>
+          <g transform={`translate(${cardWidth - 40}, ${cardHeight - 22})`}>
             <rect
               x="0"
               y="0"
@@ -724,6 +645,20 @@ export default function OrganisationOverviewPage() {
             </text>
           </g>
         )}
+        
+        {/* Invisible overlay to capture all clicks */}
+        <rect
+          x="0"
+          y="0"
+          width={cardWidth}
+          height={cardHeight}
+          fill="transparent"
+          style={{ cursor: editMode ? 'move' : 'pointer' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleRoleClick(role.id)
+          }}
+        />
       </g>
     )
   }
@@ -1025,9 +960,6 @@ export default function OrganisationOverviewPage() {
             <Link href="/lms/user-management/roles" className="py-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
               Roles
             </Link>
-            <Link href="/lms/user-management/analytics" className="py-4 px-1 border-b-2 border-transparent text-vergil-off-black/60 hover:text-vergil-purple hover:border-vergil-purple/30 font-medium text-sm transition-all">
-              Analytics
-            </Link>
           </nav>
         </div>
 
@@ -1065,6 +997,39 @@ export default function OrganisationOverviewPage() {
               {viewState.viewMode === 'roles' && (
                 <g>
                   {roles.map(renderRoleNode)}
+                  
+                  {/* Tooltips for all roles */}
+                  {roles.map(role => {
+                    // Calculate if this role has subordinates
+                    const getAllSubordinatesForTooltip = (roleId: string): User[] => {
+                      const directUsers = users.filter(u => u.roleId === roleId)
+                      const childRoles = roles.filter(r => r.parentRole === roleId)
+                      const indirectUsers = childRoles.flatMap(childRole => getAllSubordinatesForTooltip(childRole.id))
+                      return [...directUsers, ...indirectUsers]
+                    }
+                    const hasSubordinates = getAllSubordinatesForTooltip(role.id).length > 0
+                    
+                    if (!hasSubordinates) return null
+                    
+                    return (
+                      <foreignObject
+                        key={`tooltip-${role.id}`}
+                        id={`tooltip-${role.id}`}
+                        x={(role.position?.x || 0) + 185}
+                        y={(role.position?.y || 0) + 45}
+                        width="180"
+                        height="65"
+                        style={{ display: 'none', pointerEvents: 'none', overflow: 'visible' }}
+                      >
+                        <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg w-full">
+                          <p className="font-semibold text-white">Team Progress</p>
+                          <p className="text-[11px] text-gray-200 mt-1">
+                            Average completion of all subordinates
+                          </p>
+                        </div>
+                      </foreignObject>
+                    )
+                  })}
                 </g>
               )}
             </svg>
@@ -1241,12 +1206,14 @@ export default function OrganisationOverviewPage() {
           </div>
 
           {/* Details Panel */}
-          <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto">
+          <div className="w-[480px] bg-white border-l border-gray-200 p-8 overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-medium text-vergil-off-black">
-                {viewState.viewMode === 'users' ? 'User Details' : 'Role Details'}
+                {selectedUser ? 'User Details' : 
+                 selectedRole ? 'Role Details' : 
+                 viewState.viewMode === 'users' ? 'User Details' : 'Role Details'}
               </h3>
-              {viewState.viewMode === 'users' && (
+              {viewState.viewMode === 'users' && !selectedUser && !selectedRole && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1257,255 +1224,717 @@ export default function OrganisationOverviewPage() {
               )}
             </div>
             
-            {/* Show Role Hover Info when hovering over a role */}
-            {viewState.viewMode === 'roles' && hoveredRole && !selectedRole ? (
-              <div className="space-y-4">
-                {(() => {
-                  const role = roles.find(r => r.id === hoveredRole)
-                  if (!role) return null
-                  
-                  // Calculate metrics for this role
-                  const roleUsers = users.filter(u => u.roleId === role.id)
-                  const avgProgress = roleUsers.length > 0 
-                    ? Math.round(roleUsers.reduce((sum, u) => sum + (u.completionRate || 0), 0) / roleUsers.length)
-                    : 0
-                  
-                  // Calculate average underling progress (users in roles that report to this role)
-                  const childRoles = roles.filter(r => r.parentRole === role.id)
-                  const allUnderlings = users.filter(u => childRoles.some(cr => cr.id === u.roleId))
-                  const avgUnderlingProgress = allUnderlings.length > 0
-                    ? Math.round(allUnderlings.reduce((sum, u) => sum + (u.completionRate || 0), 0) / allUnderlings.length)
-                    : 0
-                  
-                  return (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-medium"
-                          style={{ backgroundColor: role.color }}
-                        >
-                          {role.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-vergil-off-black">{role.name}</h4>
-                          <p className="text-sm text-vergil-off-black/60">{role.description}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">
-                            {roleUsers.length === 1 ? 'User in this role' : 'Users in this role'}
-                          </p>
-                          <p className="text-2xl font-bold text-vergil-off-black">{roleUsers.length}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">
-                            {roleUsers.length === 1 ? 'Progress' : 'Average progress'}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <p className="text-xl font-bold text-vergil-off-black">{avgProgress}%</p>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-vergil-purple h-2 rounded-full transition-all"
-                                style={{ width: `${avgProgress}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {childRoles.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium text-vergil-off-black/60 mb-1">
-                              {allUnderlings.length === 1 ? 'Subordinate progress' : 'Average subordinate progress'}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-xl font-bold text-vergil-off-black">{avgUnderlingProgress}%</p>
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-blue-500 h-2 rounded-full transition-all"
-                                  style={{ width: `${avgUnderlingProgress}%` }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="pt-4 space-y-2">
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          onClick={() => {
-                            console.log('Send group email to', role.name, 'team')
-                          }}
-                        >
-                          <Mail className="w-4 h-4 mr-2" />
-                          {roleUsers.length === 1 ? 'Send Email' : 'Send Group Email'}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          onClick={() => {
-                            console.log('Send group Slack message to', role.name, 'team')
-                          }}
-                        >
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          {roleUsers.length === 1 ? 'Send Slack Message' : 'Send Group Slack'}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          onClick={() => zoomToRole(role.id)}
-                        >
-                          <Users className="w-4 h-4 mr-2" />
-                          {roleUsers.length === 1 ? 'View Team Member' : 'View Team Members'}
-                        </Button>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            ) : viewState.viewMode === 'users' && selectedUser ? (
-              // User Details
-              <div className="space-y-4">
+            {(viewState.viewMode === 'users' && selectedUser) || (viewState.viewMode === 'roles' && selectedUser) ? (
+              // User Details with Personal Statistics
+              <div className="space-y-6">
                 {(() => {
                   const user = users.find(u => u.id === selectedUser)
                   const role = user ? roles.find(r => r.id === user.roleId) : null
                   if (!user) return null
                   
+                  // Mock additional user statistics
+                  const coursesInProgress = 3
+                  const coursesCompleted = 7
+                  const totalCourses = 10
+                  const averageScore = 87
+                  const hoursSpent = 45.5
+                  const lastActive = "2 hours ago"
+                  const streak = 12
+                  
                   return (
                     <>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-medium"
-                          style={{ backgroundColor: role?.color || '#7B00FF' }}
+                      {/* User Header */}
+                      <div className="border-b border-gray-200 pb-6">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedUser(null)
+                            // If we're in roles view and came from a role, show that role again
+                            if (viewState.viewMode === 'roles' && user.roleId) {
+                              setSelectedRole(user.roleId)
+                            }
+                          }}
+                          className="mb-4"
                         >
-                          {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-vergil-off-black">{user.name}</h4>
-                          <p className="text-sm text-vergil-off-black/60">{role?.name || 'Unknown Role'}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">Email</p>
-                          <p className="text-vergil-off-black">{user.email}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">Phone</p>
-                          <p className="text-vergil-off-black">{user.phone}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">Training Completion</p>
-                          <div className="flex items-center gap-2">
-                            <p className="text-2xl font-bold text-vergil-off-black">{user.completionRate}%</p>
-                            <Badge variant={
-                              user.status === 'on_track' ? 'default' :
-                              user.status === 'at_risk' ? 'secondary' : 'destructive'
-                            }>
-                              {user.status?.replace('_', ' ') || 'Unknown'}
-                            </Badge>
+                          ← Back
+                        </Button>
+                        <div className="flex items-center gap-4">
+                          <div
+                            className="w-14 h-14 rounded-full flex items-center justify-center text-white font-semibold text-lg"
+                            style={{ backgroundColor: role?.color || '#7B00FF' }}
+                          >
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-vergil-off-black">{user.name}</h4>
+                            <p className="text-sm text-vergil-off-black/60">{role?.name || 'Unknown Role'}</p>
+                            <p className="text-xs text-vergil-off-black/50 mt-1">Last active: {lastActive}</p>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="pt-4 space-y-2">
-                        <Button variant="outline" className="w-full">
-                          <MessageSquare className="w-4 h-4 mr-2" />
-                          Send Slack Message
-                        </Button>
-                        <Button variant="outline" className="w-full">
-                          <Mail className="w-4 h-4 mr-2" />
-                          Send Email
-                        </Button>
-                        <Button variant="outline" className="w-full">
-                          <Edit2 className="w-4 h-4 mr-2" />
-                          Edit User
-                        </Button>
+                      {/* Contact Information */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Contact Information</h5>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="w-4 h-4 text-vergil-off-black/40" />
+                            <span className="text-vergil-off-black">{user.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="w-4 h-4 text-vergil-off-black/40" />
+                            <span className="text-vergil-off-black">{user.phone}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Learning Statistics */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Learning Statistics</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
+                            <p className="text-xl font-bold" style={{ 
+                              color: user.completionRate >= 80 ? '#10B981' : 
+                                     user.completionRate >= 60 ? '#F59E0B' : '#EF4444' 
+                            }}>
+                              {user.completionRate}%
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Average Score</p>
+                            <p className="text-xl font-bold text-vergil-off-black">{averageScore}%</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Courses</p>
+                            <p className="text-xl font-bold text-vergil-off-black">
+                              {coursesCompleted}/{totalCourses}
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Time Spent</p>
+                            <p className="text-xl font-bold text-vergil-off-black">{hoursSpent}h</p>
+                          </div>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="mt-3">
+                          <div className="flex justify-between text-xs text-vergil-off-black/60 mb-1">
+                            <span>Course Progress</span>
+                            <span>{coursesCompleted} completed, {coursesInProgress} in progress</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="flex h-2 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-green-500"
+                                style={{ width: `${(coursesCompleted / totalCourses) * 100}%` }}
+                              />
+                              <div 
+                                className="bg-blue-500"
+                                style={{ width: `${(coursesInProgress / totalCourses) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Streak */}
+                        <div className="flex items-center justify-between mt-3 p-3 bg-vergil-purple/5 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <div className="text-2xl">🔥</div>
+                            <div>
+                              <p className="text-sm font-medium text-vergil-off-black">{streak} day streak</p>
+                              <p className="text-xs text-vergil-off-black/60">Keep it up!</p>
+                            </div>
+                          </div>
+                          <Badge variant="default" className="bg-vergil-purple">
+                            {user.status?.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Actions</h5>
+                        <div className="space-y-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              console.log('Send Slack message to', user.name)
+                            }}
+                          >
+                            <MessageSquare className="w-4 h-4 mr-2" />
+                            Send Slack Message
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              console.log('Send email to', user.name)
+                            }}
+                          >
+                            <Mail className="w-4 h-4 mr-2" />
+                            Send Email
+                          </Button>
+                          <Link href={`/lms/user-management/users/${user.id}`}>
+                            <Button variant="outline" size="sm" className="w-full justify-start">
+                              <UserIcon className="w-4 h-4 mr-2" />
+                              View Full Profile
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </>
                   )
                 })()}
               </div>
             ) : viewState.viewMode === 'roles' && selectedRole ? (
-              // Role Details
-              <div className="space-y-4">
+              // Role Details - Complete redesign
+              <div className="space-y-6">
                 {(() => {
                   const role = roles.find(r => r.id === selectedRole)
                   if (!role) return null
                   
+                  // Get users in this role
+                  const roleUsers = users.filter(u => u.roleId === role.id)
+                  
+                  // Calculate metrics
+                  const avgProgress = roleUsers.length > 0 
+                    ? Math.round(roleUsers.reduce((sum, u) => sum + (u.completionRate || 0), 0) / roleUsers.length)
+                    : 0
+                  
+                  // Get all subordinates (direct and indirect)
+                  const getAllSubordinates = (roleId: string): User[] => {
+                    const directUsers = users.filter(u => u.roleId === roleId)
+                    const childRoles = roles.filter(r => r.parentRole === roleId)
+                    const indirectUsers = childRoles.flatMap(childRole => getAllSubordinates(childRole.id))
+                    return [...directUsers, ...indirectUsers]
+                  }
+                  
+                  const allSubordinates = getAllSubordinates(role.id)
+                  const totalSubordinates = allSubordinates.length
+                  const avgSubordinateProgress = totalSubordinates > 0
+                    ? Math.round(allSubordinates.reduce((sum, u) => sum + (u.completionRate || 0), 0) / totalSubordinates)
+                    : 0
+                  
+                  // Count at-risk members
+                  const atRiskCount = roleUsers.filter(u => u.status === 'at_risk' || u.status === 'behind').length
+                  
                   return (
                     <>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-medium"
-                          style={{ backgroundColor: role.color }}
-                        >
-                          {role.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-vergil-off-black">{role.name}</h4>
-                          <p className="text-sm text-vergil-off-black/60">{role.description}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">Users in this role</p>
-                          <p className="text-2xl font-bold text-vergil-off-black">{role.usersCount}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">Reports to</p>
-                          <p className="text-vergil-off-black">
-                            {role.parentRole 
-                              ? roles.find(r => r.id === role.parentRole)?.name || 'Unknown'
-                              : 'Top Level'
-                            }
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm font-medium text-vergil-off-black/60 mb-1">Direct reports</p>
-                          <p className="text-vergil-off-black">
-                            {roles.filter(r => r.parentRole === role.id).length} roles
-                          </p>
+                      {/* Role Header */}
+                      <div className="border-b border-gray-200 pb-6">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-semibold text-lg"
+                            style={{ backgroundColor: role.color }}
+                          >
+                            {role.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-vergil-off-black">{role.name}</h4>
+                            <p className="text-sm text-vergil-off-black/60">
+                              {role.parentRole 
+                                ? `Reports to ${roles.find(r => r.id === role.parentRole)?.name || 'Unknown'}`
+                                : 'Top Level Role'
+                              }
+                            </p>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="pt-4 space-y-2">
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          onClick={() => zoomToRole(role.id)}
-                        >
-                          <Users className="w-4 h-4 mr-2" />
-                          View Users
-                        </Button>
-                        <Link href="/lms/user-management/roles">
-                          <Button variant="outline" className="w-full">
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Edit Role
+                      {/* Key Statistics */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Key Statistics</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Direct Members</p>
+                            <p className="text-xl font-bold text-vergil-off-black">{roleUsers.length}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Total Team Size</p>
+                            <p className="text-xl font-bold text-vergil-off-black">{totalSubordinates}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Avg Progress</p>
+                            <p className="text-xl font-bold" style={{ color: avgProgress >= 80 ? '#10B981' : avgProgress >= 60 ? '#F59E0B' : '#EF4444' }}>
+                              {avgProgress}%
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">At Risk</p>
+                            <p className="text-xl font-bold" style={{ color: atRiskCount > 0 ? '#EF4444' : '#10B981' }}>
+                              {atRiskCount}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Team Members */}
+                      {roleUsers.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Team Members</h5>
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {roleUsers.map(user => (
+                              <div 
+                                key={user.id} 
+                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedUser(user.id)
+                                  // Don't clear the role immediately to maintain context
+                                }}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                                    style={{ backgroundColor: role.color }}
+                                  >
+                                    {user.name.split(' ').map(n => n[0]).join('')}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
+                                    <p className="text-xs text-vergil-off-black/60">{user.completionRate}% complete</p>
+                                  </div>
+                                </div>
+                                <Badge 
+                                  variant={
+                                    user.status === 'on_track' ? 'default' : 
+                                    user.status === 'at_risk' ? 'secondary' : 'destructive'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {user.status?.replace('_', ' ')}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Actions */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Actions</h5>
+                        <div className="space-y-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              console.log('Send group email to', role.name, 'team')
+                            }}
+                          >
+                            <Mail className="w-4 h-4 mr-2" />
+                            Send Team Email
                           </Button>
-                        </Link>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              console.log('Send group Slack message to', role.name, 'team')
+                            }}
+                          >
+                            <MessageSquare className="w-4 h-4 mr-2" />
+                            Send Team Slack
+                          </Button>
+                          <Link href="/lms/user-management/roles">
+                            <Button variant="outline" size="sm" className="w-full justify-start">
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Edit Role
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </>
                   )
                 })()}
               </div>
             ) : (
-              <p className="text-vergil-off-black/60 text-sm">
-                {viewState.viewMode === 'users' 
-                  ? 'Click on a user to view details'
-                  : 'Click on a role to view details'
-                }
-              </p>
+              // Organization-wide Statistics
+              <div className="space-y-6">
+                {(() => {
+                  // Calculate organization-wide metrics
+                  const totalUsers = users.length
+                  const totalRoles = roles.length
+                  
+                  // Overall completion rate
+                  const overallCompletion = Math.round(
+                    users.reduce((sum, u) => sum + (u.completionRate || 0), 0) / totalUsers
+                  )
+                  
+                  // Users by status (using mapped status names to match user page)
+                  const aheadUsers = users.filter(u => u.status === 'ahead').length
+                  const onTrackUsers = users.filter(u => u.status === 'on_track').length
+                  const fallingBehindUsers = users.filter(u => u.status === 'at_risk').length
+                  const drasticallyBehindUsers = users.filter(u => u.status === 'behind').length
+                  
+                  // Completion by role
+                  const roleStats = roles.map(role => {
+                    const roleUsers = users.filter(u => u.roleId === role.id)
+                    const avgCompletion = roleUsers.length > 0
+                      ? Math.round(roleUsers.reduce((sum, u) => sum + (u.completionRate || 0), 0) / roleUsers.length)
+                      : 0
+                    return { role, avgCompletion, userCount: roleUsers.length }
+                  }).sort((a, b) => b.avgCompletion - a.avgCompletion)
+                  
+                  // Top performers
+                  const topPerformers = users
+                    .sort((a, b) => (b.completionRate || 0) - (a.completionRate || 0))
+                    .slice(0, 5)
+                  
+                  return (
+                    <>
+                      {/* Organization Header */}
+                      <div className="border-b border-gray-200 pb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-lg bg-vergil-purple/10 flex items-center justify-center">
+                            <Users className="w-8 h-8 text-vergil-purple" />
+                          </div>
+                          <div>
+                            <h4 className="text-lg font-semibold text-vergil-off-black">Organization Overview</h4>
+                            <p className="text-sm text-vergil-off-black/60">
+                              {totalUsers} members across {totalRoles} roles
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Key Metrics */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Key Metrics</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
+                            <p className="text-2xl font-bold" style={{ 
+                              color: overallCompletion >= 80 ? '#10B981' : 
+                                     overallCompletion >= 60 ? '#F59E0B' : '#EF4444' 
+                            }}>
+                              {overallCompletion}%
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Total Members</p>
+                            <p className="text-2xl font-bold text-vergil-off-black">{totalUsers}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Ahead of Time</p>
+                            <p className="text-2xl font-bold text-cyan-800">{aheadUsers}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">On Track</p>
+                            <p className="text-2xl font-bold text-emerald-700">{onTrackUsers}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Falling Behind</p>
+                            <p className="text-2xl font-bold text-orange-800">{fallingBehindUsers}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-vergil-off-black/60">Drastically Behind</p>
+                            <p className="text-2xl font-bold text-red-700">{drasticallyBehindUsers}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Status Distribution */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Status Distribution</h5>
+                        <div className="space-y-3">
+                          <div className="relative">
+                            <div 
+                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-cyan-300 transition-all"
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'ahead' ? null : 'ahead')}
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
+                                <span className="text-sm font-bold text-cyan-800">{aheadUsers} ({Math.round(aheadUsers / totalUsers * 100)}%)</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-cyan-600 h-2 rounded-full transition-all"
+                                  style={{ width: `${(aheadUsers / totalUsers) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                            {openStatusDropdown === 'ahead' && (
+                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
+                                <div className="p-2">
+                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
+                                    <p className="text-xs font-medium text-vergil-off-black/60">Ahead of Time Users</p>
+                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
+                                  </div>
+                                  {users.filter(u => u.status === 'ahead').map(user => {
+                                    const role = roles.find(r => r.id === user.roleId)
+                                    return (
+                                      <div
+                                        key={user.id}
+                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedUser(user.id)
+                                          setSelectedRole(null)
+                                          setOpenStatusDropdown(null)
+                                        }}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
+                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
+                                          >
+                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
+                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
+                                          </div>
+                                        </div>
+                                        <span className="text-xs font-bold text-cyan-800">{user.completionRate}%</span>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <div 
+                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all"
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'on_track' ? null : 'on_track')}
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-vergil-off-black">On Track</span>
+                                <span className="text-sm font-bold text-emerald-700">{onTrackUsers} ({Math.round(onTrackUsers / totalUsers * 100)}%)</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-emerald-600 h-2 rounded-full transition-all"
+                                  style={{ width: `${(onTrackUsers / totalUsers) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                            {openStatusDropdown === 'on_track' && (
+                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
+                                <div className="p-2">
+                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
+                                    <p className="text-xs font-medium text-vergil-off-black/60">On Track Users</p>
+                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
+                                  </div>
+                                  {users.filter(u => u.status === 'on_track').map(user => {
+                                    const role = roles.find(r => r.id === user.roleId)
+                                    return (
+                                      <div
+                                        key={user.id}
+                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedUser(user.id)
+                                          setSelectedRole(null)
+                                          setOpenStatusDropdown(null)
+                                        }}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
+                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
+                                          >
+                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
+                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
+                                          </div>
+                                        </div>
+                                        <span className="text-xs font-bold text-emerald-700">{user.completionRate}%</span>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <div 
+                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-orange-300 transition-all"
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'falling_behind' ? null : 'falling_behind')}
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
+                                <span className="text-sm font-bold text-orange-800">{fallingBehindUsers} ({Math.round(fallingBehindUsers / totalUsers * 100)}%)</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-orange-600 h-2 rounded-full transition-all"
+                                  style={{ width: `${(fallingBehindUsers / totalUsers) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                            {openStatusDropdown === 'falling_behind' && (
+                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
+                                <div className="p-2">
+                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
+                                    <p className="text-xs font-medium text-vergil-off-black/60">Falling Behind Users</p>
+                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
+                                  </div>
+                                  {users.filter(u => u.status === 'at_risk').map(user => {
+                                    const role = roles.find(r => r.id === user.roleId)
+                                    return (
+                                      <div
+                                        key={user.id}
+                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedUser(user.id)
+                                          setSelectedRole(null)
+                                          setOpenStatusDropdown(null)
+                                        }}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
+                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
+                                          >
+                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
+                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
+                                          </div>
+                                        </div>
+                                        <span className="text-xs font-bold text-orange-800">{user.completionRate}%</span>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <div 
+                              className="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-red-300 transition-all"
+                              onClick={() => setOpenStatusDropdown(openStatusDropdown === 'drastically_behind' ? null : 'drastically_behind')}
+                            >
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
+                                <span className="text-sm font-bold text-red-700">{drasticallyBehindUsers} ({Math.round(drasticallyBehindUsers / totalUsers * 100)}%)</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-red-600 h-2 rounded-full transition-all"
+                                  style={{ width: `${(drasticallyBehindUsers / totalUsers) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                            {openStatusDropdown === 'drastically_behind' && (
+                              <div className="absolute z-10 mt-2 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
+                                <div className="p-2">
+                                  <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-gray-100">
+                                    <p className="text-xs font-medium text-vergil-off-black/60">Drastically Behind Users</p>
+                                    <p className="text-xs text-vergil-off-black/50">Progress</p>
+                                  </div>
+                                  {users.filter(u => u.status === 'behind').map(user => {
+                                    const role = roles.find(r => r.id === user.roleId)
+                                    return (
+                                      <div
+                                        key={user.id}
+                                        className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedUser(user.id)
+                                          setSelectedRole(null)
+                                          setOpenStatusDropdown(null)
+                                        }}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium"
+                                            style={{ backgroundColor: role?.color || '#7B00FF' }}
+                                          >
+                                            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                          </div>
+                                          <div>
+                                            <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
+                                            <p className="text-xs text-vergil-off-black/60">{role?.name}</p>
+                                          </div>
+                                        </div>
+                                        <span className="text-xs font-bold text-red-700">{user.completionRate}%</span>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Performance by Role */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Performance by Role</h5>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {roleStats.map(({ role, avgCompletion, userCount }) => (
+                            <div 
+                              key={role.id} 
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                              onClick={() => {
+                                setSelectedRole(role.id)
+                                setSelectedUser(null)
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-medium"
+                                  style={{ backgroundColor: role.color }}
+                                >
+                                  {role.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-vergil-off-black">{role.name}</p>
+                                  <p className="text-xs text-vergil-off-black/60">{userCount} members</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold" style={{ 
+                                  color: avgCompletion >= 80 ? '#10B981' : 
+                                         avgCompletion >= 60 ? '#F59E0B' : '#EF4444' 
+                                }}>
+                                  {avgCompletion}%
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Actions */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Actions</h5>
+                        <div className="space-y-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              console.log('Send organization-wide announcement')
+                            }}
+                          >
+                            <Mail className="w-4 h-4 mr-2" />
+                            Send Organization Announcement
+                          </Button>
+                          <Link href="/lms/user-management">
+                            <Button variant="outline" size="sm" className="w-full justify-start">
+                              <Users className="w-4 h-4 mr-2" />
+                              Manage All Users
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
             )}
           </div>
           </div>

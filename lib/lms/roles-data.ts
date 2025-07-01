@@ -19,7 +19,7 @@ export const initialRoles: Role[] = [
     name: 'Super Admin',
     color: '#7B00FF',
     description: 'Full system access and control',
-    usersCount: 2,
+    usersCount: 0, // Will be calculated from mock data
     privileges: ['all'],
     createdAt: '2023-01-01',
     position: { x: 400, y: 50 },
@@ -31,11 +31,11 @@ export const initialRoles: Role[] = [
     name: 'Admin',
     color: '#0087FF',
     description: 'Administrative access with some restrictions',
-    usersCount: 5,
+    usersCount: 0, // Will be calculated from mock data
     parentRole: '1',
     privileges: ['user_management', 'course_management', 'analytics_view'],
     createdAt: '2023-01-15',
-    position: { x: 400, y: 180 },
+    position: { x: 400, y: 220 },
     completionRate: 95,
     status: 'on_track'
   },
@@ -44,11 +44,11 @@ export const initialRoles: Role[] = [
     name: 'Manager',
     color: '#10B981',
     description: 'Team management and reporting',
-    usersCount: 12,
+    usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
     privileges: ['team_view', 'reports', 'course_assign'],
     createdAt: '2023-02-01',
-    position: { x: 400, y: 310 },
+    position: { x: 275, y: 390 },
     completionRate: 88,
     status: 'at_risk'
   },
@@ -57,11 +57,11 @@ export const initialRoles: Role[] = [
     name: 'Instructor',
     color: '#FFC700',
     description: 'Course creation and student management',
-    usersCount: 8,
+    usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
     privileges: ['course_create', 'student_view', 'grading'],
     createdAt: '2023-02-15',
-    position: { x: 400, y: 440 },
+    position: { x: 525, y: 390 },
     completionRate: 82,
     status: 'behind'
   }
@@ -73,7 +73,7 @@ export function calculateNewRolePosition(roles: Role[], parentRoleId?: string): 
     // Top-level role - find rightmost position
     const topLevelRoles = roles.filter(r => !r.parentRole)
     const maxX = Math.max(...topLevelRoles.map(r => r.position?.x || 0))
-    return { x: maxX + 200, y: 50 }
+    return { x: maxX + 250, y: 50 }
   }
   
   const parentRole = roles.find(r => r.id === parentRoleId)
@@ -86,7 +86,7 @@ export function calculateNewRolePosition(roles: Role[], parentRoleId?: string): 
   
   if (siblings.length === 0) {
     // First child - position directly below parent
-    return { x: parentRole.position.x, y: parentRole.position.y + 130 }
+    return { x: parentRole.position.x, y: parentRole.position.y + 170 }
   }
   
   // Position to the right of last sibling
@@ -94,7 +94,7 @@ export function calculateNewRolePosition(roles: Role[], parentRoleId?: string): 
   const lastSibling = siblings.find(r => r.position?.x === maxX)
   
   return { 
-    x: maxX + 200, 
-    y: lastSibling?.position?.y || parentRole.position.y + 130 
+    x: maxX + 250, 
+    y: lastSibling?.position?.y || parentRole.position.y + 170 
   }
 }
