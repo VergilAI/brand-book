@@ -40,7 +40,7 @@ const mockCourse: Course = {
           ],
           availableGameTypes: ['written-material', 'flashcards', 'millionaire', 'case-study'],
           estimatedTime: 30,
-          completed: true
+          completed: false
         },
         {
           id: 'lesson-1-2',
@@ -53,7 +53,7 @@ const mockCourse: Course = {
           ],
           availableGameTypes: ['written-material', 'video', 'flashcards', 'timed-test'],
           estimatedTime: 45,
-          completed: true
+          completed: false
         },
         {
           id: 'lesson-1-3',
@@ -89,7 +89,7 @@ const mockCourse: Course = {
           ],
           availableGameTypes: ['written-material', 'video', 'flashcards', 'role-playing'],
           estimatedTime: 60,
-          completed: true
+          completed: false
         },
         {
           id: 'lesson-2-2',
@@ -140,7 +140,7 @@ export function NewCourseOverview() {
   const [showFilters, setShowFilters] = useState(false)
   const [selectedLesson, setSelectedLesson] = useState<any>(null)
   const [showLearnModal, setShowLearnModal] = useState(false)
-  const [selectedLessonForAnalytics, setSelectedLessonForAnalytics] = useState<any>(mockCourse.chapters[0].lessons[0])
+  const [selectedLessonForAnalytics, setSelectedLessonForAnalytics] = useState<any>(null)
   const [filters, setFilters] = useState<FilterState>({
     chapters: [],
     completionStatus: [],
@@ -272,6 +272,29 @@ export function NewCourseOverview() {
     acc + lesson.knowledgePoints.filter(kp => kp.proficiency >= 80).length, 0
   )
 
+  // Calculate test readiness based on knowledge point averages
+  const calculateTestReadiness = (knowledgePoints: any[]) => {
+    if (knowledgePoints.length === 0) return { score: 0, label: 'Not Ready', textColor: 'text-gray-600', bgColor: 'bg-gray-100 text-gray-700 border-gray-200' }
+    
+    const average = knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / knowledgePoints.length
+    
+    if (average >= 80) return { score: Math.round(average), label: 'Ready for Test', textColor: 'text-emerald-600', bgColor: 'bg-emerald-100 text-emerald-700 border-emerald-200' }
+    if (average >= 60) return { score: Math.round(average), label: 'Almost Ready', textColor: 'text-yellow-600', bgColor: 'bg-yellow-100 text-yellow-700 border-yellow-200' }
+    if (average >= 40) return { score: Math.round(average), label: 'Keep Learning', textColor: 'text-orange-600', bgColor: 'bg-orange-100 text-orange-700 border-orange-200' }
+    return { score: Math.round(average), label: 'Not Ready', textColor: 'text-red-600', bgColor: 'bg-red-100 text-red-700 border-red-200' }
+  }
+
+  // Calculate chapter status based on test readiness
+  const getChapterStatus = (chapter: any) => {
+    const allKPs = chapter.lessons.flatMap((lesson: any) => lesson.knowledgePoints)
+    const hasProgress = allKPs.some((kp: any) => kp.proficiency > 0)
+    return hasProgress ? 'In Progress' : 'Not Started'
+  }
+
+  // Calculate overall course test readiness
+  const courseKnowledgePoints = allLessons.flatMap(lesson => lesson.knowledgePoints)
+  const courseTestReadiness = calculateTestReadiness(courseKnowledgePoints)
+
   return (
     <div className="flex h-screen bg-vergil-off-white">
       {/* Main Content */}
@@ -303,9 +326,21 @@ export function NewCourseOverview() {
             </div>
           </div>
           
-          <Badge className="bg-vergil-purple text-white">
-            In Progress
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge className={courseTestReadiness.bgColor}>
+              Final Test: {courseTestReadiness.label} ({courseTestReadiness.score}%)
+            </Badge>
+            <Button
+              size="sm"
+              className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+              onClick={() => {
+                // Navigate to test screen
+                window.location.href = '/lms/test'
+              }}
+            >
+              Take Test
+            </Button>
+          </div>
         </div>
 
         {/* Progress bar */}
@@ -463,7 +498,17 @@ export function NewCourseOverview() {
             selectedLessons={selectedLessons}
             onSelectLesson={handleSelectLesson}
             onLearnClick={handleLearnClick}
-            onLessonClick={(lesson) => setSelectedLessonForAnalytics(lesson)}
+            onLessonClick={(lesson) => {
+              // Toggle lesson selection
+              if (selectedLessonForAnalytics?.id === lesson.id) {
+                setSelectedLessonForAnalytics(null)
+              } else {
+                setSelectedLessonForAnalytics(lesson)
+              }
+            }}
+            selectedLessonId={selectedLessonForAnalytics?.id}
+            calculateTestReadiness={calculateTestReadiness}
+            getChapterStatus={getChapterStatus}
           />
         ))}
       </div>
@@ -486,6 +531,7 @@ export function NewCourseOverview() {
       <KnowledgePointAnalytics 
         lesson={selectedLessonForAnalytics} 
         allLessons={allLessons}
+        selectedLesson={selectedLessonForAnalytics}
         onNavigateToLesson={(lesson) => {
           setSelectedLessonForAnalytics(lesson)
           setSelectedLesson(lesson)

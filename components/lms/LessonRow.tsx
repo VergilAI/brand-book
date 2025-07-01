@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle, Circle, Clock, Play, Award, Brain, MoreVertical } from 'lucide-react'
+import { Circle, Play, Award, Brain, MoreVertical, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Checkbox } from '@/components/ui/Checkbox'
@@ -12,6 +12,7 @@ interface LessonRowProps {
   lessonNumber: number
   chapterNumber: number
   isSelected: boolean
+  isLessonSelected?: boolean
   onSelect: (checked: boolean) => void
   onLearnClick: () => void
   onRowClick?: () => void
@@ -22,6 +23,7 @@ export function LessonRow({
   lessonNumber, 
   chapterNumber, 
   isSelected, 
+  isLessonSelected = false,
   onSelect, 
   onLearnClick,
   onRowClick
@@ -46,20 +48,13 @@ export function LessonRow({
     return 'Not Started'
   }
 
-  const formatDuration = (minutes: number) => {
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60)
-      const mins = minutes % 60
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
-    }
-    return `${minutes}m`
-  }
 
   return (
     <tr 
       className={cn(
         "hover:bg-vergil-off-white/50 transition-colors cursor-pointer",
-        isSelected && "bg-vergil-emphasis-bg/20"
+        isSelected && "bg-vergil-emphasis-bg/20",
+        isLessonSelected && "bg-vergil-purple/10 border-l-4 border-vergil-purple"
       )}
       onClick={onRowClick}
     >
@@ -68,6 +63,7 @@ export function LessonRow({
           <Checkbox
             checked={isSelected}
             onCheckedChange={onSelect}
+            onClick={(e) => e.stopPropagation()}
           />
           
           <div className="flex-shrink-0">
@@ -112,24 +108,20 @@ export function LessonRow({
       </td>
 
       <td className="px-4 py-3">
-        <div className="flex items-center gap-1 text-xs text-vergil-off-black/60">
-          <Clock className="h-3 w-3" />
-          <span>{formatDuration(lesson.estimatedTime)}</span>
-        </div>
-      </td>
-
-      <td className="px-4 py-3">
-        {lesson.completed ? (
-          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
-            <CheckCircle className="w-2 h-2 mr-1" />
-            Completed
-          </Badge>
-        ) : (
-          <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
-            <Circle className="w-2 h-2 mr-1" />
-            In Progress
-          </Badge>
-        )}
+        {(() => {
+          const hasProgress = lesson.knowledgePoints.some((kp: any) => kp.proficiency > 0)
+          return hasProgress ? (
+            <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
+              <Circle className="w-2 h-2 mr-1" />
+              In Progress
+            </Badge>
+          ) : (
+            <Badge className="bg-gray-50 text-gray-700 border-gray-200 text-xs">
+              <Circle className="w-2 h-2 mr-1" />
+              Not Started
+            </Badge>
+          )
+        })()}
       </td>
 
       <td className="px-4 py-3">
@@ -137,7 +129,10 @@ export function LessonRow({
           <Button
             variant={lesson.completed ? "outline" : "default"}
             size="sm"
-            onClick={onLearnClick}
+            onClick={(e) => {
+              e.stopPropagation()
+              onLearnClick()
+            }}
             className={cn(
               "text-xs h-7",
               !lesson.completed ? "bg-vergil-purple hover:bg-vergil-purple-lighter" : ""
@@ -147,7 +142,12 @@ export function LessonRow({
             {lesson.completed ? 'Review' : 'Learn'}
           </Button>
           
-          <Button variant="ghost" size="sm" className="text-vergil-off-black/60 hover:text-vergil-off-black h-7 w-7 p-0">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-vergil-off-black/60 hover:text-vergil-off-black h-7 w-7 p-0"
+            onClick={(e) => e.stopPropagation()}
+          >
             <MoreVertical className="w-3 h-3" />
           </Button>
         </div>

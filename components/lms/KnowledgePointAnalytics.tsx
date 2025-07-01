@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, BarChart3, Target, BookOpen, Clock, Award } from 'lucide-react'
+import { ChevronLeft, ChevronRight, BarChart3, Target, BookOpen, Clock, Award, Calendar, CalendarDays, Zap } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -12,6 +12,7 @@ interface KnowledgePointAnalyticsProps {
   lesson: Lesson
   allLessons?: any[]
   onNavigateToLesson?: (lesson: any) => void
+  selectedLesson?: Lesson | null
 }
 
 // Mock data for where knowledge points can be learned
@@ -30,10 +31,12 @@ const mockLearningPaths = {
   ]
 }
 
-export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToLesson }: KnowledgePointAnalyticsProps) {
+export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToLesson, selectedLesson }: KnowledgePointAnalyticsProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [selectedKnowledgePoint, setSelectedKnowledgePoint] = useState<string | null>(null)
   const [hoveredKnowledgePoint, setHoveredKnowledgePoint] = useState<string | null>(null)
+  const [testDate, setTestDate] = useState('')
+  const [showTestPlan, setShowTestPlan] = useState(false)
   const canvasRef = useRef<SVGSVGElement>(null)
 
   const sidebarWidth = isCollapsed ? 0 : 380
@@ -61,9 +64,10 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
     return baseSize + (maxSize - baseSize) * sizeMultiplier
   }
 
-  // Get all knowledge points from all lessons with full lesson context
+  // Get all knowledge points from all lessons with lesson context
   const getAllKnowledgePoints = () => {
     const allKnowledgePoints = []
+    
     allLessons.forEach(lesson => {
       lesson.knowledgePoints.forEach(kp => {
         allKnowledgePoints.push({
@@ -76,6 +80,12 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
       })
     })
     return allKnowledgePoints
+  }
+
+  // Get knowledge points for the selected lesson only
+  const getSelectedLessonKnowledgePoints = () => {
+    if (!selectedLesson) return []
+    return selectedLesson.knowledgePoints.map(kp => kp.id)
   }
 
   // Calculate positions for knowledge points in a circular layout
@@ -96,6 +106,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
   }
 
   const positions = calculateKnowledgePointPositions()
+  const selectedLessonKPIds = getSelectedLessonKnowledgePoints()
 
   // Render knowledge point graph
   const renderKnowledgePointGraph = () => {
@@ -138,6 +149,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
           {/* Connection lines */}
           {positions.map((pos, index) => {
             const isConnected = selectedKnowledgePoint === pos.id || hoveredKnowledgePoint === pos.id
+            const isInSelectedLesson = selectedLesson ? selectedLessonKPIds.includes(pos.id) : true
             const nodeSize = getNodeSize(pos.proficiency)
             const centerNodeSize = 22
             
@@ -165,9 +177,9 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 y1={startY}
                 x2={endX}
                 y2={endY}
-                stroke={isConnected ? getProficiencyColor(pos.proficiency) : "#E5E7EB"}
-                strokeWidth={isConnected ? "2" : "1"}
-                opacity={isConnected ? "0.6" : "0.2"}
+                stroke={isConnected ? getProficiencyColor(pos.proficiency) : isInSelectedLesson ? "#7B00FF" : "#E5E7EB"}
+                strokeWidth={isConnected ? "2" : isInSelectedLesson ? "1.5" : "1"}
+                opacity={isConnected ? "0.6" : isInSelectedLesson ? "0.4" : "0.1"}
                 className="transition-all duration-300"
               />
             )
@@ -208,8 +220,9 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             const nodeSize = getNodeSize(pos.proficiency)
             const isHovered = hoveredKnowledgePoint === pos.id
             const isSelected = selectedKnowledgePoint === pos.id
-            const opacity = isSelected || isHovered ? 0.4 : 0.15
-            const strokeWidth = isSelected ? 3 : isHovered ? 2.5 : 2
+            const isInSelectedLesson = selectedLesson ? selectedLessonKPIds.includes(pos.id) : true
+            const opacity = isSelected || isHovered ? 0.4 : isInSelectedLesson ? 0.25 : 0.08
+            const strokeWidth = isSelected ? 3 : isHovered ? 2.5 : isInSelectedLesson ? 2.5 : 1.5
             
             return (
               <g key={pos.id}>
@@ -246,7 +259,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   cy={pos.y}
                   r={nodeSize}
                   fill="none"
-                  stroke={getProficiencyColor(pos.proficiency)}
+                  stroke={isInSelectedLesson ? getProficiencyColor(pos.proficiency) : "#9CA3AF"}
                   strokeWidth={strokeWidth}
                   className="cursor-pointer transition-all duration-300 ease-out pointer-events-none"
                   style={{
@@ -281,7 +294,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   dominantBaseline="central"
                   fontSize={nodeSize > 16 ? "11" : "9"}
                   fontWeight="bold"
-                  fill="#000000"
+                  fill={isInSelectedLesson ? "#000000" : "#9CA3AF"}
                   className="pointer-events-none transition-all duration-300"
                   style={{
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
@@ -322,6 +335,131 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
   const learningPoints = allKPs.filter(kp => kp.proficiency >= 40 && kp.proficiency < 80).length
   const strugglingPoints = allKPs.filter(kp => kp.proficiency < 40).length
 
+  // Test planning logic
+  const generateTestPlan = () => {
+    if (!testDate) return []
+    
+    const targetDate = new Date(testDate)
+    const today = new Date()
+    const daysUntilTest = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (daysUntilTest <= 0) return []
+    
+    // Get lessons that need work (those with knowledge points < 80% proficiency)
+    const lessonsNeedingWork = allLessons.filter(lesson => {
+      const avgProficiency = lesson.knowledgePoints.length > 0
+        ? lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length
+        : 0
+      return avgProficiency < 80
+    }).sort((a, b) => {
+      // Sort by priority: lowest proficiency first
+      const avgA = a.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / a.knowledgePoints.length
+      const avgB = b.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / b.knowledgePoints.length
+      return avgA - avgB
+    })
+    
+    // Distribute lessons across available days
+    const plan = []
+    const lessonsPerDay = Math.ceil(lessonsNeedingWork.length / Math.max(daysUntilTest - 1, 1))
+    
+    for (let day = 0; day < Math.min(daysUntilTest - 1, lessonsNeedingWork.length); day++) {
+      const studyDate = new Date(today)
+      studyDate.setDate(studyDate.getDate() + day + 1)
+      
+      const startIndex = day * lessonsPerDay
+      const endIndex = Math.min(startIndex + lessonsPerDay, lessonsNeedingWork.length)
+      const dayLessons = lessonsNeedingWork.slice(startIndex, endIndex)
+      
+      if (dayLessons.length > 0) {
+        plan.push({
+          date: studyDate,
+          lessons: dayLessons,
+          totalTime: dayLessons.reduce((acc, lesson) => acc + lesson.estimatedTime, 0)
+        })
+      }
+    }
+    
+    // Add final review day
+    if (daysUntilTest > 1) {
+      const reviewDate = new Date(targetDate)
+      reviewDate.setDate(reviewDate.getDate() - 1)
+      plan.push({
+        date: reviewDate,
+        lessons: [],
+        isReviewDay: true,
+        totalTime: 60 // 1 hour review
+      })
+    }
+    
+    return plan
+  }
+
+  const testPlan = generateTestPlan()
+
+  // Mock data for lesson analytics
+  const getLessonAnalytics = (lesson: Lesson) => {
+    const averageProficiency = lesson.knowledgePoints.length > 0
+      ? Math.round(lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length)
+      : 0
+
+    // Mock interaction data
+    const lastInteracted = new Date()
+    lastInteracted.setDate(lastInteracted.getDate() - Math.floor(Math.random() * 30))
+
+    // Recommend learning method based on proficiency
+    const getRecommendedMethod = () => {
+      if (averageProficiency < 30) return { method: 'Written Material', reason: 'Start with fundamentals' }
+      if (averageProficiency < 60) return { method: 'Flashcards', reason: 'Reinforce key concepts' }
+      if (averageProficiency < 80) return { method: 'Case Study', reason: 'Apply knowledge practically' }
+      return { method: 'Timed Test', reason: 'Validate mastery' }
+    }
+
+    const weakestKnowledgePoints = lesson.knowledgePoints
+      .filter(kp => kp.proficiency < 60)
+      .sort((a, b) => a.proficiency - b.proficiency)
+      .slice(0, 3)
+
+    const strongestKnowledgePoints = lesson.knowledgePoints
+      .filter(kp => kp.proficiency >= 80)
+      .sort((a, b) => b.proficiency - a.proficiency)
+      .slice(0, 3)
+
+    return {
+      averageProficiency,
+      lastInteracted,
+      recommendedMethod: getRecommendedMethod(),
+      weakestKnowledgePoints,
+      strongestKnowledgePoints,
+      timeToMastery: Math.max(1, Math.ceil((100 - averageProficiency) / 10)), // days
+      difficultyLevel: averageProficiency > 70 ? 'Advanced' : averageProficiency > 40 ? 'Intermediate' : 'Beginner'
+    }
+  }
+
+  const lessonAnalytics = selectedLesson ? getLessonAnalytics(selectedLesson) : null
+
+  const handleGoogleCalendarIntegration = () => {
+    testPlan.forEach((day, index) => {
+      const startTime = new Date(day.date)
+      startTime.setHours(9, 0, 0, 0) // Default to 9 AM
+      
+      const endTime = new Date(startTime)
+      endTime.setMinutes(endTime.getMinutes() + day.totalTime)
+      
+      const title = day.isReviewDay 
+        ? 'AI Fundamentals - Final Review'
+        : `AI Fundamentals Study - ${day.lessons.length} lesson${day.lessons.length > 1 ? 's' : ''}`
+      
+      const description = day.isReviewDay
+        ? 'Final review session before the AI Fundamentals test'
+        : `Study sessions: ${day.lessons.map(l => l.title).join(', ')}`
+      
+      // Create Google Calendar URL
+      const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(description)}&location=Online%20Learning`
+      
+      window.open(googleCalendarUrl, '_blank')
+    })
+  }
+
 
   return (
     <div className="relative">
@@ -341,27 +479,138 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
 
       <div 
         className={cn(
-          "border-l border-gray-200 bg-vergil-off-white/30 transition-all duration-300 overflow-hidden",
+          "border-l border-gray-200 bg-vergil-off-white/30 transition-all duration-300 overflow-hidden h-screen",
           isCollapsed ? "w-0" : "w-96"
         )}
       >
 
       {!isCollapsed && (
-        <div className="p-4 h-full overflow-y-auto space-y-4">
+        <div className="p-4 h-full overflow-y-auto space-y-4 flex flex-col">
           {/* Header */}
           <div className="pt-8">
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="w-4 h-4 text-vergil-purple" />
-              <h3 className="text-sm font-semibold text-vergil-off-black">Platform Analytics</h3>
+              <h3 className="text-sm font-semibold text-vergil-off-black">
+                {selectedLesson ? 'Lesson Analytics' : 'Platform Analytics'}
+              </h3>
             </div>
             <p className="text-xs text-vergil-off-black/60">
-              Complete knowledge map across all lessons
+              {selectedLesson 
+                ? `Detailed insights for "${selectedLesson.title}"`
+                : 'Complete knowledge map across all lessons'
+              }
             </p>
           </div>
 
+          {/* Lesson-Specific Analytics */}
+          {selectedLesson && lessonAnalytics && (
+            <Card variant="outlined" className="p-3 bg-vergil-purple/5 border-vergil-purple/20">
+              <div className="space-y-3">
+                {/* Lesson Overview */}
+                <div>
+                  <h4 className="text-sm font-semibold text-vergil-off-black mb-2">{selectedLesson.title}</h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white rounded p-2">
+                      <div className="font-medium text-vergil-off-black">Average Score</div>
+                      <div className={cn("font-bold", 
+                        lessonAnalytics.averageProficiency >= 80 ? 'text-emerald-600' :
+                        lessonAnalytics.averageProficiency >= 60 ? 'text-yellow-600' :
+                        lessonAnalytics.averageProficiency >= 40 ? 'text-orange-600' : 'text-red-600'
+                      )}>
+                        {lessonAnalytics.averageProficiency}%
+                      </div>
+                    </div>
+                    <div className="bg-white rounded p-2">
+                      <div className="font-medium text-vergil-off-black">Last Studied</div>
+                      <div className="text-vergil-off-black/60">
+                        {lessonAnalytics.lastInteracted.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded p-2">
+                      <div className="font-medium text-vergil-off-black">Difficulty</div>
+                      <div className="text-vergil-off-black/60">{lessonAnalytics.difficultyLevel}</div>
+                    </div>
+                    <div className="bg-white rounded p-2">
+                      <div className="font-medium text-vergil-off-black">Est. Mastery</div>
+                      <div className="text-vergil-off-black/60">{lessonAnalytics.timeToMastery} days</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recommended Learning Method */}
+                <div className="bg-white rounded p-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Target className="w-3 h-3 text-vergil-purple" />
+                    <span className="text-xs font-medium text-vergil-off-black">Recommended Method</span>
+                  </div>
+                  <div className="text-xs">
+                    <div className="font-medium text-vergil-purple">{lessonAnalytics.recommendedMethod.method}</div>
+                    <div className="text-vergil-off-black/60">{lessonAnalytics.recommendedMethod.reason}</div>
+                  </div>
+                </div>
+
+                {/* Knowledge Points Breakdown */}
+                <div>
+                  <h5 className="text-xs font-medium text-vergil-off-black mb-2">Knowledge Points ({selectedLesson.knowledgePoints.length})</h5>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {selectedLesson.knowledgePoints.map((kp) => (
+                      <div key={kp.id} className="bg-white rounded p-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-vergil-off-black">{kp.title}</span>
+                          <Badge className={cn("text-xs", 
+                            kp.proficiency >= 80 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                            kp.proficiency >= 60 ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                            kp.proficiency >= 40 ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                            'bg-red-100 text-red-700 border-red-200'
+                          )}>
+                            {kp.proficiency}%
+                          </Badge>
+                        </div>
+                        <div className="text-vergil-off-black/60 mt-1">{kp.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Areas to Focus */}
+                {lessonAnalytics.weakestKnowledgePoints.length > 0 && (
+                  <div className="bg-red-50 rounded p-2">
+                    <div className="text-xs font-medium text-red-800 mb-1">Focus Areas</div>
+                    <div className="space-y-1">
+                      {lessonAnalytics.weakestKnowledgePoints.map((kp) => (
+                        <div key={kp.id} className="text-xs text-red-700">
+                          • {kp.title} ({kp.proficiency}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Strengths */}
+                {lessonAnalytics.strongestKnowledgePoints.length > 0 && (
+                  <div className="bg-emerald-50 rounded p-2">
+                    <div className="text-xs font-medium text-emerald-800 mb-1">Strengths</div>
+                    <div className="space-y-1">
+                      {lessonAnalytics.strongestKnowledgePoints.map((kp) => (
+                        <div key={kp.id} className="text-xs text-emerald-700">
+                          • {kp.title} ({kp.proficiency}%)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* Knowledge Point Graph */}
-          <Card variant="outlined" className="p-3">
-            <h4 className="text-sm font-medium text-vergil-off-black mb-3">Knowledge Point Map</h4>
+          <Card variant="outlined" className="p-3 flex-shrink-0">
+            <h4 className="text-sm font-medium text-vergil-off-black mb-3">
+              Knowledge Point Map
+              {selectedLesson && (
+                <span className="text-vergil-purple"> • {selectedLesson.title} highlighted</span>
+              )}
+            </h4>
             {renderKnowledgePointGraph()}
           </Card>
 
@@ -459,6 +708,90 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             </div>
           </div>
 
+          {/* Test Planner */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-vergil-purple" />
+              <h4 className="text-sm font-medium text-vergil-off-black">Test Planner</h4>
+            </div>
+
+            <Card variant="outlined" className="p-3">
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-vergil-off-black mb-1">
+                    Test Date
+                  </label>
+                  <input
+                    type="date"
+                    value={testDate}
+                    onChange={(e) => setTestDate(e.target.value)}
+                    className="w-full text-xs p-2 border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-vergil-purple/20 focus:border-vergil-purple"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                {testDate && (
+                  <>
+                    <div className="text-xs text-vergil-off-black/60">
+                      {(() => {
+                        const days = Math.ceil((new Date(testDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                        return days <= 0 ? 'Please select a future date' : `${days} days to prepare`
+                      })()}
+                    </div>
+
+                    {testPlan.length > 0 && (
+                      <div className="space-y-2">
+                        <Button
+                          size="sm"
+                          onClick={() => setShowTestPlan(!showTestPlan)}
+                          className="w-full text-xs bg-vergil-purple hover:bg-vergil-purple-lighter"
+                        >
+                          <CalendarDays className="w-3 h-3 mr-1" />
+                          {showTestPlan ? 'Hide Plan' : 'Generate Study Plan'}
+                        </Button>
+
+                        {showTestPlan && (
+                          <div className="space-y-2">
+                            <div className="max-h-40 overflow-y-auto space-y-2">
+                              {testPlan.map((day, index) => (
+                                <div key={index} className="bg-white rounded p-2 text-xs border border-gray-100">
+                                  <div className="font-medium text-vergil-off-black">
+                                    {day.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                  </div>
+                                  {day.isReviewDay ? (
+                                    <div className="text-vergil-off-black/60">Final Review (1h)</div>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      <div className="text-vergil-off-black/60">
+                                        {day.lessons.length} lesson{day.lessons.length > 1 ? 's' : ''} ({Math.round(day.totalTime / 60 * 10) / 10}h)
+                                      </div>
+                                      <div className="text-vergil-off-black/50 text-xs">
+                                        {day.lessons.slice(0, 2).map(l => l.title).join(', ')}
+                                        {day.lessons.length > 2 && ` +${day.lessons.length - 2} more`}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+
+                            <Button
+                              size="sm"
+                              onClick={handleGoogleCalendarIntegration}
+                              className="w-full text-xs bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Zap className="w-3 h-3 mr-1" />
+                              Smart Calendar (Google)
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </Card>
+          </div>
 
           {/* Platform Stats */}
           <div className="space-y-2">

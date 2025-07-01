@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Clock, BookOpen, CheckCircle, Circle, Play, Award } from 'lucide-react'
+import { ChevronDown, ChevronRight, Clock, BookOpen, CheckCircle, Circle, Award } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -16,6 +16,9 @@ interface ChapterCardProps {
   onSelectLesson: (lessonId: string, checked: boolean) => void
   onLearnClick: (lesson: Lesson) => void
   onLessonClick?: (lesson: Lesson) => void
+  selectedLessonId?: string
+  calculateTestReadiness?: (knowledgePoints: any[]) => { score: number, label: string, textColor: string, bgColor: string }
+  getChapterStatus?: (chapter: any) => string
 }
 
 export function ChapterCard({ 
@@ -23,7 +26,10 @@ export function ChapterCard({
   selectedLessons, 
   onSelectLesson, 
   onLearnClick,
-  onLessonClick
+  onLessonClick,
+  selectedLessonId,
+  calculateTestReadiness,
+  getChapterStatus
 }: ChapterCardProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
@@ -83,9 +89,24 @@ export function ChapterCard({
                   <h3 className="text-lg font-semibold text-vergil-off-black">
                     Chapter {chapter.order}: {chapter.title}
                   </h3>
-                  <Badge className={getProgressBadgeColor(chapter.progress)}>
-                    {chapter.progress}% Complete
-                  </Badge>
+                  {(() => {
+                    const allKPs = chapter.lessons.flatMap((lesson: any) => lesson.knowledgePoints)
+                    const status = getChapterStatus ? getChapterStatus(chapter) : 'Not Started'
+                    const testReadiness = calculateTestReadiness ? calculateTestReadiness(allKPs) : { score: 0, label: 'Not Ready', textColor: 'text-gray-600', bgColor: 'bg-gray-100 text-gray-700 border-gray-200' }
+                    
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Badge className={cn("text-xs", 
+                          status === 'In Progress' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-gray-100 text-gray-700 border-gray-200'
+                        )}>
+                          {status}
+                        </Badge>
+                        <Badge className={cn("text-xs", testReadiness.bgColor)}>
+                          Test: {testReadiness.label} ({testReadiness.score}%)
+                        </Badge>
+                      </div>
+                    )
+                  })()}
                 </div>
                 
                 <p className="text-sm text-vergil-off-black/70 mb-2">{chapter.description}</p>
@@ -139,20 +160,6 @@ export function ChapterCard({
               </div>
             </div>
 
-            <Button
-              size="sm"
-              className="bg-vergil-purple hover:bg-vergil-purple-lighter text-xs"
-              onClick={() => {
-                const nextLesson = chapter.lessons.find(lesson => !lesson.completed)
-                if (nextLesson) {
-                  onLearnClick(nextLesson)
-                }
-              }}
-              disabled={completedLessons === totalLessons}
-            >
-              <Play className="w-3 h-3 mr-1" />
-              {completedLessons === totalLessons ? 'Completed' : 'Continue'}
-            </Button>
           </div>
         </div>
 
@@ -185,11 +192,6 @@ export function ChapterCard({
                 </th>
                 <th className="px-4 py-2 text-left">
                   <span className="text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider">
-                    Duration
-                  </span>
-                </th>
-                <th className="px-4 py-2 text-left">
-                  <span className="text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider">
                     Status
                   </span>
                 </th>
@@ -208,6 +210,7 @@ export function ChapterCard({
                   lessonNumber={index + 1}
                   chapterNumber={chapter.order}
                   isSelected={selectedLessons.includes(lesson.id)}
+                  isLessonSelected={selectedLessonId === lesson.id}
                   onSelect={(checked) => onSelectLesson(lesson.id, checked)}
                   onLearnClick={() => onLearnClick(lesson)}
                   onRowClick={() => onLessonClick?.(lesson)}
