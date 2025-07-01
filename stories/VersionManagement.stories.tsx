@@ -231,7 +231,7 @@ export const CompactVersionDisplay: Story = {
   }
 }
 
-export const VersionComparison: Story = {
+export const VersionComparisonStory: Story = {
   render: () => (
     <VersionComparison
       title="Design System Evolution: v1.0 vs v2.0"

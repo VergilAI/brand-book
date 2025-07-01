@@ -1,7 +1,7 @@
-import { addons, types } from '@storybook/manager-api'
-import { IconButton, WithTooltip, TooltipLinkList } from '@storybook/components'
-import { useGlobals } from '@storybook/manager-api'
-import { styled } from '@storybook/theming'
+import { addons, types } from 'storybook/manager-api'
+import { IconButton, WithTooltip, TooltipLinkList } from 'storybook/internal/components'
+import { useGlobals } from 'storybook/manager-api'
+import { styled } from 'storybook/internal/theming'
 import React from 'react'
 import { versions } from './version-switcher'
 

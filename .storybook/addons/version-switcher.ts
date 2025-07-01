@@ -1,6 +1,19 @@
-import { addons, types } from '@storybook/manager-api'
-import { AddonPanel } from '@storybook/components'
-import { useGlobals } from '@storybook/manager-api'
+// Import with dynamic loading to avoid SSR issues
+let addons: any;
+let types: any;
+let AddonPanel: any;
+let useGlobals: any;
+
+if (typeof window !== 'undefined') {
+  const managerApi = require('storybook/manager-api');
+  const components = require('storybook/internal/components');
+  
+  addons = managerApi.addons;
+  types = managerApi.types;
+  AddonPanel = components.AddonPanel;
+  useGlobals = managerApi.useGlobals;
+}
+
 import React from 'react'
 
 const ADDON_ID = 'vergil/version-switcher'
@@ -35,6 +48,8 @@ export const versions: VersionInfo[] = [
 ]
 
 const VersionSwitcher = () => {
+  if (!useGlobals) return null;
+  
   const [globals, updateGlobals] = useGlobals()
   const currentVersion = globals[PARAM_KEY] || 'v2'
 
@@ -144,19 +159,22 @@ const VersionSwitcher = () => {
   ])
 }
 
-addons.register(ADDON_ID, () => {
-  addons.add(PANEL_ID, {
-    type: types.PANEL,
-    title: 'Version Switcher',
-    render: ({ active, key }) => {
-      if (!active) return null
-      
-      return React.createElement(AddonPanel, {
-        key,
-        active
-      }, React.createElement(VersionSwitcher))
-    },
+// Only register addon in browser environment
+if (typeof window !== 'undefined' && addons) {
+  addons.register(ADDON_ID, () => {
+    addons.add(PANEL_ID, {
+      type: types.PANEL,
+      title: 'Version Switcher',
+      render: ({ active, key }: any) => {
+        if (!active || !AddonPanel) return null
+        
+        return React.createElement(AddonPanel, {
+          key,
+          active
+        }, React.createElement(VersionSwitcher))
+      },
+    })
   })
-})
+}
 
 export { PARAM_KEY }

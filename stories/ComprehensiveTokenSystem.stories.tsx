@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { useGlobals } from '@storybook/manager-api'
+import { useGlobals } from 'storybook/preview-api'
 import { 
   TokenBrowser, 
   VersionComparison, 

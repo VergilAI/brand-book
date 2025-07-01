@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { useGlobals } from '@storybook/manager-api'
+import { useGlobals } from 'storybook/preview-api'
 import { TokenGrid, TokenSwatch, MigrationTable, VersionComparison } from '../../components/storybook'
 import type { MigrationItem } from '../../components/storybook'
 
