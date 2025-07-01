@@ -51,6 +51,7 @@ interface ColorData {
   totalInstances: number;
   isFullyMigrated: boolean;
   healthScore: number;
+  healthStatus?: 'healthy' | 'warning' | 'danger';
   syncStatus?: 'synced' | 'outOfSync' | 'notPresent' | 'notApplicable';
   syncDetails?: {
     yaml?: string;
@@ -58,6 +59,7 @@ interface ColorData {
     css?: string;
     tailwind?: string;
   };
+  orphanStatus?: 'safe' | 'warning' | 'danger';  // New orphan detection
 }
 
 interface ColorReport {
@@ -68,6 +70,12 @@ interface ColorReport {
     partiallyMigratedColors: number;
     unmappedColors: number;
     overallHealthScore: number;
+    regenerationSafety?: {
+      isSafeToRegenerate: boolean;
+      breakingChanges: number;
+      safeRemovals: number;
+      safeColors: number;
+    };
   };
   colors: Record<string, ColorData>;
   scales: Record<string, string[]>;  // Group colors by scale
@@ -112,10 +120,7 @@ class ComprehensiveColorAnalyzer {
     // Step 4: Scan entire codebase for color usage
     await this.scanCodebase();
     
-    // Step 5: Calculate health scores
-    this.calculateHealthScores();
-    
-    // Step 6: Run sync validation
+    // Step 5: Run sync validation first
     let syncValidation;
     try {
       console.log('\n🔄 Running sync validation...');
@@ -137,7 +142,13 @@ class ComprehensiveColorAnalyzer {
       console.warn('⚠️  Could not run sync validation:', error);
     }
     
-    // Step 7: Generate report
+    // Step 6: Check for orphaned colors (in generated but not YAML)
+    this.checkOrphanedColors();
+    
+    // Step 7: Calculate health scores (after sync status is applied)
+    this.calculateHealthScores();
+    
+    // Step 8: Generate report
     return this.generateReport(syncValidation);
   }
 
@@ -462,7 +473,8 @@ class ComprehensiveColorAnalyzer {
       },
       totalInstances: 0,
       isFullyMigrated: false,
-      healthScore: 0
+      healthScore: 0,
+      healthStatus: 'danger'
     };
   }
 
@@ -517,8 +529,6 @@ class ComprehensiveColorAnalyzer {
     for (const [_, colorData] of this.colors) {
       const hasHardcoded = colorData.instances.hardcoded.length > 0;
       const inYAML = colorData.instances.inYAML.length > 0;
-      const inGeneratedTS = colorData.instances.inGeneratedTS.length > 0;
-      const inGeneratedCSS = colorData.instances.inGeneratedCSS.length > 0;
       
       // Calculate total instances
       colorData.totalInstances = 
@@ -526,21 +536,97 @@ class ComprehensiveColorAnalyzer {
         colorData.instances.inGeneratedTS.length +
         colorData.instances.inGeneratedCSS.length;
       
-      // A color is fully migrated if:
-      // 1. It's defined in YAML
-      // 2. It's available in both generated TS and CSS
-      // 3. It has NO hardcoded instances
-      colorData.isFullyMigrated = inYAML && inGeneratedTS && inGeneratedCSS && !hasHardcoded;
-      
-      // Health score calculation
+      // New health score calculation
       let score = 0;
-      if (inYAML) score += 40;  // 40% for being in YAML
-      if (inGeneratedTS) score += 20;  // 20% for being in generated TS
-      if (inGeneratedCSS) score += 20;  // 20% for being in generated CSS
-      if (!hasHardcoded) score += 20;  // 20% for no hardcoded instances
+      
+      if (!inYAML) {
+        // Not in YAML = 0% health
+        score = 0;
+      } else {
+        // Base score for being in YAML
+        score += 40;
+        
+        // Sync bonus (30% total, but can be partial)
+        if (colorData.syncStatus === 'synced') {
+          // All files present and synced = full 30%
+          score += 30;
+        } else if (colorData.syncStatus === 'notPresent') {
+          // Some files missing - give partial credit based on what's present
+          let presentFiles = 0;
+          if (colorData.instances.inGeneratedTS.length > 0) presentFiles++;
+          if (colorData.instances.inGeneratedCSS.length > 0) presentFiles++;
+          // Tailwind check would go here when we add it to instances
+          const totalFiles = 3; // TS, CSS, Tailwind
+          const partialSyncBonus = Math.round((presentFiles / totalFiles) * 30);
+          score += partialSyncBonus;
+        }
+        // No bonus for 'outOfSync' - values don't match
+        
+        // Usage bonus (30% for no hardcoded instances)
+        if (!hasHardcoded) {
+          score += 30;
+        }
+      }
       
       colorData.healthScore = score;
+      
+      // A color is fully migrated only if it has 100% health
+      colorData.isFullyMigrated = score === 100;
+      
+      // Set health status
+      if (score === 100) {
+        colorData.healthStatus = 'healthy';
+      } else if (colorData.orphanStatus === 'danger') {
+        // Override to danger if this color poses a regeneration risk
+        colorData.healthStatus = 'danger';
+      } else if (score > 0) {
+        colorData.healthStatus = 'warning';
+      } else {
+        colorData.healthStatus = 'danger';
+      }
     }
+  }
+
+  private checkOrphanedColors() {
+    console.log('🔍 Checking for regeneration safety (orphaned colors)...');
+    
+    for (const [_, colorData] of this.colors) {
+      const inYAML = colorData.instances.inYAML.length > 0;
+      const inGenerated = colorData.instances.inGeneratedTS.length > 0 || 
+                         colorData.instances.inGeneratedCSS.length > 0;
+      const hasCodebaseReferences = colorData.instances.hardcoded.length > 0;
+      
+      if (inYAML && inGenerated && colorData.syncStatus === 'synced') {
+        // Perfect: in YAML, in generated, and synced
+        colorData.orphanStatus = 'safe';
+      } else if (inYAML && !inGenerated) {
+        // In YAML but not generated (would be added on regeneration) - safe
+        colorData.orphanStatus = 'safe';
+      } else if (!inGenerated) {
+        // Not in generated files at all - safe
+        colorData.orphanStatus = 'safe';
+      } else if (inGenerated && !inYAML) {
+        // Present in generated but not in YAML - regeneration risk
+        if (hasCodebaseReferences) {
+          // DANGER: Would break codebase if regenerated
+          colorData.orphanStatus = 'danger';
+        } else {
+          // WARNING: Present but unused, would be removed safely
+          colorData.orphanStatus = 'warning';
+        }
+      } else if (inYAML && inGenerated && colorData.syncStatus !== 'synced') {
+        // In both but out of sync - safe to regenerate (will fix sync)
+        colorData.orphanStatus = 'safe';
+      } else {
+        colorData.orphanStatus = 'safe';
+      }
+    }
+    
+    const orphanedColors = Array.from(this.colors.values()).filter(c => c.orphanStatus !== 'safe');
+    const dangerousOrphans = orphanedColors.filter(c => c.orphanStatus === 'danger');
+    const warningOrphans = orphanedColors.filter(c => c.orphanStatus === 'warning');
+    
+    console.log(`✅ Regeneration safety check complete: ${dangerousOrphans.length} breaking changes, ${warningOrphans.length} safe removals\n`);
   }
 
   private applySyncStatus(syncReport: any) {
@@ -702,6 +788,15 @@ class ComprehensiveColorAnalyzer {
       ? Math.round((syncedCount / yamlColorCount) * 100) 
       : 0;
 
+    // Calculate regeneration safety stats
+    const breakingChanges = Array.from(this.colors.values())
+      .filter(c => c.orphanStatus === 'danger').length;
+    const safeRemovals = Array.from(this.colors.values())
+      .filter(c => c.orphanStatus === 'warning').length;
+    const safeColors = Array.from(this.colors.values())
+      .filter(c => c.orphanStatus === 'safe').length;
+    const isSafeToRegenerate = breakingChanges === 0;
+
     const report: ColorReport = {
       timestamp: new Date().toISOString(),
       summary: {
@@ -710,6 +805,12 @@ class ComprehensiveColorAnalyzer {
         partiallyMigratedColors: partiallyMigrated,
         unmappedColors: unmapped,
         overallHealthScore: overallHealth,
+        regenerationSafety: {
+          isSafeToRegenerate,
+          breakingChanges,
+          safeRemovals,
+          safeColors
+        },
         syncStats: {
           totalYamlColors: yamlColorCount,
           syncedColors: syncedCount,

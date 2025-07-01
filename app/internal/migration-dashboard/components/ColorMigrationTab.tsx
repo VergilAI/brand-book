@@ -35,6 +35,7 @@ interface ColorData {
   totalInstances: number;
   isFullyMigrated: boolean;
   healthScore: number;
+  healthStatus?: 'healthy' | 'warning' | 'danger';
   syncStatus?: 'synced' | 'outOfSync' | 'notPresent' | 'notApplicable';
   syncDetails?: {
     yaml?: string;
@@ -42,6 +43,7 @@ interface ColorData {
     css?: string;
     tailwind?: string;
   };
+  orphanStatus?: 'safe' | 'warning' | 'danger';
 }
 
 interface ColorInstance {
@@ -66,6 +68,12 @@ interface ColorReport {
       notPresentColors: number;
       syncPercentage: number;
     };
+    regenerationSafety?: {
+      isSafeToRegenerate: boolean;
+      breakingChanges: number;
+      safeRemovals: number;
+      safeColors: number;
+    };
   };
   colors: Record<string, ColorData>;
   scales: Record<string, string[]>;
@@ -78,6 +86,8 @@ interface ColorReport {
 }
 
 type FilterType = 'all' | 'fully-migrated' | 'partial' | 'unmapped' | 'hardcoded-only';
+
+type TabFilterType = 'all' | 'fully-migrated' | 'synced-with-hardcoded' | 'out-of-sync-safe' | 'not-safe-regenerate' | 'not-in-yaml';
 
 // Sync status indicator component
 function SyncStatusIndicator({ color }: { color: ColorData }) {
@@ -160,6 +170,74 @@ function SyncStatusIndicator({ color }: { color: ColorData }) {
   );
 }
 
+// Orphan status indicator component
+function OrphanStatusIndicator({ color }: { color: ColorData }) {
+  const getOrphanIcon = () => {
+    switch (color.orphanStatus) {
+      case 'danger':
+        return <XCircle className="w-4 h-4 text-red-600" />;
+      case 'warning':
+        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+      case 'safe':
+      default:
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+    }
+  };
+  
+  const getOrphanLabel = () => {
+    switch (color.orphanStatus) {
+      case 'danger':
+        return 'Breaking Change Risk';
+      case 'warning':
+        return 'Safe to Remove';
+      case 'safe':
+      default:
+        return 'Safe to Regenerate';
+    }
+  };
+  
+  const getOrphanDescription = () => {
+    const inYAML = color.instances.inYAML.length > 0;
+    const inGenerated = color.instances.inGeneratedTS.length > 0 || color.instances.inGeneratedCSS.length > 0;
+    const hasReferences = color.instances.hardcoded.length > 0;
+    
+    if (!inGenerated) {
+      return "Not in generated files";
+    } else if (inYAML && inGenerated) {
+      return "Present in both YAML and generated files";
+    } else if (!inYAML && inGenerated && hasReferences) {
+      return "⚠️ DANGER: Present in generated files but not in YAML, with active codebase references. Regenerating tokens would break these references!";
+    } else if (!inYAML && inGenerated && !hasReferences) {
+      return "Present in generated files but not in YAML, no codebase references. Safe to remove on regeneration.";
+    } else {
+      return "Safe";
+    }
+  };
+  
+  return (
+    <div className="relative inline-block">
+      <div className="flex items-center gap-1 cursor-help">
+        {getOrphanIcon()}
+        <span className={`text-xs ${
+          color.orphanStatus === 'danger' ? 'text-red-600' : 
+          color.orphanStatus === 'warning' ? 'text-yellow-600' : 
+          'text-green-600'
+        }`}>
+          {getOrphanLabel()}
+        </span>
+      </div>
+      
+      <div className="absolute z-50 bottom-full right-0 mb-2 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg min-w-[300px] opacity-0 group-hover:opacity-100 pointer-events-none">
+        <div className="font-semibold mb-2">Regeneration Safety Check</div>
+        <div>{getOrphanDescription()}</div>
+        <div className="absolute bottom-0 right-6 transform translate-y-full">
+          <div className="border-8 border-transparent border-t-gray-900"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Helper component for scale status
 function ScaleStatusIndicators({ colors }: { colors: ColorData[] }) {
   const yamlColors = colors.filter(c => c.instances.inYAML.length > 0);
@@ -233,13 +311,46 @@ function ScaleStatusIndicators({ colors }: { colors: ColorData[] }) {
   );
 }
 
+// Helper function to determine health status
+function getHealthStatus(color: ColorData): 'healthy' | 'warning' | 'danger' {
+  if (color.healthScore === 100) return 'healthy';
+  if (color.healthScore >= 40) return 'warning';
+  return 'danger';
+}
+
+// Helper function to filter colors by tab
+function filterColorsByTab(colors: [string, ColorData][], tabFilter: TabFilterType): [string, ColorData][] {
+  return colors.filter(([_, color]) => {
+    switch (tabFilter) {
+      case 'all':
+        return true;
+      case 'fully-migrated':
+        return color.healthScore === 100;
+      case 'synced-with-hardcoded':
+        return color.instances.inYAML.length > 0 && 
+               color.syncStatus === 'synced' && 
+               color.instances.hardcoded.length > 0;
+      case 'out-of-sync-safe':
+        return (color.syncStatus === 'outOfSync' || color.syncStatus === 'notPresent') && 
+               color.orphanStatus === 'safe';
+      case 'not-safe-regenerate':
+        return color.orphanStatus === 'danger';
+      case 'not-in-yaml':
+        return color.instances.inYAML.length === 0;
+      default:
+        return true;
+    }
+  });
+}
+
 export function ColorMigrationTab() {
   const [report, setReport] = useState<ColorReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
+  const [tabFilter, setTabFilter] = useState<TabFilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedColors, setExpandedColors] = useState<Set<string>>(new Set());
-  const [expandedScales, setExpandedScales] = useState<Set<string>>(new Set(['purple', 'gray'])); // Start with main scales expanded
+  const [expandedScales, setExpandedScales] = useState<Set<string>>(new Set()); // Start with all scales collapsed
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<{
     isInSync: boolean;
@@ -265,7 +376,23 @@ export function ColorMigrationTab() {
     }
   };
 
+  const isRegenerationSafe = () => {
+    return report?.summary.regenerationSafety?.isSafeToRegenerate ?? true;
+  };
+
+  const getRegenerationBlockedReason = () => {
+    if (!report?.summary.regenerationSafety) return '';
+    if (report.summary.regenerationSafety.isSafeToRegenerate) return '';
+    return `${report.summary.regenerationSafety.breakingChanges} colors would cause breaking changes. Fix these first by clicking the "Not Safe to Regenerate" tab.`;
+  };
+
   const regenerateTokens = async () => {
+    // Safety check: prevent regeneration if there are unsafe colors
+    if (report?.summary.regenerationSafety && !report.summary.regenerationSafety.isSafeToRegenerate) {
+      alert(`Cannot regenerate tokens: ${report.summary.regenerationSafety.breakingChanges} colors would cause breaking changes. Please fix these colors first.`);
+      return;
+    }
+
     setRegenerating(true);
     try {
       const response = await fetch('/api/migration/regenerate-tokens', {
@@ -408,8 +535,8 @@ export function ColorMigrationTab() {
                   <AlertCircle className="w-5 h-5 text-yellow-600" />
                 )}
                 <span className="font-medium">
-                  {syncStatus?.isInSync ? 'Files Generated' : 'Files Need Regeneration'}
-                  {report?.summary.syncStats && syncStatus?.isInSync && (
+                  {report?.summary.syncStats?.syncPercentage === 100 ? 'Files Generated' : 'Regeneration Needed'}
+                  {report?.summary.syncStats && (
                     <span className="ml-2 text-sm font-normal text-gray-600">
                       • {report.summary.syncStats.syncPercentage}% Value Sync
                     </span>
@@ -422,27 +549,43 @@ export function ColorMigrationTab() {
                 </div>
               )}
             </div>
-            <button
-              onClick={regenerateTokens}
-              disabled={regenerating || syncStatus?.isInSync}
-              className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${
-                syncStatus?.isInSync
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-brand-purple text-white hover:bg-brand-purple-light'
-              }`}
-            >
-              {regenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Regenerating...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4" />
-                  Regenerate Tokens
-                </>
+            <div className="relative group">
+              <button
+                onClick={regenerateTokens}
+                disabled={regenerating || !isRegenerationSafe() || report?.summary.syncStats?.syncPercentage === 100}
+                className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors border ${
+                  report?.summary.syncStats?.syncPercentage === 100
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300'
+                    : !isRegenerationSafe()
+                    ? 'bg-red-100 text-red-600 cursor-not-allowed border-red-300'
+                    : 'bg-purple-600 text-white hover:bg-purple-700 border-purple-600'
+                }`}
+                title={`Sync: ${report?.summary.syncStats?.syncPercentage}% | Safe: ${isRegenerationSafe()}`}
+              >
+                {regenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Regenerating...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Regenerate Tokens
+                  </>
+                )}
+              </button>
+              
+              {/* Tooltip for blocked regeneration */}
+              {!isRegenerationSafe() && (
+                <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg min-w-[300px] opacity-0 group-hover:opacity-100 pointer-events-none">
+                  <div className="font-semibold mb-1">⚠️ Regeneration Blocked</div>
+                  <div>{getRegenerationBlockedReason()}</div>
+                  <div className="absolute bottom-0 left-1/2 transform translate-y-full -translate-x-1/2">
+                    <div className="border-8 border-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
           </div>
           
           {/* Value Sync Details */}
@@ -535,6 +678,93 @@ export function ColorMigrationTab() {
         </div>
       </Card>
 
+      {/* Regeneration Safety Card */}
+      {report.summary.regenerationSafety && (
+        <Card className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-lg font-semibold">Regeneration Safety</h2>
+            {report.summary.regenerationSafety.isSafeToRegenerate ? (
+              <div className="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium text-green-600">Safe to Regenerate</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1 bg-red-50 rounded-full">
+                <XCircle className="w-4 h-4 text-red-600" />
+                <span className="text-sm font-medium text-red-600">
+                  {report.summary.regenerationSafety.breakingChanges} Breaking Changes
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {report.summary.regenerationSafety.safeColors}
+              </div>
+              <div className="text-sm text-gray-600">Safe Colors</div>
+            </div>
+            <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="text-2xl font-bold text-yellow-600">
+                {report.summary.regenerationSafety.safeRemovals}
+              </div>
+              <div className="text-sm text-gray-600">Safe to Remove</div>
+            </div>
+            <div className="text-center p-4 bg-red-50 rounded-lg">
+              <div className="text-2xl font-bold text-red-600">
+                {report.summary.regenerationSafety.breakingChanges}
+              </div>
+              <div className="text-sm text-gray-600">Breaking Changes</div>
+            </div>
+          </div>
+          
+          <div className="mt-4 text-sm text-gray-600">
+            <p>
+              {report.summary.regenerationSafety.isSafeToRegenerate 
+                ? "✅ Regenerating tokens is safe - no codebase references will break" 
+                : "⚠️ Regenerating tokens will break active codebase references"
+              }
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* Tab Navigation */}
+      <Card className="p-4">
+        <div className="border-b border-gray-200 mb-4">
+          <nav className="flex space-x-8" aria-label="Filter Tabs">
+            {[
+              { id: 'all', label: 'All Colors', count: Object.keys(report.colors).length },
+              { id: 'fully-migrated', label: 'Fully Migrated', count: Object.values(report.colors).filter(c => c.healthScore === 100).length },
+              { id: 'synced-with-hardcoded', label: 'Synced + Hardcoded', count: Object.values(report.colors).filter(c => c.instances.inYAML.length > 0 && c.syncStatus === 'synced' && c.instances.hardcoded.length > 0).length },
+              { id: 'out-of-sync-safe', label: 'Out of Sync (Safe)', count: Object.values(report.colors).filter(c => (c.syncStatus === 'outOfSync' || c.syncStatus === 'notPresent') && c.orphanStatus === 'safe').length },
+              { id: 'not-in-yaml', label: 'Not in YAML', count: Object.values(report.colors).filter(c => c.instances.inYAML.length === 0).length },
+              { id: 'not-safe-regenerate', label: 'Not Safe to Regenerate', count: Object.values(report.colors).filter(c => c.orphanStatus === 'danger').length }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setTabFilter(tab.id as TabFilterType)}
+                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                  tabFilter === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  tabFilter === tab.id
+                    ? 'bg-blue-100 text-blue-600'
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </Card>
+
       {/* Filters and Search */}
       <Card className="p-4">
         <div className="flex flex-col md:flex-row gap-4">
@@ -569,6 +799,10 @@ export function ColorMigrationTab() {
           const scaleColors = colorKeys
             .map(key => [key, report.colors[key]] as [string, ColorData])
             .filter(([key, color]) => {
+              // Apply tab filter first
+              if (!filterColorsByTab([[key, color]], tabFilter).length) {
+                return false;
+              }
               // Apply filters
               if (searchQuery) {
                 const query = searchQuery.toLowerCase();
@@ -626,7 +860,29 @@ export function ColorMigrationTab() {
                 </div>
                 
                 <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{scaleHealthScore}% healthy</span>
+                  {(() => {
+                    const healthyCount = scaleColors.filter(([_, c]) => getHealthStatus(c) === 'healthy').length;
+                    const dangerCount = scaleColors.filter(([_, c]) => getHealthStatus(c) === 'danger').length;
+                    const healthyPercentage = Math.round((healthyCount / scaleColors.length) * 100);
+                    
+                    if (healthyPercentage === 100) {
+                      return (
+                        <>
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <span className="text-sm font-medium text-green-600">100% Healthy</span>
+                        </>
+                      );
+                    } else if (dangerCount > 0) {
+                      return (
+                        <>
+                          <XCircle className="w-5 h-5 text-red-600" />
+                          <span className="text-sm font-medium text-red-600">{dangerCount} DANGER</span>
+                        </>
+                      );
+                    } else {
+                      return <span className="text-sm text-gray-600">{scaleHealthScore}% healthy</span>;
+                    }
+                  })()}
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all duration-300 ${
@@ -713,6 +969,11 @@ export function ColorMigrationTab() {
                   {/* Sync Status */}
                   <SyncStatusIndicator color={color} />
                   
+                  {/* Orphan Status */}
+                  <div className="group">
+                    <OrphanStatusIndicator color={color} />
+                  </div>
+                  
                   <div className="flex items-center gap-2">
                     {color.instances.hardcoded.length === 0 ? 
                       <CheckCircle className="w-4 h-4 text-green-600" /> : 
@@ -725,25 +986,33 @@ export function ColorMigrationTab() {
                   
                   {/* Health Status - Always show */}
                   <div className="flex items-center gap-2">
-                    {color.isFullyMigrated ? (
-                      <>
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                        <span className="text-sm font-medium text-green-600">Healthy</span>
-                      </>
-                    ) : (
-                      <>
-                        {color.healthScore > 0 ? (
-                          <AlertCircle className="w-5 h-5 text-yellow-600" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-600" />
-                        )}
-                        <span className={`text-sm font-medium ${
-                          color.healthScore > 0 ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {color.healthScore}% Migrated
-                        </span>
-                      </>
-                    )}
+                    {(() => {
+                      const status = getHealthStatus(color);
+                      if (status === 'healthy') {
+                        return (
+                          <>
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span className="text-sm font-medium text-green-600">Healthy</span>
+                          </>
+                        );
+                      } else if (status === 'danger') {
+                        return (
+                          <>
+                            <XCircle className="w-5 h-5 text-red-600" />
+                            <span className="text-sm font-medium text-red-600">DANGER</span>
+                          </>
+                        );
+                      } else {
+                        return (
+                          <>
+                            <AlertCircle className="w-5 h-5 text-yellow-600" />
+                            <span className="text-sm font-medium text-yellow-600">
+                              {color.healthScore}% Migrated
+                            </span>
+                          </>
+                        );
+                      }
+                    })()}
                   </div>
                 </div>
               </div>
@@ -882,6 +1151,10 @@ export function ColorMigrationTab() {
             })
             .map(key => [key, report.colors[key]] as [string, ColorData])
             .filter(([key, color]) => {
+              // Apply tab filter first
+              if (!filterColorsByTab([[key, color]], tabFilter).length) {
+                return false;
+              }
               // Apply filters
               if (searchQuery) {
                 const query = searchQuery.toLowerCase();
@@ -1007,24 +1280,15 @@ export function ColorMigrationTab() {
                                 YAML
                               </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {color.instances.inGeneratedTS.length > 0 ? 
-                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
-                                <XCircle className="w-4 h-4 text-gray-300" />
-                              }
-                              <span className={color.instances.inGeneratedTS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
-                                TS
-                              </span>
+                            
+                            {/* Sync Status */}
+                            <SyncStatusIndicator color={color} />
+                            
+                            {/* Orphan Status */}
+                            <div className="group">
+                              <OrphanStatusIndicator color={color} />
                             </div>
-                            <div className="flex items-center gap-2">
-                              {color.instances.inGeneratedCSS.length > 0 ? 
-                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
-                                <XCircle className="w-4 h-4 text-gray-300" />
-                              }
-                              <span className={color.instances.inGeneratedCSS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
-                                CSS
-                              </span>
-                            </div>
+                            
                             <div className="flex items-center gap-2">
                               {color.instances.hardcoded.length === 0 ? 
                                 <CheckCircle className="w-4 h-4 text-green-600" /> : 
@@ -1064,6 +1328,10 @@ export function ColorMigrationTab() {
           const nonYamlFiltered = report.nonYamlColors
             .map(key => [key, report.colors[key]] as [string, ColorData])
             .filter(([key, color]) => {
+              // Apply tab filter first
+              if (!filterColorsByTab([[key, color]], tabFilter).length) {
+                return false;
+              }
               // Apply filters
               if (searchQuery) {
                 const query = searchQuery.toLowerCase();
@@ -1125,7 +1393,7 @@ export function ColorMigrationTab() {
                   {nonYamlFiltered.map(([key, color]) => {
                     const isColorExpanded = expandedColors.has(key);
                     return (
-                      <Card key={key} className="overflow-hidden border-red-200">
+                      <Card key={key} className="overflow-visible border-red-200">
                         {/* Same color rendering but with red accents */}
                         <div 
                           className="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-50"
@@ -1166,24 +1434,15 @@ export function ColorMigrationTab() {
                               <XCircle className="w-4 h-4 text-gray-300" />
                               <span className="text-gray-400">YAML</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {color.instances.inGeneratedTS.length > 0 ? 
-                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
-                                <XCircle className="w-4 h-4 text-gray-300" />
-                              }
-                              <span className={color.instances.inGeneratedTS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
-                                TS
-                              </span>
+                            
+                            {/* Sync Status */}
+                            <SyncStatusIndicator color={color} />
+                            
+                            {/* Orphan Status */}
+                            <div className="group">
+                              <OrphanStatusIndicator color={color} />
                             </div>
-                            <div className="flex items-center gap-2">
-                              {color.instances.inGeneratedCSS.length > 0 ? 
-                                <CheckCircle className="w-4 h-4 text-green-600" /> : 
-                                <XCircle className="w-4 h-4 text-gray-300" />
-                              }
-                              <span className={color.instances.inGeneratedCSS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
-                                CSS
-                              </span>
-                            </div>
+                            
                             <div className="flex items-center gap-2">
                               <XCircle className="w-4 h-4 text-red-600" />
                               <span className="text-red-600">Hardcoded</span>
