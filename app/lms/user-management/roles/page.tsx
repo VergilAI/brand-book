@@ -9,23 +9,20 @@ import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { Checkbox } from '@/components/ui/Checkbox'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
-interface Role {
-  id: string
-  name: string
-  color: string
-  description?: string
-  usersCount: number
-  parentRole?: string
-  privileges: string[]
-  createdAt: string
-}
+import { Role, initialRoles, calculateNewRolePosition } from '@/lib/lms/roles-data'
 
 interface Privilege {
   id: string
@@ -33,48 +30,6 @@ interface Privilege {
   description: string
   category: string
 }
-
-const mockRoles: Role[] = [
-  {
-    id: '1',
-    name: 'Super Admin',
-    color: '#7B00FF',
-    description: 'Full system access and control',
-    usersCount: 2,
-    privileges: ['all'],
-    createdAt: '2023-01-01'
-  },
-  {
-    id: '2',
-    name: 'Admin',
-    color: '#0087FF',
-    description: 'Administrative access with some restrictions',
-    usersCount: 5,
-    parentRole: '1',
-    privileges: ['user_management', 'course_management', 'analytics_view'],
-    createdAt: '2023-01-15'
-  },
-  {
-    id: '3',
-    name: 'Manager',
-    color: '#10B981',
-    description: 'Team management and reporting',
-    usersCount: 12,
-    parentRole: '2',
-    privileges: ['team_view', 'reports', 'course_assign'],
-    createdAt: '2023-02-01'
-  },
-  {
-    id: '4',
-    name: 'Instructor',
-    color: '#FFC700',
-    description: 'Course creation and student management',
-    usersCount: 8,
-    parentRole: '2',
-    privileges: ['course_create', 'student_view', 'grading'],
-    createdAt: '2023-02-15'
-  }
-]
 
 const predefinedColors = [
   '#7B00FF', '#0087FF', '#10B981', '#FFC700', '#E51C23',
@@ -114,15 +69,18 @@ const availablePrivileges: Privilege[] = [
 ]
 
 export default function RolesPage() {
-  const [roles, setRoles] = useState<Role[]>(mockRoles)
+  const [roles, setRoles] = useState<Role[]>(initialRoles)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingRole, setEditingRole] = useState<Role | null>(null)
   const [showPrivilegesModal, setShowPrivilegesModal] = useState(false)
   const [selectedRoleForPrivileges, setSelectedRoleForPrivileges] = useState<Role | null>(null)
   const [selectedPrivileges, setSelectedPrivileges] = useState<string[]>([])
   const [newRole, setNewRole] = useState<Partial<Role>>({
     name: '',
     color: '#7B00FF',
-    description: ''
+    description: '',
+    parentRole: ''
   })
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -133,23 +91,41 @@ export default function RolesPage() {
 
   const handleCreateRole = () => {
     if (newRole.name) {
+      const position = calculateNewRolePosition(roles, newRole.parentRole)
       const role: Role = {
         id: Date.now().toString(),
         name: newRole.name,
         color: newRole.color || '#7B00FF',
         description: newRole.description,
         usersCount: 0,
+        parentRole: newRole.parentRole,
         privileges: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        position: position
       }
       setRoles([...roles, role])
-      setNewRole({ name: '', color: '#7B00FF', description: '' })
+      setNewRole({ name: '', color: '#7B00FF', description: '', parentRole: '' })
       setShowCreateModal(false)
     }
   }
 
   const handleDeleteRole = (roleId: string) => {
     setRoles(roles.filter(role => role.id !== roleId))
+  }
+
+  const handleEditRole = (role: Role) => {
+    setEditingRole(role)
+    setShowEditModal(true)
+  }
+
+  const handleSaveEditedRole = () => {
+    if (editingRole && editingRole.name) {
+      setRoles(roles.map(role => 
+        role.id === editingRole.id ? editingRole : role
+      ))
+      setEditingRole(null)
+      setShowEditModal(false)
+    }
   }
 
   const handleOpenPrivileges = (role: Role) => {
@@ -247,8 +223,8 @@ export default function RolesPage() {
         {/* Roles Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRoles.map(role => (
-            <Card key={role.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
+            <Card key={role.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full">
+              <div className="p-6 flex flex-col h-full">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div 
@@ -269,7 +245,7 @@ export default function RolesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditRole(role)}>
                         <Edit2 className="w-4 h-4 mr-2" />
                         Edit Role
                       </DropdownMenuItem>
@@ -289,27 +265,38 @@ export default function RolesPage() {
                   </DropdownMenu>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-vergil-off-black/40" />
-                    <span className="text-vergil-off-black/60">{role.usersCount} users</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-4 h-4 rounded-full border-2"
-                      style={{ 
-                        backgroundColor: role.color,
-                        borderColor: role.color 
-                      }}
-                    />
-                    <span className="text-sm text-vergil-off-black/60">Role Color</span>
+                <div className="flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-vergil-off-black/40" />
+                      <span className="text-vergil-off-black/60">{role.usersCount} users</span>
+                    </div>
+                    
+                    {role.parentRole && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Shield className="w-4 h-4 text-vergil-off-black/40" />
+                        <span className="text-vergil-off-black/60">
+                          Reports to: {roles.find(r => r.id === role.parentRole)?.name}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-4 h-4 rounded-full border-2"
+                        style={{ 
+                          backgroundColor: role.color,
+                          borderColor: role.color 
+                        }}
+                      />
+                      <span className="text-sm text-vergil-off-black/60">Role Color</span>
+                    </div>
                   </div>
 
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="w-full"
+                    className="w-full mt-4"
                     onClick={() => handleOpenPrivileges(role)}
                   >
                     <Shield className="w-4 h-4 mr-2" />
@@ -361,6 +348,31 @@ export default function RolesPage() {
                   </div>
 
                   <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                      Reports To
+                    </label>
+                    <Select
+                      value={newRole.parentRole || 'none'}
+                      onValueChange={(value) => setNewRole({ ...newRole, parentRole: value === 'none' ? undefined : value })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="None (Top Level)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None (Top Level)</SelectItem>
+                        {roles.filter(r => r.id !== newRole.id).map(role => (
+                          <SelectItem key={role.id} value={role.id}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-1 text-sm text-vergil-off-black/60">
+                      Select which role this position reports to
+                    </p>
+                  </div>
+
+                  <div>
                     <label className="block text-sm font-medium text-vergil-off-black mb-3">
                       Role Color
                     </label>
@@ -398,6 +410,121 @@ export default function RolesPage() {
                     disabled={!newRole.name}
                   >
                     Create Role
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Edit Role Modal */}
+        {showEditModal && editingRole && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-vergil-off-black">Edit Role</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowEditModal(false)
+                      setEditingRole(null)
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                      Role Name
+                    </label>
+                    <Input
+                      value={editingRole.name}
+                      onChange={(e) => setEditingRole({ ...editingRole, name: e.target.value })}
+                      placeholder="e.g., Department Head"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                      Description
+                    </label>
+                    <Input
+                      value={editingRole.description || ''}
+                      onChange={(e) => setEditingRole({ ...editingRole, description: e.target.value })}
+                      placeholder="Brief description of the role"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                      Reports To
+                    </label>
+                    <Select
+                      value={editingRole.parentRole || 'none'}
+                      onValueChange={(value) => setEditingRole({ ...editingRole, parentRole: value === 'none' ? undefined : value })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="None (Top Level)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None (Top Level)</SelectItem>
+                        {roles.filter(r => r.id !== editingRole.id).map(role => (
+                          <SelectItem key={role.id} value={role.id}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-1 text-sm text-vergil-off-black/60">
+                      Select which role this position reports to
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-vergil-off-black mb-3">
+                      Role Color
+                    </label>
+                    <div className="grid grid-cols-5 gap-2">
+                      {predefinedColors.map(color => (
+                        <button
+                          key={color}
+                          onClick={() => setEditingRole({ ...editingRole, color })}
+                          className="w-12 h-12 rounded-lg border-2 transition-all flex items-center justify-center"
+                          style={{ 
+                            backgroundColor: color,
+                            borderColor: editingRole.color === color ? '#1D1D1F' : 'transparent'
+                          }}
+                        >
+                          {editingRole.color === color && (
+                            <Check className="w-4 h-4 text-white" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowEditModal(false)
+                      setEditingRole(null)
+                    }}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveEditedRole}
+                    className="flex-1 bg-vergil-purple hover:bg-vergil-purple-lighter"
+                    disabled={!editingRole.name}
+                  >
+                    Save Changes
                   </Button>
                 </div>
               </div>

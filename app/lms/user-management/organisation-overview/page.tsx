@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, Move, Save, X, ChevronDown, ChevronRight, Users, M
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Role, initialRoles } from '@/lib/lms/roles-data'
 
 interface User {
   id: string
@@ -17,19 +18,6 @@ interface User {
   completionRate?: number
   status?: 'on_track' | 'at_risk' | 'behind'
   avatar?: string
-}
-
-interface Role {
-  id: string
-  name: string
-  color: string
-  description?: string
-  usersCount: number
-  parentRole?: string
-  position?: { x: number; y: number }
-  completionRate?: number
-  subordinatesCompletionRate?: number
-  status?: 'on_track' | 'at_risk' | 'behind'
 }
 
 interface DragState {
@@ -47,54 +35,8 @@ interface ViewState {
   focusedRoleId?: string
 }
 
-const mockRoles: Role[] = [
-  {
-    id: '1',
-    name: 'CEO',
-    color: '#7B00FF',
-    description: 'Chief Executive Officer',
-    usersCount: 1,
-    position: { x: 400, y: 50 },
-    completionRate: 100,
-    status: 'on_track'
-  },
-  {
-    id: '2',
-    name: 'Manager',
-    color: '#0087FF',
-    description: 'Team management and oversight',
-    usersCount: 3,
-    parentRole: '1',
-    position: { x: 400, y: 180 },
-    completionRate: 95,
-    status: 'on_track'
-  },
-  {
-    id: '3',
-    name: 'Team Lead',
-    color: '#10B981',
-    description: 'Direct team leadership',
-    usersCount: 2,
-    parentRole: '2',
-    position: { x: 400, y: 310 },
-    completionRate: 88,
-    status: 'at_risk'
-  },
-  {
-    id: '4',
-    name: 'Developer',
-    color: '#FFC700',
-    description: 'Software development',
-    usersCount: 8,
-    parentRole: '3',
-    position: { x: 400, y: 440 },
-    completionRate: 82,
-    status: 'behind'
-  }
-]
-
 const mockUsers: User[] = [
-  // CEO
+  // Super Admin
   {
     id: 'u1',
     name: 'Sarah Johnson',
@@ -106,7 +48,7 @@ const mockUsers: User[] = [
     status: 'on_track'
   },
   
-  // Managers (spread horizontally with spacing)
+  // Admins (spread horizontally with spacing)
   {
     id: 'u2',
     name: 'Michael Chen',
@@ -138,7 +80,7 @@ const mockUsers: User[] = [
     status: 'on_track'
   },
   
-  // Team Leads (spread horizontally with spacing)
+  // Managers (spread horizontally with spacing)
   {
     id: 'u5',
     name: 'Jessica Williams',
@@ -160,7 +102,7 @@ const mockUsers: User[] = [
     status: 'at_risk'
   },
   
-  // Developers (arranged in a grid with proper spacing)
+  // Instructors (arranged in a grid with proper spacing)
   {
     id: 'u7',
     name: 'Ryan Davis',
@@ -246,7 +188,7 @@ const mockUsers: User[] = [
 export default function OrganisationOverviewPage() {
   const canvasRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [roles, setRoles] = useState<Role[]>(mockRoles)
+  const [roles, setRoles] = useState<Role[]>(initialRoles)
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [editMode, setEditMode] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
