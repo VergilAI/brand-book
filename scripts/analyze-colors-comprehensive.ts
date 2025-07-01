@@ -26,6 +26,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import glob from 'glob';
+import { ColorSyncValidator } from './color-sync-validator';
+import { validateColorSync } from './color-sync-validator';
 
 interface ColorInstance {
   file: string;
@@ -49,6 +51,13 @@ interface ColorData {
   totalInstances: number;
   isFullyMigrated: boolean;
   healthScore: number;
+  syncStatus?: 'synced' | 'outOfSync' | 'notPresent' | 'notApplicable';
+  syncDetails?: {
+    yaml?: string;
+    ts?: string;
+    css?: string;
+    tailwind?: string;
+  };
 }
 
 interface ColorReport {
@@ -67,6 +76,17 @@ interface ColorReport {
   fileStats: {
     totalFilesScanned: number;
     filesWithHardcodedColors: number;
+  };
+  syncValidation?: {
+    totalColors: number;
+    syncedColors: number;
+    outOfSyncColors: number;
+    notPresentColors: number;
+    syncPercentage: number;
+    issues: {
+      outOfSync: any[];
+      notPresent: any[];
+    };
   };
 }
 
@@ -95,8 +115,30 @@ class ComprehensiveColorAnalyzer {
     // Step 5: Calculate health scores
     this.calculateHealthScores();
     
-    // Step 5: Generate report
-    return this.generateReport();
+    // Step 6: Run sync validation
+    let syncValidation;
+    try {
+      console.log('\n🔄 Running sync validation...');
+      const syncReport = await validateColorSync();
+      syncValidation = {
+        totalColors: syncReport.summary.totalColors,
+        syncedColors: syncReport.summary.syncedColors,
+        outOfSyncColors: syncReport.summary.outOfSyncColors,
+        notPresentColors: syncReport.summary.notPresentColors,
+        syncPercentage: syncReport.summary.syncPercentage,
+        issues: syncReport.issues
+      };
+      
+      // Apply sync status to individual colors
+      this.applySyncStatus(syncReport);
+      
+      console.log('✅ Sync validation complete\n');
+    } catch (error) {
+      console.warn('⚠️  Could not run sync validation:', error);
+    }
+    
+    // Step 7: Generate report
+    return this.generateReport(syncValidation);
   }
 
   private async loadYAMLTokens() {
@@ -501,7 +543,99 @@ class ComprehensiveColorAnalyzer {
     }
   }
 
-  private generateReport(): ColorReport {
+  private applySyncStatus(syncReport: any) {
+    // Apply sync status to individual colors
+    for (const [colorKey, colorData] of this.colors) {
+      // Skip if not in YAML
+      if (colorData.instances.inYAML.length === 0) {
+        colorData.syncStatus = 'notApplicable';
+        continue;
+      }
+      
+      // Check all colors in the sync report
+      const allSyncedColors = syncReport.colors || {};
+      const outOfSyncIssues = syncReport.issues?.outOfSync || [];
+      const notPresentIssues = syncReport.issues?.notPresent || [];
+      
+      // Find if this color has sync data
+      let syncData = null;
+      let isOutOfSync = false;
+      let isNotPresent = false;
+      
+      // Check in synced colors
+      for (const [tokenPath, syncInfo] of Object.entries(allSyncedColors)) {
+        if (syncInfo.normalizedValue === colorData.normalizedValue || 
+            syncInfo.value === colorData.value) {
+          syncData = syncInfo;
+          break;
+        }
+      }
+      
+      // Check in out of sync issues
+      isOutOfSync = outOfSyncIssues.some((issue: any) => 
+        issue.normalizedValue === colorData.normalizedValue || 
+        issue.value === colorData.value
+      );
+      
+      // Check in not present issues
+      isNotPresent = notPresentIssues.some((issue: any) => 
+        issue.normalizedValue === colorData.normalizedValue || 
+        issue.value === colorData.value
+      );
+      
+      if (isOutOfSync) {
+        colorData.syncStatus = 'outOfSync';
+        const issue = outOfSyncIssues.find((i: any) => 
+          i.normalizedValue === colorData.normalizedValue || i.value === colorData.value
+        );
+        if (issue?.details) {
+          colorData.syncDetails = {
+            yaml: issue.details.yamlValue,
+            ts: issue.details.tsValue,
+            css: issue.details.cssValue,
+            tailwind: issue.details.tailwindValue
+          };
+        }
+      } else if (isNotPresent) {
+        colorData.syncStatus = 'notPresent';
+        const issue = notPresentIssues.find((i: any) => 
+          i.normalizedValue === colorData.normalizedValue || i.value === colorData.value
+        );
+        if (issue?.details) {
+          colorData.syncDetails = {
+            yaml: issue.details.yamlValue,
+            ts: issue.details.tsValue || 'Not found',
+            css: issue.details.cssValue || 'Not found',
+            tailwind: issue.details.tailwindValue || 'Not found'
+          };
+        }
+      } else if (syncData && syncData.status === 'synced') {
+        colorData.syncStatus = 'synced';
+        colorData.syncDetails = {
+          yaml: syncData.details?.yamlValue || colorData.value,
+          ts: syncData.details?.tsValue || colorData.value,
+          css: syncData.details?.cssValue || colorData.value,
+          tailwind: syncData.details?.tailwindValue || colorData.value
+        };
+      } else {
+        // Default to synced if in all generated files
+        if (colorData.instances.inGeneratedTS.length > 0 && 
+            colorData.instances.inGeneratedCSS.length > 0) {
+          colorData.syncStatus = 'synced';
+          colorData.syncDetails = {
+            yaml: colorData.value,
+            ts: colorData.value,
+            css: colorData.value,
+            tailwind: colorData.value
+          };
+        } else {
+          colorData.syncStatus = 'notPresent';
+        }
+      }
+    }
+  }
+
+  private generateReport(syncValidation?: any): ColorReport {
     const colors = Object.fromEntries(this.colors);
     
     // Group colors by scale
@@ -556,14 +690,33 @@ class ComprehensiveColorAnalyzer {
         .map(i => i.file)
     ).size;
     
-    return {
+    // Calculate sync stats from individual color statuses
+    const yamlColorCount = yamlColors.length;
+    const syncedCount = Array.from(this.colors.values())
+      .filter(c => c.syncStatus === 'synced').length;
+    const outOfSyncCount = Array.from(this.colors.values())
+      .filter(c => c.syncStatus === 'outOfSync').length;
+    const notPresentCount = Array.from(this.colors.values())
+      .filter(c => c.syncStatus === 'notPresent').length;
+    const syncPercentage = yamlColorCount > 0 
+      ? Math.round((syncedCount / yamlColorCount) * 100) 
+      : 0;
+
+    const report: ColorReport = {
       timestamp: new Date().toISOString(),
       summary: {
         totalUniqueColors: totalColors,
         fullyMigratedColors: fullyMigrated,
         partiallyMigratedColors: partiallyMigrated,
         unmappedColors: unmapped,
-        overallHealthScore: overallHealth
+        overallHealthScore: overallHealth,
+        syncStats: {
+          totalYamlColors: yamlColorCount,
+          syncedColors: syncedCount,
+          outOfSyncColors: outOfSyncCount,
+          notPresentColors: notPresentCount,
+          syncPercentage: syncPercentage
+        }
       },
       colors,
       scales,
@@ -574,6 +727,12 @@ class ComprehensiveColorAnalyzer {
         filesWithHardcodedColors: filesWithHardcoded
       }
     };
+
+    if (syncValidation) {
+      report.syncValidation = syncValidation;
+    }
+
+    return report;
   }
 }
 
@@ -593,6 +752,16 @@ async function main() {
   console.log(`   Partially migrated: ${report.summary.partiallyMigratedColors} 🟡`);
   console.log(`   Unmapped: ${report.summary.unmappedColors} ❌`);
   console.log(`   Overall health: ${report.summary.overallHealthScore}%`);
+  
+  if (report.syncValidation) {
+    console.log('\n🔄 Sync Validation Summary:');
+    console.log(`   Total YAML colors: ${report.syncValidation.totalColors}`);
+    console.log(`   Synced across all files: ${report.syncValidation.syncedColors} ✅`);
+    console.log(`   Out of sync: ${report.syncValidation.outOfSyncColors} 🔴`);
+    console.log(`   Not present in some files: ${report.syncValidation.notPresentColors} ⚠️`);
+    console.log(`   Sync percentage: ${report.syncValidation.syncPercentage}%`);
+  }
+  
   console.log(`\n📄 Report saved to: ${reportPath}`);
 }
 

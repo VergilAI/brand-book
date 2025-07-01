@@ -35,6 +35,13 @@ interface ColorData {
   totalInstances: number;
   isFullyMigrated: boolean;
   healthScore: number;
+  syncStatus?: 'synced' | 'outOfSync' | 'notPresent' | 'notApplicable';
+  syncDetails?: {
+    yaml?: string;
+    ts?: string;
+    css?: string;
+    tailwind?: string;
+  };
 }
 
 interface ColorInstance {
@@ -52,6 +59,13 @@ interface ColorReport {
     partiallyMigratedColors: number;
     unmappedColors: number;
     overallHealthScore: number;
+    syncStats?: {
+      totalYamlColors: number;
+      syncedColors: number;
+      outOfSyncColors: number;
+      notPresentColors: number;
+      syncPercentage: number;
+    };
   };
   colors: Record<string, ColorData>;
   scales: Record<string, string[]>;
@@ -64,6 +78,87 @@ interface ColorReport {
 }
 
 type FilterType = 'all' | 'fully-migrated' | 'partial' | 'unmapped' | 'hardcoded-only';
+
+// Sync status indicator component
+function SyncStatusIndicator({ color }: { color: ColorData }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  
+  // Skip sync check if not in YAML
+  if (color.instances.inYAML.length === 0) {
+    return <span className="text-xs text-gray-400">N/A</span>;
+  }
+  
+  const getSyncIcon = () => {
+    switch (color.syncStatus) {
+      case 'synced':
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'outOfSync':
+        return <AlertCircle className="w-4 h-4 text-orange-500" />;
+      case 'notPresent':
+        return <XCircle className="w-4 h-4 text-red-600" />;
+      default:
+        return <span className="text-xs text-gray-400">N/A</span>;
+    }
+  };
+  
+  const getSyncLabel = () => {
+    switch (color.syncStatus) {
+      case 'synced':
+        return 'In Sync';
+      case 'outOfSync':
+        return 'Out of Sync';
+      case 'notPresent':
+        return 'Not Present';
+      default:
+        return 'N/A';
+    }
+  };
+  
+  return (
+    <div className="relative inline-block">
+      <div 
+        className="flex items-center gap-1 cursor-help"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {getSyncIcon()}
+        <span className="text-xs">{getSyncLabel()}</span>
+      </div>
+      
+      {showTooltip && color.syncDetails && (
+        <div className="absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg min-w-[200px]">
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <span>YAML:</span>
+              <span className="font-mono">{color.syncDetails.yaml || 'Not found'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>TypeScript:</span>
+              <span className={`font-mono ${color.syncDetails.ts !== color.syncDetails.yaml ? 'text-orange-400' : ''}`}>
+                {color.syncDetails.ts || 'Not found'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>CSS:</span>
+              <span className={`font-mono ${color.syncDetails.css !== color.syncDetails.yaml ? 'text-orange-400' : ''}`}>
+                {color.syncDetails.css || 'Not found'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Tailwind:</span>
+              <span className={`font-mono ${color.syncDetails.tailwind !== color.syncDetails.yaml ? 'text-orange-400' : ''}`}>
+                {color.syncDetails.tailwind || 'Not found'}
+              </span>
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+            <div className="border-8 border-transparent border-t-gray-900"></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Helper component for scale status
 function ScaleStatusIndicators({ colors }: { colors: ColorData[] }) {
@@ -298,54 +393,81 @@ export function ColorMigrationTab() {
     <div className="space-y-6">
       {/* Sync Status Card */}
       <Card className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              {syncStatus?.isInSync ? (
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              ) : (
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
-              )}
-              <span className="font-medium">
-                {syncStatus?.isInSync ? 'YAML and Generated Files In Sync' : 'Files Out of Sync'}
-              </span>
-            </div>
-            {syncStatus && (
-              <div className="text-sm text-gray-600">
-                {syncStatus.needsRegeneration && (
-                  <span>YAML modified after generation • </span>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                {syncStatus?.isInSync && report?.summary.syncStats?.syncPercentage === 100 ? (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-yellow-600" />
                 )}
-                Last generated: {new Date(syncStatus.generatedLastModified).toLocaleTimeString()}
+                <span className="font-medium">
+                  {syncStatus?.isInSync ? 'Files Generated' : 'Files Need Regeneration'}
+                  {report?.summary.syncStats && syncStatus?.isInSync && (
+                    <span className="ml-2 text-sm font-normal text-gray-600">
+                      • {report.summary.syncStats.syncPercentage}% Value Sync
+                    </span>
+                  )}
+                </span>
               </div>
-            )}
+              {syncStatus && (
+                <div className="text-sm text-gray-600">
+                  Last generated: {new Date(syncStatus.generatedLastModified).toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={regenerateTokens}
+              disabled={regenerating || syncStatus?.isInSync}
+              className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${
+                syncStatus?.isInSync
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-brand-purple text-white hover:bg-brand-purple-light'
+              }`}
+            >
+              {regenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Regenerating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  Regenerate Tokens
+                </>
+              )}
+            </button>
           </div>
-          <button
-            onClick={regenerateTokens}
-            disabled={regenerating || syncStatus?.isInSync}
-            className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${
-              syncStatus?.isInSync
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-vergil-purple text-white hover:bg-purple-700'
-            }`}
-          >
-            {regenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Regenerating...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                Regenerate Tokens
-              </>
-            )}
-          </button>
+          
+          {/* Value Sync Details */}
+          {syncStatus?.isInSync && report?.summary.syncStats && (
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span>{report.summary.syncStats.syncedColors} synced</span>
+              </div>
+              {report.summary.syncStats.outOfSyncColors > 0 && (
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-orange-500" />
+                  <span>{report.summary.syncStats.outOfSyncColors} out of sync</span>
+                </div>
+              )}
+              {report.summary.syncStats.notPresentColors > 0 && (
+                <div className="flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-red-600" />
+                  <span>{report.summary.syncStats.notPresentColors} not present</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {syncStatus?.details?.missingGenerated?.length > 0 && (
+            <div className="text-sm text-red-600">
+              Missing generated files: {syncStatus.details.missingGenerated.join(', ')}
+            </div>
+          )}
         </div>
-        {syncStatus?.details?.missingGenerated?.length > 0 && (
-          <div className="mt-3 text-sm text-red-600">
-            Missing generated files: {syncStatus.details.missingGenerated.join(', ')}
-          </div>
-        )}
       </Card>
 
       {/* Summary Card */}
@@ -582,24 +704,10 @@ export function ColorMigrationTab() {
                       YAML
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {color.instances.inGeneratedTS.length > 0 ? 
-                      <CheckCircle className="w-4 h-4 text-green-600" /> : 
-                      <XCircle className="w-4 h-4 text-gray-300" />
-                    }
-                    <span className={color.instances.inGeneratedTS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
-                      TS
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {color.instances.inGeneratedCSS.length > 0 ? 
-                      <CheckCircle className="w-4 h-4 text-green-600" /> : 
-                      <XCircle className="w-4 h-4 text-gray-300" />
-                    }
-                    <span className={color.instances.inGeneratedCSS.length > 0 ? 'text-green-600' : 'text-gray-400'}>
-                      CSS
-                    </span>
-                  </div>
+                  
+                  {/* Sync Status */}
+                  <SyncStatusIndicator color={color} />
+                  
                   <div className="flex items-center gap-2">
                     {color.instances.hardcoded.length === 0 ? 
                       <CheckCircle className="w-4 h-4 text-green-600" /> : 
@@ -609,6 +717,14 @@ export function ColorMigrationTab() {
                       {color.instances.hardcoded.length === 0 ? 'No Hardcoded' : 'Hardcoded'}
                     </span>
                   </div>
+                  
+                  {/* Keep Fully Migrated indicator */}
+                  {color.isFullyMigrated && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span className="text-green-600">Fully Migrated</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Health Status */}

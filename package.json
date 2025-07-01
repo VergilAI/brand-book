@@ -19,6 +19,7 @@
     "test:tokens": "tsx --test tests/token-alignment.node.test.ts",
     "scan:hardcoded": "tsx scripts/scan-hardcoded-values.ts",
     "analyze:colors": "tsx scripts/analyze-colors-comprehensive.ts",
+    "validate:color-sync": "tsx scripts/color-sync-validator.ts",
     "lint:tokens": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:tokens:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "report:coverage": "tsx scripts/generate-coverage-report.ts",
