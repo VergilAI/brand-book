@@ -1,5 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { tokens } from '@/generated/tokens'
 
 interface IconProps {
   size?: number
@@ -23,8 +24,8 @@ export function BringToFrontIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-      <rect x="6" y="2" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
+      <rect x="2" y="6" width="8" height="8" fill={tokens.colors.scales.gray["200"]} stroke={tokens.colors.scales.gray["500"]}/>
+      <rect x="6" y="2" width="8" height="8" fill={tokens.colors.scales.blue["500"]} stroke={tokens.colors.tools.editor.vertex}/>
     </svg>
   )
 }
@@ -38,8 +39,8 @@ export function BringForwardIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-      <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
+      <rect x="2" y="6" width="8" height="8" fill={tokens.colors.scales.gray["200"]} stroke={tokens.colors.scales.gray["500"]}/>
+      <rect x="4" y="4" width="8" height="8" fill={tokens.colors.scales.blue["400"]} stroke={tokens.colors.scales.blue["600"]}/>
     </svg>
   )
 }
@@ -53,8 +54,8 @@ export function SendBackwardIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="4" y="4" width="8" height="8" fill="#60A5FA" stroke="#2563EB"/>
-      <rect x="2" y="6" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
+      <rect x="4" y="4" width="8" height="8" fill={tokens.colors.scales.blue["400"]} stroke={tokens.colors.scales.blue["600"]}/>
+      <rect x="2" y="6" width="8" height="8" fill={tokens.colors.scales.gray["200"]} stroke={tokens.colors.scales.gray["500"]}/>
     </svg>
   )
 }
@@ -68,8 +69,8 @@ export function SendToBackIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="6" y="2" width="8" height="8" fill="#E5E7EB" stroke="#6B7280"/>
-      <rect x="2" y="6" width="8" height="8" fill="#3B82F6" stroke="#1E40AF"/>
+      <rect x="6" y="2" width="8" height="8" fill={tokens.colors.scales.gray["200"]} stroke={tokens.colors.scales.gray["500"]}/>
+      <rect x="2" y="6" width="8" height="8" fill={tokens.colors.scales.blue["500"]} stroke={tokens.colors.tools.editor.vertex}/>
     </svg>
   )
 }
@@ -83,8 +84,8 @@ export function CopyIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="2" width="10" height="10" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
-      <rect x="4" y="4" width="10" height="10" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
+      <rect x="2" y="2" width="10" height="10" fill="none" stroke={tokens.colors.scales.gray["500"]} strokeWidth="1.5"/>
+      <rect x="4" y="4" width="10" height="10" fill={tokens.colors.neutral.white} stroke={tokens.colors.scales.blue["500"]} strokeWidth="1.5"/>
     </svg>
   )
 }
@@ -98,8 +99,8 @@ export function DuplicateIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="2" width="8" height="8" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
-      <rect x="6" y="6" width="8" height="8" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
+      <rect x="2" y="2" width="8" height="8" fill="none" stroke={tokens.colors.scales.gray["500"]} strokeWidth="1.5"/>
+      <rect x="6" y="6" width="8" height="8" fill={tokens.colors.neutral.white} stroke={tokens.colors.scales.blue["500"]} strokeWidth="1.5"/>
     </svg>
   )
 }
@@ -113,9 +114,9 @@ export function PasteIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="2" width="10" height="10" fill="none" stroke="#6B7280" strokeWidth="1.5"/>
-      <rect x="4" y="4" width="10" height="10" fill="white" stroke="#3B82F6" strokeWidth="1.5"/>
-      <path d="M6 8H12M6 10H12M6 12H10" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="2" y="2" width="10" height="10" fill="none" stroke={tokens.colors.scales.gray["500"]} strokeWidth="1.5"/>
+      <rect x="4" y="4" width="10" height="10" fill={tokens.colors.neutral.white} stroke={tokens.colors.scales.blue["500"]} strokeWidth="1.5"/>
+      <path d="M6 8H12M6 10H12M6 12H10" stroke={tokens.colors.scales.blue["500"]} strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   )
 }
@@ -129,11 +130,11 @@ export function SelectAllIcon({ size = 16, className }: IconProps) {
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="2" width="12" height="12" rx="1" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="2 2"/>
-      <rect x="4" y="4" width="3" height="3" fill="#3B82F6"/>
-      <rect x="9" y="4" width="3" height="3" fill="#3B82F6"/>
-      <rect x="4" y="9" width="3" height="3" fill="#3B82F6"/>
-      <rect x="9" y="9" width="3" height="3" fill="#3B82F6"/>
+      <rect x="2" y="2" width="12" height="12" rx="1" fill="none" stroke={tokens.colors.scales.blue["500"]} strokeWidth="1.5" strokeDasharray="2 2"/>
+      <rect x="4" y="4" width="3" height="3" fill={tokens.colors.scales.blue["500"]}/>
+      <rect x="9" y="4" width="3" height="3" fill={tokens.colors.scales.blue["500"]}/>
+      <rect x="4" y="9" width="3" height="3" fill={tokens.colors.scales.blue["500"]}/>
+      <rect x="9" y="9" width="3" height="3" fill={tokens.colors.scales.blue["500"]}/>
     </svg>
   )
 }
@@ -147,14 +148,14 @@ export function GridIcon({ size = 16, className, enabled = true }: GridIconProps
       fill="none"
       className={cn(className)}
     >
-      <line x1="2" y1="2" x2="14" y2="2" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="2" y1="6" x2="14" y2="6" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="2" y1="10" x2="14" y2="10" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="2" y1="14" x2="14" y2="14" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="2" y1="2" x2="2" y2="14" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="6" y1="2" x2="6" y2="14" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="10" y1="2" x2="10" y2="14" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
-      <line x1="14" y1="2" x2="14" y2="14" stroke={enabled ? '#3B82F6' : '#6B7280'} strokeWidth="1"/>
+      <line x1="2" y1="2" x2="14" y2="2" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="2" y1="6" x2="14" y2="6" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="2" y1="10" x2="14" y2="10" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="2" y1="14" x2="14" y2="14" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="2" y1="2" x2="2" y2="14" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="6" y1="2" x2="6" y2="14" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="10" y1="2" x2="10" y2="14" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
+      <line x1="14" y1="2" x2="14" y2="14" stroke={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['500']} strokeWidth="1"/>
     </svg>
   )
 }
@@ -168,10 +169,10 @@ export function SnappingIcon({ size = 16, className, enabled = true }: SnappingI
       fill="none"
       className={cn(className)}
     >
-      <rect x="2" y="2" width="5" height="5" fill={enabled ? '#3B82F6' : '#D1D5DB'}/>
-      <rect x="9" y="2" width="5" height="5" fill={enabled ? '#3B82F6' : '#D1D5DB'}/>
-      <rect x="2" y="9" width="5" height="5" fill={enabled ? '#3B82F6' : '#D1D5DB'}/>
-      <rect x="9" y="9" width="5" height="5" fill={enabled ? '#3B82F6' : '#D1D5DB'}/>
+      <rect x="2" y="2" width="5" height="5" fill={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['300']}/>
+      <rect x="9" y="2" width="5" height="5" fill={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['300']}/>
+      <rect x="2" y="9" width="5" height="5" fill={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['300']}/>
+      <rect x="9" y="9" width="5" height="5" fill={enabled ? tokens.colors.scales.blue['500'] : tokens.colors.scales.gray['300']}/>
     </svg>
   )
 }

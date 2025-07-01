@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../generated/tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -63,32 +64,35 @@
   --blue-medium: #2563EB;
   --cyan-bright: #06B6D4;
   
-  /* Brand Book v2 Colors - Monochrome System */
-  --vergil-purple: #7B00FF; /* THE brand purple */
-  --vergil-purple-light: #9933FF; /* Hover states */
-  --vergil-purple-lighter: #BB66FF; /* Dark theme primary */
-  --vergil-purple-lightest: #D199FF; /* Dark theme secondary */
+  /* 
+   * Brand Book v2 Colors - Now imported from generated/tokens.css
+   * The following are aliased for backwards compatibility:
+   */
+  --vergil-purple: var(--vergil-colors-brand-purple);
+  --vergil-purple-light: var(--vergil-colors-brand-purple-light);
+  --vergil-purple-lighter: var(--vergil-colors-brand-purple-lighter);
+  --vergil-purple-lightest: var(--vergil-colors-brand-purple-lightest);
   --cosmic-purple: #6366F1; /* DEPRECATED - Legacy v1 purple, use vergil-purple instead */
   
-  /* Apple-Inspired Neutral Palette */
-  --vergil-full-black: #000000; /* Full black - backgrounds only */
-  --vergil-off-black: #1D1D1F; /* Off-black - primary text */
-  --vergil-full-white: #FFFFFF; /* Full white - backgrounds only */
-  --vergil-off-white: #F5F5F7; /* Off-white - text on dark, containers */
+  /* Neutral Palette - Aliased from token system */
+  --vergil-full-black: var(--vergil-colors-neutral-black);
+  --vergil-off-black: var(--vergil-colors-neutral-off-black);
+  --vergil-full-white: var(--vergil-colors-neutral-white);
+  --vergil-off-white: var(--vergil-colors-neutral-off-white);
   
-  /* Subtle Attention Hierarchy (Apple-inspired) */
-  --vergil-footnote-text: #6C6C6D; /* Small footnote text on off-white bg */
-  --vergil-emphasis-bg: #F0F0F2; /* Temporary headers needing attention */
-  --vergil-emphasis-input-bg: #FAFAFC; /* Interactive elements (dropdowns, inputs) within emphasis areas */
-  --vergil-emphasis-text: #303030; /* Text directly on emphasis-bg */
-  --vergil-emphasis-input-text: #323232; /* Darker text inside emphasis-input-bg elements */
-  --vergil-emphasis-button-hover: #272729; /* Button hover state */
+  /* Emphasis Colors - Aliased from token system */
+  --vergil-footnote-text: var(--vergil-colors-emphasis-footnote);
+  --vergil-emphasis-bg: var(--vergil-colors-emphasis-bg);
+  --vergil-emphasis-input-bg: var(--vergil-colors-emphasis-input-bg);
+  --vergil-emphasis-text: var(--vergil-colors-emphasis-text);
+  --vergil-emphasis-input-text: var(--vergil-colors-emphasis-input-text);
+  --vergil-emphasis-button-hover: var(--vergil-colors-emphasis-button-hover);
   
-  /* Functional Colors v2 */
-  --vergil-success: #0F8A0F;
-  --vergil-error: #E51C23;
-  --vergil-warning: #FFC700;
-  --vergil-info: #0087FF;
+  /* Functional Colors - Aliased from token system */
+  --vergil-success: var(--vergil-colors-functional-success);
+  --vergil-error: var(--vergil-colors-functional-error);
+  --vergil-warning: var(--vergil-colors-functional-warning);
+  --vergil-info: var(--vergil-colors-functional-info);
   
   /* Pure colors for backwards compatibility */
   --pure-black: #000000;

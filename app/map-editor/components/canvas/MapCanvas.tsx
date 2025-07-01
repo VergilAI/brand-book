@@ -16,6 +16,7 @@ import { ZoomIndicator } from '../ui/ZoomIndicator'
 import { GestureHint } from '../ui/GestureHint'
 import { DebugPanel } from '../debug/DebugPanel'
 import { cn } from '@/lib/utils'
+import { tokens } from '@/generated/tokens'
 import { Trash2, Crosshair } from 'lucide-react'
 import {
   BringToFrontIcon,
@@ -1251,8 +1252,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
               <path
                 key={territory.id}
                 d={territory.fillPath}
-                fill="#FFFFFF"
-                stroke={isSelected ? '#6366F1' : wouldBeSelected ? '#8B5CF6' : '#000000'}
+                fill={tokens.colors.neutral.white}
+                stroke={isSelected ? tokens.colors.tools.selection.secondary : wouldBeSelected ? tokens.colors.tools.selection.primary : tokens.colors.neutral.black}
                 strokeWidth={isSelected ? 3 : wouldBeSelected ? 2.5 : 2}
                 strokeDasharray={wouldBeSelected && !isSelected ? '3 3' : 'none'}
                 className={`cursor-pointer transition-colors ${
@@ -1292,7 +1293,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 <g key={`preview-${territory.id}`} transform={transform}>
                   <path
                     d={territory.fillPath}
-                    fill="#6366F1"
+                    fill={tokens.colors.tools.selection.secondary}
                     fillOpacity="0.4"
                     style={{ pointerEvents: 'none' }}
                   />
@@ -1307,9 +1308,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
           <g className="shape-placement-preview">
             <path
               d={shapePlacementPreview.path}
-              fill="#6366F1"
+              fill={tokens.colors.tools.selection.secondary}
               fillOpacity="0.2"
-              stroke="#6366F1"
+              stroke={tokens.colors.tools.selection.secondary}
               strokeWidth="2"
               strokeDasharray="4 2"
               className="pointer-events-none"
@@ -1318,7 +1319,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               cx={shapePlacementPreview.position.x}
               cy={shapePlacementPreview.position.y}
               r="4"
-              fill="#6366F1"
+              fill={tokens.colors.tools.selection.secondary}
               className="pointer-events-none"
             />
           </g>
@@ -1355,7 +1356,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       y1={vertex.y}
                       x2={vertex.controlPoints.in.x}
                       y2={vertex.controlPoints.in.y}
-                      stroke="#8B5CF6"
+                      stroke={tokens.colors.tools.selection.primary}
                       strokeWidth="2"
                       opacity="0.7"
                       className="pointer-events-none"
@@ -1364,8 +1365,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       cx={vertex.controlPoints.in.x}
                       cy={vertex.controlPoints.in.y}
                       r="6"
-                      fill="#8B5CF6"
-                      stroke="#FFFFFF"
+                      fill={tokens.colors.tools.selection.primary}
+                      stroke={tokens.colors.neutral.white}
                       strokeWidth="2"
                       className="cursor-move"
                       style={{ cursor: 'move' }}
@@ -1381,7 +1382,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       y1={vertex.y}
                       x2={vertex.controlPoints.out.x}
                       y2={vertex.controlPoints.out.y}
-                      stroke="#8B5CF6"
+                      stroke={tokens.colors.tools.selection.primary}
                       strokeWidth="2"
                       opacity="0.7"
                       className="pointer-events-none"
@@ -1390,8 +1391,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       cx={vertex.controlPoints.out.x}
                       cy={vertex.controlPoints.out.y}
                       r="6"
-                      fill="#8B5CF6"
-                      stroke="#FFFFFF"
+                      fill={tokens.colors.tools.selection.primary}
+                      stroke={tokens.colors.neutral.white}
                       strokeWidth="2"
                       className="cursor-move"
                       style={{ cursor: 'move' }}
@@ -1410,8 +1411,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     cx={vertex.x}
                     cy={vertex.y}
                     r="8"
-                    fill={store.editing.selectedVertices.has(index) ? '#3B82F6' : '#FFFFFF'}
-                    stroke={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
+                    fill={store.editing.selectedVertices.has(index) ? tokens.colors.scales.blue['500'] : tokens.colors.neutral.white}
+                    stroke={store.editing.selectedVertices.has(index) ? tokens.colors.tools.editor.vertex : tokens.colors.tools.selection.secondary}
                     strokeWidth="3"
                     className="cursor-move"
                     style={{ cursor: 'move' }}
@@ -1422,7 +1423,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       cx={vertex.x}
                       cy={vertex.y}
                       r="3"
-                      fill={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
+                      fill={store.editing.selectedVertices.has(index) ? tokens.colors.tools.editor.vertex : tokens.colors.tools.selection.secondary}
                       className="pointer-events-none"
                     />
                   )}
@@ -1439,7 +1440,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
             <path
               d={store.drawing.previewPath}
               fill="none"
-              stroke="#6366F1"
+              stroke={tokens.colors.tools.selection.secondary}
               strokeWidth="2"
               strokeDasharray="5 5"
               className="pointer-events-none"
@@ -1460,7 +1461,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   y1={lastPoint.y}
                   x2={currentPoint.x}
                   y2={currentPoint.y}
-                  stroke="#6366F1"
+                  stroke={tokens.colors.tools.selection.secondary}
                   strokeWidth="2"
                   strokeDasharray="3 3"
                   opacity="0.7"
@@ -1488,7 +1489,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   cy={firstPoint.y}
                   r="8"
                   fill="none"
-                  stroke="#6366F1"
+                  stroke={tokens.colors.tools.selection.secondary}
                   strokeWidth="2"
                   className="pointer-events-none animate-pulse"
                 />
@@ -1502,8 +1503,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 cx={point.x}
                 cy={point.y}
                 r="4"
-                fill="#6366F1"
-                stroke="#FFFFFF"
+                fill={tokens.colors.tools.selection.secondary}
+                stroke={tokens.colors.neutral.white}
                 strokeWidth="2"
                 className="pointer-events-none"
               />
@@ -1528,7 +1529,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     y1={dragStart.y}
                     x2={currentPoint.x}
                     y2={currentPoint.y}
-                    stroke="#8B5CF6"
+                    stroke={tokens.colors.tools.selection.primary}
                     strokeWidth="2"
                     className="pointer-events-none"
                   />
@@ -1537,8 +1538,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     cx={currentPoint.x}
                     cy={currentPoint.y}
                     r="4"
-                    fill="#8B5CF6"
-                    stroke="#FFFFFF"
+                    fill={tokens.colors.tools.selection.primary}
+                    stroke={tokens.colors.neutral.white}
                     strokeWidth="2"
                     className="pointer-events-none"
                   />
@@ -1557,7 +1558,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
             width={Math.abs(areaSelectEnd.current.x - areaSelectStart.current.x)}
             height={Math.abs(areaSelectEnd.current.y - areaSelectStart.current.y)}
             fill="rgba(99, 102, 241, 0.1)"
-            stroke="#6366F1"
+            stroke={tokens.colors.tools.selection.secondary}
             strokeWidth="1"
             strokeDasharray="3 3"
             className="pointer-events-none"
@@ -1581,7 +1582,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               cx={snappedPoint.x}
               cy={snappedPoint.y}
               r="3"
-              fill="#6366F1"
+              fill={tokens.colors.tools.selection.secondary}
               className="pointer-events-none"
             />
           )

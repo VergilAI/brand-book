@@ -1,5 +1,27 @@
 #!/usr/bin/env tsx
 
+/**
+ * Comprehensive Color Analyzer
+ * 
+ * This script analyzes color usage across the codebase to track migration progress.
+ * It identifies colors in:
+ * - YAML source files (the source of truth)
+ * - Generated token files (TS, CSS)
+ * - Hardcoded instances in component/page files
+ * 
+ * Files excluded from "hardcoded" detection:
+ * - All generated files (/generated/*)
+ * - Design token source and version files
+ * - Tailwind configuration
+ * - Global CSS files
+ * - Storybook configuration
+ * 
+ * A color is considered "fully migrated" when it's:
+ * 1. Defined in YAML
+ * 2. Available in generated TS and CSS
+ * 3. Has NO hardcoded instances in application code
+ */
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
@@ -89,14 +111,23 @@ class ComprehensiveColorAnalyzer {
       
       if (value && typeof value === 'object') {
         if ('value' in value && typeof value.value === 'string') {
-          // This is a color token
-          const normalizedColor = this.normalizeColor(value.value);
+          // Check if this is a reference or an actual color
+          const colorValue = value.value;
+          
+          if (this.isReference(colorValue)) {
+            // This is a reference like {scales.purple.600}, skip it
+            // We'll handle it after all colors are loaded
+            continue;
+          }
+          
+          // This is an actual color value
+          const normalizedColor = this.normalizeColor(colorValue);
           this.yamlTokens.set(tokenPath, normalizedColor);
           
           // Initialize color data
           if (!this.colors.has(normalizedColor)) {
             this.colors.set(normalizedColor, {
-              value: value.value,
+              value: colorValue,
               normalizedValue: normalizedColor,
               instances: {
                 hardcoded: [],
@@ -122,6 +153,11 @@ class ComprehensiveColorAnalyzer {
       }
     }
   }
+  
+  private isReference(value: string): boolean {
+    // Check if the value is a reference like {scales.purple.600}
+    return /^\{[^}]+\}$/.test(value.trim());
+  }
 
   private async scanGeneratedFiles() {
     console.log('🔍 Scanning generated token files...');
@@ -145,6 +181,12 @@ class ComprehensiveColorAnalyzer {
           const matches = line.matchAll(pattern);
           for (const match of matches) {
             const value = match[0];
+            
+            // Skip if this is inside a gradient or complex value
+            if (line.includes('gradient') || line.includes('rgba(123, 0, 255')) {
+              continue;
+            }
+            
             const normalized = this.normalizeColor(value);
             this.generatedTokens.add(normalized);
             
@@ -213,8 +255,19 @@ class ComprehensiveColorAnalyzer {
         'build/**',
         'coverage/**',
         '.git/**',
-        'generated/**',
-        'design-tokens/**/*.yaml'
+        'generated/**',  // Exclude all generated files
+        'design-tokens/**',  // Exclude all design token files (source and versioned)
+        '**/tokens.css',  // Exclude any tokens.css file
+        '**/tokens.ts',  // Exclude any tokens.ts file
+        '**/tokens.js',  // Exclude any tokens.js file
+        '**/tokens.json',  // Exclude any tokens.json file
+        '**/tokens.scss',  // Exclude any tokens.scss file
+        '**/tailwind-tokens.js',  // Exclude tailwind token configs
+        '**/tailwind-theme.js',  // Exclude tailwind theme files
+        'tailwind.config.ts',  // Exclude tailwind config (imports tokens)
+        'tailwind.config.js',  // Exclude tailwind config
+        'app/globals.css',  // Exclude globals.css (may have token definitions during migration)
+        '.storybook/**'  // Exclude storybook config files
       ]
     });
 
@@ -327,6 +380,11 @@ class ComprehensiveColorAnalyzer {
   }
 
   private isColorValue(value: string): boolean {
+    // Skip references
+    if (this.isReference(value)) {
+      return false;
+    }
+    
     return /^#[0-9a-fA-F]{3,8}$/.test(value) ||
            /^rgba?\([^)]+\)$/.test(value) ||
            /^hsla?\([^)]+\)$/.test(value);

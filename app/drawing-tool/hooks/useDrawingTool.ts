@@ -1,6 +1,7 @@
 "use client"
 
 import { create } from 'zustand'
+import { tokens } from '@/generated/tokens'
 import { DrawingToolState, BezierPoint, Shape, Point } from '../types/drawing'
 import { SnapState, SnapResult } from '../types/snapping'
 import { getSnapCandidates, getAlignmentGuides, snapPointToAngle } from '../utils/snapping'
@@ -17,7 +18,7 @@ const createEmptyDocument = () => ({
   settings: {
     canvasWidth: 1000,
     canvasHeight: 1000,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: tokens.colors.neutral.white
   }
 })
 
@@ -221,8 +222,8 @@ export const useDrawingTool = create<DrawingToolState>((set, get) => ({
       id,
       name: `Shape ${Object.keys(state.document.shapes).length + 1}`,
       fillPath: path,
-      fill: '#FFFFFF',
-      stroke: '#000000',
+      fill: tokens.colors.neutral.white,
+      stroke: tokens.colors.neutral.black,
       strokeWidth: 2,
       opacity: 1,
       center

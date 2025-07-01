@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { tokens } from '@/generated/tokens'
 import type { 
   TerritoryGraph, 
   GameTerritory,
@@ -15,12 +16,12 @@ import {
 } from '@/lib/lms/voronoi-tessellation'
 
 const PLAYER_COLORS = {
-  player1: '#6366F1', // cosmic-purple
-  player2: '#E11D48', // rose-600
-  player3: '#10B981', // emerald-500
-  player4: '#F59E0B', // amber-500
-  player5: '#3B82F6', // blue-500
-  player6: '#8B5CF6', // violet-500
+  player1: tokens.colors.tools.selection.secondary, // cosmic-purple
+  player2: tokens.colors.scales.red['600'], // rose-600
+  player3: tokens.colors.scales.green['500'], // emerald-500
+  player4: tokens.colors.scales.yellow['600'], // amber-500
+  player5: tokens.colors.scales.blue['500'], // blue-500
+  player6: tokens.colors.tools.selection.primary, // violet-500
 } as const
 
 export type TerritoryState = 'idle' | 'hovered' | 'selected' | 'selectable' | 'disabled'
@@ -115,7 +116,7 @@ export function TerritoryConquest({
     const gameTerritory = gameState.get(territoryId)
     
     // Base color from ownership
-    let baseColor = '#FFFFFF'
+    let baseColor = tokens.colors.neutral.white
     if (gameTerritory?.owner) {
       baseColor = PLAYER_COLORS[gameTerritory.owner as keyof typeof PLAYER_COLORS]
     }
@@ -140,15 +141,15 @@ export function TerritoryConquest({
     
     switch (territoryState.state) {
       case 'selected':
-        return '#1D4ED8' // Blue stroke for selected
+        return tokens.colors.scales.blue['700'] // Blue stroke for selected
       case 'selectable':
-        return '#60A5FA' // Light blue stroke for selectable
+        return tokens.colors.scales.blue['400'] // Light blue stroke for selectable
       case 'hovered':
-        return '#374151' // Dark gray for hovered
+        return tokens.colors.scales.gray['600'] // Dark gray for hovered
       case 'disabled':
-        return '#D1D5DB' // Light gray for disabled
+        return tokens.colors.scales.gray['300'] // Light gray for disabled
       default:
-        return '#000000' // Black default
+        return tokens.colors.neutral.black // Black default
     }
   }
 
@@ -292,7 +293,7 @@ export function TerritoryConquest({
               style={{
                 fontSize: '12px',
                 fontWeight: 600,
-                fill: territoryState.isSelected ? '#1D4ED8' : '#000000',
+                fill: territoryState.isSelected ? tokens.colors.scales.blue['700'] : tokens.colors.neutral.black,
                 filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.9))'
               }}
             >
@@ -320,7 +321,7 @@ export function TerritoryConquest({
             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
               <feOffset dx="0" dy="4" result="offsetblur"/>
-              <feFlood floodColor="#000000" floodOpacity="0.15"/>
+              <feFlood floodColor={tokens.colors.neutral.black} floodOpacity="0.15"/>
               <feComposite in2="offsetblur" operator="in"/>
               <feMerge>
                 <feMergeNode/>
@@ -339,7 +340,7 @@ export function TerritoryConquest({
             {/* Continent patterns for subtle visual groups */}
             <pattern id="continent-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
               <rect width="20" height="20" fill="transparent"/>
-              <circle cx="10" cy="10" r="1" fill="#000000" opacity="0.05"/>
+              <circle cx="10" cy="10" r="1" fill={tokens.colors.neutral.black} opacity="0.05"/>
             </pattern>
           </defs>
 
@@ -382,7 +383,7 @@ export function TerritoryConquest({
           {/* Subtle grid overlay for depth */}
           <defs>
             <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#000000" strokeWidth="0.5" opacity="0.05"/>
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke={tokens.colors.neutral.black} strokeWidth="0.5" opacity="0.05"/>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" opacity="0.3" className="pointer-events-none" />

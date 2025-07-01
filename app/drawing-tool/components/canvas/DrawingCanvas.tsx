@@ -7,6 +7,7 @@ import { useSnapping } from '../../hooks/useSnapping'
 import { GridOverlay } from './GridOverlay'
 import { SnapIndicators } from './SnapIndicators'
 import { cn } from '@/lib/utils'
+import { tokens } from '@/generated/tokens'
 import type { Shape, Point, BezierPoint } from '../../types/drawing'
 import type { SnapIndicator } from '../../types/snapping'
 
@@ -806,8 +807,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
               <path
                 key={shape.id}
                 d={shape.fillPath}
-                fill="#FFFFFF"
-                stroke={isSelected ? '#6366F1' : wouldBeSelected ? '#8B5CF6' : '#000000'}
+                fill={tokens.colors.neutral.white}
+                stroke={isSelected ? tokens.colors.tools.selection.secondary : wouldBeSelected ? tokens.colors.tools.selection.primary : tokens.colors.neutral.black}
                 strokeWidth={isSelected ? 3 : wouldBeSelected ? 2.5 : 2}
                 strokeDasharray={wouldBeSelected && !isSelected ? '3 3' : 'none'}
                 className={`cursor-pointer transition-colors ${
@@ -864,7 +865,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                       y1={vertex.y}
                       x2={vertex.controlPoints.in.x}
                       y2={vertex.controlPoints.in.y}
-                      stroke="#8B5CF6"
+                      stroke={tokens.colors.tools.selection.primary}
                       strokeWidth="2"
                       opacity="0.7"
                       className="pointer-events-none"
@@ -873,8 +874,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                       cx={vertex.controlPoints.in.x}
                       cy={vertex.controlPoints.in.y}
                       r="6"
-                      fill="#8B5CF6"
-                      stroke="#FFFFFF"
+                      fill={tokens.colors.tools.selection.primary}
+                      stroke={tokens.colors.neutral.white}
                       strokeWidth="2"
                       className="cursor-move"
                       style={{ cursor: 'move' }}
@@ -890,7 +891,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                       y1={vertex.y}
                       x2={vertex.controlPoints.out.x}
                       y2={vertex.controlPoints.out.y}
-                      stroke="#8B5CF6"
+                      stroke={tokens.colors.tools.selection.primary}
                       strokeWidth="2"
                       opacity="0.7"
                       className="pointer-events-none"
@@ -899,8 +900,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                       cx={vertex.controlPoints.out.x}
                       cy={vertex.controlPoints.out.y}
                       r="6"
-                      fill="#8B5CF6"
-                      stroke="#FFFFFF"
+                      fill={tokens.colors.tools.selection.primary}
+                      stroke={tokens.colors.neutral.white}
                       strokeWidth="2"
                       className="cursor-move"
                       style={{ cursor: 'move' }}
@@ -919,8 +920,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                     cx={vertex.x}
                     cy={vertex.y}
                     r="8"
-                    fill={store.editing.selectedVertices.has(index) ? '#3B82F6' : '#FFFFFF'}
-                    stroke={store.editing.selectedVertices.has(index) ? '#1E40AF' : '#6366F1'}
+                    fill={store.editing.selectedVertices.has(index) ? tokens.colors.scales.blue['500'] : tokens.colors.neutral.white}
+                    stroke={store.editing.selectedVertices.has(index) ? tokens.colors.tools.editor.vertex : tokens.colors.tools.selection.secondary}
                     strokeWidth="3"
                     className="cursor-move"
                     style={{ cursor: 'move' }}
@@ -1011,8 +1012,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                 cx={point.x}
                 cy={point.y}
                 r="4"
-                fill="#6366F1"
-                stroke="#FFFFFF"
+                fill={tokens.colors.tools.selection.secondary}
+                stroke={tokens.colors.neutral.white}
                 strokeWidth="2"
                 className="pointer-events-none"
               />
@@ -1037,7 +1038,7 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                     y1={dragStart.y}
                     x2={currentPoint.x}
                     y2={currentPoint.y}
-                    stroke="#8B5CF6"
+                    stroke={tokens.colors.tools.selection.primary}
                     strokeWidth="2"
                     className="pointer-events-none"
                   />
@@ -1046,8 +1047,8 @@ export function DrawingCanvas({ className }: DrawingCanvasProps) {
                     cx={currentPoint.x}
                     cy={currentPoint.y}
                     r="4"
-                    fill="#8B5CF6"
-                    stroke="#FFFFFF"
+                    fill={tokens.colors.tools.selection.primary}
+                    stroke={tokens.colors.neutral.white}
                     strokeWidth="2"
                     className="pointer-events-none"
                   />

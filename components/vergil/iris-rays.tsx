@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { tokens } from '@/generated/tokens'
 
 interface IrisRaysProps {
   variant?: 'default' | 'cosmic' | 'electric' | 'synaptic' | 'awakening'
@@ -42,34 +43,34 @@ export function IrisRays({
   // Variant color schemes
   const variantConfig = {
     default: {
-      primary: '#6366F1', // cosmic-purple
-      secondary: '#A78BFA', // electric-violet
-      accent: '#818CF8', // luminous-indigo
-      highlight: '#10B981' // phosphor-cyan
+      primary: tokens.colors.tools.selection.secondary, // cosmic-purple
+      secondary: tokens.colors.scales.purple['400'], // electric-violet
+      accent: tokens.colors.scales.purple['500'], // luminous-indigo
+      highlight: tokens.colors.scales.green['500'] // phosphor-cyan
     },
     cosmic: {
-      primary: '#6366F1',
-      secondary: '#8B5CF6',
-      accent: '#A78BFA',
-      highlight: '#C084FC'
+      primary: tokens.colors.tools.selection.secondary,
+      secondary: tokens.colors.tools.selection.primary,
+      accent: tokens.colors.scales.purple['400'],
+      highlight: tokens.colors.scales.purple['300']
     },
     electric: {
-      primary: '#A78BFA',
-      secondary: '#818CF8',
-      accent: '#6366F1',
-      highlight: '#DDD6FE'
+      primary: tokens.colors.scales.purple['400'],
+      secondary: tokens.colors.scales.purple['500'],
+      accent: tokens.colors.tools.selection.secondary,
+      highlight: tokens.colors.scales.purple['100']
     },
     synaptic: {
-      primary: '#F472B6',
-      secondary: '#EC4899',
-      accent: '#BE185D',
-      highlight: '#FDF2F8'
+      primary: tokens.colors.scales.purple['300'],
+      secondary: tokens.colors.scales.purple['400'],
+      accent: tokens.colors.scales.purple['700'],
+      highlight: tokens.colors.scales.purple['50']
     },
     awakening: {
-      primary: '#10B981',
-      secondary: '#06B6D4',
-      accent: '#3B82F6',
-      highlight: '#67E8F9'
+      primary: tokens.colors.scales.green['500'],
+      secondary: tokens.colors.scales.blue['500'],
+      accent: tokens.colors.scales.blue['500'],
+      highlight: tokens.colors.scales.blue['200']
     }
   }
 
