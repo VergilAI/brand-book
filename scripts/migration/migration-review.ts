@@ -122,10 +122,10 @@ class MigrationReviewer {
   private loadTargetTokens(): TargetTokenSet {
     // Load target design tokens from various sources
     const tokenSources = [
-      path.join(process.cwd(), 'design-tokens', 'source', 'colors.yaml'),
-      path.join(process.cwd(), 'design-tokens', 'source', 'spacing.yaml'),
-      path.join(process.cwd(), 'design-tokens', 'source', 'typography.yaml'),
-      path.join(process.cwd(), 'design-tokens', 'source', 'shadows.yaml'),
+      path.join(process.cwd(), 'design-tokens', 'active', 'source', 'colors.yaml'),
+      path.join(process.cwd(), 'design-tokens', 'active', 'source', 'spacing.yaml'),
+      path.join(process.cwd(), 'design-tokens', 'active', 'source', 'typography.yaml'),
+      path.join(process.cwd(), 'design-tokens', 'active', 'source', 'shadows.yaml'),
       path.join(process.cwd(), 'generated', 'tokens.json'),
     ];
 

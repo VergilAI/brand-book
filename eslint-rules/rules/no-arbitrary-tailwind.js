@@ -72,8 +72,11 @@ module.exports = {
       arbitraryValue: 'Arbitrary Tailwind class "{{class}}" found. Use design tokens or standard classes instead.',
       arbitraryValueWithSuggestion: 'Arbitrary Tailwind class "{{class}}" found. Consider using: {{suggestion}}',
       arbitraryColor: 'Arbitrary color class "{{class}}" with value "{{value}}" found. Use color tokens instead.',
+      arbitraryColorWithSuggestion: 'Arbitrary color class "{{class}}" with value "{{value}}" found. Consider using token: {{suggestion}}',
       arbitrarySpacing: 'Arbitrary spacing class "{{class}}" with value "{{value}}" found. Use spacing tokens instead.',
+      arbitrarySpacingWithSuggestion: 'Arbitrary spacing class "{{class}}" with value "{{value}}" found. Consider using token: {{suggestion}}',
       arbitraryTypography: 'Arbitrary typography class "{{class}}" with value "{{value}}" found. Use typography tokens instead.',
+      arbitraryTypographyWithSuggestion: 'Arbitrary typography class "{{class}}" with value "{{value}}" found. Consider using token: {{suggestion}}',
     },
   },
 

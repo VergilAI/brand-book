@@ -1,13 +1,186 @@
-# Vergil Design System - Project Overview
+# Vergil Design System - AI Development Guide
 
-## Project Structure
+## 🗺️ Current System Overview
 
-This repository contains multiple Vergil-related projects:
+### What We've Built
 
-1. **Brand Book** (`/app/brand/`) - Comprehensive brand guidelines and design system documentation
-2. **Vergil Main** (`/app/vergil-main/`) - Main AI infrastructure platform landing page
-3. **Vergil Learn** (`/app/vergil-learn/`) - Educational platform landing page
-4. **LMS Demo** (`/app/lms/`) - Learning Management System demo interface
+1. **Centralized Token System**
+   - Source: `/design-tokens/source/*.yaml` (YAML files define everything)
+   - Generated: `/generated/` (CSS, TS, SCSS auto-generated)
+   - THIS is your single source of truth
+
+2. **Component Scaffolding Tool**
+   - Command: `npm run create:component ComponentName -- --category=ui`
+   - Automatically creates files with correct structure and tokens
+
+3. **Enforcement System** (ACTIVE!)
+   - ESLint catches hardcoded values
+   - Pre-commit hooks block bad code
+   - CI/CD validates everything
+
+4. **Version Management System**
+   - All tokens are versioned (currently v2.1.0-dev)
+   - @docs/versioning-system.md - Complete versioning documentation
+   - @docs/migration-dashboard-spec.md - Migration dashboard plans
+
+5. **Reporting & Tracking**
+   - `npm run report:all` shows system health
+   - `npm run scan:hardcoded` finds violations
+   - Current state: 2,323 hardcoded values to fix
+
+## 🎯 How to Build New Components
+
+### Step 1: Always Use the Scaffolding Tool
+
+```bash
+npm run create:component MyButton -- --category=ui
+```
+
+This creates:
+- `components/ui/MyButton/MyButton.tsx` (with tokens pre-imported)
+- `components/ui/MyButton/MyButton.stories.tsx` (Storybook ready)
+- `components/ui/MyButton/MyButton.test.tsx` (test structure)
+- `components/ui/MyButton/index.ts` (exports)
+
+The component already uses tokens! No hardcoded values.
+
+### Step 2: Only Use Tokens from Generated Files
+
+When styling, ONLY use:
+- Colors: `text-vergil-purple` or `style={{ color: tokens.colors.brand.purple }}`
+- Spacing: `p-4` (maps to token) or `style={{ padding: tokens.spacing.scale[4] }}`
+- Never: `text-[#7B00FF]` or `p-[16px]`
+
+Your tokens live in:
+- CSS: `var(--vergil-colors-brand-purple)`
+- TypeScript: `import { tokens } from '@/generated/tokens'`
+- Tailwind: Automatically configured from tokens
+
+### Step 3: Build Your Storybook Story
+
+The generated story file has the structure. Just fill in:
+- Different variants
+- Interactive controls
+- Usage examples
+- NO hardcoded values!
+
+## 🔄 How to Port Existing Components
+
+> 📖 **Note on Versioning**: Our design system uses a sophisticated versioning system. If you need to understand how token versions work, how to create new versions, or how the migration system operates, see @docs/versioning-system.md
+
+### The Manual Migration Process
+
+1. **Pick a Component to Migrate**
+   - Start with simple ones (Button, Card)
+   - Look at `/components/ui/button.tsx`
+
+2. **Run the Scanner on That File**
+   ```bash
+   npm run scan:hardcoded
+   ```
+   Find all violations in that component
+
+3. **Create the New Version**
+   ```bash
+   npm run create:component Button -- --category=ui
+   ```
+
+4. **Copy Logic, Replace Styles**
+   - Copy the component logic
+   - Replace EVERY hardcoded value with tokens
+   - Use the scanner report as your checklist
+
+5. **Verify It's Clean**
+   - ESLint will tell you if you missed anything
+   - The component should have ZERO violations
+
+### Example Migration
+
+**Old Button (with violations):**
+```tsx
+<button className="bg-[#7B00FF] px-[16px] py-[8px]">
+```
+
+**New Button (token-based):**
+```tsx
+<button className="bg-vergil-purple px-4 py-2">
+```
+
+## 📚 Token Reference
+
+Open these files to see available tokens:
+- `/generated/tokens.ts` - See all tokens in TypeScript
+- `/generated/tokens.css` - See all CSS variables
+- Storybook Token Browser - Visual reference
+
+Common tokens you'll use:
+- **Colors**: vergil-purple, vergil-off-black, vergil-off-white
+- **Spacing**: spacing-1 through spacing-64 (4px increments)
+- **Radii**: radius-sm, radius-md, radius-lg
+- **Shadows**: shadow-sm, shadow-md, shadow-lg
+
+## 🎨 How to Create New Tokens
+
+### Creating a New Color Token
+
+1. **Edit `/design-tokens/source/colors.yaml`:**
+   ```yaml
+   colors:
+     brand:
+       purple: "#7B00FF"
+       # Add your new color:
+       purple-dark: "#5500CC"
+   ```
+
+2. **Build tokens:**
+   ```bash
+   npm run build:tokens
+   ```
+
+3. **Use everywhere:**
+   - Tailwind: `bg-brand-purple-dark`
+   - CSS: `var(--vergil-colors-brand-purple-dark)`
+   - TS: `tokens.colors.brand.purpleDark`
+
+### Creating a New Spacing Token
+
+1. **Edit `/design-tokens/source/spacing.yaml`:**
+   ```yaml
+   spacing:
+     scale:
+       # Add custom spacing:
+       18: "72px"
+   ```
+
+2. **Build and use:**
+   ```bash
+   npm run build:tokens
+   ```
+   - Tailwind: `p-18`, `m-18`
+   - CSS: `var(--vergil-spacing-scale-18)`
+   - TS: `tokens.spacing.scale[18]`
+
+## 🎮 Daily Workflow
+
+1. **Need a new component?**
+   ```bash
+   npm run create:component Name -- --category=ui
+   ```
+
+2. **Checking system health?**
+   ```bash
+   npm run report:all
+   ```
+
+3. **Finding what to fix?**
+   ```bash
+   npm run scan:hardcoded
+   ```
+
+4. **Testing your changes?**
+   ```bash
+   npm run lint:tokens
+   ```
 
 ## Tech Stack
 
@@ -19,37 +192,15 @@ This repository contains multiple Vergil-related projects:
 - **Data Visualization**: D3.js
 - **Component Architecture**: Class Variance Authority (CVA)
 
-## CRITICAL: Component Architecture Standards
+## Component Categories
 
-### Component Structure (MANDATORY)
-Every component MUST follow this structure:
-```
-components/
-└── ComponentName/
-    ├── ComponentName.tsx          // Component implementation
-    ├── ComponentName.stories.tsx  // Storybook stories (required)
-    ├── ComponentName.test.tsx     // Tests (required)
-    ├── ComponentName.module.css   // Styles (if needed)
-    └── index.ts                   // Exports
-```
+- `/components/ui/` - Core UI components (unified Card, Button, Input, etc.)
+- `/components/vergil/` - Brand-specific components (logos, patterns, visualizations)
+- `/components/landing/` - Approved landing components (Navigation, LearnHero, UserJourneyCarousel)
+- `/components/lms/` - LMS-specific components (CourseCard, LessonViewer, etc.)
+- `/components/docs/` - Documentation components
 
-### Component Categories & Precedence
-1. **Vergil Learn Components** - HIGHEST PRIORITY (fully approved, do not modify)
-   - LearnHero, UserJourneyCarousel, Navigation, LearnFooter
-2. **Core UI Components** - Unified system (Card with all variants, Button, Input, etc.)
-3. **Brand Components** - Vergil-specific (RadialHeatmap, StreamgraphBackground, logos)
-4. **Module Components** - Product-specific (LMS CourseCard, GameInterface)
-
-### Unified Card System
-The Card component now includes all variants:
-- `default` - Basic card
-- `interactive` - With hover effects and breathing
-- `neural` - With gradient background
-- `feature` - For feature displays (replaces FeatureCard)
-- `metric` - For metrics (replaces MetricCard)
-- `problem` - For problem/solution displays (replaces ProblemCard)
-- `gradient` - With consciousness gradient
-- `outlined` - With border emphasis
+## Key Conventions
 
 ### Token-First Development (MANDATORY)
 ```typescript
@@ -58,81 +209,15 @@ The Card component now includes all variants:
 <div className="bg-[#7B00FF]" />
 <div style={{ color: '#7B00FF' }} />
 
-// ✅ ALWAYS use V2 design tokens
+// ✅ ALWAYS use design tokens
 <div className="bg-vergil-purple" />
 <div className="text-vergil-off-black" />
 ```
 
-**CRITICAL RULE**: Every component MUST use only design tokens. No hardcoded values allowed.
-
-## CLAUDE.md File Guidelines
-
-### Purpose of CLAUDE.md Files
-CLAUDE.md files are context documents that get passed to AI assistants when working on specific parts of the codebase. They should contain ONLY the most relevant information for that specific context level.
-
-### Hierarchy and Content Rules
-
-#### Root CLAUDE.md (this file)
-- **ONLY** universal, project-wide standards
-- Critical architectural decisions
-- Mandatory patterns that apply everywhere
-- Brief project structure overview
-- Links to module-specific CLAUDE.md files
-
-#### Module-level CLAUDE.md (`/app/[module]/CLAUDE.md`)
-- Module-specific architecture
-- Page structure and routing
-- Module-specific components
-- Business logic unique to that module
-- Module deployment instructions
-
-#### Component-level CLAUDE.md (`/components/[category]/CLAUDE.md`)
-- Component library standards
-- Specific patterns for that component category
-- Props documentation patterns
-- Accessibility requirements
-- Performance considerations
-
-### Writing Effective CLAUDE.md Files
-
-1. **Be Concise**: Every line should be essential
-2. **Be Specific**: Include exact file paths and code examples
-3. **Be Current**: Update immediately when patterns change
-4. **Be Contextual**: Only include what's needed at that level
-
-Example hierarchy:
-```
-/CLAUDE.md (root) - Universal standards, component structure
-├── /app/lms/CLAUDE.md - LMS routing, features, components
-│   └── /app/lms/courses/CLAUDE.md - Course-specific logic
-├── /components/CLAUDE.md - Component library overview
-│   ├── /components/ui/CLAUDE.md - Primitive patterns
-│   └── /components/vergil/CLAUDE.md - Brand component patterns
-```
-
-## Key Conventions
-
-### Tailwind CSS v4
-- Import syntax: `@import "tailwindcss"` (NOT `@tailwind base/components/utilities`)
-- Config file: `tailwind.config.js` (JavaScript, not TypeScript)
-
-### Brand Guidelines (V2 TOKEN SYSTEM)
-- **Logo Strategy**: All logos are white by default - always use on dark/colored backgrounds
-- **Color System V2**: MANDATORY Apple-inspired monochrome palette
-  - **Primary Brand**: `vergil-purple` (#7B00FF) - THE brand color
-  - **Neutrals**: `vergil-off-black` (#1D1D1F), `vergil-off-white` (#F5F5F7)  
-  - **Emphasis**: `vergil-emphasis-bg`, `vergil-emphasis-text`, `vergil-emphasis-button-hover`
-  - **DEPRECATED**: `cosmic-purple` (#6366F1) - DO NOT USE V1 colors
-  - **Token Source**: `/design-tokens/source/colors.yaml` - SINGLE SOURCE OF TRUTH
-- **Animations**: Incorporate "living system" breathing effects using token-based values
-
-### Component Organization
-- `/components/ui/` - Core UI components (unified Card, Button, Input, etc.)
-- `/components/vergil/` - Brand-specific components (logos, patterns, visualizations)
-- `/components/landing/` - Approved landing components (Navigation, LearnHero, UserJourneyCarousel)
-- `/components/lms/` - LMS-specific components (CourseCard, LessonViewer, etc.)
-- `/components/docs/` - Documentation components
-- `/components/landing/_archived/` - Deprecated components (replaced by unified system)
+### Brand Color Tokens
+- **Primary Brand**: `vergil-purple` (#7B00FF) - THE brand color
+- **Neutrals**: `vergil-off-black` (#1D1D1F), `vergil-off-white` (#F5F5F7)
+- **Source**: `/design-tokens/source/colors.yaml` - SINGLE SOURCE OF TRUTH
 
 ### Code Style
 - DO NOT add comments unless requested
@@ -140,147 +225,50 @@ Example hierarchy:
 - Use existing libraries - check package.json first
 - Maintain accessibility (WCAG AA standards)
 
-## MANDATORY: Centralized Design System Commands
+## Essential Commands
 
-### Component Creation (ALWAYS REQUIRED)
+### Component Creation
 ```bash
-# NEVER create components manually - ALWAYS use the scaffolding tool
 npm run create:component ComponentName -- --category=ui
-
-# This generates: Component.tsx, stories, tests with V2 tokens only
-# Manual component creation is FORBIDDEN
 ```
 
-### Quality Assurance (REQUIRED BEFORE COMMITS)
+### Quality Checks
 ```bash
-npm run scan:hardcoded     # Scan for hardcoded values (REQUIRED)
-npm run lint:tokens        # Check token violations (REQUIRED)
-npm run validate-tokens    # Ensure CSS/TS alignment (REQUIRED)
+npm run scan:hardcoded     # Find hardcoded values
+npm run lint:tokens        # Check token violations
+npm run report:all         # System health report
 ```
 
-### Token Management (CENTRALIZED ONLY)
-```bash
-npm run build:tokens       # Build tokens from YAML sources
-npm run watch:tokens       # Watch token sources during development
-```
-
-### Coverage & Reporting
-```bash
-npm run report:all         # Generate complete coverage reports
-npm run report:coverage    # Component health scores
-npm run report:trends      # Historical trend analysis
-```
-
-### Development Commands
+### Development
 ```bash
 npm run dev               # Start development server
-npm run build             # Build for production
-npm run start             # Start production server
+npm run build:tokens      # Build tokens from YAML
+npm run storybook         # Start Storybook
 ```
 
-### CRITICAL ENFORCEMENT RULES
+## Project Structure
 
-1. **NEVER create components manually** - Always use `npm run create:component`
-2. **NEVER commit without validation** - Run `npm run lint:tokens` first
-3. **NEVER use hardcoded values** - Token-first development only
-4. **ALWAYS validate token alignment** - Run `npm run validate-tokens`
-5. **ALWAYS check coverage** - Run `npm run report:all` weekly
+- **Brand Book** (`/app/brand/`) - Brand guidelines and design system documentation
+- **Vergil Main** (`/app/vergil-main/`) - Main AI platform landing page
+- **Vergil Learn** (`/app/vergil-learn/`) - Educational platform landing page
+- **LMS Demo** (`/app/lms/`) - Learning Management System demo
 
-## Module-Specific Documentation
+## Core System Files
 
-Each major module has its own CLAUDE.md file with detailed information:
-
-- `/app/brand/CLAUDE.md` - Brand book implementation details
-- `/app/vergil-main/CLAUDE.md` - Vergil platform landing documentation
-- `/app/vergil-learn/CLAUDE.md` - Vergil Learn landing documentation
-- `/app/lms/CLAUDE.md` - LMS module documentation
-- `/app/map-editor/CLAUDE.md` - Map editor with z-order management, snapping, templates, copy/paste
-- `/components/CLAUDE.md` - Component library documentation
-- `/public/data/CLAUDE.md` - Data files documentation
-
-## CENTRALIZED DESIGN SYSTEM DOCUMENTATION
-
-### Core System Files
 - `/design-tokens/source/` - YAML token definitions (SINGLE SOURCE OF TRUTH)
 - `/generated/` - Auto-generated token outputs (CSS, TS, JSON, Tailwind)
 - `/scripts/` - Automation and validation tools
 - `/reports/` - Coverage and quality reports
-- `/eslint-rules/` - Token enforcement rules
-- `/docs/component-inventory.md` - Complete component health tracking
+- `/eslint-rules/` - Token enforcement rules (ACTIVE)
 
-### Additional Documentation
-- `/docs/snapping-system.md` - Comprehensive snapping system documentation
-- `/docs/template-library.md` - Template shape library documentation
-- `/app/map-editor/docs/template-library-plan.md` - Implementation plan and status
-- `/docs/hardcoded-values-scanner.md` - Hardcoded value detection system
-- `/docs/eslint-token-enforcement.md` - Token enforcement rules documentation
+## Current System Status
 
-## Deployment
-
-For deploying individual modules, use branch-specific .gitignore files:
-- `.gitignore.brand-book` - Deploy only brand book
-- `.gitignore.vergil` - Deploy only Vergil platform landing
-- `.gitignore.vergil-learn` - Deploy only Vergil Learn landing
-- `.gitignore.lms` - Deploy only LMS demo
-
-**Important**: See `README_GITIGNORE.md` for detailed deployment instructions.
-
-### Quick Deployment Steps
-
-1. **Create deployment branch**: `git checkout -b deploy-[module]`
-2. **Apply module gitignore**: `cp .gitignore.[module] .gitignore`
-3. **Commit and push**: `git add . && git commit -m "Deploy [module]" && git push`
-4. **Configure platform** to deploy from the deployment branch
-
-### GitHub Workflow
-
-**Branch Strategy:**
-- `main` - Development branch with all modules
-- `deploy-brand-book` - Brand book deployment only
-- `deploy-vergil` - Vergil platform landing deployment only
-- `deploy-vergil-learn` - Vergil Learn landing deployment only
-- `deploy-lms` - LMS deployment only
-
-**Important Rules:**
-- Never modify .gitignore on main branch
-- Don't merge deployment branches back to main
-- Update deployment branches by merging from main
-
-**Updating Deployments:**
-```bash
-# After making changes on main
-git checkout deploy-brand-book
-git merge main
-git push origin deploy-brand-book
-```
+- **Enforcement**: Active (ESLint + pre-commit hooks)
+- **Components**: 82 tracked
+- **Token Violations**: 2,323 hardcoded values to fix
+- **Storybook Coverage**: 37%
+- **V2 Token Adoption**: 29%
 
 ## GitHub Repository
 
 **URL**: https://github.com/VergilAI/brand-book
-
-**Repository Structure:**
-- Single monorepo containing all modules
-- Module separation through routing and deployment branches  
-- **Centralized design system** with YAML-based token management
-- **Automated quality enforcement** through ESLint rules and pre-commit hooks
-- **Complete coverage tracking** for components, tokens, and system health
-- **Single source of truth** for all design decisions
-
-## SYSTEM QUALITY METRICS
-
-**Current Status** (run `npm run report:all` for latest):
-- 82 total components tracked
-- 34% average component health score
-- 37% Storybook coverage
-- 2% test coverage (CRITICAL - needs improvement)
-- 29% V2 token adoption (migration in progress)
-- 2,323 hardcoded values detected (needs token migration)
-- 6,511 ESLint token violations (enforcement active)
-
-**Quality Goals**:
-- 100% component health scores
-- 100% Storybook coverage (MANDATORY)
-- 100% test coverage
-- 100% V2 token adoption
-- ZERO hardcoded values
-- ZERO ESLint violations

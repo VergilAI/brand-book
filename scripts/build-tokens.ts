@@ -5,10 +5,10 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 // Constants
-const SOURCE_DIR = path.join(process.cwd(), 'design-tokens', 'source');
+const SOURCE_DIR = path.join(process.cwd(), 'design-tokens', 'active', 'source');
 const OUTPUT_DIR = path.join(process.cwd(), 'generated');
 const CSS_PREFIX = '--vergil-';
-const PACKAGE_VERSION = '1.0.0';
+const PACKAGE_VERSION = '2.1.0-dev'; // Updated to match active version
 
 // Token reference pattern
 const TOKEN_REF_PATTERN = /\{([^}]+)\}/g;

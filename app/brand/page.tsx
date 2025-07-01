@@ -9,7 +9,7 @@ export default function ComponentsPage() {
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4 gradient-text">Component Library</h1>
           <p className="text-xl text-muted-foreground">
-            Comprehensive documentation of Vergil's design system components, 
+            Comprehensive documentation of Vergil&apos;s design system components, 
             from basic UI elements to complex landing page patterns.
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function ComponentsPage() {
                 <Badge variant="outline">Brand</Badge>
               </CardTitle>
               <CardDescription>
-                Unique components that express Vergil's living intelligence philosophy
+                Unique components that express Vergil&apos;s living intelligence philosophy
               </CardDescription>
             </CardHeader>
             <CardContent>

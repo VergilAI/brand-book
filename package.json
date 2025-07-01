@@ -18,9 +18,12 @@
     "validate-tokens": "tsx scripts/validate-tokens.ts",
     "test:tokens": "tsx --test tests/token-alignment.node.test.ts",
     "scan:hardcoded": "tsx scripts/scan-hardcoded-values.ts",
+    "lint:tokens": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:tokens:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "report:coverage": "tsx scripts/generate-coverage-report.ts",
     "report:trends": "tsx scripts/track-coverage-trends.ts",
     "report:all": "tsx scripts/generate-all-reports.ts",
+    "verify:enforcement": "tsx scripts/verify-enforcement.ts",
     "version:create": "tsx scripts/version-manager.ts create",
     "version:activate": "tsx scripts/version-manager.ts activate",
     "version:list": "tsx scripts/version-manager.ts list",
@@ -48,7 +51,8 @@
     "token:accessibility": "tsx scripts/token-accessibility.ts",
     "token:docs": "tsx scripts/token-docs.ts",
     "token:migrate": "tsx scripts/token-migrate.ts",
-    "token:watch": "tsx scripts/token-watch.ts"
+    "token:watch": "tsx scripts/token-watch.ts",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",
@@ -105,7 +109,7 @@
     "eslint-config-next": "^14.0.0",
     "husky": "^8.0.3",
     "js-yaml": "^4.1.0",
-    "lint-staged": "^15.0.0",
+    "lint-staged": "^15.5.2",
     "storybook": "^9.0.13",
     "tailwindcss": "^4",
     "tsx": "^4.20.3",

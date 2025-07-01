@@ -14,7 +14,7 @@ export default function HeroPatternsPage() {
           <p className="text-xl text-muted-foreground max-w-3xl">
             Flexible, variant-based hero sections that establish immediate brand presence 
             and guide users toward key actions. Each pattern is designed to work across 
-            different contexts while maintaining Vergil's living intelligence philosophy.
+            different contexts while maintaining Vergil&apos;s living intelligence philosophy.
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export default function HeroPatternsPage() {
                 layout="centered"
                 size="lg"
                 title="Unlock Human Potential with AI"
-                subtitle="Transform your organization's learning capabilities with personalized AI-driven education that adapts to every individual's unique growth journey."
+                subtitle="Transform your organization&apos;s learning capabilities with personalized AI-driven education that adapts to every individual&apos;s unique growth journey."
                 primaryCta={{ text: "Start Free Trial", href: "#" }}
                 secondaryCta={{ text: "Watch Demo", href: "#" }}
                 backgroundPattern={true}
@@ -66,7 +66,7 @@ export default function HeroPatternsPage() {
   layout="centered"
   size="lg"
   title="Unlock Human Potential with AI"
-  subtitle="Transform your organization's learning capabilities..."
+  subtitle="Transform your organization&apos;s learning capabilities..."
   primaryCta={{ text: "Start Free Trial", href: "/signup" }}
   secondaryCta={{ text: "Watch Demo", href: "/demo" }}
   backgroundPattern={true}
@@ -309,7 +309,7 @@ export default function HeroPatternsPage() {
 
             <Card className="border-red-200 bg-red-50">
               <CardHeader>
-                <CardTitle className="text-red-800">Don't</CardTitle>
+                <CardTitle className="text-red-800">Don&apos;t</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-red-700">

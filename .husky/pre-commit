@@ -10,4 +10,4 @@ echo "✅ Validating token definitions..."
 npm run validate-tokens
 
 # Run lint-staged for staged files
-npx lint-staged
+npx lint-stagednpx lint-staged

@@ -88,6 +88,7 @@ module.exports = {
     }
 
     function isSpacingProperty(property) {
+      if (!property || typeof property !== 'string') return false;
       if (ignoredProperties.has(property)) return false;
       return SPACING_PROPERTIES.some(prop => 
         property.toLowerCase().includes(prop.toLowerCase())

@@ -136,7 +136,7 @@ module.exports = {
             'fill', 'stroke', 'outline', 'caretColor',
           ];
           
-          if (colorProperties.some(prop => key && key.toLowerCase().includes(prop.toLowerCase()))) {
+          if (key && typeof key === 'string' && colorProperties.some(prop => key.toLowerCase().includes(prop.toLowerCase()))) {
             checkForHardcodedColors(node.value, node.value.value);
           }
         }

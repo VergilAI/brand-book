@@ -449,6 +449,37 @@ class HardcodedValueScanner {
   }
 }
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const failOnErrors = args.includes('--fail-on-errors');
+const outputJson = args.includes('--output') ? args[args.indexOf('--output') + 1] : null;
+
 // Run the scanner
 const scanner = new HardcodedValueScanner();
-scanner.scan().catch(console.error);
+scanner.scan().then(async () => {
+  // Export findings as JSON if requested
+  if (outputJson) {
+    const findings = scanner['findings']; // Access private property
+    const jsonReport = {
+      date: new Date().toISOString(),
+      scannedFiles: scanner['scannedFiles'],
+      totalFindings: scanner['totalFindings'],
+      findings: findings,
+      summary: {
+        byType: Object.entries(scanner['groupFindingsByType']()).reduce((acc, [type, items]) => {
+          acc[type] = items.length;
+          return acc;
+        }, {} as Record<string, number>)
+      }
+    };
+    
+    await fs.promises.writeFile(outputJson, JSON.stringify(jsonReport, null, 2));
+    console.log(`\n📄 JSON report saved to: ${outputJson}`);
+  }
+  
+  // Exit with error code if findings exist and fail-on-errors is set
+  if (failOnErrors && scanner['totalFindings'] > 0) {
+    console.error(`\n❌ Found ${scanner['totalFindings']} hardcoded values. Failing build.`);
+    process.exit(1);
+  }
+}).catch(console.error);

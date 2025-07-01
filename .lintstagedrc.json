@@ -1,10 +1,6 @@
 {
-  "*.{ts,tsx}": [
-    "eslint --fix --rule '@vergil/tokens/no-hardcoded-colors: error' --rule '@vergil/tokens/no-hardcoded-spacing: error' --rule '@vergil/tokens/no-arbitrary-tailwind: error'",
-    "prettier --write"
-  ],
-  "*.{js,jsx}": [
-    "eslint --fix",
+  "*.{ts,tsx,js,jsx}": [
+    "eslint --fix --max-warnings 0",
     "prettier --write"
   ],
   "*.{css,scss,less}": [
@@ -15,6 +11,13 @@
   ],
   "design-tokens/**/*.yaml": [
     "npm run build:tokens",
+    "npm run validate-tokens",
     "git add generated/"
+  ],
+  "app/**/*.{ts,tsx,js,jsx}": [
+    "npm run lint:tokens"
+  ],
+  "components/**/*.{ts,tsx,js,jsx}": [
+    "npm run lint:tokens"
   ]
 }

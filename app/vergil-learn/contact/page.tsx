@@ -22,11 +22,11 @@ export default function ContactPage() {
             <div className="text-center mb-16">
               <h1 className="text-5xl md:text-6xl font-display font-bold mb-6">
                 <span className="bg-gradient-to-r from-cosmic-purple via-electric-violet to-luminous-indigo bg-clip-text text-transparent">
-                  Let's Build Something Amazing Together
+                  Let&apos;s Build Something Amazing Together
                 </span>
               </h1>
               <p className="text-xl text-stone-gray max-w-2xl mx-auto">
-                Ready to transform how your organization learns? Our team is here to show you how Vergil Learn can unlock your team's full potential.
+                Ready to transform how your organization learns? Our team is here to show you how Vergil Learn can unlock your team&apos;s full potential.
               </p>
             </div>
             
@@ -109,7 +109,7 @@ export default function ContactPage() {
                 Have a specific question? Feel free to reach out directly to any of our team members above.
               </p>
               <p className="text-sm text-stone-gray">
-                We're committed to helping you unlock the full potential of your organization's knowledge.
+                We&apos;re committed to helping you unlock the full potential of your organization&apos;s knowledge.
               </p>
             </div>
           </div>

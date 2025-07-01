@@ -1,0 +1,125 @@
+name: Automated Design System Reports
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  generate-reports:
+    name: Generate Weekly Reports
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate all reports
+        run: |
+          npm run report:all
+          npm run report:coverage
+          npm run report:trends
+          npm run scan:hardcoded -- --output reports/hardcoded-scan.json
+          
+      - name: Create report summary
+        run: |
+          node -e "
+          const fs = require('fs');
+          const inventory = JSON.parse(fs.readFileSync('reports/component-inventory.json', 'utf8'));
+          const coverage = JSON.parse(fs.readFileSync('reports/coverage-report.json', 'utf8'));
+          const hardcoded = JSON.parse(fs.readFileSync('reports/hardcoded-scan.json', 'utf8'));
+          
+          const summary = {
+            date: new Date().toISOString(),
+            health: {
+              overall: inventory.overallHealth,
+              components: inventory.totalComponents,
+              storybookCoverage: inventory.storybookCoverage,
+              testCoverage: inventory.testCoverage,
+              tokenAdoption: inventory.tokenAdoption
+            },
+            violations: {
+              hardcodedValues: hardcoded.totalFindings,
+              eslintErrors: 0, // Will be populated by linting
+              deprecatedTokens: inventory.deprecatedTokenUsage || 0
+            },
+            trends: {
+              healthChange: 0, // Calculate from previous report
+              newComponents: 0,
+              fixedViolations: 0
+            }
+          };
+          
+          fs.writeFileSync('reports/weekly-summary.json', JSON.stringify(summary, null, 2));
+          "
+          
+      - name: Create issue with report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = JSON.parse(fs.readFileSync('reports/weekly-summary.json', 'utf8'));
+            
+            const issueBody = `# 📊 Weekly Design System Health Report
+            
+            **Report Date:** ${new Date(summary.date).toLocaleDateString()}
+            
+            ## 🏥 System Health
+            
+            **Overall Health Score: ${summary.health.overall}%**
+            
+            | Metric | Current | Target | Status |
+            |--------|---------|--------|--------|
+            | Components | ${summary.health.components} | - | - |
+            | Storybook Coverage | ${summary.health.storybookCoverage}% | 100% | ${summary.health.storybookCoverage >= 100 ? '✅' : '⚠️'} |
+            | Test Coverage | ${summary.health.testCoverage}% | 80% | ${summary.health.testCoverage >= 80 ? '✅' : '❌'} |
+            | Token Adoption | ${summary.health.tokenAdoption}% | 100% | ${summary.health.tokenAdoption >= 100 ? '✅' : '⚠️'} |
+            
+            ## 🚨 Violations
+            
+            | Type | Count | Severity |
+            |------|-------|----------|
+            | Hardcoded Values | ${summary.violations.hardcodedValues} | ${summary.violations.hardcodedValues > 0 ? 'High' : 'None'} |
+            | Deprecated Tokens | ${summary.violations.deprecatedTokens} | ${summary.violations.deprecatedTokens > 0 ? 'Medium' : 'None'} |
+            
+            ## 📋 Action Items
+            
+            ${summary.violations.hardcodedValues > 0 ? `- [ ] Fix ${summary.violations.hardcodedValues} hardcoded values` : ''}
+            ${summary.health.storybookCoverage < 100 ? `- [ ] Add Storybook stories for ${100 - summary.health.storybookCoverage}% of components` : ''}
+            ${summary.health.testCoverage < 80 ? `- [ ] Increase test coverage to 80% (current: ${summary.health.testCoverage}%)` : ''}
+            ${summary.violations.deprecatedTokens > 0 ? `- [ ] Migrate ${summary.violations.deprecatedTokens} deprecated token usages` : ''}
+            
+            ---
+            
+            View detailed reports in the \`reports/\` directory or run \`npm run report:all\` locally.
+            `;
+            
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Design System] Weekly Health Report - ${new Date().toLocaleDateString()}`,
+              body: issueBody,
+              labels: ['design-system', 'health-report', 'automated']
+            });
+            
+            console.log(`Created issue #${issue.data.number}`);
+            
+      - name: Commit report artifacts
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add reports/
+          git diff --staged --quiet || git commit -m "chore: weekly design system health reports [skip ci]"
+          git push || echo "No changes to push"

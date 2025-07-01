@@ -125,7 +125,7 @@ export class TokenParser {
    * Parse YAML token files if they exist
    */
   private parseYAMLTokens(): TokenDefinition[] {
-    const yamlDir = join(this.basePath, 'design-tokens', 'source');
+    const yamlDir = join(this.basePath, 'design-tokens', 'active', 'source');
     if (!existsSync(yamlDir)) {
       return [];
     }

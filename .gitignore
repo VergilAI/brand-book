@@ -45,3 +45,7 @@ storybook-static
 
 # Reports (generated files)
 /reports
+!/reports/.gitkeep
+
+# Legacy backups
+/design-tokens/source.legacy-backup
