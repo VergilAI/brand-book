@@ -5,7 +5,7 @@
 ### What We've Built
 
 1. **Centralized Token System**
-   - Source: `/design-tokens/source/*.yaml` (YAML files define everything)
+   - Source: `/design-tokens/active/source/*.yaml` (YAML files define everything)
    - Generated: `/generated/` (CSS, TS, SCSS auto-generated)
    - THIS is your single source of truth
 
@@ -123,7 +123,7 @@ Common tokens you'll use:
 
 ### Creating a New Color Token
 
-1. **Edit `/design-tokens/source/colors.yaml`:**
+1. **Edit `/design-tokens/active/source/colors.yaml`:**
    ```yaml
    colors:
      brand:
@@ -144,7 +144,7 @@ Common tokens you'll use:
 
 ### Creating a New Spacing Token
 
-1. **Edit `/design-tokens/source/spacing.yaml`:**
+1. **Edit `/design-tokens/active/source/spacing.yaml`:**
    ```yaml
    spacing:
      scale:
@@ -203,21 +203,90 @@ Common tokens you'll use:
 ## Key Conventions
 
 ### Token-First Development (MANDATORY)
-```typescript
-// ❌ NEVER use arbitrary values or hardcoded colors
-<div className="bg-[#6366F1]" />
-<div className="bg-[#7B00FF]" />
-<div style={{ color: '#7B00FF' }} />
 
-// ✅ ALWAYS use design tokens
-<div className="bg-vergil-purple" />
-<div className="text-vergil-off-black" />
+## 🚨 CRITICAL: Token Usage Rules
+
+You MUST use tokens from our generated files. **NO EXCEPTIONS**.
+
+### The ONLY Allowed Token Sources:
+
+1. **Tailwind Classes** (Use for 90% of styling)
+   ```jsx
+   // ✅ CORRECT - Static styles
+   <div className="bg-brand-purple p-4 text-white rounded-md">
+   <button className="hover:bg-brand-purple-light">
+   ```
+
+2. **TypeScript Tokens** (Use for dynamic/computed values)
+   ```jsx
+   import { tokens } from '@/generated/tokens';
+   
+   // ✅ CORRECT - Dynamic styles
+   <div style={{ backgroundColor: isActive ? tokens.colors.brand.purple : tokens.colors.gray[200] }}>
+   <div style={{ width: `${progress}%`, color: tokens.colors.semantic.text.primary }}>
+   ```
+
+3. **CSS Variables** (Use in CSS/SCSS files only)
+   ```css
+   /* ✅ CORRECT - In CSS files */
+   .custom-class {
+     background: var(--vergil-colors-brand-purple);
+     color: var(--vergil-colors-neutral-off-black);
+   }
+   ```
+
+### ❌ ABSOLUTELY FORBIDDEN:
+```jsx
+// ❌ NEVER hardcode colors
+<div className="bg-[#7B00FF]">
+<div style={{ color: '#7B00FF' }}>
+<div style={{ backgroundColor: 'rgb(123, 0, 255)' }}>
+
+// ❌ NEVER import from anywhere else
+import colors from '../constants/colors';
+import { BRAND_COLORS } from '../config';
+
+// ❌ NEVER use arbitrary Tailwind values
+<div className="text-[#1D1D1F] p-[16px]">
 ```
 
-### Brand Color Tokens
-- **Primary Brand**: `vergil-purple` (#7B00FF) - THE brand color
-- **Neutrals**: `vergil-off-black` (#1D1D1F), `vergil-off-white` (#F5F5F7)
-- **Source**: `/design-tokens/source/colors.yaml` - SINGLE SOURCE OF TRUTH
+### 📋 Usage Decision Tree:
+
+1. **Is it a static style?** → Use Tailwind class
+2. **Is it dynamic/conditional?** → Import and use `tokens` from `@/generated/tokens`
+3. **Is it in a CSS file?** → Use CSS variable `var(--vergil-*)`
+4. **Can't find what you need?** → **STOP! Ask the user before proceeding**
+
+### 🛑 If You Need Something Not in Tokens:
+
+**DO NOT**:
+- Create new constants
+- Hardcode values
+- Import from other files
+
+**DO**:
+- Stop immediately
+- Ask: "I need [specific value] for [purpose], but it's not in the design tokens. Should I add it to the YAML, or how should I proceed?"
+
+### Examples of When to Ask:
+
+```jsx
+// Need a specific opacity?
+"I need 0.5 opacity for this overlay, but opacity values aren't in the tokens. Should I add opacity scale to the YAML?"
+
+// Need a specific size?
+"I need a 72px size for this icon, but spacing.scale doesn't have 72px. Should I add it to spacing tokens?"
+
+// Need a new color?
+"This component needs a green color for success states, but I only see brand purples. Should I add semantic colors?"
+```
+
+Remember: The tokens are your ONLY source of truth. If it's not in tokens, it doesn't exist until the user decides how to handle it.
+
+### Brand Color Reference
+- **Primary Brand**: `brand-purple` - Use via Tailwind or `tokens.colors.brand.purple`
+- **Neutrals**: `neutral-off-black`, `neutral-off-white`
+- **Source**: `/design-tokens/active/source/colors.yaml` - SINGLE SOURCE OF TRUTH
 
 ### Code Style
 - DO NOT add comments unless requested
@@ -255,7 +324,7 @@ npm run storybook         # Start Storybook
 
 ## Core System Files
 
-- `/design-tokens/source/` - YAML token definitions (SINGLE SOURCE OF TRUTH)
+- `/design-tokens/active/source/` - YAML token definitions (SINGLE SOURCE OF TRUTH)
 - `/generated/` - Auto-generated token outputs (CSS, TS, JSON, Tailwind)
 - `/scripts/` - Automation and validation tools
 - `/reports/` - Coverage and quality reports
