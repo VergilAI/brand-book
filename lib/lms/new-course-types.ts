@@ -22,6 +22,7 @@ export interface Chapter {
   order: number
   progress: number // 0-100 percentage
   estimatedTime: string // human readable like "2 hours"
+  testScore?: number | null // Test score percentage, null if not taken
   lessons: Lesson[]
 }
 

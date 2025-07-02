@@ -2,28 +2,14 @@ import {
   FileText, 
   Volume2, 
   Video, 
-  Link, 
   Layers, 
   DollarSign, 
-  Zap, 
-  Clock, 
-  Timer, 
+  Trophy,
+  Puzzle,
   List, 
   FileEdit, 
   Type, 
-  Hash, 
-  Grid3x3, 
-  Shuffle, 
-  Puzzle, 
-  Map, 
-  Bot, 
-  MessageSquare, 
-  Briefcase, 
-  Users, 
-  Gamepad2, 
-  Trophy, 
-  Home,
-  Gavel
+  Hash
 } from 'lucide-react'
 
 export interface GameType {
@@ -60,13 +46,6 @@ export const gameTypes: GameType[] = [
     icon: Video,
     category: 'content'
   },
-  {
-    id: 'user-linked',
-    name: 'User Linked Content',
-    description: 'Content linked by users',
-    icon: Link,
-    category: 'content'
-  },
 
   // Quiz Games
   {
@@ -93,125 +72,11 @@ export const gameTypes: GameType[] = [
     hasRewards: true
   },
   {
-    id: 'speed-rounds',
-    name: 'Speed Rounds',
-    description: 'Timed rounds of multiple choice questions',
-    icon: Zap,
-    category: 'quiz',
-    isTimed: true
-  },
-
-  // Test Types
-  {
-    id: 'timed-test',
-    name: 'Timed Test',
-    description: 'Complete test within time limit',
-    icon: Clock,
-    category: 'test',
-    isTimed: true
-  },
-  {
-    id: 'untimed-test',
-    name: 'Untimed Test',
-    description: 'Take your time to complete',
-    icon: Timer,
-    category: 'test'
-  },
-
-  // Game Types
-  {
-    id: 'crossword',
-    name: 'Crossword Puzzles',
-    description: 'Solve knowledge-based crosswords',
-    icon: Grid3x3,
-    category: 'game'
-  },
-  {
-    id: 'concept-matching',
-    name: 'Concept Matching',
-    description: 'Match related concepts together',
-    icon: Shuffle,
-    category: 'game'
-  },
-  {
     id: 'connect-cards',
     name: 'Connect Cards',
     description: 'Duolingo-style card matching game',
     icon: Puzzle,
-    category: 'game'
-  },
-  {
-    id: 'odd-one-out',
-    name: 'Odd One Out',
-    description: 'Identify which concept doesn\'t belong',
-    icon: Puzzle,
-    category: 'game'
-  },
-  {
-    id: 'territory-conquest',
-    name: 'Territory Conquest',
-    description: 'Conquer territories by answering questions',
-    icon: Map,
-    category: 'game',
-    requiresAI: true
-  },
-  {
-    id: 'optimized-territory-map',
-    name: 'Optimized Territory Map',
-    description: 'Efficient border-based territory system',
-    icon: Map,
-    category: 'game',
-    requiresAI: true
-  },
-
-  // Chat Based Games
-  {
-    id: 'case-study',
-    name: 'Case Study Chat',
-    description: 'Analyze real-world scenarios',
-    icon: Briefcase,
-    category: 'chat',
-    requiresAI: true
-  },
-  {
-    id: 'open-chat',
-    name: 'Open Topic Chat',
-    description: 'Explore topics through conversation',
-    icon: MessageSquare,
-    category: 'chat',
-    requiresAI: true
-  },
-  {
-    id: 'role-playing',
-    name: 'Role Playing Game',
-    description: 'Learn through character interactions',
-    icon: Gamepad2,
-    category: 'chat',
-    requiresAI: true
-  },
-  {
-    id: 'shark-tank',
-    name: 'Shark Tank Format',
-    description: 'Pitch ideas and defend concepts',
-    icon: Users,
-    category: 'chat',
-    requiresAI: true
-  },
-  {
-    id: 'escape-room',
-    name: 'Escape Room',
-    description: 'Solve knowledge-based puzzles to escape',
-    icon: Home,
-    category: 'chat',
-    requiresAI: true
-  },
-  {
-    id: 'debate',
-    name: 'Debate Tournament',
-    description: 'Argue positions on topics',
-    icon: Gavel,
-    category: 'chat',
-    requiresAI: true
+    category: 'quiz'
   }
 ]
 

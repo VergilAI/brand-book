@@ -13,7 +13,9 @@ import {
   RotateCcw,
   Clock,
   Target,
-  Zap
+  Zap,
+  Brain,
+  Sparkles
 } from 'lucide-react'
 
 export interface ConnectCard {
@@ -81,6 +83,7 @@ export function ConnectCardsGame({
   })
 
   const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
   const [shuffledCards] = useState(() => ({
     left: pairs.map(pair => pair.leftCard).sort(() => Math.random() - 0.5),
     right: pairs.map(pair => pair.rightCard).sort(() => Math.random() - 0.5)
@@ -159,18 +162,8 @@ export function ConnectCardsGame({
   useEffect(() => {
     if (gameState.gameCompleted) {
       setShowCompletionModal(true)
-      const completionTime = (gameState.endTime! - gameState.startTime) / 1000
-      const accuracy = (gameState.correctAnswers / (gameState.correctAnswers + gameState.incorrectAnswers)) * 100
-      
-      onComplete({
-        correctAnswers: gameState.correctAnswers,
-        incorrectAnswers: gameState.incorrectAnswers,
-        totalPairs: pairs.length,
-        completionTime,
-        accuracy
-      })
     }
-  }, [gameState.gameCompleted, gameState.endTime, gameState.startTime, gameState.correctAnswers, gameState.incorrectAnswers, pairs.length, onComplete])
+  }, [gameState.gameCompleted])
 
   const getCardStyle = (card: ConnectCard) => {
     const isSelected = (card.side === 'left' && gameState.selectedLeftCard?.id === card.id) ||
@@ -180,21 +173,21 @@ export function ConnectCardsGame({
                               (gameState.currentAttempt.left.id === card.id || gameState.currentAttempt.right.id === card.id)
     
     if (isMatched) {
-      return 'bg-phosphor-cyan/10 border-phosphor-cyan text-phosphor-cyan opacity-60'
+      return 'bg-vergil-purple/10 border-vergil-purple text-vergil-purple opacity-60'
     }
     
     if (isInCurrentAttempt && gameState.isCheckingMatch) {
       const isCorrect = gameState.currentAttempt!.left.matchId === gameState.currentAttempt!.right.matchId
       return isCorrect 
-        ? 'bg-phosphor-cyan/10 border-phosphor-cyan text-phosphor-cyan'
+        ? 'bg-vergil-purple/10 border-vergil-purple text-vergil-purple'
         : 'bg-red-50 border-red-500 text-red-600 border-2'
     }
     
     if (isSelected) {
-      return 'bg-cosmic-purple/10 border-cosmic-purple text-cosmic-purple shadow-lg'
+      return 'bg-vergil-purple/5 border-vergil-purple text-vergil-off-black shadow-lg'
     }
     
-    return 'border-stone-gray/20 hover:border-cosmic-purple/40 hover:shadow-sm'
+    return 'bg-white border-vergil-off-black/10 hover:border-vergil-purple/40 hover:shadow-sm'
   }
 
   const getCardAnimation = (card: ConnectCard) => {
@@ -227,64 +220,104 @@ export function ConnectCardsGame({
     const completionTime = (gameState.endTime! - gameState.startTime) / 1000
     const accuracy = gameState.correctAnswers > 0 ? (gameState.correctAnswers / (gameState.correctAnswers + gameState.incorrectAnswers)) * 100 : 0
 
+    useEffect(() => {
+      // Prevent background scrolling when modal is open
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = 'unset'
+      }
+    }, [])
+
     return (
-      <div className="fixed inset-0 bg-deep-space/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md max-h-[90vh] overflow-y-auto"
         >
-          <Card className="p-8 text-center border-stone-gray/20">
+          <Card className="p-8 bg-white border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white overflow-hidden">
             <div className="space-y-6">
-              <div className="w-24 h-24 rounded-full bg-cosmic-purple/10 mx-auto flex items-center justify-center">
-                <Trophy className="w-12 h-12 text-cosmic-purple" />
-              </div>
-              
-              <div>
-                <h2 className="text-3xl font-display font-bold text-deep-space mb-2">
-                  Well Done!
+              {/* Header Section */}
+              <div className="text-center space-y-4">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                  Excellent Matching!
                 </h2>
-                <p className="text-stone-gray">
-                  You've completed the card matching challenge
+                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                  You've completed all card pairs
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="p-3 bg-phosphor-cyan/5 rounded-lg">
-                    <p className="text-2xl font-bold text-phosphor-cyan">{gameState.correctAnswers}</p>
-                    <p className="text-sm text-stone-gray">Correct</p>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {gameState.correctAnswers}
                   </div>
-                  <div className="p-3 bg-vivid-red/5 rounded-lg">
-                    <p className="text-2xl font-bold text-vivid-red">{gameState.incorrectAnswers}</p>
-                    <p className="text-sm text-stone-gray">Incorrect</p>
+                  <div className="text-sm text-vergil-off-black/60">Correct</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {Math.round(accuracy)}%
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-stone-gray">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span>{completionTime.toFixed(1)}s</span>
+                  <div className="text-sm text-vergil-off-black/60">Accuracy</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {completionTime.toFixed(0)}s
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4" />
-                    <span>{accuracy.toFixed(0)}% accuracy</span>
-                  </div>
-                </div>
+                  <div className="text-sm text-vergil-off-black/60">Time</div>
+                </Card>
               </div>
+
+              {/* Knowledge Impact */}
+              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5 text-vergil-purple" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                      Knowledge Point Impact
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
+                      <span className="text-lg font-bold text-vergil-purple">
+                        +{Math.round(accuracy * 0.8)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
 
               <div className="flex gap-3">
                 <Button
+                  size="lg"
                   variant="outline"
-                  onClick={onQuit}
-                  className="flex-1"
+                  onClick={() => {
+                    const completionTime = (gameState.endTime! - gameState.startTime) / 1000
+                    const accuracy = (gameState.correctAnswers / (gameState.correctAnswers + gameState.incorrectAnswers)) * 100
+                    
+                    onComplete({
+                      correctAnswers: gameState.correctAnswers,
+                      incorrectAnswers: gameState.incorrectAnswers,
+                      totalPairs: pairs.length,
+                      completionTime,
+                      accuracy
+                    })
+                  }}
                 >
-                  <X className="w-4 h-4 mr-2" />
-                  Exit
+                  Exit Game
                 </Button>
                 <Button
+                  size="lg"
                   onClick={() => window.location.reload()}
-                  className="flex-1 bg-cosmic-purple text-white hover:bg-electric-violet"
+                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Play Again
@@ -293,64 +326,88 @@ export function ConnectCardsGame({
             </div>
           </Card>
         </motion.div>
+        </div>
       </div>
     )
   }
 
+  useEffect(() => {
+    // Prevent background scrolling when game is open
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
+
   return (
-    <div className={cn("space-y-6", className)}>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-display font-bold text-deep-space">
-          {title}
-        </h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onQuit}
-          className="text-stone-gray hover:text-deep-space"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-
-      <Card className="p-4 border-stone-gray/20">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 text-sm text-stone-gray">
-            <Target className="w-4 h-4" />
-            <span>Progress: {gameState.matchedPairs.size}/{pairs.length} pairs</span>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-stone-gray">
-            <div className="flex items-center gap-1">
-              <CheckCircle className="w-4 h-4 text-phosphor-cyan" />
-              <span>{gameState.correctAnswers}</span>
+    <div className={cn("min-h-screen bg-vergil-off-white p-8", className)}>
+      <div className="max-w-7xl mx-auto">
+        {/* Header - Matching other games style */}
+        <Card className="p-6 mb-4 bg-white border-vergil-off-black/10 relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowExitConfirm(true)}
+            className="absolute top-4 left-4 text-vergil-off-black/60 hover:text-vergil-off-black z-10"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 px-12">
+              <h1 className="text-2xl font-bold text-vergil-off-black text-center">
+                {title}
+              </h1>
+              <p className="text-sm text-vergil-off-black/60 mt-1 text-center">Match the cards from left to right</p>
             </div>
-            <div className="flex items-center gap-1">
-              <XCircle className="w-4 h-4 text-vivid-red" />
-              <span>{gameState.incorrectAnswers}</span>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <p className="text-xs text-vergil-off-black/60">Matched</p>
+                <p className="text-2xl font-bold text-vergil-purple">
+                  {gameState.matchedPairs.size}/{pairs.length}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-vergil-off-black/60">Mistakes</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {gameState.incorrectAnswers}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="w-full bg-mist-gray rounded-full h-2">
-          <motion.div
-            className="bg-cosmic-purple h-2 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-      </Card>
+        </Card>
 
-      <div className="text-center mb-4">
-        <p className="text-stone-gray">
-          Select one card from each side to make a match
-        </p>
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-4">
+            {/* Progress */}
+            <Card className="p-4 bg-white border-vergil-off-black/10 mb-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-vergil-purple">
+                      {gameState.matchedPairs.size}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-semibold text-vergil-off-black">
+                    Matching Progress
+                  </h2>
+                </div>
+                <span className="text-sm font-medium text-vergil-purple">
+                  {Math.round(progress)}% Complete
+                </span>
+              </div>
+              <div className="w-full h-2 bg-vergil-off-black/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-vergil-purple transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </Card>
 
-      <div className="grid grid-cols-2 gap-8">
-        <div className="space-y-3">
-          <h3 className="text-lg font-display font-semibold text-deep-space text-center">
-            Left Side
-          </h3>
+            <div className="grid grid-cols-2 gap-8">
+          <div className="space-y-3">
+            <h3 className="text-lg font-display font-semibold text-vergil-off-black text-center">
+              Left Side
+            </h3>
           <AnimatePresence mode="popLayout">
             {availableLeftCards.map((card, index) => {
               const cardAnimation = getCardAnimation(card)
@@ -392,7 +449,7 @@ export function ConnectCardsGame({
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-lg font-display font-semibold text-deep-space text-center">
+          <h3 className="text-lg font-display font-semibold text-vergil-off-black text-center">
             Right Side
           </h3>
           <AnimatePresence mode="popLayout">
@@ -433,9 +490,42 @@ export function ConnectCardsGame({
               )
             })}
           </AnimatePresence>
+            </div>
+          </div>
         </div>
       </div>
-
+      
+      {showExitConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="p-6 max-w-md bg-white border-vergil-off-black/10">
+            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+              Exit Game?
+            </h3>
+            <p className="text-vergil-off-black/60 mb-6">
+              Are you sure you want to exit? You'll lose your current progress.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExitConfirm(false)}
+                className="flex-1"
+              >
+                Continue Playing
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowExitConfirm(false)
+                  onQuit()
+                }}
+                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+              >
+                Exit Game
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+      </div>
     </div>
   )
 }

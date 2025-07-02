@@ -41,25 +41,25 @@ export function GameTypeCard({
   }
 
   return (
-    <div className="relative group">
-      {/* Recommended Label */}
-      {isRecommended && (
-        <div className="absolute -top-6 left-0 text-xs font-medium text-vergil-purple transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-1">
-          Recommended
-        </div>
-      )}
-      
+    <div className="relative">
       <Card
         className={cn(
-          "relative overflow-hidden transition-all duration-300 h-full",
+          "relative overflow-hidden transition-all duration-300 h-full group",
           isAvailable 
             ? "cursor-pointer hover:shadow-xl hover:scale-105 hover:-translate-y-1" 
             : "opacity-50 cursor-not-allowed",
-          isRecommended && "ring-2 ring-vergil-purple/50",
           className
         )}
         onClick={isAvailable ? onClick : undefined}
       >
+        {/* Recommended Badge on Border */}
+        {isRecommended && (
+          <div className="absolute -top-3 left-4 z-10">
+            <div className="bg-vergil-purple text-white text-xs font-medium px-3 py-1 rounded-full shadow-lg">
+              Recommended
+            </div>
+          </div>
+        )}
         <CardContent className="p-6 h-full flex flex-col">
         {/* Category Badge */}
         <Badge 

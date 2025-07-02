@@ -28,6 +28,7 @@ const mockCourse: Course = {
       order: 1,
       progress: 85,
       estimatedTime: '2 hours',
+      testScore: 88, // Add test score
       lessons: [
         {
           id: 'lesson-1-1',
@@ -38,7 +39,7 @@ const mockCourse: Course = {
             { id: 'kp-2', title: 'Types of AI', description: 'Narrow AI, general AI, and superintelligence', proficiency: 72 },
             { id: 'kp-3', title: 'AI Applications', description: 'Real-world AI use cases across industries', proficiency: 90 }
           ],
-          availableGameTypes: ['written-material', 'flashcards', 'millionaire', 'case-study'],
+          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
           estimatedTime: 30,
           completed: false
         },
@@ -51,7 +52,7 @@ const mockCourse: Course = {
             { id: 'kp-5', title: 'Heuristics', description: 'Using heuristic functions to guide search', proficiency: 58 },
             { id: 'kp-6', title: 'Optimization', description: 'Finding optimal solutions in problem spaces', proficiency: 40 }
           ],
-          availableGameTypes: ['written-material', 'video', 'flashcards', 'timed-test'],
+          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
           estimatedTime: 45,
           completed: false
         },
@@ -64,7 +65,7 @@ const mockCourse: Course = {
             { id: 'kp-8', title: 'Semantic Networks', description: 'Graph-based knowledge representation', proficiency: 0 },
             { id: 'kp-9', title: 'Inference Rules', description: 'Automated reasoning and rule-based systems', proficiency: 0 }
           ],
-          availableGameTypes: ['written-material', 'video', 'crossword', 'concept-matching'],
+          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
           estimatedTime: 50,
           completed: false
         }
@@ -77,6 +78,7 @@ const mockCourse: Course = {
       order: 2,
       progress: 25,
       estimatedTime: '3.5 hours',
+      testScore: null, // No test taken yet
       lessons: [
         {
           id: 'lesson-2-1',
@@ -87,7 +89,7 @@ const mockCourse: Course = {
             { id: 'kp-11', title: 'Unsupervised Learning', description: 'Finding patterns in unlabeled data', proficiency: 60 },
             { id: 'kp-12', title: 'Reinforcement Learning', description: 'Learning through trial and error', proficiency: 30 }
           ],
-          availableGameTypes: ['written-material', 'video', 'flashcards', 'role-playing'],
+          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
           estimatedTime: 60,
           completed: false
         },
@@ -100,7 +102,7 @@ const mockCourse: Course = {
             { id: 'kp-14', title: 'Network Layers', description: 'Input, hidden, and output layers', proficiency: 0 },
             { id: 'kp-15', title: 'Training Process', description: 'How neural networks learn from data', proficiency: 0 }
           ],
-          availableGameTypes: ['written-material', 'video', 'territory-conquest', 'case-study'],
+          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
           estimatedTime: 90,
           completed: false
         }
@@ -113,6 +115,7 @@ const mockCourse: Course = {
       order: 3,
       progress: 0,
       estimatedTime: '4 hours',
+      testScore: null, // No test taken yet
       lessons: [
         {
           id: 'lesson-3-1',
@@ -123,7 +126,7 @@ const mockCourse: Course = {
             { id: 'kp-17', title: 'Fairness Metrics', description: 'Measuring and ensuring AI fairness', proficiency: 0 },
             { id: 'kp-18', title: 'AI Governance', description: 'Policies and frameworks for responsible AI', proficiency: 0 }
           ],
-          availableGameTypes: ['written-material', 'video', 'debate', 'shark-tank'],
+          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
           estimatedTime: 120,
           completed: false
         }
@@ -194,105 +197,132 @@ export function NewCourseOverview() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-vergil-off-black mb-2">{mockCourse.title}</h1>
-            <p className="text-sm text-vergil-off-black/70 mb-3">{mockCourse.description}</p>
-            
-            {/* Course stats */}
-            <div className="flex items-center gap-4 text-xs text-vergil-off-black/60">
-              <div className="flex items-center gap-1">
-                <BookOpen className="w-3 h-3" />
-                <span>{mockCourse.totalLessons} lessons</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <GraduationCap className="w-3 h-3" />
-                <span>{masteredKnowledgePoints}/{totalKnowledgePoints} knowledge points</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-vergil-purple rounded-full flex items-center justify-center text-white text-[10px]">
-                  {mockCourse.progress}%
-                </span>
-                <span>progress</span>
-              </div>
-            </div>
+      {/* Breadcrumb Navigation */}
+      <div className="mb-4">
+        <nav className="flex items-center text-sm">
+          <a href="/lms" className="text-vergil-off-black/60 hover:text-vergil-purple transition-colors">
+            Courses
+          </a>
+          <span className="mx-2 text-vergil-off-black/40">/</span>
+          <span className="text-vergil-off-black font-medium">{mockCourse.title}</span>
+        </nav>
+      </div>
+
+      {/* Course Header Card */}
+      <Card className="mb-8 p-8 bg-gradient-to-br from-vergil-off-white to-white border-vergil-purple/10">
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-vergil-off-black mb-3">{mockCourse.title}</h1>
+            <p className="text-base text-vergil-off-black/70 max-w-3xl">
+              {mockCourse.description}
+            </p>
           </div>
           
-          <div className="flex flex-col items-end gap-2">
-            <Badge className={courseTestReadiness.bgColor}>
-              Final Test: {courseTestReadiness.label} ({courseTestReadiness.score}%)
-            </Badge>
+          <div className="flex flex-col gap-3 ml-8">
             <Button
-              size="sm"
-              className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+              size="default"
+              className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white min-w-[140px]"
               onClick={() => {
                 // Navigate to test screen
                 window.location.href = '/lms/test'
               }}
             >
-              Take Test
+              Take Final Assessment
             </Button>
+            <Badge className={cn("justify-center", courseTestReadiness.bgColor)}>
+              {courseTestReadiness.label} ({courseTestReadiness.score}%)
+            </Badge>
           </div>
         </div>
 
-        {/* Course Progress Ring */}
-        <div className="mb-6 flex items-center gap-6">
-          {/* Radial Progress Ring */}
-          <div className="relative">
-            <svg className="w-32 h-32 transform -rotate-90">
-              {/* Background circle */}
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                stroke="#E5E7EB"
-                strokeWidth="8"
-                fill="none"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                stroke="#7B00FF"
-                strokeWidth="8"
-                fill="none"
-                strokeDasharray={`${2 * Math.PI * 56}`}
-                strokeDashoffset={`${2 * Math.PI * 56 * (1 - mockCourse.progress / 100)}`}
-                strokeLinecap="round"
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            {/* Center content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-vergil-off-black">{mockCourse.progress}%</span>
-              <span className="text-xs text-vergil-off-black/60">Complete</span>
+        {/* Progress Section */}
+        <div className="border-t border-vergil-off-black/10 pt-6">
+          <div className="flex items-center gap-8">
+            {/* Radial Progress Ring */}
+            <div className="relative flex-shrink-0">
+              <svg className="w-24 h-24 transform -rotate-90">
+                {/* Background circle */}
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  stroke="#E5E7EB"
+                  strokeWidth="6"
+                  fill="none"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  stroke="#7B00FF"
+                  strokeWidth="6"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 40}`}
+                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - mockCourse.progress / 100)}`}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              {/* Center content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl font-bold text-vergil-off-black">{mockCourse.progress}%</span>
+                <span className="text-xs text-vergil-off-black/60">Complete</span>
+              </div>
             </div>
-          </div>
-          
-          {/* Course Stats */}
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-vergil-off-black mb-3">Course Progress</h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-vergil-off-black/60">Lessons Completed</span>
-                <span className="font-medium text-vergil-off-black">{mockCourse.completedLessons}/{mockCourse.totalLessons}</span>
+            
+            {/* Course Metrics */}
+            <div className="flex-1 grid grid-cols-3 gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <BookOpen className="w-4 h-4 text-vergil-purple" />
+                  <span className="text-sm font-medium text-vergil-off-black">Lessons</span>
+                </div>
+                <div className="text-2xl font-bold text-vergil-off-black">
+                  {allLessons.filter(lesson => lesson.knowledgePoints.some(kp => kp.proficiency > 0 && kp.proficiency < 100)).length}
+                </div>
+                <div className="text-xs text-vergil-off-black/60">In Progress</div>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-vergil-off-black/60">Knowledge Points Mastered</span>
-                <span className="font-medium text-vergil-off-black">{masteredKnowledgePoints}/{totalKnowledgePoints}</span>
+              
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <GraduationCap className="w-4 h-4 text-vergil-purple" />
+                  <span className="text-sm font-medium text-vergil-off-black">Knowledge Points</span>
+                </div>
+                <div className="text-2xl font-bold text-vergil-off-black">{masteredKnowledgePoints}/{totalKnowledgePoints}</div>
+                <div className="text-xs text-vergil-off-black/60">Mastered</div>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-vergil-off-black/60">Active Chapters</span>
-                <span className="font-medium text-vergil-off-black">
-                  {mockCourse.chapters.filter(ch => ch.progress > 0 && ch.progress < 100).length} of {mockCourse.chapters.length}
-                </span>
+              
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-4 h-4 bg-vergil-purple rounded flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">{mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}</span>
+                  </span>
+                  <span className="text-sm font-medium text-vergil-off-black">Chapter Tests</span>
+                </div>
+                <div className="text-2xl font-bold text-vergil-off-black">
+                  {mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}/{mockCourse.chapters.length}
+                </div>
+                <div className="text-xs text-vergil-off-black/60">
+                  Completed
+                  {(() => {
+                    const completedTests = mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined)
+                    if (completedTests.length > 0) {
+                      const avgScore = Math.round(completedTests.reduce((acc, ch) => acc + (ch.testScore || 0), 0) / completedTests.length)
+                      return ` (Avg: ${avgScore}%)`
+                    }
+                    return ''
+                  })()}
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </Card>
+
+      {/* Course Content Section */}
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Course Content</h2>
       </div>
 
 

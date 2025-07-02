@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { Sparkles, Star } from 'lucide-react'
 import type { JeopardyCategory, JeopardyClue as JeopardyClueType } from './jeopardy-game'
 
 interface JeopardyBoardProps {
@@ -21,22 +22,35 @@ export function JeopardyBoard({
   const values = [200, 400, 600, 800, 1000]
 
   return (
-    <div className={cn("grid grid-cols-6 gap-3", className)}>
-      {categories.map((category, catIndex) => (
-        <div key={category.name} className="space-y-3">
+    <div className={cn("space-y-3", className)}>
+      {/* Category Headers */}
+      <div className="grid grid-cols-5 gap-2">
+        {categories.map((category, catIndex) => (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: catIndex * 0.1 }}
+            key={`header-${category.name}`}
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+              delay: catIndex * 0.1,
+              type: "spring",
+              stiffness: 300,
+              damping: 20
+            }}
           >
-            <Card className="h-20 flex items-center justify-center p-3 bg-deep-space text-white border-0">
-              <h3 className="text-sm font-display font-bold uppercase tracking-wider text-center">
+            <Card className="relative h-16 flex items-center justify-center p-3 bg-white border-2 border-vergil-purple/40 overflow-hidden">
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-center text-vergil-purple/80 leading-tight">
                 {category.name}
               </h3>
             </Card>
           </motion.div>
-
-          {values.map((value, valueIndex) => {
+        ))}
+      </div>
+      
+      {/* Game Board */}
+      <div className="grid grid-cols-5 gap-2">
+        {categories.map((category, catIndex) => (
+          <div key={category.name} className="space-y-2">
+            {values.map((value, valueIndex) => {
             const clue = category.clues[valueIndex]
             const isUsed = usedClues.has(clue.id)
 
@@ -58,49 +72,76 @@ export function JeopardyBoard({
                 <Card 
                   variant={isUsed ? "default" : "interactive"}
                   className={cn(
-                    "h-20 flex items-center justify-center transition-all duration-200",
+                    "h-16 flex items-center justify-center transition-all duration-200 relative overflow-hidden",
                     isUsed ? [
-                      "bg-mist-gray/10 border-mist-gray/20 cursor-default"
+                      "bg-vergil-off-black/5 border-vergil-off-black/10 cursor-default"
                     ] : [
-                      "bg-white border-stone-gray/20",
-                      "hover:border-cosmic-purple/40 hover:shadow-md",
-                      "group"
+                      "bg-white border-vergil-purple/20",
+                      "hover:border-vergil-purple/60 hover:shadow-lg hover:scale-105",
+                      "group shadow-sm"
                     ]
                   )}
                 >
-                  {!isUsed && (
+                  {isUsed ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-vergil-off-black/10" />
+                    </div>
+                  ) : (
                     <>
                       <span className={cn(
-                        "font-mono font-bold text-2xl transition-colors",
-                        "text-deep-space group-hover:text-cosmic-purple"
+                        "font-mono font-bold text-2xl transition-all duration-200 relative z-10",
+                        "text-vergil-purple/70 group-hover:text-vergil-purple group-hover:scale-110"
                       )}>
                         ${value}
                       </span>
+                      
+                      {/* Hover effect background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-vergil-purple/0 to-vergil-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
                       {clue.isDailyDouble && (
-                        <motion.div
-                          className="absolute inset-0 rounded-lg pointer-events-none"
-                          animate={{
-                            boxShadow: [
-                              "inset 0 0 0 0 rgba(99, 102, 241, 0)",
-                              "inset 0 0 0 2px rgba(99, 102, 241, 0.3)",
-                              "inset 0 0 0 0 rgba(99, 102, 241, 0)",
-                            ]
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
-                        />
+                        <>
+                          {/* Daily Double indicator */}
+                          <motion.div
+                            className="absolute top-1 right-1"
+                            animate={{
+                              rotate: [0, 360],
+                              scale: [1, 1.2, 1]
+                            }}
+                            transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              ease: "linear"
+                            }}
+                          >
+                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                          </motion.div>
+                          
+                          <motion.div
+                            className="absolute inset-0 rounded-lg pointer-events-none"
+                            animate={{
+                              boxShadow: [
+                                "inset 0 0 0 0 rgba(255, 204, 0, 0)",
+                                "inset 0 0 0 2px rgba(255, 204, 0, 0.4)",
+                                "inset 0 0 0 0 rgba(255, 204, 0, 0)",
+                              ]
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        </>
                       )}
                     </>
                   )}
                 </Card>
               </motion.button>
             )
-          })}
-        </div>
-      ))}
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

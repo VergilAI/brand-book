@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { JeopardyBoard } from './jeopardy-board'
 import { JeopardyClue } from './jeopardy-clue'
 import { JeopardyScore } from './jeopardy-score'
-import { Trophy } from 'lucide-react'
+import { Trophy, X, Shuffle, Brain, Sparkles } from 'lucide-react'
 
 export interface JeopardyClue {
   id: string
@@ -50,6 +50,7 @@ export function JeopardyGame({
     dailyDoubleWager: 0,
     gamePhase: 'board'
   })
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   const handleClueSelect = (clue: JeopardyClue) => {
     if (gameState.usedClues.has(clue.id)) return
@@ -98,57 +99,205 @@ export function JeopardyGame({
   }
 
   if (gameState.gamePhase === 'complete') {
+    const totalClues = categories.reduce((acc, cat) => acc + cat.clues.length, 0)
+    const answeredCorrectly = Math.round((gameState.score > 0 ? gameState.score / (totalClues * 200) : 0) * 100)
+    const knowledgeImprovement = Math.round(answeredCorrectly * 0.8)
+    
     return (
-      <Card className={cn(
-        "p-12 text-center max-w-2xl mx-auto",
-        "border-stone-gray/20",
-        className
-      )}>
-        <div className="space-y-6">
-          <div className="w-24 h-24 rounded-full bg-cosmic-purple/10 mx-auto flex items-center justify-center">
-            <Trophy className="w-12 h-12 text-cosmic-purple" />
-          </div>
-          <h2 className="text-4xl font-display font-bold text-deep-space">
-            Game Complete!
-          </h2>
-          <div className="pt-6">
-            <p className="text-lg text-stone-gray mb-2">Final Score</p>
-            <p className="text-5xl font-mono font-bold text-cosmic-purple">
-              ${gameState.score.toLocaleString()}
-            </p>
-          </div>
-          <Button
-            size="lg"
-            onClick={() => window.location.reload()}
-            className="bg-cosmic-purple text-white hover:bg-electric-violet"
-          >
-            Play Again
-          </Button>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4">
+          <Card className={cn(
+            "p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto",
+            className
+          )}>
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="text-center space-y-4">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                  Jeopardy Complete!
+                </h2>
+                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                  Great job navigating through all those challenging questions!
+                </p>
+              </div>
+              
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    ${gameState.score.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Final Score</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {gameState.usedClues.size}
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Questions Answered</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {totalClues - gameState.usedClues.size}
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Questions Left</div>
+                </Card>
+              </div>
+              
+              {/* Knowledge Impact */}
+              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5 text-vergil-purple" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                      Knowledge Point Impact
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
+                      <span className="text-lg font-bold text-vergil-purple">
+                        +{knowledgeImprovement}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              
+              <div className="flex gap-4">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => onGameEnd?.(gameState.score)}
+                >
+                  Exit Game
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={() => window.location.reload()}
+                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                >
+                  Play Again
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
-      </Card>
+      </div>
     )
   }
 
+  // Function to choose a random available clue
+  const chooseRandomClue = () => {
+    const availableClues: JeopardyClue[] = []
+    categories.forEach(category => {
+      category.clues.forEach(clue => {
+        if (!gameState.usedClues.has(clue.id)) {
+          availableClues.push(clue)
+        }
+      })
+    })
+    
+    if (availableClues.length > 0) {
+      const randomClue = availableClues[Math.floor(Math.random() * availableClues.length)]
+      handleClueSelect(randomClue)
+    }
+  }
+
+  useEffect(() => {
+    // Prevent background scrolling when game is open
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
+
   return (
-    <div className={cn("space-y-6", className)}>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-display font-bold text-deep-space">Jeopardy!</h1>
-        <JeopardyScore score={gameState.score} />
+    <div className={cn("min-h-screen bg-gradient-to-br from-vergil-off-white to-vergil-purple/5 p-4", className)}>
+      <div className="max-w-7xl mx-auto space-y-4">
+        <Card className="p-4 bg-white border-vergil-off-black/10 relative shadow-lg">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowExitConfirm(true)}
+            className="absolute top-3 left-3 text-vergil-off-black/60 hover:text-vergil-off-black z-10"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 text-center px-12">
+              <h1 className="text-2xl font-bold text-vergil-off-black font-display">Jeopardy!</h1>
+              <p className="text-xs text-vergil-off-black/60 mt-0.5">Test your knowledge across categories</p>
+            </div>
+            <JeopardyScore score={gameState.score} />
+          </div>
+        </Card>
+
+        <div className="space-y-3">
+          <JeopardyBoard
+            categories={categories}
+            usedClues={gameState.usedClues}
+            onClueSelect={handleClueSelect}
+          />
+          
+          {/* Choose Random Button */}
+          <div className="flex justify-center">
+            <Button
+              onClick={chooseRandomClue}
+              variant="outline"
+              size="sm"
+              className="border-vergil-purple/20 text-vergil-purple/70 hover:bg-vergil-purple/5 hover:text-vergil-purple"
+              disabled={gameState.usedClues.size === categories.reduce((acc, cat) => acc + cat.clues.length, 0)}
+            >
+              <Shuffle className="w-4 h-4 mr-2" />
+              Choose Random Question
+            </Button>
+          </div>
+        </div>
+
+        {gameState.selectedClue && (
+          <JeopardyClue
+            clue={gameState.selectedClue}
+            onAnswer={handleAnswer}
+            onClose={handleClueClose}
+            currentScore={gameState.score}
+          />
+        )}
       </div>
-
-      <JeopardyBoard
-        categories={categories}
-        usedClues={gameState.usedClues}
-        onClueSelect={handleClueSelect}
-      />
-
-      {gameState.selectedClue && (
-        <JeopardyClue
-          clue={gameState.selectedClue}
-          onAnswer={handleAnswer}
-          onClose={handleClueClose}
-          currentScore={gameState.score}
-        />
+      
+      {showExitConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="p-6 max-w-md bg-white border-vergil-off-black/10">
+            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+              Exit Game?
+            </h3>
+            <p className="text-vergil-off-black/60 mb-6">
+              Are you sure you want to exit? You'll lose your current score and progress.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExitConfirm(false)}
+                className="flex-1"
+              >
+                Continue Playing
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowExitConfirm(false)
+                  onGameEnd?.(gameState.score)
+                }}
+                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+              >
+                Exit Game
+              </Button>
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   )

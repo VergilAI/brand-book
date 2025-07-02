@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Clock, Brain, Award, CheckCircle, Play } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -19,6 +19,16 @@ interface LearnModalProps {
 
 export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnModalProps) {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      // Prevent background scrolling when modal is open
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = 'unset'
+      }
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -64,8 +74,9 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-6xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 overflow-y-auto z-50">
+      <div className="min-h-full flex items-center justify-center p-4">
+        <Card className="w-full max-w-6xl max-h-[90vh] flex flex-col my-auto overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-start justify-between">
@@ -214,6 +225,7 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
           </div>
         </div>
       </Card>
+      </div>
     </div>
   )
 }
