@@ -37,6 +37,9 @@ interface TextEditor2State {
   wordWrap: boolean;
   theme: "light" | "dark";
   formatting: FormattingState;
+  searchQuery: string;
+  searchMatches: number[];
+  currentMatchIndex: number;
   
   setContent: (content: string) => void;
   updateStats: (content: string) => void;
@@ -56,6 +59,10 @@ interface TextEditor2State {
   toggleUnderline: () => void;
   toggleStrikethrough: () => void;
   setAlignment: (alignment: "left" | "center" | "right" | "justify") => void;
+  setSearchQuery: (query: string) => void;
+  findMatches: (query: string, content: string) => void;
+  goToNextMatch: () => void;
+  goToPreviousMatch: () => void;
 }
 
 function countWords(text: string): number {
@@ -95,6 +102,9 @@ export const useTextEditor2Store = create<TextEditor2State>((set) => ({
     isStrikethrough: false,
     alignment: "left",
   },
+  searchQuery: "",
+  searchMatches: [],
+  currentMatchIndex: -1,
   
   setContent: (content) => set({ content }, false), // Don't notify subscribers immediately
   
@@ -163,5 +173,34 @@ export const useTextEditor2Store = create<TextEditor2State>((set) => ({
   })),
   setAlignment: (alignment) => set((state) => ({ 
     formatting: { ...state.formatting, alignment } 
+  })),
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  findMatches: (query, content) => {
+    if (!query) {
+      set({ searchMatches: [], currentMatchIndex: -1 });
+      return;
+    }
+    
+    const matches: number[] = [];
+    const lowerQuery = query.toLowerCase();
+    const lowerContent = content.toLowerCase();
+    let index = 0;
+    
+    while ((index = lowerContent.indexOf(lowerQuery, index)) !== -1) {
+      matches.push(index);
+      index += query.length;
+    }
+    
+    set({ searchMatches: matches, currentMatchIndex: matches.length > 0 ? 0 : -1 });
+  },
+  goToNextMatch: () => set((state) => ({
+    currentMatchIndex: state.searchMatches.length > 0 
+      ? (state.currentMatchIndex + 1) % state.searchMatches.length 
+      : -1
+  })),
+  goToPreviousMatch: () => set((state) => ({
+    currentMatchIndex: state.searchMatches.length > 0 
+      ? (state.currentMatchIndex - 1 + state.searchMatches.length) % state.searchMatches.length 
+      : -1
   })),
 }));

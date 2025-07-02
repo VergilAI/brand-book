@@ -36,7 +36,7 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
       fontSize, fontFamily, lineHeight, zoomLevel,
       showRuler, showLineNumbers, wordWrap,
       setCursorPosition, setSelectionStats,
-      updateStats
+      updateStats, searchQuery, searchMatches, currentMatchIndex, findMatches
     } = useTextEditor2Store();
 
     // Initialize content only once
@@ -46,6 +46,113 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
         editorContentRef.current.focus();
       }
     }, []);
+
+    // Highlight search matches
+    useEffect(() => {
+      if (!editorContentRef.current || !searchQuery || searchMatches.length === 0) {
+        // Clear any existing highlights
+        if (editorContentRef.current) {
+          const text = editorContentRef.current.textContent || '';
+          // Only clear if there are highlights
+          if (editorContentRef.current.querySelector('span')) {
+            editorContentRef.current.textContent = text;
+          }
+        }
+        return;
+      }
+
+      const text = editorContentRef.current.textContent || '';
+      const container = editorContentRef.current;
+      
+      // Check if search input has focus - if so, don't mess with selection
+      const activeElement = document.activeElement;
+      const isSearchFocused = activeElement?.id === 'search-input';
+      
+      // Save cursor position only if editor has focus
+      const selection = window.getSelection();
+      const range = selection?.rangeCount && !isSearchFocused ? selection.getRangeAt(0) : null;
+      const startOffset = range?.startOffset || 0;
+      const endOffset = range?.endOffset || 0;
+
+      // Clear and rebuild content with highlights
+      container.innerHTML = '';
+      
+      let lastIndex = 0;
+      searchMatches.forEach((matchIndex, index) => {
+        // Add text before match
+        if (matchIndex > lastIndex) {
+          const textNode = document.createTextNode(text.substring(lastIndex, matchIndex));
+          container.appendChild(textNode);
+        }
+        
+        // Add highlighted match
+        const span = document.createElement('span');
+        span.textContent = text.substring(matchIndex, matchIndex + searchQuery.length);
+        span.style.backgroundColor = index === currentMatchIndex ? '#FFA500' : '#FFFF00';
+        span.style.color = '#000000';
+        span.style.borderRadius = '2px';
+        span.style.padding = '0 2px';
+        container.appendChild(span);
+        
+        lastIndex = matchIndex + searchQuery.length;
+      });
+      
+      // Add remaining text
+      if (lastIndex < text.length) {
+        const textNode = document.createTextNode(text.substring(lastIndex));
+        container.appendChild(textNode);
+      }
+      
+      // Restore cursor position only if editor had focus
+      if (range && selection && !isSearchFocused) {
+        try {
+          const newRange = document.createRange();
+          const walker = document.createTreeWalker(
+            container,
+            NodeFilter.SHOW_TEXT,
+            null
+          );
+          
+          let currentOffset = 0;
+          let startNode = null;
+          let endNode = null;
+          let startFound = false;
+          let endFound = false;
+          
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            const nodeLength = node.textContent?.length || 0;
+            
+            if (!startFound && currentOffset + nodeLength >= startOffset) {
+              startNode = node;
+              newRange.setStart(node, startOffset - currentOffset);
+              startFound = true;
+            }
+            
+            if (!endFound && currentOffset + nodeLength >= endOffset) {
+              endNode = node;
+              newRange.setEnd(node, endOffset - currentOffset);
+              endFound = true;
+              break;
+            }
+            
+            currentOffset += nodeLength;
+          }
+          
+          if (startFound && endFound) {
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          }
+        } catch (e) {
+          // Ignore errors in restoring cursor
+        }
+      }
+      
+      // Restore focus to search input if it had focus
+      if (isSearchFocused && activeElement) {
+        activeElement.focus();
+      }
+    }, [searchQuery, searchMatches, currentMatchIndex]);
 
     // Handle input with minimal overhead
     const handleInput = useCallback(() => {
@@ -65,9 +172,13 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
       updateTimerRef.current = setTimeout(() => {
         onChange(newContent);
         updateStats(newContent);
+        // Re-run search on content change
+        if (searchQuery) {
+          findMatches(searchQuery, newContent);
+        }
       }, 100);
       
-    }, [onChange, updateStats]);
+    }, [onChange, updateStats, searchQuery, findMatches]);
 
 
     // Update cursor position - debounced
