@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Bold, Italic, Underline, Strikethrough, 
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Indent, Outdent,
   Undo, Redo, Copy, Scissors, Clipboard,
-  Save, FileText, FolderOpen, Printer,
   Search, Table, Minus, Smile,
   Maximize2, Eye, Ruler, Hash,
   Type, Paintbrush, PaintBucket,
@@ -22,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface ToolbarProps {
   onFullscreen: () => void;
   onFocusMode: () => void;
+  editorRef: React.RefObject<HTMLDivElement>;
 }
 
 const fontFamilies = [
@@ -46,24 +46,144 @@ const lineSpacings = [
   { value: "3", label: "Triple" },
 ];
 
-export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
+export function Toolbar({ onFullscreen, onFocusMode, editorRef }: ToolbarProps) {
   const { 
     fontSize, fontFamily, lineHeight, zoomLevel,
     setFontSize, setFontFamily, setLineHeight, setZoomLevel,
     toggleRuler, toggleLineNumbers, showRuler, showLineNumbers,
-    updateLastSaved
+    formatting, toggleBold, toggleItalic, 
+    toggleUnderline, toggleStrikethrough, setAlignment, setFormatting
   } = useTextEditor2Store();
 
   const [textColor, setTextColor] = useState("#000000");
   const [highlightColor, setHighlightColor] = useState("#FFFF00");
 
-  const handleSave = () => {
-    updateLastSaved();
-    // Visual feedback
-    const button = document.getElementById("save-button");
-    button?.classList.add("animate-pulse");
-    setTimeout(() => button?.classList.remove("animate-pulse"), 1000);
-  };
+  // Get the actual contentEditable element
+  const getEditor = useCallback(() => {
+    if (!editorRef.current) return null;
+    const contentEditable = editorRef.current.querySelector('[contenteditable="true"]');
+    return contentEditable as HTMLDivElement;
+  }, [editorRef]);
+
+  // Execute formatting command
+  const executeCommand = useCallback((command: string, value?: string) => {
+    const editor = getEditor();
+    if (!editor) return;
+    
+    // Focus the editor to ensure the command works
+    editor.focus();
+    
+    // Execute the command
+    document.execCommand(command, false, value);
+    
+    // Update the formatting state after a short delay
+    setTimeout(() => {
+      try {
+        const isBold = document.queryCommandState('bold');
+        const isItalic = document.queryCommandState('italic');
+        const isUnderline = document.queryCommandState('underline');
+        const isStrikethrough = document.queryCommandState('strikeThrough');
+        
+        // Get alignment
+        let alignment: "left" | "center" | "right" | "justify" = "left";
+        if (document.queryCommandState('justifyCenter')) alignment = "center";
+        else if (document.queryCommandState('justifyRight')) alignment = "right";
+        else if (document.queryCommandState('justifyFull')) alignment = "justify";
+        
+        setFormatting({
+          isBold,
+          isItalic,
+          isUnderline,
+          isStrikethrough,
+          alignment
+        });
+      } catch (e) {
+        // Ignore errors in formatting state detection
+      }
+    }, 10);
+  }, [getEditor, setFormatting]);
+
+  // Update formatting state based on current selection
+  const updateFormattingState = useCallback(() => {
+    try {
+      const isBold = document.queryCommandState('bold');
+      const isItalic = document.queryCommandState('italic');
+      const isUnderline = document.queryCommandState('underline');
+      const isStrikethrough = document.queryCommandState('strikeThrough');
+      
+      // Get alignment
+      let alignment: "left" | "center" | "right" | "justify" = "left";
+      if (document.queryCommandState('justifyCenter')) alignment = "center";
+      else if (document.queryCommandState('justifyRight')) alignment = "right";
+      else if (document.queryCommandState('justifyFull')) alignment = "justify";
+      
+      setFormatting({
+        isBold,
+        isItalic,
+        isUnderline,
+        isStrikethrough,
+        alignment
+      });
+    } catch (e) {
+      // Ignore errors in formatting state detection
+    }
+  }, [setFormatting]);
+
+  // Listen for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      updateFormattingState();
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    
+    // Also listen for clicks and keyups on the editor
+    const editor = getEditor();
+    if (editor) {
+      editor.addEventListener('click', updateFormattingState);
+      editor.addEventListener('keyup', updateFormattingState);
+    }
+
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+      if (editor) {
+        editor.removeEventListener('click', updateFormattingState);
+        editor.removeEventListener('keyup', updateFormattingState);
+      }
+    };
+  }, [getEditor, updateFormattingState]);
+
+  // Format handlers
+  const handleBold = useCallback(() => {
+    executeCommand('bold');
+  }, [executeCommand]);
+
+  const handleItalic = useCallback(() => {
+    executeCommand('italic');
+  }, [executeCommand]);
+
+  const handleUnderline = useCallback(() => {
+    executeCommand('underline');
+  }, [executeCommand]);
+
+  const handleStrikethrough = useCallback(() => {
+    executeCommand('strikeThrough');
+  }, [executeCommand]);
+
+  const handleAlignment = useCallback((align: "left" | "center" | "right" | "justify") => {
+    const alignCommand = align === 'left' ? 'justifyLeft' : 
+                        align === 'center' ? 'justifyCenter' : 
+                        align === 'right' ? 'justifyRight' : 'justifyFull';
+    executeCommand(alignCommand);
+  }, [executeCommand]);
+
+  const handleList = useCallback((type: 'bullet' | 'numbered') => {
+    executeCommand(type === 'bullet' ? 'insertUnorderedList' : 'insertOrderedList');
+  }, [executeCommand]);
+
+  const handleIndent = useCallback((direction: 'increase' | 'decrease') => {
+    executeCommand(direction === 'increase' ? 'indent' : 'outdent');
+  }, [executeCommand]);
 
   const handleZoomIn = () => {
     const newZoom = Math.min(200, zoomLevel + 10);
@@ -77,39 +197,24 @@ export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
 
   return (
     <TooltipProvider>
-      <div className="border-b bg-white dark:bg-obsidian-black shadow-sm">
-        <div className="flex items-center gap-1 p-2 flex-wrap">
-          {/* File Operations */}
-          <div className="flex items-center gap-1">
-            <ToolbarButton icon={FileText} label="New Document" shortcut="Ctrl+N" />
-            <ToolbarButton icon={FolderOpen} label="Open" shortcut="Ctrl+O" />
-            <ToolbarButton 
-              id="save-button"
-              icon={Save} 
-              label="Save" 
-              shortcut="Ctrl+S"
-              onClick={handleSave}
-            />
-            <ToolbarButton icon={Printer} label="Print Preview" shortcut="Ctrl+P" />
-          </div>
-
-          <Separator orientation="vertical" className="h-6" />
+      <div className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="flex items-center gap-2 p-3 flex-wrap">
 
           {/* Edit Operations */}
-          <div className="flex items-center gap-1">
-            <ToolbarButton icon={Undo} label="Undo" shortcut="Ctrl+Z" />
-            <ToolbarButton icon={Redo} label="Redo" shortcut="Ctrl+Y" />
-            <ToolbarButton icon={Scissors} label="Cut" shortcut="Ctrl+X" />
-            <ToolbarButton icon={Copy} label="Copy" shortcut="Ctrl+C" />
-            <ToolbarButton icon={Clipboard} label="Paste" shortcut="Ctrl+V" />
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-900 rounded-lg px-2 py-1 shadow-sm">
+            <ToolbarButton icon={Undo} label="Undo" shortcut="Ctrl+Z" onClick={() => executeCommand('undo')} />
+            <ToolbarButton icon={Redo} label="Redo" shortcut="Ctrl+Y" onClick={() => executeCommand('redo')} />
+            <ToolbarButton icon={Scissors} label="Cut" shortcut="Ctrl+X" onClick={() => executeCommand('cut')} />
+            <ToolbarButton icon={Copy} label="Copy" shortcut="Ctrl+C" onClick={() => executeCommand('copy')} />
+            <ToolbarButton icon={Clipboard} label="Paste" shortcut="Ctrl+V" onClick={() => executeCommand('paste')} />
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-7 bg-gray-300 dark:bg-gray-600" />
 
           {/* Font Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-2 py-1 shadow-sm">
             <Select value={fontFamily} onValueChange={setFontFamily}>
-              <SelectTrigger className="w-32 h-8">
+              <SelectTrigger className="w-32 h-8 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-100">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -122,7 +227,7 @@ export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
             </Select>
 
             <Select value={fontSize.toString()} onValueChange={(v) => setFontSize(parseInt(v))}>
-              <SelectTrigger className="w-16 h-8">
+              <SelectTrigger className="w-16 h-8 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-100">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -133,19 +238,19 @@ export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
             </Select>
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-7 bg-gray-300 dark:bg-gray-600" />
 
           {/* Text Formatting */}
-          <div className="flex items-center gap-1">
-            <ToolbarButton icon={Bold} label="Bold" shortcut="Ctrl+B" />
-            <ToolbarButton icon={Italic} label="Italic" shortcut="Ctrl+I" />
-            <ToolbarButton icon={Underline} label="Underline" shortcut="Ctrl+U" />
-            <ToolbarButton icon={Strikethrough} label="Strikethrough" />
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-900 rounded-lg px-2 py-1 shadow-sm">
+            <ToolbarButton icon={Bold} label="Bold" shortcut="Ctrl+B" onClick={handleBold} active={formatting.isBold} />
+            <ToolbarButton icon={Italic} label="Italic" shortcut="Ctrl+I" onClick={handleItalic} active={formatting.isItalic} />
+            <ToolbarButton icon={Underline} label="Underline" shortcut="Ctrl+U" onClick={handleUnderline} active={formatting.isUnderline} />
+            <ToolbarButton icon={Strikethrough} label="Strikethrough" onClick={handleStrikethrough} active={formatting.isStrikethrough} />
             
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Paintbrush className="h-4 w-4" style={{ color: textColor }} />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-600 dark:text-white hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm transition-all duration-200">
+                  <Paintbrush className="h-4 w-4" style={{ color: textColor === '#000000' ? undefined : textColor }} />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64">
@@ -163,8 +268,8 @@ export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <PaintBucket className="h-4 w-4" style={{ color: highlightColor }} />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-600 dark:text-white hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm transition-all duration-200">
+                  <PaintBucket className="h-4 w-4" style={{ color: highlightColor === '#FFFF00' ? undefined : highlightColor }} />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64">
@@ -181,17 +286,17 @@ export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
             </Popover>
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-7 bg-gray-300 dark:bg-gray-600" />
 
           {/* Paragraph Formatting */}
-          <div className="flex items-center gap-1">
-            <ToolbarButton icon={AlignLeft} label="Align Left" />
-            <ToolbarButton icon={AlignCenter} label="Align Center" />
-            <ToolbarButton icon={AlignRight} label="Align Right" />
-            <ToolbarButton icon={AlignJustify} label="Justify" />
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-900 rounded-lg px-2 py-1 shadow-sm">
+            <ToolbarButton icon={AlignLeft} label="Align Left" onClick={() => handleAlignment("left")} active={formatting.alignment === "left"} />
+            <ToolbarButton icon={AlignCenter} label="Align Center" onClick={() => handleAlignment("center")} active={formatting.alignment === "center"} />
+            <ToolbarButton icon={AlignRight} label="Align Right" onClick={() => handleAlignment("right")} active={formatting.alignment === "right"} />
+            <ToolbarButton icon={AlignJustify} label="Justify" onClick={() => handleAlignment("justify")} active={formatting.alignment === "justify"} />
             
             <Select value={lineHeight} onValueChange={setLineHeight}>
-              <SelectTrigger className="w-24 h-8">
+              <SelectTrigger className="w-24 h-8 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-100">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -203,29 +308,29 @@ export function Toolbar({ onFullscreen, onFocusMode }: ToolbarProps) {
               </SelectContent>
             </Select>
 
-            <ToolbarButton icon={Outdent} label="Decrease Indent" />
-            <ToolbarButton icon={Indent} label="Increase Indent" />
-            <ToolbarButton icon={List} label="Bullet List" />
-            <ToolbarButton icon={ListOrdered} label="Numbered List" />
+            <ToolbarButton icon={Outdent} label="Decrease Indent" onClick={() => handleIndent('decrease')} />
+            <ToolbarButton icon={Indent} label="Increase Indent" onClick={() => handleIndent('increase')} />
+            <ToolbarButton icon={List} label="Bullet List" onClick={() => handleList('bullet')} />
+            <ToolbarButton icon={ListOrdered} label="Numbered List" onClick={() => handleList('numbered')} />
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-7 bg-gray-300 dark:bg-gray-600" />
 
           {/* Insert Options */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-900 rounded-lg px-2 py-1 shadow-sm">
             <ToolbarButton icon={Table} label="Insert Table" />
             <ToolbarButton icon={Minus} label="Horizontal Line" />
             <ToolbarButton icon={Smile} label="Emoji" />
             <ToolbarButton icon={Search} label="Find & Replace" shortcut="Ctrl+F" />
           </div>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-7 bg-gray-300 dark:bg-gray-600" />
 
           {/* View Controls */}
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-1 px-2">
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-900 rounded-lg px-2 py-1 shadow-sm">
+            <div className="flex items-center gap-2 px-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
               <ToolbarButton icon={ZoomOut} label="Zoom Out" onClick={handleZoomOut} />
-              <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
+              <span className="text-sm font-medium w-12 text-center text-gray-700 dark:text-gray-300">{zoomLevel}%</span>
               <ToolbarButton icon={ZoomIn} label="Zoom In" onClick={handleZoomIn} />
             </div>
             
@@ -272,7 +377,7 @@ function ToolbarButton({ id, icon: Icon, label, shortcut, onClick, active }: Too
           id={id}
           variant={active ? "default" : "ghost"} 
           size="sm" 
-          className={`h-8 w-8 p-0 ${active ? 'bg-cosmic-purple text-white hover:bg-electric-violet' : ''}`}
+          className={`h-8 w-8 p-0 transition-all duration-200 ${active ? 'bg-cosmic-purple text-white hover:bg-electric-violet shadow-md' : 'text-gray-600 dark:text-white hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm'}`}
           onClick={onClick}
         >
           <Icon className="h-4 w-4" />

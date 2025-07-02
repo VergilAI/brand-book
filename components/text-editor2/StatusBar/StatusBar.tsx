@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Type, Hash, MousePointer, Clock } from "lucide-react";
+import { FileText, Type, Hash, MousePointer } from "lucide-react";
 import { useTextEditor2Store } from "@/stores/text-editor2-store";
 
 interface StatusBarProps {
@@ -20,27 +20,10 @@ export function StatusBar({
   cursorPosition,
   selectionStats,
 }: StatusBarProps) {
-  const { lastSaved, autoSaveEnabled } = useTextEditor2Store();
-
-  const formatTime = (date: Date | null) => {
-    if (!date) return "Not saved";
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    
-    if (minutes < 1) return "Just now";
-    if (minutes === 1) return "1 minute ago";
-    if (minutes < 60) return `${minutes} minutes ago`;
-    
-    const hours = Math.floor(minutes / 60);
-    if (hours === 1) return "1 hour ago";
-    if (hours < 24) return `${hours} hours ago`;
-    
-    return date.toLocaleDateString();
-  };
+  const { zoomLevel } = useTextEditor2Store();
 
   return (
-    <div className="h-8 bg-gray-100 dark:bg-gray-900 border-t flex items-center px-4 text-xs text-gray-600 dark:text-gray-400">
+    <div className="h-7 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700 flex items-center px-6 text-xs text-gray-500 dark:text-gray-400">
       <div className="flex items-center gap-6 flex-1">
         {/* Cursor Position */}
         <div className="flex items-center gap-1">
@@ -67,9 +50,9 @@ export function StatusBar({
         {/* Selection Stats */}
         {selectionStats && (
           <>
-            <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 opacity-50" />
             <div className="flex items-center gap-4">
-              <span className="text-cosmic-purple font-medium">Selection:</span>
+              <span className="text-cosmic-purple dark:text-electric-violet font-medium">Selection:</span>
               <span>{selectionStats.words} words</span>
               <span>{selectionStats.chars} characters</span>
             </div>
@@ -77,19 +60,9 @@ export function StatusBar({
         )}
       </div>
 
-      {/* Save Status */}
-      <div className="flex items-center gap-2">
-        {autoSaveEnabled && (
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full animate-pulse" />
-            <span>Auto-save on</span>
-          </div>
-        )}
-        
-        <div className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          <span>Saved {formatTime(lastSaved)}</span>
-        </div>
+      {/* Zoom Level */}
+      <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+        <span className="font-medium">Zoom: {zoomLevel}%</span>
       </div>
     </div>
   );

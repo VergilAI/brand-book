@@ -29,14 +29,12 @@ interface EditorAreaProps {
 export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
   ({ content, onChange, focusMode }, ref) => {
     const editorContentRef = useRef<HTMLDivElement>(null);
-    const [showSaveIndicator, setShowSaveIndicator] = useState(false);
     const lastContentRef = useRef(content);
     const updateTimerRef = useRef<NodeJS.Timeout>();
     
     const { 
       fontSize, fontFamily, lineHeight, zoomLevel,
       showRuler, showLineNumbers, wordWrap,
-      autoSaveEnabled, updateLastSaved,
       setCursorPosition, setSelectionStats,
       updateStats
     } = useTextEditor2Store();
@@ -71,18 +69,6 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
       
     }, [onChange, updateStats]);
 
-    // Auto-save functionality
-    useEffect(() => {
-      if (!autoSaveEnabled || !lastContentRef.current) return;
-
-      const saveTimer = setTimeout(() => {
-        updateLastSaved();
-        setShowSaveIndicator(true);
-        setTimeout(() => setShowSaveIndicator(false), 2000);
-      }, 30000);
-
-      return () => clearTimeout(saveTimer);
-    }, [lastContentRef.current, autoSaveEnabled, updateLastSaved]);
 
     // Update cursor position - debounced
     const updateCursorPosition = useCallback(() => {
@@ -117,26 +103,12 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
       });
     }, [setCursorPosition, setSelectionStats]);
 
-    // Keyboard shortcuts
+    // Keyboard shortcuts - let the default behavior work
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key) {
-          case 'b':
-            e.preventDefault();
-            document.execCommand('bold');
-            handleInput();
-            break;
-          case 'i':
-            e.preventDefault();
-            document.execCommand('italic');
-            handleInput();
-            break;
-          case 'u':
-            e.preventDefault();
-            document.execCommand('underline');
-            handleInput();
-            break;
-        }
+      // The browser handles Ctrl+B, Ctrl+I, Ctrl+U natively for contentEditable
+      // We just need to update our content after the command executes
+      if ((e.ctrlKey || e.metaKey) && ['b', 'i', 'u'].includes(e.key.toLowerCase())) {
+        setTimeout(handleInput, 10);
       }
     };
 
@@ -159,18 +131,28 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
           
           <div className="flex-1 p-8 relative bg-gray-100">
             <div className="max-w-[816px] mx-auto bg-white shadow-lg min-h-[1056px] relative">
-              {/* Page layout simulation */}
+              {/* Page layout simulation - margin guides */}
               <div className="absolute inset-0 pointer-events-none">
-                <div className="border-l-2 border-r-2 border-dashed border-gray-200 dark:border-gray-700 h-full mx-16" />
+                <div className="absolute left-[144px] top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-700" />
+                <div className="absolute right-[108px] top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-700" />
               </div>
               
               <div
                 ref={editorContentRef}
                 contentEditable
-                className={`outline-none p-16 min-h-full relative z-10 ${
+                className={`outline-none min-h-full relative z-10 ${
                   wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'
                 } ${focusMode ? 'focus-mode-editor' : ''}`}
-                style={editorStyle}
+                style={{
+                  ...editorStyle,
+                  paddingTop: '72px', // 1 inch
+                  paddingBottom: '72px', // 1 inch
+                  paddingLeft: '144px', // 2 inches
+                  paddingRight: '108px', // 1.5 inches
+                  textIndent: '36px', // 0.5 inch first line indent
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                }}
                 onInput={handleInput}
                 onKeyDown={handleKeyDown}
                 onMouseUp={updateCursorPosition}
@@ -185,12 +167,6 @@ export const EditorArea = forwardRef<HTMLDivElement, EditorAreaProps>(
           </div>
         </div>
 
-        {/* Auto-save indicator */}
-        {showSaveIndicator && (
-          <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-md text-sm animate-fade-in-out">
-            Auto-saved
-          </div>
-        )}
       </div>
     );
   }

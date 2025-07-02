@@ -11,6 +11,14 @@ interface CursorPosition {
   column: number;
 }
 
+interface FormattingState {
+  isBold: boolean;
+  isItalic: boolean;
+  isUnderline: boolean;
+  isStrikethrough: boolean;
+  alignment: "left" | "center" | "right" | "justify";
+}
+
 interface TextEditor2State {
   content: string;
   wordCount: number;
@@ -28,8 +36,7 @@ interface TextEditor2State {
   showLineNumbers: boolean;
   wordWrap: boolean;
   theme: "light" | "dark";
-  autoSaveEnabled: boolean;
-  lastSaved: Date | null;
+  formatting: FormattingState;
   
   setContent: (content: string) => void;
   updateStats: (content: string) => void;
@@ -43,8 +50,12 @@ interface TextEditor2State {
   toggleLineNumbers: () => void;
   toggleWordWrap: () => void;
   toggleTheme: () => void;
-  toggleAutoSave: () => void;
-  updateLastSaved: () => void;
+  setFormatting: (formatting: Partial<FormattingState>) => void;
+  toggleBold: () => void;
+  toggleItalic: () => void;
+  toggleUnderline: () => void;
+  toggleStrikethrough: () => void;
+  setAlignment: (alignment: "left" | "center" | "right" | "justify") => void;
 }
 
 function countWords(text: string): number {
@@ -71,14 +82,19 @@ export const useTextEditor2Store = create<TextEditor2State>((set) => ({
   selectionStats: null,
   fontSize: 16,
   fontFamily: "Inter",
-  lineHeight: "1.6",
+  lineHeight: "1.8",
   zoomLevel: 100,
   showRuler: true,
   showLineNumbers: false,
   wordWrap: true,
   theme: "light",
-  autoSaveEnabled: true,
-  lastSaved: null,
+  formatting: {
+    isBold: false,
+    isItalic: false,
+    isUnderline: false,
+    isStrikethrough: false,
+    alignment: "left",
+  },
   
   setContent: (content) => set({ content }, false), // Don't notify subscribers immediately
   
@@ -130,6 +146,22 @@ export const useTextEditor2Store = create<TextEditor2State>((set) => ({
   toggleLineNumbers: () => set((state) => ({ showLineNumbers: !state.showLineNumbers })),
   toggleWordWrap: () => set((state) => ({ wordWrap: !state.wordWrap })),
   toggleTheme: () => set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
-  toggleAutoSave: () => set((state) => ({ autoSaveEnabled: !state.autoSaveEnabled })),
-  updateLastSaved: () => set({ lastSaved: new Date() }),
+  setFormatting: (formatting) => set((state) => ({ 
+    formatting: { ...state.formatting, ...formatting } 
+  })),
+  toggleBold: () => set((state) => ({ 
+    formatting: { ...state.formatting, isBold: !state.formatting.isBold } 
+  })),
+  toggleItalic: () => set((state) => ({ 
+    formatting: { ...state.formatting, isItalic: !state.formatting.isItalic } 
+  })),
+  toggleUnderline: () => set((state) => ({ 
+    formatting: { ...state.formatting, isUnderline: !state.formatting.isUnderline } 
+  })),
+  toggleStrikethrough: () => set((state) => ({ 
+    formatting: { ...state.formatting, isStrikethrough: !state.formatting.isStrikethrough } 
+  })),
+  setAlignment: (alignment) => set((state) => ({ 
+    formatting: { ...state.formatting, alignment } 
+  })),
 }));

@@ -2,11 +2,11 @@
 
 import React from 'react'
 import { useMapEditor } from '../../hooks/useMapEditor'
-import { Card } from '@/components/ui/Card'
-import { Label } from '@/components/ui/Label'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
-import { Switch } from '@/components/ui/Switch'
+import { Card } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { ChevronDown, ChevronRight, Bug } from 'lucide-react'
 import styles from '../panels/ScrollablePanel.module.css'
 

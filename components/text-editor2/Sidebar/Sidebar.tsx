@@ -37,40 +37,41 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   if (collapsed) {
     return (
-      <div className="w-12 border-r bg-gray-50 dark:bg-obsidian-black flex flex-col items-center py-4">
+      <div className="w-16 bg-gray-50 dark:bg-gray-900 flex flex-col items-center py-4 m-2 rounded-xl shadow-lg">
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggle}
-          className="mb-4"
+          className="mb-4 hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-all"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
         
         <div className="flex flex-col gap-4">
-          <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-          <BarChart3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <FileText className="h-5 w-5 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-cosmic-purple transition-colors" />
+          <Search className="h-5 w-5 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-cosmic-purple transition-colors" />
+          <BarChart3 className="h-5 w-5 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-cosmic-purple transition-colors" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-80 border-r bg-gray-50 dark:bg-obsidian-black flex flex-col">
-      <div className="p-4 border-b flex items-center justify-between">
-        <h3 className="font-semibold text-sm">Tools & Navigation</h3>
+    <div className="w-80 bg-gray-50 dark:bg-gray-900 flex flex-col m-2 rounded-xl shadow-lg">
+      <div className="p-4 flex items-center justify-between">
+        <h3 className="font-semibold text-sm text-gray-700 dark:text-gray-200">Tools & Navigation</h3>
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggle}
+          className="hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-all"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
       </div>
 
       <Tabs defaultValue="structure" className="flex-1">
-        <TabsList className="w-full justify-start rounded-none border-b h-10">
+        <TabsList className="w-full justify-start rounded-lg mx-4 bg-white dark:bg-gray-800 h-10">
           <TabsTrigger value="structure" className="gap-2">
             <FileText className="h-4 w-4" />
             Structure
@@ -85,20 +86,20 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="structure" className="p-4 m-0">
+        <TabsContent value="structure" className="p-4 m-0 transition-all duration-200">
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                 <Hash className="h-4 w-4" />
                 Document Outline
               </h4>
-              <ScrollArea className="h-64 rounded border bg-white dark:bg-gray-900">
+              <ScrollArea className="h-64 rounded-lg border-0 bg-white dark:bg-gray-800 shadow-sm">
                 <div className="p-2">
                   {headings.length > 0 ? (
                     headings.map((heading, index) => (
                       <button
                         key={index}
-                        className={`w-full text-left px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded ${
+                        className={`w-full text-left px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ${
                           heading.level > 1 ? `ml-${(heading.level - 1) * 4}` : ''
                         }`}
                         style={{ paddingLeft: `${(heading.level - 1) * 16 + 8}px` }}
@@ -118,13 +119,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <Bookmark className="h-4 w-4" />
                 Bookmarks
               </h4>
-              <ScrollArea className="h-32 rounded border bg-white dark:bg-gray-900">
+              <ScrollArea className="h-32 rounded-lg border-0 bg-white dark:bg-gray-800 shadow-sm">
                 <div className="p-2">
                   {bookmarks.length > 0 ? (
                     bookmarks.map((bookmark, index) => (
                       <button
                         key={index}
-                        className="w-full text-left px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                        className="w-full text-left px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       >
                         {bookmark}
                       </button>
@@ -138,7 +139,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="search" className="p-4 m-0">
+        <TabsContent value="search" className="p-4 m-0 transition-all duration-200">
           <div className="space-y-4">
             <div>
               <Label htmlFor="search-input" className="text-sm">Find</Label>
@@ -147,7 +148,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search text..."
-                className="mt-1"
+                className="mt-1 rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               />
             </div>
 
@@ -158,7 +159,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 value={replaceQuery}
                 onChange={(e) => setReplaceQuery(e.target.value)}
                 placeholder="Replace with..."
-                className="mt-1"
+                className="mt-1 rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               />
             </div>
 
@@ -199,7 +200,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <History className="h-4 w-4" />
                 Search History
               </h4>
-              <ScrollArea className="h-32 rounded border bg-white dark:bg-gray-900">
+              <ScrollArea className="h-32 rounded-lg border-0 bg-white dark:bg-gray-800 shadow-sm">
                 <div className="p-2">
                   <p className="text-sm text-muted-foreground">No recent searches</p>
                 </div>
@@ -208,7 +209,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="stats" className="p-4 m-0">
+        <TabsContent value="stats" className="p-4 m-0 transition-all duration-200">
           <div className="space-y-4">
             <StatItem icon={Type} label="Words" value={wordCount.toLocaleString()} />
             <StatItem icon={Hash} label="Characters" value={charCount.toLocaleString()} />

@@ -41,6 +41,7 @@ export function TextEditor() {
         <Toolbar 
           onFullscreen={() => setFullscreen(!fullscreen)}
           onFocusMode={() => setFocusMode(!focusMode)}
+          editorRef={editorRef}
         />
       )}
       
