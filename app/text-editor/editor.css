@@ -1,10 +1,31 @@
 /* TipTap Editor Styles */
 .ProseMirror {
-  @apply min-h-full text-base leading-relaxed text-deep-space dark:text-pure-light;
+  @apply text-base leading-relaxed text-deep-space dark:text-pure-light;
+  caret-color: #6366F1; /* Cosmic purple cursor */
+  cursor: text;
+  width: 100%;
+  /* Allow content to flow naturally for pagination */
+  height: auto;
+  min-height: 0; /* Remove minimum height to prevent empty pages */
+  /* Enable multi-page layout */
+  overflow: visible;
+  position: relative;
 }
 
+/* Enhanced cursor visibility and focus styles */
 .ProseMirror:focus {
   @apply outline-none;
+  caret-color: #6366F1;
+}
+
+/* Make cursor thicker and more visible */
+.ProseMirror {
+  caret-shape: bar;
+}
+
+/* Dark mode cursor */
+.dark .ProseMirror {
+  caret-color: #A78BFA; /* Electric violet for dark mode */
 }
 
 .ProseMirror > * + * {
@@ -12,9 +33,15 @@
 }
 
 .ProseMirror p {
-  @apply mb-4;
+  @apply mb-3; /* Reduced margin */
   margin-left: 0;
   padding-left: 0;
+  margin-top: 0; /* Ensure no top margin on first paragraph */
+}
+
+/* Remove margin from first paragraph to prevent empty space */
+.ProseMirror > p:first-child {
+  margin-top: 0;
 }
 
 .ProseMirror h1,
@@ -35,6 +62,7 @@
 .ProseMirror p.is-editor-empty:first-child::before {
   @apply text-stone-gray dark:text-gray-500 float-left h-0 pointer-events-none;
   content: attr(data-placeholder);
+  position: absolute; /* Prevent placeholder from affecting layout */
 }
 
 /* Text alignment */
@@ -68,3 +96,100 @@
 }
 
 /* Lists are styled in globals.css to ensure they take precedence over Tailwind resets */
+
+/* Make paragraphs fill available space for better click targets */
+.ProseMirror p:empty {
+  min-height: 1.5em; /* Only empty paragraphs need min height */
+}
+
+/* Ensure the editor fills the container */
+.ProseMirror-focused {
+  outline: none;
+}
+
+/* Override OS behavior - keep cursor visible while typing */
+.text-editor-layout,
+.text-editor-layout * {
+  cursor: auto !important;
+}
+
+.text-editor-layout .ProseMirror {
+  cursor: text !important;
+}
+
+/* Disable cursor hiding on keypress */
+@media (pointer: fine) {
+  .text-editor-layout {
+    cursor: auto !important;
+  }
+}
+
+/* Multi-page layout support */
+.editor-pages-container {
+  position: relative;
+}
+
+.editor-page {
+  page-break-after: always;
+  page-break-inside: avoid;
+}
+
+/* Ensure proper content flow across pages */
+.editor-content-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Multi-page editor styles */
+.editor-multipage {
+  position: relative;
+}
+
+.editor-multipage .ProseMirror {
+  overflow: visible !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
+/* Page break handling */
+.editor-page-content {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Ensure content measures correctly */
+.editor-measure-container {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Continuous flow editor */
+.editor-continuous-flow {
+  position: relative;
+}
+
+/* Create visual page breaks without breaking content flow */
+.page-break-visual {
+  position: relative;
+  height: 24px; /* Page gap */
+  pointer-events: none;
+  background: transparent;
+}
+
+/* Ensure continuous text flow */
+.editor-pages-wrapper {
+  position: relative;
+  background: transparent;
+}
+
+/* Page shadows for visual separation */
+.page-shadow {
+  position: absolute;
+  pointer-events: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}

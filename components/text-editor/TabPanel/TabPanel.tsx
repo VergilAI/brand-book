@@ -21,7 +21,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 export function TabPanel() {
   const {
@@ -76,11 +75,12 @@ export function TabPanel() {
 
   return (
     <>
-      <div className="w-64 border-r border-mist-gray dark:border-gray-700 bg-soft-light dark:bg-gray-900 p-4 h-full overflow-y-auto flex flex-col">
-        <div className="mb-4">
-          <ThemeToggle />
-        </div>
-        <div className="mb-4">
+      <div className="w-64 h-full border-r border-mist-gray dark:border-gray-700 bg-soft-light dark:bg-gray-900 flex flex-col">
+        <div className="p-4 flex-1 overflow-y-auto">
+          <div className="mb-4">
+            <ThemeToggle />
+          </div>
+          <div className="mb-4">
           <Button
             onClick={createDocument}
             className="w-full justify-start"
@@ -176,11 +176,12 @@ export function TabPanel() {
           ))}
         </div>
 
-        <div className="mt-auto pt-8 space-y-1 text-xs text-stone-gray dark:text-gray-400">
-          <p>Keyboard shortcuts:</p>
-          <p>⌘1-9: Switch tabs</p>
-          <p>⌘N: New document</p>
-          <p>⌘W: Close tab</p>
+          <div className="mt-auto pt-8 space-y-1 text-xs text-stone-gray dark:text-gray-400">
+            <p>Keyboard shortcuts:</p>
+            <p>⌘1-9: Switch tabs</p>
+            <p>⌘N: New document</p>
+            <p>⌘W: Close tab</p>
+          </div>
         </div>
       </div>
 

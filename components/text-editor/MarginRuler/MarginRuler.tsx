@@ -20,8 +20,8 @@ const snapToHalfPoint = (px: number) => {
 };
 
 export function MarginRuler({ onMarginsChange, maxWidth = 595 }: MarginRulerProps) {
-  const [leftMargin, setLeftMargin] = useState(ptToPx(72)); // 1 inch = 72pt
-  const [rightMargin, setRightMargin] = useState(ptToPx(72));
+  const [leftMargin, setLeftMargin] = useState(ptToPx(60)); // Smaller margin for screen
+  const [rightMargin, setRightMargin] = useState(ptToPx(60));
   const [isDraggingLeft, setIsDraggingLeft] = useState(false);
   const [isDraggingRight, setIsDraggingRight] = useState(false);
   const [dragPreview, setDragPreview] = useState<{ left?: number; right?: number } | null>(null);

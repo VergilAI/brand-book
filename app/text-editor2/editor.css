@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Focus mode styles */
+.focus-mode {
+  @apply bg-gray-950;
+}
+
+.focus-mode-editor {
+  @apply bg-gray-950 text-gray-100;
+}
+
+/* Auto-save animation */
+@keyframes fade-in-out {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in-out {
+  animation: fade-in-out 2s ease-in-out;
+}
+
+/* Spell check indicators */
+.spell-error {
+  text-decoration: wavy underline red;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.grammar-error {
+  text-decoration: wavy underline blue;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* Editor print layout */
+@media print {
+  .focus-mode,
+  .focus-mode-editor {
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Hide UI elements when printing */
+  [role="toolbar"],
+  [role="navigation"],
+  [role="status"] {
+    display: none !important;
+  }
+}
+
+/* Page simulation styles */
+.page-container {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: white;
+  position: relative;
+}
+
+.page-container::before {
+  content: "";
+  position: absolute;
+  top: 1in;
+  bottom: 1in;
+  left: 1in;
+  right: 1in;
+  border: 1px dashed #e5e5e5;
+  pointer-events: none;
+}
+
+/* Smart quotes */
+.smart-quotes {
+  quotes: """ """ "'" "'";
+}
+
+/* Bracket matching */
+.bracket-match {
+  background-color: rgba(99, 102, 241, 0.2);
+  border-radius: 2px;
+}
+
+/* Active line highlighting */
+.active-line {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+/* Column selection */
+.column-selection {
+  background-color: rgba(167, 139, 250, 0.3);
+}

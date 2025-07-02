@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState, memo } from 'react';
 import { Editor } from '@tiptap/react';
 import { 
   Bold, 
@@ -21,9 +21,9 @@ import {
   Highlighter,
   Search,
   Replace,
+  Type,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,9 +37,64 @@ interface EditorToolbarProps {
   editor?: Editor;
   onFind?: () => void;
   onFindReplace?: () => void;
+  pageWidth?: number;
 }
 
+const TEXT_SIZES = [
+  { label: '12pt', value: '12pt' },
+  { label: '14pt', value: '14pt' },
+  { label: '16pt', value: '16pt' },
+  { label: '18pt', value: '18pt' },
+  { label: '20pt', value: '20pt' },
+  { label: '24pt', value: '24pt' },
+  { label: '28pt', value: '28pt' },
+  { label: '32pt', value: '32pt' },
+];
+
+const TAB_PANEL_WIDTH = 256; // w-64 = 16rem = 256px
+
+// Memoized toolbar button component
+const ToolbarButton = memo(({ 
+  onClick, 
+  isActive = false, 
+  title, 
+  disabled = false,
+  children 
+}: { 
+  onClick: () => void;
+  isActive?: boolean;
+  title: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onClick}
+    disabled={disabled}
+    className={cn(
+      "rounded-full h-9 w-9 hover:bg-cosmic-purple/10 dark:hover:bg-cosmic-purple/20 transition-all duration-200",
+      isActive ? 'bg-cosmic-purple/20 text-cosmic-purple dark:bg-cosmic-purple/30 dark:text-electric-violet' : 'text-stone-gray dark:text-gray-400 hover:text-deep-space dark:hover:text-gray-200'
+    )}
+    title={title}
+  >
+    {children}
+  </Button>
+));
+
+ToolbarButton.displayName = 'ToolbarButton';
+
+const ToolbarSeparator = () => (
+  <div className="w-px h-6 bg-mist-gray/50 mx-1" />
+);
+
 export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarProps) {
+  const [toolbarPosition, setToolbarPosition] = useState({ 
+    left: '50%', 
+    transform: 'translateX(-50%)' 
+  });
+
+  // Handlers
   const handleColorChange = useCallback((color: string) => {
     editor?.chain().focus().setColor(color).run();
   }, [editor]);
@@ -48,53 +103,76 @@ export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarPr
     editor?.chain().focus().toggleHighlight({ color }).run();
   }, [editor]);
 
+  const handleTextSizeChange = useCallback((size: string) => {
+    editor?.chain().focus().setFontSize(size).run();
+  }, [editor]);
+
+  // Dynamic positioning based on viewport
+  useEffect(() => {
+    const updatePosition = () => {
+      const viewportWidth = window.innerWidth;
+      const documentAreaWidth = viewportWidth - TAB_PANEL_WIDTH;
+      const documentCenterX = TAB_PANEL_WIDTH + (documentAreaWidth / 2);
+      
+      setToolbarPosition({
+        left: `${documentCenterX}px`,
+        transform: 'translateX(-50%)'
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    
+    return () => window.removeEventListener('resize', updatePosition);
+  }, []);
+
+  if (!editor) return null;
+
   const getAlignmentIcon = () => {
-    if (editor?.isActive({ textAlign: 'center' })) return <AlignCenter className="h-4 w-4" />;
-    if (editor?.isActive({ textAlign: 'right' })) return <AlignRight className="h-4 w-4" />;
-    if (editor?.isActive({ textAlign: 'justify' })) return <AlignJustify className="h-4 w-4" />;
+    if (editor.isActive({ textAlign: 'center' })) return <AlignCenter className="h-4 w-4" />;
+    if (editor.isActive({ textAlign: 'right' })) return <AlignRight className="h-4 w-4" />;
+    if (editor.isActive({ textAlign: 'justify' })) return <AlignJustify className="h-4 w-4" />;
     return <AlignLeft className="h-4 w-4" />;
   };
 
-  if (!editor) {
-    return null;
-  }
-
-  const ToolbarButton = ({ 
-    onClick, 
-    isActive, 
-    title, 
-    disabled,
-    children 
-  }: { 
-    onClick: () => void;
-    isActive?: boolean;
-    title: string;
-    disabled?: boolean;
-    children: React.ReactNode;
-  }) => (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "rounded-full h-9 w-9 hover:bg-cosmic-purple/10 dark:hover:bg-cosmic-purple/20 transition-all duration-200",
-        isActive ? 'bg-cosmic-purple/20 text-cosmic-purple dark:bg-cosmic-purple/30 dark:text-electric-violet' : 'text-stone-gray dark:text-gray-400 hover:text-deep-space dark:hover:text-gray-200'
-      )}
-      title={title}
-    >
-      {children}
-    </Button>
-  );
-
-  const ToolbarSeparator = () => (
-    <div className="w-px h-6 bg-mist-gray/50 mx-1" />
-  );
+  const getCurrentTextSize = () => {
+    return editor.getAttributes('textStyle')?.fontSize || '16pt';
+  };
 
   return (
-    <div className="bg-pure-light/95 dark:bg-gray-800/95 backdrop-blur-md rounded-full shadow-2xl border border-mist-gray/20 dark:border-gray-700 p-2">
-      <div className="flex items-center gap-1">
-          {/* Text formatting group */}
+    <div 
+      className="fixed top-4 z-[100]" 
+      style={toolbarPosition}
+    >
+      <div className="bg-pure-light/95 dark:bg-gray-800/95 backdrop-blur-md rounded-full shadow-2xl border border-mist-gray/20 dark:border-gray-700 p-2">
+        <div className="flex items-center gap-1">
+          {/* Text size */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="rounded-full px-3 h-9 hover:bg-cosmic-purple/10 dark:hover:bg-cosmic-purple/20 text-stone-gray dark:text-gray-400 hover:text-deep-space dark:hover:text-gray-200 flex items-center gap-1"
+              >
+                <Type className="h-4 w-4" />
+                <span className="text-xs">{getCurrentTextSize()}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="rounded-xl">
+              {TEXT_SIZES.map((size) => (
+                <DropdownMenuItem 
+                  key={size.value}
+                  onClick={() => handleTextSizeChange(size.value)}
+                >
+                  {size.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <ToolbarSeparator />
+
+          {/* Text formatting */}
           <div className="flex items-center">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBold().run()}
@@ -128,7 +206,7 @@ export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarPr
 
           <ToolbarSeparator />
 
-          {/* Color group */}
+          {/* Colors */}
           <div className="flex items-center">
             <ColorPalette
               icon={<Palette className="h-4 w-4" />}
@@ -144,41 +222,38 @@ export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarPr
 
           <ToolbarSeparator />
 
-          {/* Alignment dropdown */}
+          {/* Alignment */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                title="Text alignment"
                 className="rounded-full h-9 w-9 hover:bg-cosmic-purple/10 dark:hover:bg-cosmic-purple/20 text-stone-gray dark:text-gray-400 hover:text-deep-space dark:hover:text-gray-200"
               >
                 {getAlignmentIcon()}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-xl">
-              <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('left').run()}>
-                <AlignLeft className="h-4 w-4 mr-2" />
-                Align left
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('center').run()}>
-                <AlignCenter className="h-4 w-4 mr-2" />
-                Align center
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('right').run()}>
-                <AlignRight className="h-4 w-4 mr-2" />
-                Align right
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => editor.chain().focus().setTextAlign('justify').run()}>
-                <AlignJustify className="h-4 w-4 mr-2" />
-                Justify
-              </DropdownMenuItem>
+              {[
+                { value: 'left', icon: AlignLeft, label: 'Align left' },
+                { value: 'center', icon: AlignCenter, label: 'Align center' },
+                { value: 'right', icon: AlignRight, label: 'Align right' },
+                { value: 'justify', icon: AlignJustify, label: 'Justify' },
+              ].map(({ value, icon: Icon, label }) => (
+                <DropdownMenuItem 
+                  key={value}
+                  onClick={() => editor.chain().focus().setTextAlign(value).run()}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
           <ToolbarSeparator />
 
-          {/* List group */}
+          {/* Lists */}
           <div className="flex items-center">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -212,7 +287,7 @@ export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarPr
 
           <ToolbarSeparator />
 
-          {/* History group */}
+          {/* History */}
           <div className="flex items-center">
             <ToolbarButton
               onClick={() => editor.chain().focus().undo().run()}
@@ -232,13 +307,12 @@ export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarPr
 
           <ToolbarSeparator />
 
-          {/* Find/Replace dropdown */}
+          {/* Find/Replace */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                title="Find"
                 className="rounded-full h-9 w-9 hover:bg-cosmic-purple/10 dark:hover:bg-cosmic-purple/20 text-stone-gray dark:text-gray-400 hover:text-deep-space dark:hover:text-gray-200"
               >
                 <Search className="h-4 w-4" />
@@ -258,11 +332,12 @@ export function EditorToolbar({ editor, onFind, onFindReplace }: EditorToolbarPr
 
           <ToolbarSeparator />
 
-          {/* Word/character count */}
+          {/* Stats */}
           <div className="flex items-center gap-3 px-2 text-xs text-stone-gray dark:text-gray-400">
             <span>{editor.storage.characterCount?.words() || 0} words</span>
             <span>·</span>
             <span>{editor.storage.characterCount?.characters() || 0} chars</span>
+          </div>
         </div>
       </div>
     </div>

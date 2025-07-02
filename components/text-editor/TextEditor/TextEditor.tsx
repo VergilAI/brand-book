@@ -7,6 +7,7 @@ import { EditorToolbar } from '../EditorToolbar';
 import { TabPanel } from '../TabPanel';
 import { EditorCanvas } from '../EditorCanvas';
 import { FindReplaceDialog } from '../FindReplaceDialog';
+import { ToolsPanel } from '../ToolsPanel';
 
 export function TextEditor() {
   const { documents, activeDocumentId, createDocument, hasUnsavedChanges } = useTextEditorStore();
@@ -56,18 +57,25 @@ export function TextEditor() {
   }
 
   return (
-    <div className="flex h-screen bg-whisper-gray dark:bg-black">
-      <TabPanel />
-      <EditorCanvas 
-        editor={editor} 
-        toolbar={
-          <EditorToolbar 
-            editor={editor}
-            onFind={() => setShowFind(true)}
-            onFindReplace={() => setShowFindReplace(true)}
-          />
-        }
-      />
+    <div className="h-screen flex bg-whisper-gray dark:bg-black overflow-hidden">
+      {/* Fixed Tab Panel */}
+      <div className="h-full">
+        <TabPanel />
+      </div>
+      
+      {/* Main Editor Area */}
+      <div className="flex-1 flex flex-col relative">
+        <EditorCanvas editor={editor} />
+        <EditorToolbar 
+          editor={editor}
+          onFind={() => setShowFind(true)}
+          onFindReplace={() => setShowFindReplace(true)}
+          pageWidth={816} // Wider page width
+        />
+      </div>
+      
+      {/* Fixed Tools Panel */}
+      <ToolsPanel />
       
       <FindReplaceDialog
         editor={editor}

@@ -1,4 +1,5 @@
 import { useEditor } from '@tiptap/react';
+import { useEffect } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
@@ -8,6 +9,7 @@ import Highlight from '@tiptap/extension-highlight';
 import CharacterCount from '@tiptap/extension-character-count';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useTextEditorStore } from '@/stores/text-editor-store';
+import { FontSize } from '@/lib/tiptap-font-size';
 
 export function useTextEditor() {
   const { getActiveDocument, updateDocument, activeDocumentId } = useTextEditorStore();
@@ -52,19 +54,43 @@ export function useTextEditor() {
       Placeholder.configure({
         placeholder: 'Start typing...',
       }),
+      FontSize,
     ],
     content: activeDocument?.content || '',
     onUpdate: ({ editor }) => {
-      if (activeDocumentId) {
-        updateDocument(activeDocumentId, editor.getHTML());
+      try {
+        if (activeDocumentId) {
+          updateDocument(activeDocumentId, editor.getHTML());
+        }
+      } catch (error) {
+        // Silently handle update errors
       }
     },
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-full px-8 py-8',
+        class: 'focus:outline-none',
+        style: 'cursor: text;',
+      },
+      handleDOMEvents: {
+        // Ensure mouse cursor stays visible
+        keydown: () => {
+          document.body.style.cursor = 'auto';
+          return false;
+        },
       },
     },
+    autofocus: true,
   });
+
+  // Focus editor when active document changes
+  useEffect(() => {
+    if (editor && activeDocumentId) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        editor.commands.focus('end');
+      }, 100);
+    }
+  }, [editor, activeDocumentId]);
 
   return editor;
 }
