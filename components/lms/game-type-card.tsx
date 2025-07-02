@@ -8,6 +8,7 @@ import type { GameType } from '@/lib/lms/game-types'
 interface GameTypeCardProps {
   gameType: GameType
   isAvailable?: boolean
+  isRecommended?: boolean
   onClick?: () => void
   className?: string
 }
@@ -15,6 +16,7 @@ interface GameTypeCardProps {
 export function GameTypeCard({ 
   gameType, 
   isAvailable = true, 
+  isRecommended = false,
   onClick,
   className 
 }: GameTypeCardProps) {
@@ -28,26 +30,37 @@ export function GameTypeCard({
     test: 'bg-luminous-indigo/10 text-luminous-indigo border-luminous-indigo/20'
   }
 
-  const categoryLabels = {
-    content: 'Content',
-    quiz: 'Quiz',
-    game: 'Game',
-    chat: 'Interactive',
-    test: 'Assessment'
+  // Determine the category label based on game type
+  const getCategoryLabel = (gameType: GameType) => {
+    // Content types
+    if (['written-material', 'video'].includes(gameType.id)) return 'Content'
+    // Quiz types
+    if (['flashcards', 'connect-cards'].includes(gameType.id)) return 'Quiz'
+    // Everything else is Interactive
+    return 'Interactive'
   }
 
   return (
-    <Card
-      className={cn(
-        "group relative overflow-hidden transition-all duration-300",
-        isAvailable 
-          ? "cursor-pointer hover:shadow-xl hover:scale-105 hover:-translate-y-1" 
-          : "opacity-50 cursor-not-allowed",
-        className
+    <div className="relative group">
+      {/* Recommended Label */}
+      {isRecommended && (
+        <div className="absolute -top-6 left-0 text-xs font-medium text-vergil-purple transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-1">
+          Recommended
+        </div>
       )}
-      onClick={isAvailable ? onClick : undefined}
-    >
-      <CardContent className="p-6">
+      
+      <Card
+        className={cn(
+          "relative overflow-hidden transition-all duration-300 h-full",
+          isAvailable 
+            ? "cursor-pointer hover:shadow-xl hover:scale-105 hover:-translate-y-1" 
+            : "opacity-50 cursor-not-allowed",
+          isRecommended && "ring-2 ring-vergil-purple/50",
+          className
+        )}
+        onClick={isAvailable ? onClick : undefined}
+      >
+        <CardContent className="p-6 h-full flex flex-col">
         {/* Category Badge */}
         <Badge 
           variant="outline" 
@@ -56,7 +69,7 @@ export function GameTypeCard({
             categoryColors[gameType.category]
           )}
         >
-          {categoryLabels[gameType.category]}
+          {getCategoryLabel(gameType)}
         </Badge>
 
         {/* Icon Container */}
@@ -69,33 +82,13 @@ export function GameTypeCard({
         </div>
 
         {/* Content */}
-        <h3 className="font-display font-semibold text-deep-space mb-2">
-          {gameType.name}
-        </h3>
-        <p className="text-sm text-stone-gray">
-          {gameType.description}
-        </p>
-
-        {/* Special Indicators */}
-        <div className="flex gap-2 mt-4">
-          {gameType.hasRewards && (
-            <Badge variant="secondary" className="text-xs">
-              <DollarSign className="w-3 h-3 mr-1" />
-              Rewards
-            </Badge>
-          )}
-          {gameType.isTimed && (
-            <Badge variant="secondary" className="text-xs">
-              <Clock className="w-3 h-3 mr-1" />
-              Timed
-            </Badge>
-          )}
-          {gameType.requiresAI && (
-            <Badge variant="secondary" className="text-xs">
-              <Bot className="w-3 h-3 mr-1" />
-              AI Enhanced
-            </Badge>
-          )}
+        <div className="flex-1">
+          <h3 className="font-display font-semibold text-deep-space mb-2">
+            {gameType.name}
+          </h3>
+          <p className="text-sm text-stone-gray">
+            {gameType.description}
+          </p>
         </div>
 
         {!isAvailable && (
@@ -105,8 +98,7 @@ export function GameTypeCard({
         )}
       </CardContent>
     </Card>
+    </div>
   )
 }
 
-// Import icons used in badges
-import { Clock, DollarSign, Bot } from 'lucide-react'

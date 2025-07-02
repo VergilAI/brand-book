@@ -14,9 +14,10 @@ interface LearnModalProps {
   lesson: Lesson
   isOpen: boolean
   onClose: () => void
+  onStartLearning?: (gameTypeId: string) => void
 }
 
-export function LearnModal({ lesson, isOpen, onClose }: LearnModalProps) {
+export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnModalProps) {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null)
 
   if (!isOpen) return null
@@ -25,6 +26,12 @@ export function LearnModal({ lesson, isOpen, onClose }: LearnModalProps) {
   const availableGameTypes = gameTypes.filter(gameType => 
     lesson.availableGameTypes.includes(gameType.id)
   )
+
+  // Determine recommended game type based on average proficiency
+  const avgProficiency = lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length
+  const recommendedGameTypeId = avgProficiency < 40 ? 'written-material' : 
+                                avgProficiency < 70 ? 'flashcards' : 
+                                'millionaire'
 
   const selectedGameTypeData = gameTypes.find(gt => gt.id === selectedGameType)
 
@@ -47,14 +54,18 @@ export function LearnModal({ lesson, isOpen, onClose }: LearnModalProps) {
 
   const handleStartLearning = () => {
     if (selectedGameType) {
-      alert(`Starting lesson "${lesson.title}" with ${selectedGameTypeData?.name}`)
-      onClose()
+      if (onStartLearning) {
+        onStartLearning(selectedGameType)
+      } else {
+        alert(`Starting lesson "${lesson.title}" with ${selectedGameTypeData?.name}`)
+        onClose()
+      }
     }
   }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <Card className="w-full max-w-6xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-start justify-between">
@@ -99,59 +110,82 @@ export function LearnModal({ lesson, isOpen, onClose }: LearnModalProps) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          <h3 className="text-base font-semibold text-vergil-off-black mb-4">
-            Choose Your Learning Method
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+          <div className="flex gap-6">
+            {/* Main Content */}
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-vergil-off-black mb-4">
+                Choose Your Learning Method
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 pt-6">
             {availableGameTypes.map((gameType) => (
               <GameTypeCard
                 key={gameType.id}
                 gameType={gameType}
                 isAvailable={true}
+                isRecommended={gameType.id === recommendedGameTypeId && lesson.availableGameTypes.includes(recommendedGameTypeId)}
                 onClick={() => setSelectedGameType(gameType.id)}
                 className={cn(
                   "cursor-pointer transition-all",
                   selectedGameType === gameType.id && "ring-2 ring-vergil-purple ring-offset-2"
                 )}
               />
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Selected method details */}
-          {selectedGameTypeData && (
-            <Card variant="outlined" className="p-4 bg-vergil-purple/5 border-vergil-purple/20">
-              <div className="flex items-start gap-3">
-                <selectedGameTypeData.icon className="w-6 h-6 text-vergil-purple mt-1" />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-vergil-off-black mb-1">
-                    {selectedGameTypeData.name}
-                  </h4>
-                  <p className="text-sm text-vergil-off-black/70 mb-3">
-                    {selectedGameTypeData.description}
-                  </p>
-                  
-                  <div className="flex gap-2">
-                    {selectedGameTypeData.hasRewards && (
-                      <Badge variant="secondary" className="text-xs">
-                        Rewards
-                      </Badge>
-                    )}
-                    {selectedGameTypeData.isTimed && (
-                      <Badge variant="secondary" className="text-xs">
-                        Timed
-                      </Badge>
-                    )}
-                    {selectedGameTypeData.requiresAI && (
-                      <Badge variant="secondary" className="text-xs">
-                        AI Enhanced
-                      </Badge>
-                    )}
-                  </div>
+            </div>
+
+            {/* Knowledge Points Summary Panel */}
+            <div className="w-64 border-l border-gray-200 pl-4">
+              <h4 className="text-sm font-semibold text-vergil-off-black mb-4">Lesson Progress</h4>
+              
+              {/* Overall Stats */}
+              <Card variant="outlined" className="p-3 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-vergil-off-black">Average Proficiency</span>
+                  <span className={cn("text-lg font-bold", getProficiencyColor(
+                    lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length
+                  ))}>
+                    {Math.round(lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="h-1.5 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${Math.round(lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length)}%`,
+                      backgroundColor: lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length >= 80 ? '#10B981' :
+                        lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length >= 60 ? '#F59E0B' :
+                        lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length >= 40 ? '#F97316' : '#EF4444'
+                    }}
+                  />
+                </div>
+              </Card>
+
+              {/* Knowledge Points List */}
+              <div className="space-y-2">
+                <h5 className="text-xs font-medium text-vergil-off-black mb-2">Knowledge Points in this Lesson</h5>
+                <div className="space-y-1.5 max-h-96 overflow-y-auto">
+                  {lesson.knowledgePoints.map((kp) => (
+                    <div key={kp.id} className="p-2 rounded border border-gray-200 hover:border-vergil-purple/30 transition-colors">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-medium text-vergil-off-black truncate">{kp.title}</span>
+                        <span className={cn("text-xs font-medium flex-shrink-0", 
+                          kp.proficiency >= 80 ? 'text-emerald-600' :
+                          kp.proficiency >= 60 ? 'text-yellow-600' :
+                          kp.proficiency >= 40 ? 'text-orange-600' :
+                          'text-red-600'
+                        )}>
+                          {kp.proficiency}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </Card>
-          )}
+
+            </div>
+          </div>
         </div>
 
         {/* Footer */}

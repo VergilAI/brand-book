@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, BarChart3, Target, BookOpen, Clock, Award, Calendar, CalendarDays, Zap } from 'lucide-react'
+import { ChevronLeft, ChevronRight, BarChart3, Target, BookOpen, Clock, Award, Calendar, CalendarDays, Zap, Play } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -13,6 +13,7 @@ interface KnowledgePointAnalyticsProps {
   allLessons?: any[]
   onNavigateToLesson?: (lesson: any) => void
   selectedLesson?: Lesson | null
+  onLearnClick?: (lesson: Lesson) => void
 }
 
 // Mock data for where knowledge points can be learned
@@ -31,7 +32,7 @@ const mockLearningPaths = {
   ]
 }
 
-export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToLesson, selectedLesson }: KnowledgePointAnalyticsProps) {
+export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToLesson, selectedLesson, onLearnClick }: KnowledgePointAnalyticsProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [selectedKnowledgePoint, setSelectedKnowledgePoint] = useState<string | null>(null)
   const [hoveredKnowledgePoint, setHoveredKnowledgePoint] = useState<string | null>(null)
@@ -177,9 +178,9 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 y1={startY}
                 x2={endX}
                 y2={endY}
-                stroke={isConnected ? getProficiencyColor(pos.proficiency) : isInSelectedLesson ? "#7B00FF" : "#E5E7EB"}
-                strokeWidth={isConnected ? "2" : isInSelectedLesson ? "1.5" : "1"}
-                opacity={isConnected ? "0.6" : isInSelectedLesson ? "0.4" : "0.1"}
+                stroke={isConnected ? getProficiencyColor(pos.proficiency) : selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)}
+                strokeWidth={isConnected ? "2" : selectedLesson && isInSelectedLesson ? "1.5" : "1"}
+                opacity={isConnected ? "0.8" : selectedLesson ? (isInSelectedLesson ? "0.6" : "0.2") : "0.4"}
                 className="transition-all duration-300"
               />
             )
@@ -221,8 +222,8 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             const isHovered = hoveredKnowledgePoint === pos.id
             const isSelected = selectedKnowledgePoint === pos.id
             const isInSelectedLesson = selectedLesson ? selectedLessonKPIds.includes(pos.id) : true
-            const opacity = isSelected || isHovered ? 0.4 : isInSelectedLesson ? 0.25 : 0.08
-            const strokeWidth = isSelected ? 3 : isHovered ? 2.5 : isInSelectedLesson ? 2.5 : 1.5
+            const opacity = isSelected || isHovered ? 0.8 : selectedLesson ? (isInSelectedLesson ? 0.6 : 0.15) : 0.4
+            const strokeWidth = isSelected ? 3 : isHovered ? 2.5 : isInSelectedLesson ? 2 : 1
             
             return (
               <g key={pos.id}>
@@ -259,7 +260,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   cy={pos.y}
                   r={nodeSize}
                   fill="none"
-                  stroke={isInSelectedLesson ? getProficiencyColor(pos.proficiency) : "#9CA3AF"}
+                  stroke={selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)}
                   strokeWidth={strokeWidth}
                   className="cursor-pointer transition-all duration-300 ease-out pointer-events-none"
                   style={{
@@ -294,7 +295,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   dominantBaseline="central"
                   fontSize={nodeSize > 16 ? "11" : "9"}
                   fontWeight="bold"
-                  fill={isInSelectedLesson ? "#000000" : "#9CA3AF"}
+                  fill={selectedLesson ? (isInSelectedLesson ? "#FFFFFF" : "#6B7280") : "#FFFFFF"}
                   className="pointer-events-none transition-all duration-300"
                   style={{
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
@@ -307,8 +308,8 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 {/* Gradient definitions */}
                 <defs>
                   <radialGradient id={`gradient-${pos.id}`} cx="30%" cy="30%">
-                    <stop offset="0%" stopColor={getProficiencyColor(pos.proficiency)} stopOpacity={opacity + 0.1} />
-                    <stop offset="100%" stopColor={getProficiencyColor(pos.proficiency)} stopOpacity={opacity} />
+                    <stop offset="0%" stopColor={selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)} stopOpacity={opacity + 0.1} />
+                    <stop offset="100%" stopColor={selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)} stopOpacity={opacity} />
                   </radialGradient>
                 </defs>
               </g>
@@ -502,6 +503,17 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             </p>
           </div>
 
+          {/* Knowledge Point Graph - Moved to top */}
+          <Card variant="outlined" className="p-3 flex-shrink-0">
+            <h4 className="text-sm font-medium text-vergil-off-black mb-3">
+              Knowledge Point Map
+              {selectedLesson && (
+                <span className="text-vergil-purple"> • {selectedLesson.title} highlighted</span>
+              )}
+            </h4>
+            {renderKnowledgePointGraph()}
+          </Card>
+
           {/* Lesson-Specific Analytics */}
           {selectedLesson && lessonAnalytics && (
             <Card variant="outlined" className="p-3 bg-vergil-purple/5 border-vergil-purple/20">
@@ -537,18 +549,6 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   </div>
                 </div>
 
-                {/* Recommended Learning Method */}
-                <div className="bg-white rounded p-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Target className="w-3 h-3 text-vergil-purple" />
-                    <span className="text-xs font-medium text-vergil-off-black">Recommended Method</span>
-                  </div>
-                  <div className="text-xs">
-                    <div className="font-medium text-vergil-purple">{lessonAnalytics.recommendedMethod.method}</div>
-                    <div className="text-vergil-off-black/60">{lessonAnalytics.recommendedMethod.reason}</div>
-                  </div>
-                </div>
-
                 {/* Knowledge Points Breakdown */}
                 <div>
                   <h5 className="text-xs font-medium text-vergil-off-black mb-2">Knowledge Points ({selectedLesson.knowledgePoints.length})</h5>
@@ -572,47 +572,21 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   </div>
                 </div>
 
-                {/* Areas to Focus */}
-                {lessonAnalytics.weakestKnowledgePoints.length > 0 && (
-                  <div className="bg-red-50 rounded p-2">
-                    <div className="text-xs font-medium text-red-800 mb-1">Focus Areas</div>
-                    <div className="space-y-1">
-                      {lessonAnalytics.weakestKnowledgePoints.map((kp) => (
-                        <div key={kp.id} className="text-xs text-red-700">
-                          • {kp.title} ({kp.proficiency}%)
-                        </div>
-                      ))}
-                    </div>
+                {/* Recommended Learning Method - Moved to bottom */}
+                <div className="bg-white rounded p-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Target className="w-3 h-3 text-vergil-purple" />
+                    <span className="text-xs font-medium text-vergil-off-black">Recommended Method</span>
                   </div>
-                )}
-
-                {/* Strengths */}
-                {lessonAnalytics.strongestKnowledgePoints.length > 0 && (
-                  <div className="bg-emerald-50 rounded p-2">
-                    <div className="text-xs font-medium text-emerald-800 mb-1">Strengths</div>
-                    <div className="space-y-1">
-                      {lessonAnalytics.strongestKnowledgePoints.map((kp) => (
-                        <div key={kp.id} className="text-xs text-emerald-700">
-                          • {kp.title} ({kp.proficiency}%)
-                        </div>
-                      ))}
-                    </div>
+                  <div className="text-xs">
+                    <div className="font-medium text-vergil-purple">{lessonAnalytics.recommendedMethod.method}</div>
+                    <div className="text-vergil-off-black/60">{lessonAnalytics.recommendedMethod.reason}</div>
                   </div>
-                )}
+                </div>
               </div>
             </Card>
           )}
 
-          {/* Knowledge Point Graph */}
-          <Card variant="outlined" className="p-3 flex-shrink-0">
-            <h4 className="text-sm font-medium text-vergil-off-black mb-3">
-              Knowledge Point Map
-              {selectedLesson && (
-                <span className="text-vergil-purple"> • {selectedLesson.title} highlighted</span>
-              )}
-            </h4>
-            {renderKnowledgePointGraph()}
-          </Card>
 
           {/* Selected Knowledge Point Details */}
           {selectedKnowledgePoint && (
@@ -665,12 +639,15 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             </Card>
           )}
 
-          {/* Lesson Statistics */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="w-4 h-4 text-vergil-purple" />
-              <h4 className="text-sm font-medium text-vergil-off-black">Lesson Statistics</h4>
-            </div>
+          {/* Only show these sections when no lesson is selected */}
+          {!selectedLesson && (
+            <>
+              {/* Lesson Statistics */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="w-4 h-4 text-vergil-purple" />
+                  <h4 className="text-sm font-medium text-vergil-off-black">Lesson Statistics</h4>
+                </div>
 
             {/* Overall Progress */}
             <Card variant="outlined" className="p-3">
@@ -793,32 +770,22 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             </Card>
           </div>
 
-          {/* Platform Stats */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Award className="w-4 h-4 text-vergil-purple" />
-              <h4 className="text-sm font-medium text-vergil-off-black">Platform Stats</h4>
-            </div>
+            </>
+          )}
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-white rounded p-2">
-                <div className="font-medium text-vergil-off-black">Total Lessons</div>
-                <div className="text-vergil-off-black/60">{allLessons.length} lessons</div>
-              </div>
-              <div className="bg-white rounded p-2">
-                <div className="font-medium text-vergil-off-black">Knowledge Points</div>
-                <div className="text-vergil-off-black/60">{allKPs.length} concepts</div>
-              </div>
-              <div className="bg-white rounded p-2">
-                <div className="font-medium text-vergil-off-black">Completed</div>
-                <div className="text-vergil-off-black/60">{allLessons.filter(l => l.completed).length} lessons</div>
-              </div>
-              <div className="bg-white rounded p-2">
-                <div className="font-medium text-vergil-off-black">Average Score</div>
-                <div className="text-vergil-off-black/60">{averageProficiency}%</div>
-              </div>
+          {/* Learn Button - Only show when lesson is selected */}
+          {selectedLesson && onLearnClick && (
+            <div className="mt-auto pt-4">
+              <Button
+                onClick={() => onLearnClick(selectedLesson)}
+                className="w-full bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+                size="default"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Learn
+              </Button>
             </div>
-          </div>
+          )}
         </div>
       )}
       </div>

@@ -3,7 +3,6 @@
 import { Circle, Play, Award, Brain, MoreVertical, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Checkbox } from '@/components/ui/Checkbox'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/lms/new-course-types'
 
@@ -56,37 +55,24 @@ export function LessonRow({
         isSelected && "bg-vergil-emphasis-bg/20",
         isLessonSelected && "bg-vergil-purple/10 border-l-4 border-vergil-purple"
       )}
-      onClick={onRowClick}
+      onClick={() => {
+        onSelect(!isSelected)
+        onRowClick?.()
+      }}
     >
       <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={onSelect}
-            onClick={(e) => e.stopPropagation()}
-          />
-          
-          <div className="flex-shrink-0">
-            {lesson.completed ? (
-              <CheckCircle className="h-4 w-4 text-emerald-600" />
-            ) : (
-              <Circle className="h-4 w-4 text-vergil-off-black/40" />
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h4 className="text-sm font-medium text-vergil-off-black">
+              {chapterNumber}.{lessonNumber} {lesson.title}
+            </h4>
+            {lesson.completed && (
+              <Award className="h-3 w-3 text-vergil-purple" />
             )}
           </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-0.5">
-              <h4 className="text-sm font-medium text-vergil-off-black">
-                {chapterNumber}.{lessonNumber} {lesson.title}
-              </h4>
-              {lesson.completed && (
-                <Award className="h-3 w-3 text-vergil-purple" />
-              )}
-            </div>
-            <p className="text-xs text-vergil-off-black/60 line-clamp-1">
-              {lesson.description}
-            </p>
-          </div>
+          <p className="text-xs text-vergil-off-black/60 line-clamp-1">
+            {lesson.description}
+          </p>
         </div>
       </td>
 

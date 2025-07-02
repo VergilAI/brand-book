@@ -5,7 +5,6 @@ import { ChevronDown, ChevronRight, Clock, BookOpen, CheckCircle, Circle, Award 
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Checkbox } from '@/components/ui/Checkbox'
 import { LessonRow } from './LessonRow'
 import { cn } from '@/lib/utils'
 import type { Chapter, Lesson } from '@/lib/lms/new-course-types'
@@ -64,16 +63,6 @@ export function ChapterCard({
       <div className="p-4 border-b border-gray-200 bg-vergil-off-white/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
-            <Checkbox
-              checked={allLessonsSelected}
-              ref={(ref) => {
-                if (ref) {
-                  ref.indeterminate = someLessonsSelected && !allLessonsSelected
-                }
-              }}
-              onCheckedChange={handleSelectAll}
-            />
-
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center gap-3 text-left flex-1 hover:opacity-80 transition-opacity"
