@@ -1,8 +1,8 @@
 'use client'
 
 import { Circle, Play, Award, Brain, MoreVertical, CheckCircle } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/lms/new-course-types'
 

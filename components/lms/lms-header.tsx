@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu, User, ChevronDown, Settings, LogOut } from 'lucide-react'
+import { Menu, User, ChevronDown, Settings, LogOut, Shield, BarChart3, Database, Users } from 'lucide-react'
 import { VergilLogo } from '@/components/vergil/vergil-logo'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,7 +25,7 @@ export function LMSHeader({ onMenuToggle, currentView }: LMSHeaderProps) {
     name: "Alex Chen",
     email: "alex.chen@company.com",
     avatar: "/avatars/alex.jpg",
-    role: "student",
+    role: "Super Admin",
     overallProgress: 68
   }
 
@@ -53,6 +53,17 @@ export function LMSHeader({ onMenuToggle, currentView }: LMSHeaderProps) {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-4">
+          {/* User Management Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-vergil-purple/20 text-vergil-purple hover:bg-vergil-purple/5 hover:text-vergil-purple"
+            onClick={() => window.location.href = '/lms/user-management'}
+          >
+            <Users className="mr-2 h-4 w-4" />
+            User Management
+          </Button>
+          
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -75,6 +86,10 @@ export function LMSHeader({ onMenuToggle, currentView }: LMSHeaderProps) {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">{user.name}</p>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Shield className="h-3 w-3 text-vergil-purple" />
+                    <span className="text-xs font-medium text-vergil-purple">{user.role}</span>
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { X, Clock, Brain, Award, CheckCircle, Play } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { GameTypeCard } from './game-type-card'
 import { gameTypes } from '@/lib/lms/game-types'
 import { cn } from '@/lib/utils'
@@ -74,9 +74,15 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 overflow-y-auto z-50">
+    <div 
+      className="fixed inset-0 bg-black/50 overflow-y-auto z-50"
+      onClick={onClose}
+    >
       <div className="min-h-full flex items-center justify-center p-4">
-        <Card className="w-full max-w-6xl max-h-[90vh] flex flex-col my-auto overflow-hidden">
+        <Card 
+          className="w-full max-w-6xl max-h-[90vh] flex flex-col my-auto overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-start justify-between">

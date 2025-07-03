@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, BarChart3, Target, BookOpen, Clock, Award, Calendar, CalendarDays, Zap, Play } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/lms/new-course-types'
 
@@ -42,6 +42,11 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
 
   const sidebarWidth = isCollapsed ? 0 : 380
 
+  // Clear selected knowledge point when lesson selection changes
+  useEffect(() => {
+    setSelectedKnowledgePoint(null)
+  }, [selectedLesson])
+
   const getProficiencyColor = (proficiency: number) => {
     if (proficiency >= 80) return '#10B981' // green
     if (proficiency >= 60) return '#F59E0B' // yellow  
@@ -59,8 +64,8 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
   }
 
   const getNodeSize = (proficiency: number) => {
-    const baseSize = 12
-    const maxSize = 20
+    const baseSize = 14
+    const maxSize = 22
     const sizeMultiplier = proficiency / 100
     return baseSize + (maxSize - baseSize) * sizeMultiplier
   }
@@ -92,9 +97,14 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
   // Calculate positions for knowledge points in a circular layout
   const calculateKnowledgePointPositions = () => {
     const centerX = 200
-    const centerY = 130
-    const radius = 130
+    const centerY = 180 // Moved down to provide more space at top
     const allKPs = getAllKnowledgePoints()
+    
+    // Calculate minimum radius to prevent overlap
+    // Each node needs space for its max diameter (44px) plus some padding
+    const maxNodeDiameter = 44 + 10 // max node size + padding
+    const minRadius = Math.max(120, (allKPs.length * maxNodeDiameter) / (2 * Math.PI))
+    const radius = Math.min(minRadius, 140) // Cap to ensure all nodes fit in viewport with padding
     
     return allKPs.map((kp, index) => {
       const angle = (index / allKPs.length) * 2 * Math.PI - Math.PI / 2
@@ -112,14 +122,14 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
   // Render knowledge point graph
   const renderKnowledgePointGraph = () => {
     const centerX = 200
-    const centerY = 130
+    const centerY = 180 // Match the positioning function
 
     return (
       <div className="relative">
         <svg
           ref={canvasRef}
-          className="w-full h-72"
-          viewBox="0 0 400 300"
+          className="w-full h-80"
+          viewBox="0 0 400 360"
         >
           {/* Subtle background pattern */}
           <defs>
@@ -133,7 +143,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
           </defs>
           
           {/* Background pattern */}
-          <rect width="400" height="300" fill="url(#dotGrid)" opacity="0.3"/>
+          <rect width="400" height="360" fill="url(#dotGrid)" opacity="0.3"/>
           
           {/* Background circle */}
           <circle
@@ -271,13 +281,13 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 
                 {/* Drop shadow for text */}
                 <text
-                  x={pos.x + 0.5}
-                  y={pos.y + 0.5}
+                  x={pos.x + 1}
+                  y={pos.y + 1}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fontSize={nodeSize > 16 ? "11" : "9"}
+                  fontSize={nodeSize > 18 ? "12" : "10"}
                   fontWeight="bold"
-                  fill="rgba(0,0,0,0.3)"
+                  fill="rgba(0,0,0,0.5)"
                   className="pointer-events-none transition-all duration-300"
                   style={{
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
@@ -293,9 +303,9 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   y={pos.y}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fontSize={nodeSize > 16 ? "11" : "9"}
+                  fontSize={nodeSize > 18 ? "12" : "10"}
                   fontWeight="bold"
-                  fill={selectedLesson ? (isInSelectedLesson ? "#FFFFFF" : "#6B7280") : "#FFFFFF"}
+                  fill={selectedLesson ? (isInSelectedLesson ? "#1F2937" : "#4B5563") : "#1F2937"}
                   className="pointer-events-none transition-all duration-300"
                   style={{
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',

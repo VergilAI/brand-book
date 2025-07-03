@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react'
 import { BookOpen, GraduationCap } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { ChapterCard } from './ChapterCard'
 import { LearnModal } from './LearnModal'
 import { GameLauncher } from './game-launcher'
@@ -193,200 +193,171 @@ export function NewCourseOverview() {
   const courseTestReadiness = calculateTestReadiness(courseKnowledgePoints)
 
   return (
-    <div className="flex h-screen bg-vergil-off-white">
+    <div className="flex h-screen bg-vergil-off-white overflow-hidden">
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Breadcrumb Navigation */}
-      <div className="mb-4">
-        <nav className="flex items-center text-sm">
-          <a href="/lms" className="text-vergil-off-black/60 hover:text-vergil-purple transition-colors">
-            Courses
-          </a>
-          <span className="mx-2 text-vergil-off-black/40">/</span>
-          <span className="text-vergil-off-black font-medium">{mockCourse.title}</span>
-        </nav>
-      </div>
-
-      {/* Course Header Card */}
-      <Card className="mb-8 p-8 bg-gradient-to-br from-vergil-off-white to-white border-vergil-purple/10">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-vergil-off-black mb-3">{mockCourse.title}</h1>
-            <p className="text-base text-vergil-off-black/70 max-w-3xl">
-              {mockCourse.description}
-            </p>
-          </div>
-          
-          <div className="flex flex-col gap-3 ml-8">
-            <Button
-              size="default"
-              className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white min-w-[140px]"
-              onClick={() => {
-                // Navigate to test screen
-                window.location.href = '/lms/test'
-              }}
-            >
-              Take Final Assessment
-            </Button>
-            <Badge className={cn("justify-center", courseTestReadiness.bgColor)}>
-              {courseTestReadiness.label} ({courseTestReadiness.score}%)
-            </Badge>
-          </div>
-        </div>
-
-        {/* Progress Section */}
-        <div className="border-t border-vergil-off-black/10 pt-6">
-          <div className="flex items-center gap-8">
-            {/* Radial Progress Ring */}
-            <div className="relative flex-shrink-0">
-              <svg className="w-24 h-24 transform -rotate-90">
-                {/* Background circle */}
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  stroke="#E5E7EB"
-                  strokeWidth="6"
-                  fill="none"
-                />
-                {/* Progress circle */}
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  stroke="#7B00FF"
-                  strokeWidth="6"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 40}`}
-                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - mockCourse.progress / 100)}`}
-                  strokeLinecap="round"
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-              {/* Center content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-vergil-off-black">{mockCourse.progress}%</span>
-                <span className="text-xs text-vergil-off-black/60">Complete</span>
-              </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {/* Breadcrumb Navigation */}
+            <div className="mb-4">
+              <nav className="flex items-center text-sm">
+                <a href="/lms" className="text-vergil-off-black/60 hover:text-vergil-purple transition-colors">
+                  Courses
+                </a>
+                <span className="mx-2 text-vergil-off-black/40">/</span>
+                <span className="text-vergil-off-black font-medium">{mockCourse.title}</span>
+              </nav>
             </div>
-            
-            {/* Course Metrics */}
-            <div className="flex-1 grid grid-cols-3 gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <BookOpen className="w-4 h-4 text-vergil-purple" />
-                  <span className="text-sm font-medium text-vergil-off-black">Lessons</span>
+
+            {/* Course Header Card */}
+            <Card className="mb-8 p-8 bg-gradient-to-br from-vergil-off-white to-white border-vergil-purple/10">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-vergil-off-black mb-3">{mockCourse.title}</h1>
+                  <p className="text-base text-vergil-off-black/70 max-w-3xl">
+                    {mockCourse.description}
+                  </p>
                 </div>
-                <div className="text-2xl font-bold text-vergil-off-black">
-                  {allLessons.filter(lesson => lesson.knowledgePoints.some(kp => kp.proficiency > 0 && kp.proficiency < 100)).length}
+                
+                <div className="flex flex-col gap-3 ml-8">
+                  <Button
+                    size="default"
+                    className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white min-w-[180px]"
+                    onClick={() => {
+                      // Navigate to test screen
+                      window.location.href = '/lms/test'
+                    }}
+                  >
+                    Take Final Assessment
+                  </Button>
+                  <Badge className={cn("justify-center", courseTestReadiness.bgColor)}>
+                    {courseTestReadiness.label} ({courseTestReadiness.score}%)
+                  </Badge>
                 </div>
-                <div className="text-xs text-vergil-off-black/60">In Progress</div>
               </div>
-              
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <GraduationCap className="w-4 h-4 text-vergil-purple" />
-                  <span className="text-sm font-medium text-vergil-off-black">Knowledge Points</span>
+
+              {/* Progress Section */}
+              <div className="border-t border-vergil-off-black/10 pt-4">
+                {/* Course Metrics */}
+                <div className="flex gap-4 w-full">
+                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-6 border-2 border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
+                    <div className="flex flex-col items-center mb-3">
+                      <div className="w-8 h-8 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-2">
+                        <BookOpen className="w-4 h-4 text-vergil-purple" />
+                      </div>
+                      <span className="text-sm font-semibold text-vergil-off-black">Lessons</span>
+                    </div>
+                    <div className="text-3xl font-bold text-vergil-off-black mb-2">
+                      {allLessons.filter(lesson => lesson.knowledgePoints.some(kp => kp.proficiency > 0 && kp.proficiency < 100)).length}
+                    </div>
+                    <div className="text-sm text-vergil-off-black/60 text-center">In Progress</div>
+                  </div>
+                  
+                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-6 border-2 border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
+                    <div className="flex flex-col items-center mb-3">
+                      <div className="w-8 h-8 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-2">
+                        <GraduationCap className="w-4 h-4 text-vergil-purple" />
+                      </div>
+                      <span className="text-sm font-semibold text-vergil-off-black">Knowledge Points</span>
+                    </div>
+                    <div className="text-3xl font-bold text-vergil-off-black mb-2">{masteredKnowledgePoints}/{totalKnowledgePoints}</div>
+                    <div className="text-sm text-vergil-off-black/60 text-center">Mastered</div>
+                  </div>
+                  
+                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-6 border-2 border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
+                    <div className="flex flex-col items-center mb-3">
+                      <div className="w-8 h-8 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-2">
+                        <span className="w-4 h-4 bg-vergil-purple rounded flex items-center justify-center">
+                          <span className="text-white text-[10px] font-bold">{mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}</span>
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-vergil-off-black">Chapter Tests</span>
+                    </div>
+                    <div className="text-3xl font-bold text-vergil-off-black mb-2">
+                      {mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}/{mockCourse.chapters.length}
+                    </div>
+                    <div className="text-sm text-vergil-off-black/60 text-center">
+                      Completed
+                      {(() => {
+                        const completedTests = mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined)
+                        if (completedTests.length > 0) {
+                          const avgScore = Math.round(completedTests.reduce((acc, ch) => acc + (ch.testScore || 0), 0) / completedTests.length)
+                          return ` (Avg: ${avgScore}%)`
+                        }
+                        return ''
+                      })()}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-vergil-off-black">{masteredKnowledgePoints}/{totalKnowledgePoints}</div>
-                <div className="text-xs text-vergil-off-black/60">Mastered</div>
               </div>
-              
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-4 h-4 bg-vergil-purple rounded flex items-center justify-center">
-                    <span className="text-white text-[10px] font-bold">{mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}</span>
-                  </span>
-                  <span className="text-sm font-medium text-vergil-off-black">Chapter Tests</span>
-                </div>
-                <div className="text-2xl font-bold text-vergil-off-black">
-                  {mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}/{mockCourse.chapters.length}
-                </div>
-                <div className="text-xs text-vergil-off-black/60">
-                  Completed
-                  {(() => {
-                    const completedTests = mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined)
-                    if (completedTests.length > 0) {
-                      const avgScore = Math.round(completedTests.reduce((acc, ch) => acc + (ch.testScore || 0), 0) / completedTests.length)
-                      return ` (Avg: ${avgScore}%)`
+            </Card>
+
+            {/* Course Content Section */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Course Content</h2>
+            </div>
+
+            {/* Chapters and Lessons */}
+            <div className="space-y-4">
+              {groupedLessons.map((chapter: any) => (
+                <ChapterCard
+                  key={chapter.id}
+                  chapter={chapter}
+                  selectedLessons={[]}
+                  onSelectLesson={() => {}}
+                  onLearnClick={handleLearnClick}
+                  onLessonClick={(lesson) => {
+                    // Toggle lesson selection
+                    if (selectedLessonForAnalytics?.id === lesson.id) {
+                      setSelectedLessonForAnalytics(null)
+                    } else {
+                      setSelectedLessonForAnalytics(lesson)
                     }
-                    return ''
-                  })()}
+                  }}
+                  selectedLessonId={selectedLessonForAnalytics?.id}
+                  calculateTestReadiness={calculateTestReadiness}
+                  getChapterStatus={getChapterStatus}
+                />
+              ))}
+            </div>
+
+            {/* Learn Modal */}
+            {selectedLesson && !activeGame && (
+              <LearnModal
+                lesson={selectedLesson}
+                isOpen={showLearnModal}
+                onClose={() => {
+                  setShowLearnModal(false)
+                  setSelectedLesson(null)
+                }}
+                onStartLearning={(gameTypeId) => {
+                  setActiveGame({ lesson: selectedLesson, gameTypeId })
+                  setShowLearnModal(false)
+                }}
+              />
+            )}
+
+            {/* Game Launcher */}
+            {activeGame && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="w-full h-full bg-white rounded-lg overflow-hidden">
+                  <GameLauncher
+                    gameTypeId={activeGame.gameTypeId}
+                    lesson={activeGame.lesson}
+                    onComplete={(result) => {
+                      console.log('Game completed:', result)
+                      setActiveGame(null)
+                      setSelectedLesson(null)
+                    }}
+                    onQuit={() => {
+                      setActiveGame(null)
+                      setShowLearnModal(true)
+                    }}
+                  />
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        </div>
-      </Card>
-
-      {/* Course Content Section */}
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Course Content</h2>
-      </div>
-
-
-
-      {/* Chapters and Lessons */}
-      <div className="space-y-4">
-        {groupedLessons.map((chapter: any) => (
-          <ChapterCard
-            key={chapter.id}
-            chapter={chapter}
-            selectedLessons={[]}
-            onSelectLesson={() => {}}
-            onLearnClick={handleLearnClick}
-            onLessonClick={(lesson) => {
-              // Toggle lesson selection
-              if (selectedLessonForAnalytics?.id === lesson.id) {
-                setSelectedLessonForAnalytics(null)
-              } else {
-                setSelectedLessonForAnalytics(lesson)
-              }
-            }}
-            selectedLessonId={selectedLessonForAnalytics?.id}
-            calculateTestReadiness={calculateTestReadiness}
-            getChapterStatus={getChapterStatus}
-          />
-        ))}
-      </div>
-
-          {/* Learn Modal */}
-          {selectedLesson && !activeGame && (
-            <LearnModal
-              lesson={selectedLesson}
-              isOpen={showLearnModal}
-              onClose={() => {
-                setShowLearnModal(false)
-                setSelectedLesson(null)
-              }}
-              onStartLearning={(gameTypeId) => {
-                setActiveGame({ lesson: selectedLesson, gameTypeId })
-                setShowLearnModal(false)
-              }}
-            />
-          )}
-
-          {/* Game Launcher */}
-          {activeGame && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="w-full h-full bg-white rounded-lg overflow-hidden">
-                <GameLauncher
-                  gameTypeId={activeGame.gameTypeId}
-                  lesson={activeGame.lesson}
-                  onComplete={(result) => {
-                    console.log('Game completed:', result)
-                    setActiveGame(null)
-                    setSelectedLesson(null)
-                  }}
-                  onQuit={() => {
-                    setActiveGame(null)
-                    setShowLearnModal(true)
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

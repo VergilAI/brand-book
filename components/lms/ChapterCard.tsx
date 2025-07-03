@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Clock, BookOpen, CheckCircle, Circle, Award } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { LessonRow } from './LessonRow'
 import { cn } from '@/lib/utils'
 import type { Chapter, Lesson } from '@/lib/lms/new-course-types'

@@ -54,8 +54,8 @@ export function GameTypeCard({
       >
         {/* Recommended Badge on Border */}
         {isRecommended && (
-          <div className="absolute -top-3 left-4 z-10">
-            <div className="bg-vergil-purple text-white text-xs font-medium px-3 py-1 rounded-full shadow-lg">
+          <div className="absolute top-1 left-1 z-10">
+            <div className="bg-vergil-purple text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-sm">
               Recommended
             </div>
           </div>
