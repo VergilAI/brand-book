@@ -1,15 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Plus, X, AlertCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { initialRoles } from '@/lib/lms/roles-data'
+import { mockUsers } from '@/lib/lms/mock-data'
 
 interface FormData {
   name: string
@@ -18,7 +26,8 @@ interface FormData {
   location: string
   department: string
   manager: string
-  role: 'student' | 'instructor' | 'administrator'
+  role: 'student' | 'instructor' | 'administrator' | 'super_admin' | 'manager'
+  reportsTo: string
   severity: 'low' | 'medium' | 'high'
   sendWelcomeEmail: boolean
   autoEnrollCourses: boolean
@@ -50,6 +59,7 @@ export default function NewUserPage() {
     department: '',
     manager: '',
     role: 'student',
+    reportsTo: 'none',
     severity: 'low',
     sendWelcomeEmail: true,
     autoEnrollCourses: true,
@@ -58,6 +68,16 @@ export default function NewUserPage() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Auto-select mandatory courses when component loads (if auto-enroll is enabled by default)
+  useEffect(() => {
+    if (formData.autoEnrollCourses) {
+      const mandatoryCourses = availableCourses
+        .filter(course => course.mandatory)
+        .map(c => c.id)
+      setSelectedCourses(mandatoryCourses)
+    }
+  }, []) // Empty dependency array means this runs only once on mount
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*'
@@ -91,6 +111,11 @@ export default function NewUserPage() {
       newErrors.tempPassword = 'Password must be at least 8 characters'
     }
     
+    // Reports To validation - mandatory for all roles except Super Admin
+    if (formData.role !== 'super_admin' && (!formData.reportsTo || formData.reportsTo === 'none')) {
+      newErrors.reportsTo = 'Reports To is required for this role'
+    }
+    
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -122,9 +147,9 @@ export default function NewUserPage() {
     setFormData(prev => ({ ...prev, autoEnrollCourses: checked }))
     
     if (checked) {
-      // Use formData.severity directly to avoid stale closure
+      // Select ALL mandatory courses regardless of severity
       const mandatoryCourses = availableCourses
-        .filter(course => course.mandatory && course.severity.includes(formData.severity))
+        .filter(course => course.mandatory)
         .map(c => c.id)
       setSelectedCourses(mandatoryCourses)
     } else {
@@ -269,14 +294,23 @@ export default function NewUserPage() {
                     value={formData.role}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as FormData['role'] }))}
                   >
-                    <option value="student">Student</option>
-                    <option value="instructor">Instructor</option>
-                    <option value="administrator">Administrator</option>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                      <SelectItem value="administrator">Administrator</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="instructor">Instructor</SelectItem>
+                      <SelectItem value="student">Student</SelectItem>
+                    </SelectContent>
                   </Select>
                   <p className="mt-1 text-sm text-vergil-off-black/60">
-                    {formData.role === 'student' && 'Can access and complete assigned courses'}
+                    {formData.role === 'super_admin' && 'Ultimate system access with all privileges and permissions'}
+                    {formData.role === 'administrator' && 'Full system access and user management capabilities'}
+                    {formData.role === 'manager' && 'Team management and oversight responsibilities'}
                     {formData.role === 'instructor' && 'Can create and manage course content'}
-                    {formData.role === 'administrator' && 'Full system access and user management'}
+                    {formData.role === 'student' && 'Can access and complete assigned courses'}
                   </p>
                 </div>
                 
@@ -288,9 +322,14 @@ export default function NewUserPage() {
                     value={formData.severity}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, severity: value as FormData['severity'] }))}
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select severity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
                   </Select>
                   <p className="mt-1 text-sm text-vergil-off-black/60">
                     {formData.severity === 'low' && 'Standard training pace with flexible deadlines'}
@@ -298,6 +337,45 @@ export default function NewUserPage() {
                     {formData.severity === 'high' && 'Intensive training with strict deadlines and monitoring'}
                   </p>
                 </div>
+              </div>
+              
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  Reports To {formData.role !== 'super_admin' && <span className="text-vergil-error">*</span>}
+                </label>
+                <Select
+                  value={formData.reportsTo}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, reportsTo: value }))}
+                >
+                  <SelectTrigger className={`w-full ${errors.reportsTo ? 'border-vergil-error' : ''}`}>
+                    <SelectValue placeholder={formData.role === 'super_admin' ? "Select reporting manager (optional)" : "Select reporting manager"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.role === 'super_admin' && (
+                      <SelectItem value="none">None (Top Level)</SelectItem>
+                    )}
+                    {mockUsers
+                      .filter(user => user.roleId !== '4') // Exclude students from being managers
+                      .map(user => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name} ({initialRoles.find(r => r.id === user.roleId)?.name || 'Unknown Role'})
+                        </SelectItem>
+                      ))
+                    }
+                  </SelectContent>
+                </Select>
+                {errors.reportsTo && (
+                  <p className="mt-1 text-sm text-vergil-error flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.reportsTo}
+                  </p>
+                )}
+                <p className="mt-1 text-sm text-vergil-off-black/60">
+                  {formData.role === 'super_admin' 
+                    ? 'Super Admins can optionally report to another user or be at the top level'
+                    : 'Select which user this person will report to in the organization hierarchy'
+                  }
+                </p>
               </div>
               
               <div className="mt-6">
@@ -330,7 +408,6 @@ export default function NewUserPage() {
           </Card>
 
           {/* Course Enrollment */}
-          {formData.role === 'student' && (
             <Card className="mb-6">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -351,11 +428,10 @@ export default function NewUserPage() {
                   </div>
                 </div>
                 
-                {formData.autoEnrollCourses && getSuggestedCourses().length > 0 && (
+                {formData.autoEnrollCourses && availableCourses.some(c => c.mandatory) && (
                   <div className="mb-4 p-3 bg-vergil-emphasis-bg rounded-lg">
                     <p className="text-sm text-vergil-emphasis-text">
-                      Based on <Badge variant="warning" className="inline-flex mx-1">{formData.severity} severity</Badge> 
-                      level, the following mandatory courses will be assigned:
+                      All mandatory courses will be automatically assigned to this user.
                     </p>
                   </div>
                 )}
@@ -366,23 +442,17 @@ export default function NewUserPage() {
                     const isSelected = selectedCourses.includes(course.id)
                     
                     return (
-                      <div
+                      <label
                         key={course.id}
-                        className={`p-3 border rounded-lg transition-colors cursor-pointer ${
+                        htmlFor={`course-${course.id}`}
+                        className={`block p-3 border rounded-lg transition-colors cursor-pointer ${
                           isSelected ? 'border-vergil-purple bg-vergil-purple/5' : 'border-gray-200 hover:bg-vergil-off-white/50'
                         }`}
-                        onClick={(e) => {
-                          // Don't toggle if clicking on the checkbox itself
-                          const target = e.target as HTMLElement;
-                          const isCheckbox = target.closest('[role="checkbox"]') || target.closest('button[role="checkbox"]');
-                          if (!isCheckbox) {
-                            toggleCourse(course.id);
-                          }
-                        }}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <Checkbox
+                              id={`course-${course.id}`}
                               checked={isSelected}
                               onCheckedChange={() => toggleCourse(course.id)}
                             />
@@ -410,7 +480,7 @@ export default function NewUserPage() {
                             ))}
                           </div>
                         </div>
-                      </div>
+                      </label>
                     )
                   })}
                 </div>
@@ -420,7 +490,6 @@ export default function NewUserPage() {
                 </p>
               </div>
             </Card>
-          )}
 
           {/* Notifications */}
           <Card className="mb-6">

@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users } from 'lucide-react'
+import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users, Plus, Minus } from 'lucide-react'
 import { UserManagementHeader } from '@/components/lms/user-management-header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
 import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
@@ -28,6 +29,7 @@ export default function OrganisationOverviewPage() {
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [includeSubordinates, setIncludeSubordinates] = useState(true)
   const [viewState, setViewState] = useState<ViewState>({
     zoom: 1.0,
     pan: { x: -250, y: -20 },
@@ -239,6 +241,38 @@ export default function OrganisationOverviewPage() {
     })
   }
 
+  // Zoom in
+  const handleZoomIn = () => {
+    const newZoom = Math.min(3, viewState.zoom * 1.2)
+    setViewState(prev => ({
+      ...prev,
+      zoom: newZoom
+    }))
+    setShowZoomIndicator(true)
+    if (zoomIndicatorTimeout.current) {
+      clearTimeout(zoomIndicatorTimeout.current)
+    }
+    zoomIndicatorTimeout.current = setTimeout(() => {
+      setShowZoomIndicator(false)
+    }, 1000)
+  }
+
+  // Zoom out
+  const handleZoomOut = () => {
+    const newZoom = Math.max(0.1, viewState.zoom * 0.8)
+    setViewState(prev => ({
+      ...prev,
+      zoom: newZoom
+    }))
+    setShowZoomIndicator(true)
+    if (zoomIndicatorTimeout.current) {
+      clearTimeout(zoomIndicatorTimeout.current)
+    }
+    zoomIndicatorTimeout.current = setTimeout(() => {
+      setShowZoomIndicator(false)
+    }, 1000)
+  }
+
   // Render connection lines
   const renderConnections = () => {
     const cardWidth = 160
@@ -380,6 +414,7 @@ export default function OrganisationOverviewPage() {
     // Set the selected role
     setSelectedRole(roleId)
     setSelectedUser(null) // Clear any selected user
+    setIncludeSubordinates(false) // Default to "Users with this role"
   }, [])
 
 
@@ -387,7 +422,22 @@ export default function OrganisationOverviewPage() {
   const renderRoleNode = (role: Role) => {
     if (!role.position) return null
     
-    const isSelected = selectedRole === role.id
+    // Helper function to get all subordinate role IDs
+    const getSubordinateRoleIds = (roleId: string): string[] => {
+      const childRoles = roles.filter(r => r.parentRole === roleId)
+      const result = childRoles.map(r => r.id)
+      // Recursively get subordinates of subordinates
+      childRoles.forEach(childRole => {
+        result.push(...getSubordinateRoleIds(childRole.id))
+      })
+      return result
+    }
+    
+    // Check if this role should be highlighted
+    const isDirectlySelected = selectedRole === role.id && !includeSubordinates
+    const isSubordinateSelected = selectedRole && includeSubordinates && 
+      getSubordinateRoleIds(selectedRole).includes(role.id)
+    const isSelected = isDirectlySelected || isSubordinateSelected
     const isDragging = false
     
     // Calculate subordinate progress
@@ -431,9 +481,10 @@ export default function OrganisationOverviewPage() {
           width={cardWidth}
           height={cardHeight}
           rx="6"
-          fill="white"
-          stroke={isSelected ? role.color : '#E5E7EB'}
-          strokeWidth={isSelected ? "2" : "1"}
+          fill={isSubordinateSelected ? `${role.color}08` : "white"}
+          stroke={isDirectlySelected ? role.color : isSubordinateSelected ? role.color : '#E5E7EB'}
+          strokeWidth={isDirectlySelected ? "2" : isSubordinateSelected ? "1.5" : "1"}
+          strokeDasharray={isSubordinateSelected ? "4,2" : "none"}
         />
         
         {/* Color accent bar */}
@@ -803,11 +854,11 @@ export default function OrganisationOverviewPage() {
         
         {/* Status indicator */}
         {user.status && (
-          <g transform={`translate(${cardWidth - 20}, 12)`}>
+          <g transform={`translate(${cardWidth - 24}, 8)`}>
             <circle
-              cx="8"
-              cy="8"
-              r="8"
+              cx="10"
+              cy="10"
+              r="10"
               fill={
                 user.status === 'on_track' ? '#10B981' :
                 user.status === 'at_risk' ? '#F59E0B' :
@@ -815,10 +866,10 @@ export default function OrganisationOverviewPage() {
               }
             />
             <text
-              x="8"
-              y="12"
+              x="10"
+              y="14"
               textAnchor="middle"
-              fontSize="10"
+              fontSize="9"
               fill="white"
               fontWeight="bold"
             >
@@ -1420,6 +1471,28 @@ export default function OrganisationOverviewPage() {
               </div>
             )}
             
+            {/* Zoom controls */}
+            <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomIn}
+                className="bg-white shadow-sm hover:bg-vergil-off-white w-10 h-10 p-0"
+                title="Zoom In"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomOut}
+                className="bg-white shadow-sm hover:bg-vergil-off-white w-10 h-10 p-0"
+                title="Zoom Out"
+              >
+                <Minus className="w-4 h-4" />
+              </Button>
+            </div>
+            
             {/* Zoom indicator */}
             {showZoomIndicator && (
               <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white rounded-lg px-3 py-1 text-sm font-medium">
@@ -1450,8 +1523,8 @@ export default function OrganisationOverviewPage() {
             )}
             
             {(selectedUser || selectedRole || viewState.viewMode === 'users' || viewState.viewMode === 'employees') && (
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-vergil-off-black">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-vergil-off-black mb-4">
                   {selectedUser ? 'User Profile' : 
                    selectedRole ? 'Team Details' : 
                    'User Profile'}
@@ -1696,10 +1769,16 @@ export default function OrganisationOverviewPage() {
                     ? Math.round(allSubordinates.reduce((sum, u) => sum + (u.completionRate || 0), 0) / totalSubordinates)
                     : 0
                   
-                  // Use team view metrics
-                  const currentViewUsers = roleUsers
-                  const currentAvgProgress = avgProgress
-                  const currentAtRiskCount = roleUsers.filter(u => u.status === 'at_risk' || u.status === 'behind').length
+                  // Calculate subordinates only (excluding current role users)
+                  const subordinatesOnly = allSubordinates.filter(u => u.roleId !== role.id)
+                  const avgSubordinatesOnlyProgress = subordinatesOnly.length > 0
+                    ? Math.round(subordinatesOnly.reduce((sum, u) => sum + (u.completionRate || 0), 0) / subordinatesOnly.length)
+                    : 0
+                  
+                  // Use team view metrics based on toggle state
+                  const currentViewUsers = includeSubordinates ? subordinatesOnly : roleUsers
+                  const currentAvgProgress = includeSubordinates ? avgSubordinatesOnlyProgress : avgProgress
+                  const currentAtRiskCount = currentViewUsers.filter(u => u.status === 'at_risk' || u.status === 'behind').length
                   
                   return (
                     <>
@@ -1723,6 +1802,42 @@ export default function OrganisationOverviewPage() {
                           </div>
                         </div>
                         
+                      </div>
+                      
+                      {/* View Toggle */}
+                      <div className="mb-6">
+                        <div className="bg-vergil-off-white/50 rounded-lg p-1 flex">
+                          <button
+                            onClick={() => setIncludeSubordinates(false)}
+                            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
+                              !includeSubordinates
+                                ? 'bg-white text-vergil-off-black shadow-sm border border-gray-200'
+                                : 'text-vergil-off-black/60 hover:text-vergil-off-black'
+                            }`}
+                          >
+                            <div className="text-center">
+                              <div className="font-semibold">Users with this role</div>
+                              <div className="text-xs mt-1 opacity-75">
+                                {roleUsers.length} {roleUsers.length === 1 ? 'user' : 'users'} • {avgProgress}% avg progress
+                              </div>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => setIncludeSubordinates(true)}
+                            className={`flex-1 px-4 py-3 text-sm font-medium rounded-md transition-all ${
+                              includeSubordinates
+                                ? 'bg-white text-vergil-off-black shadow-sm border border-gray-200'
+                                : 'text-vergil-off-black/60 hover:text-vergil-off-black'
+                            }`}
+                          >
+                            <div className="text-center">
+                              <div className="font-semibold">All subordinates</div>
+                              <div className="text-xs mt-1 opacity-75">
+                                {subordinatesOnly.length} {subordinatesOnly.length === 1 ? 'user' : 'users'} • {avgSubordinatesOnlyProgress}% avg progress
+                              </div>
+                            </div>
+                          </button>
+                        </div>
                       </div>
                       
                       {/* Key Metrics */}
@@ -1836,12 +1951,12 @@ export default function OrganisationOverviewPage() {
                       {currentViewUsers.length > 0 && (
                         <div>
                           <h5 className="text-sm font-semibold text-vergil-off-black mb-2">
-                            Users with this role
+                            {includeSubordinates ? `Subordinate team members` : `Users with this role`}
                           </h5>
                           <div className="space-y-2 max-h-64 overflow-y-auto">
                             {currentViewUsers.map(user => {
                               const userRole = roles.find(r => r.id === user.roleId)
-                              const isSubordinate = false
+                              const isSubordinate = includeSubordinates && user.roleId !== role.id
                               
                               return (
                                 <div 
@@ -1863,6 +1978,9 @@ export default function OrganisationOverviewPage() {
                                       <p className="text-sm font-medium text-vergil-off-black">{user.name}</p>
                                       <div className="flex items-center gap-2 text-xs">
                                         <span className="text-vergil-off-black/60">{user.completionRate}% complete</span>
+                                        {isSubordinate && (
+                                          <span className="text-vergil-purple/70">• {userRole?.name}</span>
+                                        )}
                                       </div>
                                     </div>
                                   </div>

@@ -640,7 +640,14 @@ export default function UserManagementPage() {
               </thead>
               <tbody className="bg-vergil-full-white divide-y divide-gray-200">
                 {filteredAndSortedUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-vergil-off-white/50 transition-colors">
+                  <tr 
+                    key={user.id} 
+                    className={`hover:bg-vergil-off-white/50 transition-all relative ${
+                      selectedUsers.includes(user.id) 
+                        ? 'bg-vergil-purple/5 shadow-sm ring-2 ring-vergil-purple ring-inset' 
+                        : ''
+                    }`}
+                  >
                     <td className="px-6 py-4">
                       <Checkbox
                         checked={selectedUsers.includes(user.id)}
