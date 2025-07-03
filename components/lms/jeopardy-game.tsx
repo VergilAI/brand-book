@@ -113,8 +113,8 @@ export function JeopardyGame({
             <div className="space-y-6">
               {/* Header Section */}
               <div className="text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-off-black to-gray-800 mx-auto flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-10 h-10 text-vergil-purple" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-10 h-10 text-white" />
                 </div>
                 <h2 className="text-3xl font-display font-bold text-vergil-off-black">
                   Jeopardy Complete!
@@ -149,10 +149,10 @@ export function JeopardyGame({
               </div>
               
               {/* Knowledge Impact */}
-              <Card variant="outlined" className="p-4 border-vergil-off-black/20 bg-vergil-off-black/5">
+              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5 text-vergil-off-black" />
+                    <Brain className="w-5 h-5 text-vergil-purple" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
@@ -179,7 +179,7 @@ export function JeopardyGame({
                 <Button
                   size="lg"
                   onClick={() => window.location.reload()}
-                  className="bg-vergil-off-black text-white hover:bg-gray-800"
+                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
                 >
                   Play Again
                 </Button>

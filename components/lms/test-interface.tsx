@@ -12,7 +12,8 @@ import {
   X,
   Trophy,
   RotateCcw,
-  Flag
+  Flag,
+  Brain
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -312,83 +313,88 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
 
   if (showResults) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-3xl mx-auto px-4">
-          <Card className="shadow-xl">
-            <CardHeader className="text-center border-b">
-              <div className="mb-4">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4">
+          <Card className="p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto">
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="text-center space-y-4">
                 {passed ? (
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                    <Trophy className="h-10 w-10 text-green-600" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
+                    <Trophy className="w-10 h-10 text-white" />
                   </div>
                 ) : (
-                  <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                    <X className="h-10 w-10 text-red-600" />
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-red-600 mx-auto flex items-center justify-center animate-pulse">
+                    <X className="w-10 h-10 text-white" />
                   </div>
                 )}
-              </div>
-              <CardTitle className="text-2xl">
-                {passed ? 'Congratulations!' : 'Keep Learning!'}
-              </CardTitle>
-              <p className="text-muted-foreground mt-2">
-                {test.title} - Results
-              </p>
-            </CardHeader>
-            
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <div className="text-5xl font-bold mb-2">
-                  {scorePercentage.toFixed(0)}%
-                </div>
-                <p className="text-muted-foreground">
-                  You scored {score} out of {test.questions.length * 10} points
+                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                  {passed ? 'Congratulations!' : 'Test Complete'}
+                </h2>
+                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                  {passed ? 'You successfully passed the assessment!' : "Don't worry, you can review and try again."}
                 </p>
-                <div className="mt-4 space-y-2">
-                  <Badge 
-                    className={cn(
-                      passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                    )}
-                  >
-                    {passed ? 'PASSED' : 'NOT PASSED'} (Passing: {test.passingScore}%)
-                  </Badge>
-                  {scorePercentage >= test.courseCompletionThreshold && (
-                    <div>
-                      <Badge className="bg-blue-100 text-blue-800">
-                        COURSE COMPLETED ✓
-                      </Badge>
-                    </div>
-                  )}
-                </div>
+              </div>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {scorePercentage.toFixed(0)}%
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Score</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {test.questions.filter(q => checkAnswer(q, answers[q.id])).length}/{test.questions.length}
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Correct</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {Math.floor((test.duration * 60 - timeRemaining) / 60)}m
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Time</div>
+                </Card>
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                  <span className="font-medium">Questions Answered</span>
-                  <span>{answeredCount} / {test.questions.length}</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                  <span className="font-medium">Correct Answers</span>
-                  <span className="text-green-600 font-medium">
-                    {test.questions.filter(q => checkAnswer(q, answers[q.id])).length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                  <span className="font-medium">Time Taken</span>
-                  <span>{Math.floor((test.duration * 60 - timeRemaining) / 60)} minutes</span>
-                </div>
-                {test.predictedScore && (
-                  <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <span className="font-medium">Performance vs Prediction</span>
-                    <span className={cn(
-                      "font-medium",
-                      scorePercentage >= test.predictedScore ? "text-green-600" : "text-orange-600"
-                    )}>
-                      {scorePercentage >= test.predictedScore ? "+" : ""}{(scorePercentage - test.predictedScore).toFixed(0)}%
-                      {scorePercentage >= test.predictedScore ? " above" : " below"} predicted
-                    </span>
-                  </div>
+              {/* Pass/Fail Status */}
+              <div className="text-center">
+                <Badge 
+                  className={cn(
+                    "text-base px-4 py-2",
+                    passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  )}
+                >
+                  {passed ? 'PASSED' : 'NOT PASSED'} (Passing Score: {test.passingScore}%)
+                </Badge>
+                {scorePercentage >= test.courseCompletionThreshold && (
+                  <Badge className="bg-vergil-purple/10 text-vergil-purple ml-2 text-base px-4 py-2">
+                    COURSE COMPLETED ✓
+                  </Badge>
                 )}
               </div>
+
+              {/* Knowledge Impact */}
+              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5 text-vergil-purple" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                      Knowledge Point Impact
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
+                      <span className="text-lg font-bold text-vergil-purple">
+                        +{Math.round((test.questions.filter(q => checkAnswer(q, answers[q.id])).length / test.questions.length) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
 
               {test.attempts < test.maxAttempts - 1 && !passed && (
                 <Alert className="mb-6">
@@ -401,17 +407,16 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
 
               <div className="flex gap-4">
                 <Button 
+                  size="lg"
                   variant="outline" 
-                  className="flex-1"
                   onClick={() => window.location.href = `/lms/course/${courseId}`}
                 >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Back to Course
+                  Exit Game
                 </Button>
                 {test.allowReview && (
                   <Button 
+                    size="lg"
                     variant="outline" 
-                    className="flex-1"
                     onClick={() => {
                       setShowResults(false)
                       setCurrentQuestion(0)
@@ -422,15 +427,16 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
                 )}
                 {!passed && test.attempts < test.maxAttempts - 1 && (
                   <Button 
-                    className="flex-1 bg-cosmic-purple hover:bg-cosmic-purple/90"
+                    size="lg"
+                    className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
                     onClick={() => window.location.reload()}
                   >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Retry Test
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Try Again
                   </Button>
                 )}
               </div>
-            </CardContent>
+            </div>
           </Card>
         </div>
       </div>

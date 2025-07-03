@@ -154,6 +154,9 @@ body {
 /* Custom Utility Classes */
 .vergil-breathing {
   animation: breathing 4s ease-in-out infinite;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .vergil-pulse {
@@ -186,8 +189,8 @@ body {
 
 /* Brand Keyframe Animations */
 @keyframes breathing {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.03); opacity: 1; }
+  0%, 100% { transform: scale3d(1, 1, 1); opacity: 0.8; }
+  50% { transform: scale3d(1.03, 1.03, 1); opacity: 1; }
 }
 
 @keyframes energy-flow {
@@ -498,4 +501,22 @@ body.carousel-active::-webkit-scrollbar-thumb:hover {
   body.carousel-active * {
     scroll-behavior: smooth;
   }
+}
+
+/* Optimize scroll performance for LMS components */
+.lms-scroll-container {
+  will-change: scroll-position;
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pause animations during scroll for better performance */
+.lms-scroll-container:hover .vergil-breathing,
+.lms-scroll-container:hover [class*="animate-"] {
+  animation-play-state: paused;
+}
+
+/* Reduce transition complexity in scrollable areas */
+.lms-scroll-container * {
+  transition-duration: 0.2s;
 }

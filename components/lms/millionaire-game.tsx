@@ -84,6 +84,7 @@ export function MillionaireGame({
   const [showAudiencePoll, setShowAudiencePoll] = useState(false)
   const [showPhoneAnimation, setShowPhoneAnimation] = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [lastQuestion, setLastQuestion] = useState<typeof questions[0] | null>(null)
 
   const currentQuestion = questions[gameState.currentLevel]
   const currentPrize = moneyLadder[gameState.currentLevel]
@@ -106,6 +107,7 @@ export function MillionaireGame({
     if (!gameState.selectedAnswer || gameState.gameStatus !== 'playing') return
     
     setGameState(prev => ({ ...prev, isLocked: true }))
+    setLastQuestion(currentQuestion) // Store the current question
 
     setTimeout(() => {
       const isCorrect = gameState.selectedAnswer === currentQuestion.correctAnswer
@@ -144,6 +146,7 @@ export function MillionaireGame({
     const winnings = gameState.currentLevel > 0 
       ? moneyLadder[gameState.currentLevel - 1] 
       : 0
+    setLastQuestion(currentQuestion) // Store current question when walking away
     setGameState(prev => ({
       ...prev,
       gameStatus: 'walkaway',
@@ -230,6 +233,16 @@ export function MillionaireGame({
     }
   }, [currentQuestion, gameState.lifelines, gameState.isLocked])
 
+  // Prevent background scrolling when game ends
+  useEffect(() => {
+    if (gameState.gameStatus !== 'playing') {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = 'unset'
+      }
+    }
+  }, [gameState.gameStatus])
+
   if (gameState.gameStatus !== 'playing') {
     // Calculate correct answers based on status
     let correctAnswersCount = 0
@@ -242,14 +255,6 @@ export function MillionaireGame({
     }
     
     const knowledgePointsImproved = Math.round((correctAnswersCount / 15) * 100)
-    
-    useEffect(() => {
-      // Prevent background scrolling when game ends
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = 'unset'
-      }
-    }, [])
     
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
@@ -284,7 +289,7 @@ export function MillionaireGame({
                   Game Over
                 </h2>
                 <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
-                  Good effort! The correct answer was <span className="font-semibold text-vergil-purple">{currentQuestion.correctAnswer}</span>. 
+                  Good effort! The correct answer was <span className="font-semibold text-vergil-purple">{lastQuestion?.correctAnswer || 'A'}</span>. 
                   Every question is a learning opportunity.
                 </p>
               </>
@@ -372,6 +377,7 @@ export function MillionaireGame({
                   totalWinnings: 0,
                   guaranteedAmount: 0
                 })
+                setLastQuestion(null)
               }}
               className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
             >

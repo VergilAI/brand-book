@@ -1,19 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { FlashcardGame } from './flashcard-game'
 import { MillionaireGame } from './millionaire-game'
 import { JeopardyGame } from './jeopardy-game'
 import { ConnectCardsGame } from './connect-cards-game'
-<<<<<<< Updated upstream
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { FileText, Video, Volume2, MessageSquare, X } from 'lucide-react'
-=======
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { FileText, Video, Volume2, MessageSquare, X, CheckCircle, Upload, Play, Pause, Clock, List } from 'lucide-react'
->>>>>>> Stashed changes
 import type { Lesson } from '@/lib/lms/new-course-types'
 
 interface GameLauncherProps {
@@ -28,6 +23,35 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
+
+  // Prevent body scroll when game is active
+  useEffect(() => {
+    // Store original body styles
+    const originalOverflow = document.body.style.overflow
+    const originalPosition = document.body.style.position
+    const originalTop = document.body.style.top
+    const originalWidth = document.body.style.width
+    
+    // Get current scroll position
+    const scrollY = window.scrollY
+    
+    // Prevent background scrolling and interaction
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    
+    return () => {
+      // Restore original styles
+      document.body.style.overflow = originalOverflow
+      document.body.style.position = originalPosition
+      document.body.style.top = originalTop
+      document.body.style.width = originalWidth
+      
+      // Restore scroll position
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
   // Mock data for games - in production, this would come from the lesson data
   // Generate 15 flashcards with variations
   const mockFlashcardDeck = {
@@ -206,10 +230,13 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
     }
   }))
 
+  // Render the game content
+  let gameContent = null
+
   // Content viewers
   if (gameTypeId === 'written-material') {
-    return (
-      <div className="fixed inset-0 bg-gray-100 flex flex-col">
+    gameContent = (
+      <div className="fixed inset-0 bg-gray-100 flex flex-col z-[9999]">
         {/* Simple Header */}
         <div className="bg-white shadow-sm z-10">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -341,9 +368,7 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         </div>
       </div>
     )
-  }
-
-  if (gameTypeId === 'video') {
+  } else if (gameTypeId === 'video') {
     const [videoPlaying, setVideoPlaying] = useState(false)
     const [videoTime, setVideoTime] = useState(0)
     const videoDuration = 420 // 7 minutes mock video
@@ -364,8 +389,8 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
       return `${mins}:${secs.toString().padStart(2, '0')}`
     }
     
-    return (
-      <div className="fixed inset-0 bg-black flex flex-col">
+    gameContent = (
+      <div className="fixed inset-0 bg-black flex flex-col z-[9999]">
         {/* Video Header */}
         <div className="bg-black/90 backdrop-blur z-10">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -476,9 +501,7 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         </div>
       </div>
     )
-  }
-
-  if (gameTypeId === 'audio-material') {
+  } else if (gameTypeId === 'audio-material') {
     // Mock audio chapters based on lesson content
     const audioChapters = [
       { 
@@ -540,8 +563,8 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
       }
     }, [currentTime])
     
-    return (
-      <div className="fixed inset-0 bg-gray-100 flex flex-col">
+    gameContent = (
+      <div className="fixed inset-0 bg-gray-100 flex flex-col z-[9999]">
         {/* Fixed Header */}
         <div className="bg-vergil-off-black shadow-lg z-10">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -677,32 +700,47 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         </div>
       </div>
     )
+  } else {
+    // Game components
+    switch (gameTypeId) {
+      case 'flashcards':
+        gameContent = <FlashcardGame deck={mockFlashcardDeck} onComplete={onComplete} onQuit={onQuit} />
+        break
+      
+      case 'millionaire':
+        gameContent = <MillionaireGame questions={mockMillionaireQuestions} onGameEnd={(winnings, status) => onComplete({ winnings, status })} />
+        break
+      
+      case 'jeopardy':
+        gameContent = <JeopardyGame categories={mockJeopardyCategories} onGameEnd={(finalScore) => onComplete({ score: finalScore })} />
+        break
+      
+      case 'connect-cards':
+        gameContent = <ConnectCardsGame pairs={mockConnectPairs} onComplete={onComplete} onQuit={onQuit} />
+        break
+      
+      default:
+        gameContent = (
+          <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
+            <div className="max-w-4xl mx-auto p-6">
+              <Card className="p-8 text-center bg-white">
+                <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Game Not Available</h2>
+                <p className="text-vergil-off-black/60 mb-6">This learning method is not available yet.</p>
+                <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+              </Card>
+            </div>
+          </div>
+        )
+    }
   }
 
-
-  // Game components
-  switch (gameTypeId) {
-    case 'flashcards':
-      return <FlashcardGame deck={mockFlashcardDeck} onComplete={onComplete} onQuit={onQuit} />
-    
-    case 'millionaire':
-      return <MillionaireGame questions={mockMillionaireQuestions} onGameEnd={(winnings, status) => onComplete({ winnings, status })} />
-    
-    case 'jeopardy':
-      return <JeopardyGame categories={mockJeopardyCategories} onGameEnd={(finalScore) => onComplete({ score: finalScore })} />
-    
-    case 'connect-cards':
-      return <ConnectCardsGame pairs={mockConnectPairs} onComplete={onComplete} onQuit={onQuit} />
-    
-    default:
-      return (
-        <div className="max-w-4xl mx-auto p-6">
-          <Card className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Game Not Available</h2>
-            <p className="text-vergil-off-black/60 mb-6">This learning method is not available yet.</p>
-            <Button onClick={onQuit} variant="outline">Back to Selection</Button>
-          </Card>
-        </div>
-      )
-  }
+  // Wrap everything in a portal
+  if (typeof window === 'undefined') return null
+  
+  return createPortal(
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999]" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+      {gameContent}
+    </div>,
+    document.body
+  )
 }

@@ -15,7 +15,8 @@ import {
   Home,
   CheckCircle,
   XCircle,
-  Sparkles
+  Sparkles,
+  Brain
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -216,80 +217,110 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
     const success = matchedPairs.size === matchingPairs.length
     
     return (
-      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-        <Card className="max-w-lg w-full">
-          <CardContent className="p-8 text-center">
-            <div className="mb-6">
-              {success ? (
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="h-12 w-12 text-green-600" />
-                </div>
-              ) : (
-                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <XCircle className="h-12 w-12 text-red-600" />
-                </div>
-              )}
-              
-              <h2 className="text-2xl font-bold mb-2">
-                {success ? 'Congratulations!' : 'Game Over'}
-              </h2>
-              <p className="text-muted-foreground">
-                {success ? 'You completed the game!' : 'Better luck next time!'}
-              </p>
-            </div>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                <span className="font-medium">Final Score</span>
-                <span className="text-2xl font-bold text-cosmic-purple">{score}</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                <span className="font-medium">Time</span>
-                <span>{formatTime(timeElapsed)}</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-                <span className="font-medium">Accuracy</span>
-                <span>{Math.round((matchedPairs.size / matchingPairs.length) * 100)}%</span>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4">
+          <Card className="p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto">
+            <div className="space-y-6">
+              {/* Header Section */}
+              <div className="text-center space-y-4">
+                {success ? (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
+                    <Trophy className="w-10 h-10 text-white" />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-red-600 mx-auto flex items-center justify-center animate-pulse">
+                    <XCircle className="w-10 h-10 text-white" />
+                  </div>
+                )}
+                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                  {success ? 'Congratulations!' : 'Game Over'}
+                </h2>
+                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                  {success ? 'You completed the game!' : 'Better luck next time!'}
+                </p>
               </div>
 
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {score}
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Final Score</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {formatTime(timeElapsed)}
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Time</div>
+                </Card>
+                
+                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
+                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                    {Math.round((matchedPairs.size / matchingPairs.length) * 100)}%
+                  </div>
+                  <div className="text-sm text-vergil-off-black/60">Accuracy</div>
+                </Card>
+              </div>
+
+              {/* Star Rating */}
               {success && (
-                <div className="flex justify-center gap-1 mt-4">
+                <div className="flex justify-center gap-2">
                   {[1, 2, 3].map((star) => (
                     <Star
                       key={star}
                       className={cn(
-                        "h-8 w-8",
+                        "h-10 w-10",
                         star <= (score >= 150 ? 3 : score >= 100 ? 2 : 1)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
+                          ? "fill-vergil-purple text-vergil-purple"
+                          : "text-vergil-off-black/20"
                       )}
                     />
                   ))}
                 </div>
               )}
-            </div>
 
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={handleExitGame}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Back to Course
-              </Button>
-              <Button
-                className="flex-1 bg-cosmic-purple hover:bg-cosmic-purple/90"
-                onClick={handleRestartGame}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Play Again
-              </Button>
+              {/* Knowledge Impact */}
+              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5 text-vergil-purple" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                      Knowledge Point Impact
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
+                      <span className="text-lg font-bold text-vergil-purple">
+                        +{Math.round((matchedPairs.size / matchingPairs.length) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="flex gap-4">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleExitGame}
+                >
+                  Exit Game
+                </Button>
+                <Button
+                  size="lg"
+                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                  onClick={handleRestartGame}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Play Again
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -301,8 +332,8 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
         <Card className="max-w-lg w-full">
           <CardContent className="p-8">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-cosmic-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-cosmic-purple" />
+              <div className="w-16 h-16 bg-vergil-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-vergil-purple" />
               </div>
               <h2 className="text-2xl font-bold mb-2">{game.title}</h2>
               <Badge className={cn(
@@ -324,7 +355,7 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-cosmic-purple">{game.points}</div>
+                  <div className="text-2xl font-bold text-vergil-purple">{game.points}</div>
                   <div className="text-xs text-muted-foreground">Max Points</div>
                 </div>
                 <div className="text-center">
@@ -349,7 +380,7 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
                 Back to Course
               </Button>
               <Button
-                className="flex-1 bg-cosmic-purple hover:bg-cosmic-purple/90"
+                className="flex-1 bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
                 onClick={handleStartGame}
               >
                 <Play className="h-4 w-4 mr-2" />
@@ -364,7 +395,7 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
 
   // Main game interface
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-cosmic-purple/20 to-electric-violet/20">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-vergil-purple/20 to-vergil-purple-lighter/20">
       {/* Game header */}
       <header className="bg-white/95 backdrop-blur border-b px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

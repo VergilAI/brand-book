@@ -157,10 +157,11 @@ export function NewCourseOverview() {
   // Just use the chapters directly since we're not filtering
   const groupedLessons = mockCourse.chapters
 
+  // Modal components now handle their own scroll prevention using React Portal
 
   const handleLearnClick = (lesson: any) => {
     setSelectedLesson(lesson)
-    setSelectedLessonForAnalytics(lesson)
+    setSelectedLessonForAnalytics(null) // Close the right sidebar
     setShowLearnModal(true)
   }
 
@@ -196,7 +197,7 @@ export function NewCourseOverview() {
     <div className="flex h-screen bg-vergil-off-white overflow-hidden">
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto will-change-scroll" style={{ transform: 'translateZ(0)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {/* Breadcrumb Navigation */}
             <div className="mb-4">
@@ -210,19 +211,19 @@ export function NewCourseOverview() {
             </div>
 
             {/* Course Header Card */}
-            <Card className="mb-8 p-8 bg-gradient-to-br from-vergil-off-white to-white border-vergil-purple/10">
-              <div className="flex items-start justify-between mb-6">
+            <Card className="mb-4 p-4 bg-gradient-to-br from-vergil-off-white to-white border-vergil-purple/10">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-vergil-off-black mb-3">{mockCourse.title}</h1>
-                  <p className="text-base text-vergil-off-black/70 max-w-3xl">
+                  <h1 className="text-xl font-bold text-vergil-off-black mb-1">{mockCourse.title}</h1>
+                  <p className="text-sm text-vergil-off-black/70 max-w-2xl">
                     {mockCourse.description}
                   </p>
                 </div>
                 
-                <div className="flex flex-col gap-3 ml-8">
+                <div className="flex flex-col gap-2 ml-6">
                   <Button
-                    size="default"
-                    className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white min-w-[180px]"
+                    size="sm"
+                    className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white min-w-[160px]"
                     onClick={() => {
                       // Navigate to test screen
                       window.location.href = '/lms/test'
@@ -230,53 +231,53 @@ export function NewCourseOverview() {
                   >
                     Take Final Assessment
                   </Button>
-                  <Badge className={cn("justify-center", courseTestReadiness.bgColor)}>
+                  <Badge className={cn("justify-center text-xs", courseTestReadiness.bgColor)}>
                     {courseTestReadiness.label} ({courseTestReadiness.score}%)
                   </Badge>
                 </div>
               </div>
 
               {/* Progress Section */}
-              <div className="border-t border-vergil-off-black/10 pt-4">
+              <div className="border-t border-vergil-off-black/10 pt-3">
                 {/* Course Metrics */}
-                <div className="flex gap-4 w-full">
-                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-6 border-2 border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
-                    <div className="flex flex-col items-center mb-3">
-                      <div className="w-8 h-8 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-2">
-                        <BookOpen className="w-4 h-4 text-vergil-purple" />
+                <div className="flex gap-3 w-full">
+                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-3 border border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
+                    <div className="flex flex-col items-center mb-1">
+                      <div className="w-6 h-6 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-1">
+                        <BookOpen className="w-3 h-3 text-vergil-purple" />
                       </div>
-                      <span className="text-sm font-semibold text-vergil-off-black">Lessons</span>
+                      <span className="text-xs font-semibold text-vergil-off-black">Lessons</span>
                     </div>
-                    <div className="text-3xl font-bold text-vergil-off-black mb-2">
+                    <div className="text-xl font-bold text-vergil-off-black mb-1">
                       {allLessons.filter(lesson => lesson.knowledgePoints.some(kp => kp.proficiency > 0 && kp.proficiency < 100)).length}
                     </div>
-                    <div className="text-sm text-vergil-off-black/60 text-center">In Progress</div>
+                    <div className="text-xs text-vergil-off-black/60 text-center">In Progress</div>
                   </div>
                   
-                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-6 border-2 border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
-                    <div className="flex flex-col items-center mb-3">
-                      <div className="w-8 h-8 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-2">
-                        <GraduationCap className="w-4 h-4 text-vergil-purple" />
+                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-3 border border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
+                    <div className="flex flex-col items-center mb-1">
+                      <div className="w-6 h-6 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-1">
+                        <GraduationCap className="w-3 h-3 text-vergil-purple" />
                       </div>
-                      <span className="text-sm font-semibold text-vergil-off-black">Knowledge Points</span>
+                      <span className="text-xs font-semibold text-vergil-off-black">Knowledge Points</span>
                     </div>
-                    <div className="text-3xl font-bold text-vergil-off-black mb-2">{masteredKnowledgePoints}/{totalKnowledgePoints}</div>
-                    <div className="text-sm text-vergil-off-black/60 text-center">Mastered</div>
+                    <div className="text-xl font-bold text-vergil-off-black mb-1">{masteredKnowledgePoints}/{totalKnowledgePoints}</div>
+                    <div className="text-xs text-vergil-off-black/60 text-center">Mastered</div>
                   </div>
                   
-                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-6 border-2 border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
-                    <div className="flex flex-col items-center mb-3">
-                      <div className="w-8 h-8 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-2">
-                        <span className="w-4 h-4 bg-vergil-purple rounded flex items-center justify-center">
-                          <span className="text-white text-[10px] font-bold">{mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}</span>
+                  <div className="flex flex-col items-center text-center bg-white rounded-lg p-3 border border-vergil-purple/20 shadow-sm hover:shadow-md transition-all duration-200 flex-1">
+                    <div className="flex flex-col items-center mb-1">
+                      <div className="w-6 h-6 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-1">
+                        <span className="w-3 h-3 bg-vergil-purple rounded flex items-center justify-center">
+                          <span className="text-white text-[8px] font-bold">{mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}</span>
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-vergil-off-black">Chapter Tests</span>
+                      <span className="text-xs font-semibold text-vergil-off-black">Chapter Tests</span>
                     </div>
-                    <div className="text-3xl font-bold text-vergil-off-black mb-2">
+                    <div className="text-xl font-bold text-vergil-off-black mb-1">
                       {mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}/{mockCourse.chapters.length}
                     </div>
-                    <div className="text-sm text-vergil-off-black/60 text-center">
+                    <div className="text-xs text-vergil-off-black/60 text-center">
                       Completed
                       {(() => {
                         const completedTests = mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined)
@@ -339,23 +340,19 @@ export function NewCourseOverview() {
 
             {/* Game Launcher */}
             {activeGame && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                <div className="w-full h-full bg-white rounded-lg overflow-hidden">
-                  <GameLauncher
-                    gameTypeId={activeGame.gameTypeId}
-                    lesson={activeGame.lesson}
-                    onComplete={(result) => {
-                      console.log('Game completed:', result)
-                      setActiveGame(null)
-                      setSelectedLesson(null)
-                    }}
-                    onQuit={() => {
-                      setActiveGame(null)
-                      setShowLearnModal(true)
-                    }}
-                  />
-                </div>
-              </div>
+              <GameLauncher
+                gameTypeId={activeGame.gameTypeId}
+                lesson={activeGame.lesson}
+                onComplete={(result) => {
+                  console.log('Game completed:', result)
+                  setActiveGame(null)
+                  setSelectedLesson(null)
+                }}
+                onQuit={() => {
+                  setActiveGame(null)
+                  setShowLearnModal(true)
+                }}
+              />
             )}
           </div>
         </div>
@@ -373,6 +370,7 @@ export function NewCourseOverview() {
         }}
         onLearnClick={(lesson) => {
           setSelectedLesson(lesson)
+          setSelectedLessonForAnalytics(null) // Close the right sidebar
           setShowLearnModal(true)
         }}
       />

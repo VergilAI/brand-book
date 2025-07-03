@@ -130,6 +130,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
           ref={canvasRef}
           className="w-full h-80"
           viewBox="0 0 400 360"
+          style={{ willChange: 'transform', transform: 'translateZ(0)' }}
         >
           {/* Subtle background pattern */}
           <defs>
@@ -192,6 +193,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 strokeWidth={isConnected ? "2" : selectedLesson && isInSelectedLesson ? "1.5" : "1"}
                 opacity={isConnected ? "0.8" : selectedLesson ? (isInSelectedLesson ? "0.6" : "0.2") : "0.4"}
                 className="transition-all duration-300"
+                style={{ willChange: 'opacity, stroke-width' }}
               />
             )
           })}
@@ -255,7 +257,8 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   className="cursor-pointer transition-all duration-300 ease-out"
                   style={{
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-                    transformOrigin: `${pos.x}px ${pos.y}px`
+                    transformOrigin: `${pos.x}px ${pos.y}px`,
+                    willChange: isHovered ? 'transform' : 'auto'
                   }}
                   onClick={() => setSelectedKnowledgePoint(
                     selectedKnowledgePoint === pos.id ? null : pos.id
@@ -496,7 +499,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
       >
 
       {!isCollapsed && (
-        <div className="p-4 h-full overflow-y-auto space-y-4 flex flex-col">
+        <div className="p-4 h-full overflow-y-auto space-y-4 flex flex-col will-change-scroll" style={{ transform: 'translateZ(0)', WebkitOverflowScrolling: 'touch' }}>
           {/* Header */}
           <div className="pt-8">
             <div className="flex items-center gap-2 mb-2">
@@ -562,7 +565,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 {/* Knowledge Points Breakdown */}
                 <div>
                   <h5 className="text-xs font-medium text-vergil-off-black mb-2">Knowledge Points ({selectedLesson.knowledgePoints.length})</h5>
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                  <div className="space-y-2 max-h-32 overflow-y-auto will-change-scroll" style={{ transform: 'translateZ(0)' }}>
                     {selectedLesson.knowledgePoints.map((kp) => (
                       <div key={kp.id} className="bg-white rounded p-2 text-xs">
                         <div className="flex items-center justify-between">
@@ -739,7 +742,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
 
                         {showTestPlan && (
                           <div className="space-y-2">
-                            <div className="max-h-40 overflow-y-auto space-y-2">
+                            <div className="max-h-40 overflow-y-auto space-y-2 will-change-scroll" style={{ transform: 'translateZ(0)' }}>
                               {testPlan.map((day, index) => (
                                 <div key={index} className="bg-white rounded p-2 text-xs border border-gray-100">
                                   <div className="font-medium text-vergil-off-black">

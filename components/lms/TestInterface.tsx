@@ -213,7 +213,7 @@ export function TestInterface() {
               <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             )}
             <h1 className="text-3xl font-bold text-vergil-off-black mb-2">
-              Test {passed ? 'Completed' : 'Completed'}
+              Test {passed ? 'Completed' : 'Failed'}
             </h1>
             <p className="text-vergil-off-black/70">
               {passed 

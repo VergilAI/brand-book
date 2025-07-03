@@ -157,7 +157,7 @@ export function ChapterCard({
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div 
               className={cn("h-1.5 rounded-full transition-all duration-300", getProgressColor(chapter.progress))}
-              style={{ width: `${chapter.progress}%` }}
+              style={{ width: `${chapter.progress}%`, willChange: 'width' }}
             />
           </div>
         </div>
@@ -165,7 +165,7 @@ export function ChapterCard({
 
       {/* Lessons Table */}
       {isExpanded && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" style={{ willChange: 'scroll-position', transform: 'translateZ(0)' }}>
           <table className="w-full">
             <thead className="bg-vergil-off-white border-b border-gray-200">
               <tr>

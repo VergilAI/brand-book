@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Clock, Brain, Award, CheckCircle, Play } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,10 +23,30 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
 
   useEffect(() => {
     if (isOpen) {
-      // Prevent background scrolling when modal is open
+      // Store original body styles
+      const originalOverflow = document.body.style.overflow
+      const originalPosition = document.body.style.position
+      const originalTop = document.body.style.top
+      const originalWidth = document.body.style.width
+      
+      // Get current scroll position
+      const scrollY = window.scrollY
+      
+      // Prevent background scrolling and interaction
       document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      
       return () => {
-        document.body.style.overflow = 'unset'
+        // Restore original styles
+        document.body.style.overflow = originalOverflow
+        document.body.style.position = originalPosition
+        document.body.style.top = originalTop
+        document.body.style.width = originalWidth
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollY)
       }
     }
   }, [isOpen])
@@ -73,14 +94,15 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
     }
   }
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 bg-black/50 overflow-y-auto z-50"
+      className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] overflow-hidden"
       onClick={onClose}
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
-      <div className="min-h-full flex items-center justify-center p-4">
+      <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
         <Card 
-          className="w-full max-w-6xl max-h-[90vh] flex flex-col my-auto overflow-hidden"
+          className="w-full max-w-6xl max-h-[90vh] flex flex-col my-4 overflow-hidden bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}
@@ -234,4 +256,8 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
       </div>
     </div>
   )
+
+  if (typeof window === 'undefined') return null
+  
+  return createPortal(modalContent, document.body)
 }

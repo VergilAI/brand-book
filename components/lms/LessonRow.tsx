@@ -1,6 +1,6 @@
 'use client'
 
-import { Circle, Play, Award, Brain, MoreVertical, CheckCircle } from 'lucide-react'
+import { Circle, Play, Award, Brain, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -126,15 +126,6 @@ export function LessonRow({
           >
             <Play className="w-3 h-3 mr-1" />
             {lesson.completed ? 'Review' : 'Learn'}
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-vergil-off-black/60 hover:text-vergil-off-black h-7 w-7 p-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreVertical className="w-3 h-3" />
           </Button>
         </div>
       </td>

@@ -777,7 +777,7 @@ export default function UserManagementPage() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-6 will-change-scroll" style={{ transform: 'translateZ(0)', WebkitOverflowScrolling: 'touch' }}>
                 {!importFile ? (
                   <div className="space-y-4">
                     {/* File Upload */}

@@ -34,14 +34,14 @@ export function MillionaireQuestion({
 
     if (lockedAnswer === answer) {
       if (correctAnswer === answer) {
-        return 'bg-phosphor-cyan/10 border-phosphor-cyan shadow-lg'
+        return 'bg-green-100 border-green-500 border-2 shadow-lg'
       } else {
-        return 'bg-vivid-red/10 border-vivid-red shadow-lg'
+        return 'bg-red-100 border-red-500 border-2 shadow-lg'
       }
     }
 
     if (correctAnswer && correctAnswer === answer && lockedAnswer !== answer) {
-      return 'bg-phosphor-cyan/10 border-phosphor-cyan'
+      return 'bg-green-100 border-green-500 border-2'
     }
 
     if (selectedAnswer === answer) {
@@ -54,8 +54,8 @@ export function MillionaireQuestion({
   const getAnswerIcon = (answer: 'A' | 'B' | 'C' | 'D') => {
     if (correctAnswer && lockedAnswer === answer) {
       return correctAnswer === answer 
-        ? <Check className="w-5 h-5 text-phosphor-cyan" />
-        : <X className="w-5 h-5 text-vivid-red" />
+        ? <Check className="w-5 h-5 text-green-600" />
+        : <X className="w-5 h-5 text-red-600" />
     }
     return null
   }
