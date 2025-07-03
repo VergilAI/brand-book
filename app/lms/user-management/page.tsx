@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle } from 'lucide-react'
 import Image from 'next/image'
 import { UserManagementHeader } from '@/components/lms/user-management-header'
-import { Card } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
-import { Select } from '@/components/ui/Select'
-import { Badge } from '@/components/ui/Badge'
-import { Checkbox } from '@/components/ui/Checkbox'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -260,7 +260,7 @@ export default function UserManagementPage() {
       if (!user.role || !user.role.trim()) {
         errors.push(`Row ${rowNum}: Role is required`)
       } else if (!validRoles.includes(user.role.toLowerCase())) {
-        errors.push(`Row ${rowNum}: Invalid role. Must be one of: ${mockRoles.map(r => r.name).join(', ')}`)
+        errors.push(`Row ${rowNum}: Invalid role. Must be one of: ${initialRoles.map(r => r.name).join(', ')}`)
       }
     })
     
@@ -291,7 +291,7 @@ export default function UserManagementPage() {
         const transformedUsers = users.map(user => ({
           name: user.name,
           email: user.email,
-          role: mockRoles.find(r => r.name.toLowerCase() === user.role.toLowerCase())?.name || user.role,
+          role: initialRoles.find(r => r.name.toLowerCase() === user.role.toLowerCase())?.name || user.role,
           phone: user.phone || '',
           location: user.location || '',
           department: user.department || '',
@@ -443,7 +443,7 @@ export default function UserManagementPage() {
                   <div>
                     <label className="block text-sm font-medium text-vergil-off-black mb-2">Role</label>
                     <div className="space-y-2">
-                      {mockRoles.map(role => (
+                      {initialRoles.map(role => (
                         <label key={role.id} className="flex items-center gap-2">
                           <Checkbox
                             checked={filters.roles.includes(role.name)}
@@ -832,7 +832,7 @@ export default function UserManagementPage() {
                       <ul className="space-y-1 text-sm text-vergil-off-black/60">
                         <li>• Required columns: Name, Email, Role</li>
                         <li>• Optional columns: Phone, Location, Department, Manager</li>
-                        <li>• Roles must be one of: {mockRoles.map(r => r.name).join(', ')}</li>
+                        <li>• Roles must be one of: {initialRoles.map(r => r.name).join(', ')}</li>
                         <li>• Dates should be in YYYY-MM-DD format</li>
                         <li>• Email addresses must be unique</li>
                       </ul>

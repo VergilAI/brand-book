@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Plus, X, AlertCircle } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
-import { Badge } from '@/components/ui/Badge'
-import { Checkbox } from '@/components/ui/Checkbox'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface FormData {
   name: string
@@ -65,7 +65,7 @@ export default function NewUserPage() {
     for (let i = 0; i < 12; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length))
     }
-    setFormData({ ...formData, tempPassword: password })
+    setFormData(prev => ({ ...prev, tempPassword: password }))
   }
 
   const validateForm = () => {
@@ -119,10 +119,13 @@ export default function NewUserPage() {
   }
 
   const handleAutoEnroll = (checked: boolean) => {
-    setFormData({ ...formData, autoEnrollCourses: checked })
+    setFormData(prev => ({ ...prev, autoEnrollCourses: checked }))
     
     if (checked) {
-      const mandatoryCourses = getSuggestedCourses().map(c => c.id)
+      // Use formData.severity directly to avoid stale closure
+      const mandatoryCourses = availableCourses
+        .filter(course => course.mandatory && course.severity.includes(formData.severity))
+        .map(c => c.id)
       setSelectedCourses(mandatoryCourses)
     } else {
       setSelectedCourses([])
@@ -130,11 +133,13 @@ export default function NewUserPage() {
   }
 
   const toggleCourse = (courseId: string) => {
-    if (selectedCourses.includes(courseId)) {
-      setSelectedCourses(selectedCourses.filter(id => id !== courseId))
-    } else {
-      setSelectedCourses([...selectedCourses, courseId])
-    }
+    setSelectedCourses(prev => {
+      if (prev.includes(courseId)) {
+        return prev.filter(id => id !== courseId)
+      } else {
+        return [...prev, courseId]
+      }
+    })
   }
 
   return (
@@ -164,7 +169,7 @@ export default function NewUserPage() {
                   </label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={errors.name ? 'border-vergil-error' : ''}
                     placeholder="John Smith"
                   />
@@ -183,7 +188,7 @@ export default function NewUserPage() {
                   <Input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={errors.email ? 'border-vergil-error' : ''}
                     placeholder="john.smith@company.com"
                   />
@@ -202,7 +207,7 @@ export default function NewUserPage() {
                   <Input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
@@ -213,7 +218,7 @@ export default function NewUserPage() {
                   </label>
                   <Input
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
                     placeholder="San Francisco, CA"
                   />
                 </div>
@@ -224,7 +229,7 @@ export default function NewUserPage() {
                   </label>
                   <Input
                     value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
                     className={errors.department ? 'border-vergil-error' : ''}
                     placeholder="Engineering"
                   />
@@ -242,7 +247,7 @@ export default function NewUserPage() {
                   </label>
                   <Input
                     value={formData.manager}
-                    onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, manager: e.target.value }))}
                     placeholder="Jane Doe"
                   />
                 </div>
@@ -262,7 +267,7 @@ export default function NewUserPage() {
                   </label>
                   <Select
                     value={formData.role}
-                    onValueChange={(value) => setFormData({ ...formData, role: value as FormData['role'] })}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as FormData['role'] }))}
                   >
                     <option value="student">Student</option>
                     <option value="instructor">Instructor</option>
@@ -281,7 +286,7 @@ export default function NewUserPage() {
                   </label>
                   <Select
                     value={formData.severity}
-                    onValueChange={(value) => setFormData({ ...formData, severity: value as FormData['severity'] })}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, severity: value as FormData['severity'] }))}
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -303,7 +308,7 @@ export default function NewUserPage() {
                   <Input
                     type="text"
                     value={formData.tempPassword}
-                    onChange={(e) => setFormData({ ...formData, tempPassword: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, tempPassword: e.target.value }))}
                     className={errors.tempPassword ? 'border-vergil-error' : ''}
                     placeholder="Enter temporary password"
                   />
@@ -334,7 +339,11 @@ export default function NewUserPage() {
                     <Checkbox
                       id="auto-enroll"
                       checked={formData.autoEnrollCourses}
-                      onCheckedChange={handleAutoEnroll}
+                      onCheckedChange={(checked) => {
+                        if (typeof checked === 'boolean') {
+                          handleAutoEnroll(checked)
+                        }
+                      }}
                     />
                     <label htmlFor="auto-enroll" className="text-sm text-vergil-off-black cursor-pointer">
                       Auto-enroll in mandatory courses
@@ -362,14 +371,20 @@ export default function NewUserPage() {
                         className={`p-3 border rounded-lg transition-colors cursor-pointer ${
                           isSelected ? 'border-vergil-purple bg-vergil-purple/5' : 'border-gray-200 hover:bg-vergil-off-white/50'
                         }`}
-                        onClick={() => toggleCourse(course.id)}
+                        onClick={(e) => {
+                          // Don't toggle if clicking on the checkbox itself
+                          const target = e.target as HTMLElement;
+                          const isCheckbox = target.closest('[role="checkbox"]') || target.closest('button[role="checkbox"]');
+                          if (!isCheckbox) {
+                            toggleCourse(course.id);
+                          }
+                        }}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <Checkbox
                               checked={isSelected}
                               onCheckedChange={() => toggleCourse(course.id)}
-                              onClick={(e) => e.stopPropagation()}
                             />
                             <div>
                               <p className="font-medium text-vergil-off-black">{course.title}</p>
@@ -417,7 +432,11 @@ export default function NewUserPage() {
                   <Checkbox
                     id="welcome-email"
                     checked={formData.sendWelcomeEmail}
-                    onCheckedChange={(checked) => setFormData({ ...formData, sendWelcomeEmail: checked as boolean })}
+                    onCheckedChange={(checked) => {
+                      if (typeof checked === 'boolean') {
+                        setFormData(prev => ({ ...prev, sendWelcomeEmail: checked }))
+                      }
+                    }}
                   />
                   <div>
                     <label htmlFor="welcome-email" className="text-vergil-off-black cursor-pointer">

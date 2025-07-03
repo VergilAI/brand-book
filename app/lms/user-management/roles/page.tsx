@@ -4,18 +4,18 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Plus, Edit2, Trash2, Shield, Users, MoreVertical, Palette, X, Check, Lock } from 'lucide-react'
 import { UserManagementHeader } from '@/components/lms/user-management-header'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Badge } from '@/components/ui/Badge'
-import { Checkbox } from '@/components/ui/Checkbox'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/Select'
+} from '@/components/ui/select'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,6 +78,7 @@ export default function RolesPage() {
   const [showPrivilegesModal, setShowPrivilegesModal] = useState(false)
   const [selectedRoleForPrivileges, setSelectedRoleForPrivileges] = useState<Role | null>(null)
   const [selectedPrivileges, setSelectedPrivileges] = useState<string[]>([])
+  const [privilegesSaved, setPrivilegesSaved] = useState(false)
   const [newRole, setNewRole] = useState<Partial<Role>>({
     name: '',
     color: '#7B00FF',
@@ -132,7 +133,13 @@ export default function RolesPage() {
 
   const handleOpenPrivileges = (role: Role) => {
     setSelectedRoleForPrivileges(role)
-    setSelectedPrivileges(role.privileges || [])
+    // Filter out any privileges that don't exist in availablePrivileges
+    const validPrivilegeIds = availablePrivileges.map(p => p.id)
+    const validPrivileges = (role.privileges || []).filter(p => 
+      p === 'all' || validPrivilegeIds.includes(p)
+    )
+    setSelectedPrivileges(validPrivileges)
+    setPrivilegesSaved(false)
     setShowPrivilegesModal(true)
   }
 
@@ -143,9 +150,12 @@ export default function RolesPage() {
           ? { ...role, privileges: selectedPrivileges }
           : role
       ))
-      setShowPrivilegesModal(false)
-      setSelectedRoleForPrivileges(null)
-      setSelectedPrivileges([])
+      setPrivilegesSaved(true)
+      // Update the selectedRoleForPrivileges with new privileges
+      setSelectedRoleForPrivileges({
+        ...selectedRoleForPrivileges,
+        privileges: selectedPrivileges
+      })
     }
   }
 
@@ -155,6 +165,7 @@ export default function RolesPage() {
         ? prev.filter(id => id !== privilegeId)
         : [...prev, privilegeId]
     )
+    setPrivilegesSaved(false)
   }
 
   const groupedPrivileges = availablePrivileges.reduce((acc, privilege) => {
@@ -291,8 +302,14 @@ export default function RolesPage() {
 
         {/* Create Role Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
+          <div 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => setShowCreateModal(false)}
+          >
+            <Card 
+              className="w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-vergil-off-black">Create New Role</h3>
@@ -400,8 +417,17 @@ export default function RolesPage() {
 
         {/* Edit Role Modal */}
         {showEditModal && editingRole && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
+          <div 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => {
+              setShowEditModal(false)
+              setEditingRole(null)
+            }}
+          >
+            <Card 
+              className="w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-vergil-off-black">Edit Role</h3>
@@ -515,8 +541,19 @@ export default function RolesPage() {
 
         {/* Manage Privileges Modal */}
         {showPrivilegesModal && selectedRoleForPrivileges && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-3xl max-h-[80vh] flex flex-col">
+          <div 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => {
+              setShowPrivilegesModal(false)
+              setSelectedRoleForPrivileges(null)
+              setSelectedPrivileges([])
+              setPrivilegesSaved(false)
+            }}
+          >
+            <Card 
+              className="w-full max-w-3xl max-h-[80vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
@@ -550,9 +587,10 @@ export default function RolesPage() {
                             className="flex items-start gap-3 p-3 rounded-lg hover:bg-vergil-off-white/50 cursor-pointer transition-colors"
                           >
                             <Checkbox
-                              checked={selectedPrivileges.includes(privilege.id)}
+                              checked={selectedPrivileges.includes('all') || selectedPrivileges.includes(privilege.id)}
                               onCheckedChange={() => togglePrivilege(privilege.id)}
                               className="mt-0.5"
+                              disabled={selectedRoleForPrivileges.id === '1' || selectedPrivileges.includes('all')}
                             />
                             <div className="flex-1">
                               <p className="font-medium text-vergil-off-black text-sm">
@@ -583,21 +621,28 @@ export default function RolesPage() {
               <div className="p-6 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-vergil-off-black/60">
-                    {selectedPrivileges.length} privileges selected
+                    {selectedPrivileges.includes('all') 
+                      ? 'All privileges selected' 
+                      : `${selectedPrivileges.length} privileges selected`}
                   </p>
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
-                      onClick={() => setShowPrivilegesModal(false)}
+                      onClick={() => {
+                        setShowPrivilegesModal(false)
+                        setSelectedRoleForPrivileges(null)
+                        setSelectedPrivileges([])
+                        setPrivilegesSaved(false)
+                      }}
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSavePrivileges}
-                      className="bg-vergil-purple hover:bg-vergil-purple-lighter"
-                      disabled={selectedRoleForPrivileges.id === '1'}
+                      className={privilegesSaved ? "bg-gray-400 cursor-not-allowed" : "bg-vergil-purple hover:bg-vergil-purple-lighter"}
+                      disabled={selectedRoleForPrivileges.id === '1' || privilegesSaved}
                     >
-                      Save Privileges
+                      {privilegesSaved ? 'Privileges Saved' : 'Save Privileges'}
                     </Button>
                   </div>
                 </div>

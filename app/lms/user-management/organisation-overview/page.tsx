@@ -4,9 +4,9 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users } from 'lucide-react'
 import { UserManagementHeader } from '@/components/lms/user-management-header'
-import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
 import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
@@ -23,6 +23,7 @@ interface ViewState {
 export default function OrganisationOverviewPage() {
   const canvasRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const rightPanelRef = useRef<HTMLDivElement>(null)
   const [roles, setRoles] = useState<Role[]>(updateRoleUserCounts(initialRoles))
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [selectedRole, setSelectedRole] = useState<string | null>(null)
@@ -101,7 +102,11 @@ export default function OrganisationOverviewPage() {
       }
     }
     
-    if (!clickedRole) {
+    if (clickedRole) {
+      // Select the clicked role
+      setSelectedRole(clickedRole.id)
+      setSelectedUser(null) // Clear user selection when role is selected
+    } else {
       // Only start panning if we didn't click on a role
       setIsPanning(true)
       setLastMousePos({ x: e.clientX, y: e.clientY })
@@ -143,6 +148,18 @@ export default function OrganisationOverviewPage() {
       window.removeEventListener('mouseup', handleMouseUp)
     }
   }, [handleMouseMove, handleMouseUp])
+
+  // Scroll to top when role or user is selected
+  useEffect(() => {
+    if (rightPanelRef.current) {
+      // Force scroll to top with a slight delay to ensure DOM updates
+      setTimeout(() => {
+        if (rightPanelRef.current) {
+          rightPanelRef.current.scrollTop = 0
+        }
+      }, 50)
+    }
+  }, [selectedRole, selectedUser])
 
   // Handle wheel for zoom
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -360,7 +377,6 @@ export default function OrganisationOverviewPage() {
 
   // Handle role click
   const handleRoleClick = useCallback((roleId: string) => {
-    return
     // Set the selected role
     setSelectedRole(roleId)
     setSelectedUser(null) // Clear any selected user
@@ -1413,7 +1429,10 @@ export default function OrganisationOverviewPage() {
           </div>
 
           {/* Details Panel */}
-          <div className="w-[480px] bg-vergil-off-white/30 border-l border-vergil-off-black/10 p-8 overflow-y-auto">
+          <div 
+            ref={rightPanelRef}
+            className="w-[480px] bg-vergil-off-white/30 border-l border-vergil-off-black/10 p-8 overflow-y-auto"
+          >
             {/* Back button at the top */}
             {(selectedUser || selectedRole) && (
               <Button

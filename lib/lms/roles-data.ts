@@ -33,7 +33,7 @@ export const initialRoles: Role[] = [
     description: 'Administrative access with some restrictions',
     usersCount: 0, // Will be calculated from mock data
     parentRole: '1',
-    privileges: ['user_management', 'course_management', 'analytics_view'],
+    privileges: ['user_view', 'user_create', 'user_edit', 'course_view', 'course_create', 'course_edit', 'analytics_view'],
     createdAt: '2023-01-15',
     position: { x: 400, y: 220 },
     completionRate: 95,
@@ -46,7 +46,7 @@ export const initialRoles: Role[] = [
     description: 'Team management and reporting',
     usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
-    privileges: ['team_view', 'reports', 'course_assign'],
+    privileges: ['user_view', 'course_view', 'course_assign', 'analytics_view', 'reports_generate'],
     createdAt: '2023-02-01',
     position: { x: 275, y: 390 },
     completionRate: 88,
@@ -59,7 +59,7 @@ export const initialRoles: Role[] = [
     description: 'Course creation and student management',
     usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
-    privileges: ['course_create', 'student_view', 'grading'],
+    privileges: ['course_view', 'course_create', 'course_edit', 'user_view', 'content_upload'],
     createdAt: '2023-02-15',
     position: { x: 525, y: 390 },
     completionRate: 82,
