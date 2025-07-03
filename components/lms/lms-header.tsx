@@ -1,7 +1,7 @@
 'use client'
 
 import { Menu, User, ChevronDown, Settings, LogOut, Shield, BarChart3, Database, Users } from 'lucide-react'
-import { VergilLogo } from '@/components/vergil/vergil-logo'
+import { VergilLogo } from '@/components/lms/vergil-logo'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -44,7 +44,7 @@ export function LMSHeader({ onMenuToggle, currentView }: LMSHeaderProps) {
           </Button>
           
           <div className="flex items-center gap-2">
-            <VergilLogo variant="mark-dark" size="sm" />
+            <VergilLogo variant="mark-black" size="sm" />
             <div className="text-lg font-semibold text-vergil-off-black">
               Vergil Learn
             </div>

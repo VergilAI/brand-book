@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils'
  */
 
 interface VergilLogoProps {
-  variant?: 'logo' | 'mark' | 'mark-dark' | 'wordmark' | 'white' | 'dark'
+  variant?: 'logo' | 'mark' | 'wordmark' | 'white' | 'dark' | 'mark-black'
   size?: 'sm' | 'md' | 'lg' | 'xl'
   animated?: boolean
   className?: string
@@ -56,22 +56,22 @@ export function VergilLogo({
   const logoSrc = {
     logo: '/logos/vergil-logo.svg',
     mark: '/logos/vergil-mark.svg',
-    'mark-dark': '/logos/vergil-mark-black.svg',
     wordmark: '/logos/vergil-wordmark.svg',
-    white: '/logos/vergil-logo-white.svg',
-    dark: '/logos/vergil-logo-black.svg'
+    white: '/logos/vergil-logo.svg', // Using default logo for white variant
+    dark: '/logos/vergil-logo-black.svg', // Using black logo for dark variant
+    'mark-black': '/logos/vergil-mark-black.svg'
   }
 
   const altText = {
     logo: 'Vergil Logo',
     mark: 'Vergil Mark',
-    'mark-dark': 'Vergil Mark (Dark)',
     wordmark: 'Vergil Wordmark',
     white: 'Vergil Logo (White)',
-    dark: 'Vergil Logo (Dark)'
+    dark: 'Vergil Logo (Dark)',
+    'mark-black': 'Vergil Mark (Black)'
   }
 
-  const isMarkOnly = variant === 'mark' || variant === 'mark-dark'
+  const isMarkOnly = variant === 'mark' || variant === 'mark-black'
   const dimensions = isMarkOnly ? markSizeConfig[size] : sizeConfig[size]
 
   return (

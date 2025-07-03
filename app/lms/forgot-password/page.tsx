@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import { VergilLogo } from '@/components/vergil/vergil-logo'
+import { VergilLogo } from '@/components/lms/vergil-logo'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
