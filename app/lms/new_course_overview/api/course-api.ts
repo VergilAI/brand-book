@@ -90,7 +90,7 @@ export const courseAPI = {
     }
     
     // If we have user progress, merge it with the course data
-    if (userProgress) {
+    if (userProgress && course) {
       console.log(`🔀 Merging user progress with course data...`)
       const mergedCourse = mergeCourseWithProgress(course, userProgress)
       console.log(`✅ Course merged with progress for ${courseId}`)
