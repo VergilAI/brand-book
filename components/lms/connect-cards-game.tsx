@@ -173,13 +173,13 @@ export function ConnectCardsGame({
                               (gameState.currentAttempt.left.id === card.id || gameState.currentAttempt.right.id === card.id)
     
     if (isMatched) {
-      return 'bg-vergil-purple/10 border-vergil-purple text-vergil-purple opacity-60'
+      return 'bg-green-50 border-green-500 text-green-700 opacity-60'
     }
     
     if (isInCurrentAttempt && gameState.isCheckingMatch) {
       const isCorrect = gameState.currentAttempt!.left.matchId === gameState.currentAttempt!.right.matchId
       return isCorrect 
-        ? 'bg-vergil-purple/10 border-vergil-purple text-vergil-purple'
+        ? 'bg-green-50 border-green-500 text-green-700'
         : 'bg-red-50 border-red-500 text-red-600 border-2'
     }
     
@@ -340,25 +340,28 @@ export function ConnectCardsGame({
   }, [])
 
   return (
-    <div className={cn("min-h-screen bg-vergil-off-white p-8", className)}>
-      <div className="max-w-7xl mx-auto">
-        {/* Header - Matching other games style */}
-        <Card className="p-6 mb-4 bg-white border-vergil-off-black/10 relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowExitConfirm(true)}
-            className="absolute top-4 left-4 text-vergil-off-black/60 hover:text-vergil-off-black z-10"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+    <div className={cn("fixed inset-0 bg-gray-100 flex flex-col", className)}>
+      {/* Fixed Header */}
+      <div className="bg-white shadow-sm z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex-1 px-12">
-              <h1 className="text-2xl font-bold text-vergil-off-black text-center">
-                {title}
-              </h1>
-              <p className="text-sm text-vergil-off-black/60 mt-1 text-center">Match the cards from left to right</p>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowExitConfirm(true)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Game Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-600">Match the cards from left to right</p>
             <div className="flex items-center gap-6">
               <div className="text-center">
                 <p className="text-xs text-vergil-off-black/60">Matched</p>
@@ -374,12 +377,10 @@ export function ConnectCardsGame({
               </div>
             </div>
           </div>
-        </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-4">
+          <div className="space-y-4">
             {/* Progress */}
-            <Card className="p-4 bg-white border-vergil-off-black/10 mb-4">
+            <Card className="p-4 bg-white border-vergil-off-black/10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
@@ -404,10 +405,10 @@ export function ConnectCardsGame({
             </Card>
 
             <div className="grid grid-cols-2 gap-8">
-          <div className="space-y-3">
-            <h3 className="text-lg font-display font-semibold text-vergil-off-black text-center">
-              Left Side
-            </h3>
+              <div className="space-y-3">
+                <h3 className="text-lg font-display font-semibold text-vergil-off-black text-center">
+                  Left Side
+                </h3>
           <AnimatePresence mode="popLayout">
             {availableLeftCards.map((card, index) => {
               const cardAnimation = getCardAnimation(card)
@@ -489,7 +490,8 @@ export function ConnectCardsGame({
               </motion.button>
               )
             })}
-          </AnimatePresence>
+              </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
@@ -525,7 +527,6 @@ export function ConnectCardsGame({
           </Card>
         </div>
       )}
-      </div>
     </div>
   )
 }

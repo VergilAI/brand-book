@@ -53,6 +53,8 @@ interface Test {
   showResults: boolean
   attempts: number
   maxAttempts: number
+  predictedScore?: number // percentage
+  courseCompletionThreshold: number // percentage needed to complete course
 }
 
 export function TestInterface({ courseId, testId }: TestInterfaceProps) {
@@ -68,6 +70,8 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
     showResults: true,
     attempts: 0,
     maxAttempts: 3,
+    predictedScore: 75,
+    courseCompletionThreshold: 70,
     questions: [
       {
         id: 'q1',
@@ -339,14 +343,22 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
                 <p className="text-muted-foreground">
                   You scored {score} out of {test.questions.length * 10} points
                 </p>
-                <Badge 
-                  className={cn(
-                    "mt-4",
-                    passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                <div className="mt-4 space-y-2">
+                  <Badge 
+                    className={cn(
+                      passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    )}
+                  >
+                    {passed ? 'PASSED' : 'NOT PASSED'} (Passing: {test.passingScore}%)
+                  </Badge>
+                  {scorePercentage >= test.courseCompletionThreshold && (
+                    <div>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        COURSE COMPLETED ✓
+                      </Badge>
+                    </div>
                   )}
-                >
-                  {passed ? 'PASSED' : 'NOT PASSED'} (Passing: {test.passingScore}%)
-                </Badge>
+                </div>
               </div>
 
               <div className="space-y-4 mb-8">
@@ -364,6 +376,18 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
                   <span className="font-medium">Time Taken</span>
                   <span>{Math.floor((test.duration * 60 - timeRemaining) / 60)} minutes</span>
                 </div>
+                {test.predictedScore && (
+                  <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <span className="font-medium">Performance vs Prediction</span>
+                    <span className={cn(
+                      "font-medium",
+                      scorePercentage >= test.predictedScore ? "text-green-600" : "text-orange-600"
+                    )}>
+                      {scorePercentage >= test.predictedScore ? "+" : ""}{(scorePercentage - test.predictedScore).toFixed(0)}%
+                      {scorePercentage >= test.predictedScore ? " above" : " below"} predicted
+                    </span>
+                  </div>
+                )}
               </div>
 
               {test.attempts < test.maxAttempts - 1 && !passed && (

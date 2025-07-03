@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Clock, CheckCircle, Circle, AlertCircle, ArrowLeft, ArrowRight, Flag, Eye, EyeOff, BookOpen } from 'lucide-react'
+import { Clock, CheckCircle, Circle, AlertCircle, ArrowLeft, ArrowRight, Flag, Eye, EyeOff, BookOpen, X } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -23,8 +23,10 @@ const mockTest = {
   title: 'AI Fundamentals Final Assessment',
   description: 'Comprehensive evaluation of your AI knowledge across all chapters',
   timeLimit: 90, // minutes
-  totalQuestions: 25,
+  totalQuestions: 5,
   passingScore: 70,
+  predictedScore: 75,
+  courseCompletionThreshold: 65,
   questions: [
     {
       id: 'q1',
@@ -101,6 +103,7 @@ export function TestInterface() {
   const [showResults, setShowResults] = useState(false)
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
   const [showExplanations, setShowExplanations] = useState(false)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   // Timer effect
   useEffect(() => {
@@ -220,7 +223,7 @@ export function TestInterface() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <Card variant="outlined" className="p-4">
               <div className="text-2xl font-bold text-vergil-purple">{score}%</div>
               <div className="text-sm text-vergil-off-black/60">Your Score</div>
@@ -236,6 +239,35 @@ export function TestInterface() {
               <div className="text-sm text-vergil-off-black/60">Questions Answered</div>
             </Card>
           </div>
+
+          {/* Course Completion Status */}
+          <div className="mb-4">
+            {score >= mockTest.courseCompletionThreshold && (
+              <Badge className="bg-blue-100 text-blue-800 text-base px-4 py-2">
+                ✓ COURSE COMPLETED - You have achieved the required score
+              </Badge>
+            )}
+          </div>
+
+          {/* Performance vs Prediction */}
+          {mockTest.predictedScore && (
+            <Card variant="outlined" className="p-4 mb-8 bg-vergil-purple/5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-vergil-off-black/60">Performance vs Predicted Score</div>
+                  <div className="text-sm text-vergil-off-black/80 mt-1">
+                    Predicted: {mockTest.predictedScore}% | Actual: {score}%
+                  </div>
+                </div>
+                <div className={cn(
+                  "text-2xl font-bold",
+                  score >= mockTest.predictedScore ? "text-green-600" : "text-orange-600"
+                )}>
+                  {score >= mockTest.predictedScore ? "+" : ""}{score - mockTest.predictedScore}%
+                </div>
+              </div>
+            </Card>
+          )}
 
           <div className="flex justify-center gap-4">
             <Button
@@ -297,8 +329,18 @@ export function TestInterface() {
     )
   }
 
+  // Don't try to render the question view if we're showing results
+  if (showResults || isSubmitted) {
+    return null // The results view is already rendered above
+  }
+
   const currentQ = mockTest.questions[currentQuestion]
   const isLowTime = timeRemaining < 600 // 10 minutes
+
+  // Additional safety check
+  if (!currentQ) {
+    return null
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -319,6 +361,13 @@ export function TestInterface() {
                 </span>
               </div>
             </Card>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowExitConfirm(true)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
           </div>
         </div>
 
@@ -497,6 +546,37 @@ export function TestInterface() {
           </Card>
         </div>
       </div>
+      
+      {showExitConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="p-6 max-w-md bg-white">
+            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+              Exit Test?
+            </h3>
+            <p className="text-vergil-off-black/60 mb-6">
+              Are you sure you want to exit? Your progress will be lost and the test will be marked as incomplete.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExitConfirm(false)}
+                className="flex-1"
+              >
+                Continue Test
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowExitConfirm(false)
+                  window.location.href = '/lms/new_course_overview'
+                }}
+                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+              >
+                Exit Test
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

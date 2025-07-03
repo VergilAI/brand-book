@@ -386,17 +386,26 @@ export function MillionaireGame({
   }
 
   return (
-    <div className={cn("min-h-screen bg-vergil-off-white p-8", className)}>
-      <div className="max-w-7xl mx-auto">
-        <Card className="p-6 mb-4 bg-white border-vergil-off-black/10 relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowExitConfirm(true)}
-            className="absolute top-4 left-4 text-vergil-off-black/60 hover:text-vergil-off-black z-10"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+    <div className={cn("fixed inset-0 bg-gray-100 flex flex-col", className)}>
+      {/* Fixed Header */}
+      <div className="bg-white shadow-sm z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">Who Wants to Be a Millionaire</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowExitConfirm(true)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Game Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1 px-12">
               <h1 className="text-2xl font-bold text-vergil-off-black text-center">
@@ -411,9 +420,8 @@ export function MillionaireGame({
               </p>
             </div>
           </div>
-        </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-3 space-y-4">
             <Card className="p-4 bg-white border-vergil-off-black/10">
               <div className="flex items-center justify-between mb-4">
@@ -479,6 +487,8 @@ export function MillionaireGame({
           />
         </div>
       </div>
+      </div>
+      </div>
 
       {showAudiencePoll && gameState.lifelines.askAudience.percentages && (
         <MillionaireAudiencePoll
@@ -533,7 +543,6 @@ export function MillionaireGame({
           </Card>
         </div>
       )}
-      </div>
     </div>
   )
 }

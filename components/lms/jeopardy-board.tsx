@@ -37,8 +37,8 @@ export function JeopardyBoard({
               damping: 20
             }}
           >
-            <Card className="relative h-16 flex items-center justify-center p-3 bg-white border-2 border-vergil-purple/40 overflow-hidden">
-              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-center text-vergil-purple/80 leading-tight">
+            <Card className="relative h-16 flex items-center justify-center p-3 bg-white border-2 border-vergil-off-black overflow-hidden">
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-center text-vergil-off-black leading-tight">
                 {category.name}
               </h3>
             </Card>
@@ -76,8 +76,8 @@ export function JeopardyBoard({
                     isUsed ? [
                       "bg-vergil-off-black/5 border-vergil-off-black/10 cursor-default"
                     ] : [
-                      "bg-white border-vergil-purple/20",
-                      "hover:border-vergil-purple/60 hover:shadow-lg hover:scale-105",
+                      "bg-white border-vergil-off-black",
+                      "hover:border-vergil-purple hover:shadow-lg hover:scale-105",
                       "group shadow-sm"
                     ]
                   )}
@@ -90,13 +90,13 @@ export function JeopardyBoard({
                     <>
                       <span className={cn(
                         "font-mono font-bold text-2xl transition-all duration-200 relative z-10",
-                        "text-vergil-purple/70 group-hover:text-vergil-purple group-hover:scale-110"
+                        "text-vergil-off-black group-hover:text-vergil-purple group-hover:scale-110"
                       )}>
                         ${value}
                       </span>
                       
                       {/* Hover effect background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-vergil-purple/0 to-vergil-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-vergil-purple/0 to-vergil-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
                       {clue.isDailyDouble && (
                         <>

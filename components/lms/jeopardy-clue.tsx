@@ -86,9 +86,9 @@ export function JeopardyClue({
                   </span>
                 </Card>
                 {clue.isDailyDouble && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-vergil-purple/10 rounded-lg">
-                    <Star className="w-4 h-4 text-cosmic-purple" />
-                    <span className="text-sm font-display font-bold text-cosmic-purple">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+                    <Star className="w-4 h-4 text-vergil-purple" />
+                    <span className="text-sm font-display font-bold text-vergil-purple">
                       DAILY DOUBLE
                     </span>
                   </div>
@@ -128,7 +128,7 @@ export function JeopardyClue({
                   />
                   <Button
                     onClick={handleWagerSubmit}
-                    className="w-full bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                    className="w-full bg-vergil-off-black text-white hover:bg-gray-800"
                   >
                     Lock In Wager
                   </Button>
@@ -141,7 +141,7 @@ export function JeopardyClue({
                 className="space-y-6"
               >
                 <div className="text-center">
-                  <h3 className="text-sm font-display font-bold uppercase tracking-wider text-cosmic-purple mb-4">
+                  <h3 className="text-sm font-display font-bold uppercase tracking-wider text-vergil-off-black mb-4">
                     {clue.category}
                   </h3>
                   <p className="text-2xl font-medium leading-relaxed text-vergil-off-black">
@@ -162,7 +162,7 @@ export function JeopardyClue({
                     <Button
                       type="submit"
                       disabled={!answer.trim()}
-                      className="w-full bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                      className="w-full bg-vergil-off-black text-white hover:bg-gray-800"
                     >
                       Submit Answer
                     </Button>
@@ -175,10 +175,10 @@ export function JeopardyClue({
                   >
                     <div className={cn(
                       "w-20 h-20 rounded-full mx-auto flex items-center justify-center",
-                      isCorrect ? "bg-vergil-purple/10" : "bg-vivid-red/10"
+                      isCorrect ? "bg-green-50" : "bg-red-50"
                     )}>
                       {isCorrect ? (
-                        <Check className="w-10 h-10 text-phosphor-cyan" />
+                        <Check className="w-10 h-10 text-vergil-purple" />
                       ) : (
                         <AlertCircle className="w-10 h-10 text-vivid-red" />
                       )}
@@ -193,7 +193,7 @@ export function JeopardyClue({
                     </div>
                     <Button
                       onClick={handleContinue}
-                      className="w-full bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                      className="w-full bg-vergil-off-black text-white hover:bg-gray-800"
                     >
                       Continue
                     </Button>
