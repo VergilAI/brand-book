@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { ProgressAPI } from '@/app/lms/new_course_overview/api/progress-api'
 import { MillionaireQuestion } from './millionaire-question'
 import { MillionaireProgress } from './millionaire-progress'
 import { MillionaireLifelines } from './millionaire-lifelines'
@@ -52,6 +53,7 @@ interface MillionaireGameProps {
   questions: Question[]
   onGameEnd?: (winnings: number, status: GameState['gameStatus']) => void
   className?: string
+  lessonId?: string // Add lesson ID for progress tracking
 }
 
 const moneyLadder = [
@@ -65,7 +67,8 @@ const guaranteedLevels = [4, 9] // $1,000 and $32,000
 export function MillionaireGame({ 
   questions, 
   onGameEnd,
-  className 
+  className,
+  lessonId
 }: MillionaireGameProps) {
   const [gameState, setGameState] = useState<GameState>({
     currentLevel: 0,
@@ -80,10 +83,31 @@ export function MillionaireGame({
     totalWinnings: 0,
     guaranteedAmount: 0
   })
+  
+  // Track question results for progress calculation
+  const [questionResults, setQuestionResults] = useState<Array<{
+    questionId: string
+    isCorrect: boolean
+    usedLifelines: string[]
+    responseTime: number
+  }>>([])
 
   const [showAudiencePoll, setShowAudiencePoll] = useState(false)
   const [showPhoneAnimation, setShowPhoneAnimation] = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  
+  // Function to process progress and call game end
+  const handleGameEndWithProgress = async (winnings: number, status: GameState['gameStatus']) => {
+    if (lessonId && questionResults.length > 0) {
+      try {
+        await ProgressAPI.processMillionaireCompletion(lessonId, questionResults)
+        console.log('Progress updated for lesson:', lessonId)
+      } catch (error) {
+        console.error('Failed to update progress:', error)
+      }
+    }
+    onGameEnd?.(winnings, status)
+  }
   const [lastQuestion, setLastQuestion] = useState<typeof questions[0] | null>(null)
 
   const currentQuestion = questions[gameState.currentLevel]
@@ -111,6 +135,18 @@ export function MillionaireGame({
 
     setTimeout(() => {
       const isCorrect = gameState.selectedAnswer === currentQuestion.correctAnswer
+      
+      // Track this question result
+      const usedLifelines = Object.entries(gameState.lifelines)
+        .filter(([_, lifeline]) => lifeline.used)
+        .map(([key, _]) => key)
+      
+      setQuestionResults(prev => [...prev, {
+        questionId: currentQuestion.id,
+        isCorrect,
+        usedLifelines,
+        responseTime: 15000 // Mock response time
+      }])
       
       if (isCorrect) {
         const newWinnings = moneyLadder[gameState.currentLevel]
@@ -356,7 +392,7 @@ export function MillionaireGame({
             <Button
               size="lg"
               variant="outline"
-              onClick={() => onGameEnd?.(gameState.totalWinnings, gameState.gameStatus)}
+              onClick={() => handleGameEndWithProgress(gameState.totalWinnings, gameState.gameStatus)}
             >
               Exit Game
             </Button>
@@ -539,7 +575,7 @@ export function MillionaireGame({
               <Button
                 onClick={() => {
                   setShowExitConfirm(false)
-                  onGameEnd?.(gameState.guaranteedAmount, 'walkaway')
+                  handleGameEndWithProgress(gameState.guaranteedAmount, 'walkaway')
                 }}
                 className="flex-1 bg-red-600 text-white hover:bg-red-700"
               >

@@ -19,6 +19,7 @@ import {
   Layers
 } from 'lucide-react'
 import type { FlashcardDeck, FlashcardGameState, FlashcardGameResult } from '@/lib/lms/flashcard-types'
+import { ProgressAPI } from '@/app/lms/new_course_overview/api/progress-api'
 import { cn } from '@/lib/utils'
 
 interface FlashcardGameProps {
@@ -26,13 +27,15 @@ interface FlashcardGameProps {
   onComplete: (result: FlashcardGameResult) => void
   onQuit: () => void
   className?: string
+  lessonId?: string // Add lesson ID for progress tracking
 }
 
 export function FlashcardGame({ 
   deck, 
   onComplete, 
   onQuit,
-  className 
+  className,
+  lessonId
 }: FlashcardGameProps) {
   const [gameState, setGameState] = useState<FlashcardGameState>({
     currentIndex: 0,
@@ -131,8 +134,29 @@ export function FlashcardGame({
     setIsCorrect(null)
   }
 
-  const completeGame = () => {
+  const completeGame = async () => {
     const endTime = Date.now()
+    
+    // Process progress if lessonId is provided
+    if (lessonId) {
+      try {
+        // Create results for progress tracking - only for cards that were actually answered
+        const results = Array.from(cardResults.entries()).map(([cardId, isCorrect]) => ({
+          cardId,
+          isCorrect,
+          responseTime: 5000 // Mock response time, could be tracked per card
+        }))
+        
+        console.log('🃏 Flashcard results for progress tracking:', results)
+        
+        // Update knowledge point progress
+        await ProgressAPI.processFlashcardCompletion(lessonId, results)
+        console.log('Progress updated for lesson:', lessonId)
+      } catch (error) {
+        console.error('Failed to update progress:', error)
+      }
+    }
+    
     const result: FlashcardGameResult = {
       totalCards: deck.cards.length,
       correctAnswers: gameState.correctAnswers,
@@ -405,7 +429,18 @@ export function FlashcardGame({
                     timeSpent: Math.floor((Date.now() - gameState.startTime) / 1000),
                     knowledgePointProgress: new Map()
                   }}
-                  onBackToLesson={onQuit}
+                  onBackToLesson={() => {
+                    // Call onComplete with final result before quitting
+                    onComplete({
+                      totalCards: deck.cards.length,
+                      correctAnswers: gameState.correctAnswers,
+                      incorrectAnswers: gameState.incorrectAnswers,
+                      accuracy: (gameState.correctAnswers / deck.cards.length) * 100,
+                      timeSpent: Math.floor((Date.now() - gameState.startTime) / 1000),
+                      knowledgePointProgress: new Map()
+                    })
+                    onQuit()
+                  }}
                   onPlayAgain={() => window.location.reload()}
                   onReviewWithAI={() => console.log('Review with AI')}
                 />

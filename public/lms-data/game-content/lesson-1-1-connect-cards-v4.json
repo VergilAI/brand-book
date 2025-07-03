@@ -1,0 +1,217 @@
+{
+  "gameType": "connect-cards",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "title": "Security Tools & Technologies - Purpose Matching",
+    "description": "Match security tools and technologies with their primary functions",
+    "pairs": [
+      {
+        "matchId": "match-1",
+        "leftCard": {
+          "id": "l-1",
+          "content": "SIEM",
+          "matchId": "match-1",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-1",
+          "content": "Aggregates and analyzes security logs in real-time",
+          "matchId": "match-1",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-2",
+        "leftCard": {
+          "id": "l-2",
+          "content": "IDS/IPS",
+          "matchId": "match-2",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-2",
+          "content": "Detects and prevents network intrusions",
+          "matchId": "match-2",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-3",
+        "leftCard": {
+          "id": "l-3",
+          "content": "WAF",
+          "matchId": "match-3",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-3",
+          "content": "Protects web applications from common attacks",
+          "matchId": "match-3",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-4",
+        "leftCard": {
+          "id": "l-4",
+          "content": "EDR",
+          "matchId": "match-4",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-4",
+          "content": "Monitors and responds to endpoint threats",
+          "matchId": "match-4",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-5",
+        "leftCard": {
+          "id": "l-5",
+          "content": "DLP",
+          "matchId": "match-5",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-5",
+          "content": "Prevents sensitive data from leaving the organization",
+          "matchId": "match-5",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-6",
+        "leftCard": {
+          "id": "l-6",
+          "content": "CASB",
+          "matchId": "match-6",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-6",
+          "content": "Secures cloud service usage and access",
+          "matchId": "match-6",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-7",
+        "leftCard": {
+          "id": "l-7",
+          "content": "PAM",
+          "matchId": "match-7",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-7",
+          "content": "Manages privileged account access and credentials",
+          "matchId": "match-7",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-8",
+        "leftCard": {
+          "id": "l-8",
+          "content": "SOAR",
+          "matchId": "match-8",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-8",
+          "content": "Automates security operations and incident response",
+          "matchId": "match-8",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-9",
+        "leftCard": {
+          "id": "l-9",
+          "content": "Sandbox",
+          "matchId": "match-9",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-9",
+          "content": "Isolates suspicious files for safe analysis",
+          "matchId": "match-9",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-10",
+        "leftCard": {
+          "id": "l-10",
+          "content": "UEBA",
+          "matchId": "match-10",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-10",
+          "content": "Detects anomalies in user behavior patterns",
+          "matchId": "match-10",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-11",
+        "leftCard": {
+          "id": "l-11",
+          "content": "NAC",
+          "matchId": "match-11",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-11",
+          "content": "Controls device access to network resources",
+          "matchId": "match-11",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-12",
+        "leftCard": {
+          "id": "l-12",
+          "content": "HIDS",
+          "matchId": "match-12",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-12",
+          "content": "Monitors host system for suspicious activities",
+          "matchId": "match-12",
+          "side": "right",
+          "type": "text"
+        }
+      }
+    ],
+    "difficulty": "medium",
+    "timeLimit": 150,
+    "category": "Security Technologies"
+  }
+}

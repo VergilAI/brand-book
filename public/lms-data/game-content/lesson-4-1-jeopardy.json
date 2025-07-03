@@ -1,0 +1,259 @@
+{
+  "gameType": "jeopardy",
+  "lessonId": "lesson-4-1",
+  "content": {
+    "title": "Secure Software Development Jeopardy",
+    "categories": [
+      {
+        "name": "OWASP Top 10",
+        "clues": [
+          {
+            "id": "clue-1-1",
+            "category": "OWASP Top 10",
+            "value": 200,
+            "clue": "This vulnerability occurs when user input is not properly validated and is directly included in SQL queries",
+            "answer": "What is SQL Injection?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-1-2",
+            "category": "OWASP Top 10",
+            "value": 400,
+            "clue": "This attack allows malicious scripts to be executed in a victim's browser by injecting them into web pages",
+            "answer": "What is Cross-Site Scripting (XSS)?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-1-3",
+            "category": "OWASP Top 10",
+            "value": 600,
+            "clue": "This vulnerability allows attackers to access files and directories outside the web root folder",
+            "answer": "What is Path Traversal or Directory Traversal?",
+            "isDailyDouble": true,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-1-4",
+            "category": "OWASP Top 10",
+            "value": 800,
+            "clue": "Poor implementation of this security feature can allow attackers to hijack user sessions or bypass login",
+            "answer": "What is Broken Authentication?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-1-5",
+            "category": "OWASP Top 10",
+            "value": 1000,
+            "clue": "This vulnerability in object serialization can lead to remote code execution",
+            "answer": "What is Insecure Deserialization?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          }
+        ]
+      },
+      {
+        "name": "Secure Coding",
+        "clues": [
+          {
+            "id": "clue-2-1",
+            "category": "Secure Coding",
+            "value": 200,
+            "clue": "This practice ensures that all user input is checked against a set of rules before processing",
+            "answer": "What is Input Validation?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-2-2",
+            "category": "Secure Coding",
+            "value": 400,
+            "clue": "Converting special characters to their HTML entities prevents XSS attacks",
+            "answer": "What is Output Encoding or HTML Encoding?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-2-3",
+            "category": "Secure Coding",
+            "value": 600,
+            "clue": "This principle states that code should fail securely and not reveal sensitive information in errors",
+            "answer": "What is Fail Secure or Fail Safe?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-2-4",
+            "category": "Secure Coding",
+            "value": 800,
+            "clue": "Using prepared statements prevents this common database attack",
+            "answer": "What is SQL Injection?",
+            "isDailyDouble": true,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-2-5",
+            "category": "Secure Coding",
+            "value": 1000,
+            "clue": "This token prevents CSRF attacks by ensuring requests come from legitimate sources",
+            "answer": "What is a CSRF Token or Anti-CSRF Token?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          }
+        ]
+      },
+      {
+        "name": "DevSecOps",
+        "clues": [
+          {
+            "id": "clue-3-1",
+            "category": "DevSecOps",
+            "value": 200,
+            "clue": "This practice integrates security testing into the CI/CD pipeline automatically",
+            "answer": "What is Security Automation?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-17"
+          },
+          {
+            "id": "clue-3-2",
+            "category": "DevSecOps",
+            "value": 400,
+            "clue": "SAST stands for this type of security testing performed on source code",
+            "answer": "What is Static Application Security Testing?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-17"
+          },
+          {
+            "id": "clue-3-3",
+            "category": "DevSecOps",
+            "value": 600,
+            "clue": "DAST performs this type of testing on running applications",
+            "answer": "What is Dynamic Application Security Testing?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-17"
+          },
+          {
+            "id": "clue-3-4",
+            "category": "DevSecOps",
+            "value": 800,
+            "clue": "This principle means security is everyone's responsibility, not just the security team",
+            "answer": "What is Shift Left Security?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-17"
+          },
+          {
+            "id": "clue-3-5",
+            "category": "DevSecOps",
+            "value": 1000,
+            "clue": "This scanning identifies vulnerable dependencies in your project",
+            "answer": "What is Software Composition Analysis (SCA)?",
+            "isDailyDouble": true,
+            "knowledgePointId": "kp-17"
+          }
+        ]
+      },
+      {
+        "name": "Security Headers",
+        "clues": [
+          {
+            "id": "clue-4-1",
+            "category": "Security Headers",
+            "value": 200,
+            "clue": "This header prevents clickjacking by controlling if a page can be framed",
+            "answer": "What is X-Frame-Options?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-4-2",
+            "category": "Security Headers",
+            "value": 400,
+            "clue": "CSP stands for this policy that prevents XSS and data injection attacks",
+            "answer": "What is Content Security Policy?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-4-3",
+            "category": "Security Headers",
+            "value": 600,
+            "clue": "This header forces browsers to use HTTPS connections",
+            "answer": "What is HTTP Strict Transport Security (HSTS)?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-4-4",
+            "category": "Security Headers",
+            "value": 800,
+            "clue": "This header prevents browsers from MIME-sniffing responses",
+            "answer": "What is X-Content-Type-Options: nosniff?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          },
+          {
+            "id": "clue-4-5",
+            "category": "Security Headers",
+            "value": 1000,
+            "clue": "This header controls how much referrer information is sent with requests",
+            "answer": "What is Referrer-Policy?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-16"
+          }
+        ]
+      },
+      {
+        "name": "Vulnerability Types",
+        "clues": [
+          {
+            "id": "clue-5-1",
+            "category": "Vulnerability Types",
+            "value": 200,
+            "clue": "This occurs when an application uses more memory than allocated, potentially crashing or executing code",
+            "answer": "What is Buffer Overflow?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-5-2",
+            "category": "Vulnerability Types",
+            "value": 400,
+            "clue": "This vulnerability allows attackers to upload malicious files to a server",
+            "answer": "What is Unrestricted File Upload?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-5-3",
+            "category": "Vulnerability Types",
+            "value": 600,
+            "clue": "IDOR stands for this type of access control vulnerability",
+            "answer": "What is Insecure Direct Object Reference?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-5-4",
+            "category": "Vulnerability Types",
+            "value": 800,
+            "clue": "This attack exploits the trust a website has in a user's browser",
+            "answer": "What is Cross-Site Request Forgery (CSRF)?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          },
+          {
+            "id": "clue-5-5",
+            "category": "Vulnerability Types",
+            "value": 1000,
+            "clue": "This vulnerability in XML processors can lead to disclosure of internal files",
+            "answer": "What is XML External Entity (XXE) Injection?",
+            "isDailyDouble": false,
+            "knowledgePointId": "kp-15"
+          }
+        ]
+      }
+    ]
+  }
+}

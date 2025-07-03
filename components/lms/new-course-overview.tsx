@@ -9,134 +9,17 @@ import { ChapterCard } from './ChapterCard'
 import { LearnModal } from './LearnModal'
 import { GameLauncher } from './game-launcher'
 import { KnowledgePointAnalytics } from './KnowledgePointAnalytics'
+import { DebugPanel } from './debug-panel'
 import { cn } from '@/lib/utils'
 import type { Course, LessonWithChapter } from '@/lib/lms/new-course-types'
 
-// Mock course data with chapters and lessons structure
-const mockCourse: Course = {
-  id: 'course-1',
-  title: 'AI Fundamentals',
-  description: 'Comprehensive introduction to artificial intelligence covering core concepts, algorithms, and real-world applications.',
-  totalLessons: 28,
-  completedLessons: 12,
-  progress: 43,
-  chapters: [
-    {
-      id: 'chapter-1',
-      title: 'Introduction to Artificial Intelligence',
-      description: 'Core AI concepts and foundational principles',
-      order: 1,
-      progress: 85,
-      estimatedTime: '2 hours',
-      testScore: 88, // Add test score
-      lessons: [
-        {
-          id: 'lesson-1-1',
-          title: 'What is Artificial Intelligence?',
-          description: 'Overview of AI concepts, history, and applications',
-          knowledgePoints: [
-            { id: 'kp-1', title: 'AI Definition', description: 'Understanding what artificial intelligence is', proficiency: 85 },
-            { id: 'kp-2', title: 'Types of AI', description: 'Narrow AI, general AI, and superintelligence', proficiency: 72 },
-            { id: 'kp-3', title: 'AI Applications', description: 'Real-world AI use cases across industries', proficiency: 90 }
-          ],
-          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-          estimatedTime: 30,
-          completed: false
-        },
-        {
-          id: 'lesson-1-2',
-          title: 'Search and Problem Solving',
-          description: 'AI search algorithms and problem-solving techniques',
-          knowledgePoints: [
-            { id: 'kp-4', title: 'Search Algorithms', description: 'Breadth-first, depth-first, and informed search', proficiency: 65 },
-            { id: 'kp-5', title: 'Heuristics', description: 'Using heuristic functions to guide search', proficiency: 58 },
-            { id: 'kp-6', title: 'Optimization', description: 'Finding optimal solutions in problem spaces', proficiency: 40 }
-          ],
-          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-          estimatedTime: 45,
-          completed: false
-        },
-        {
-          id: 'lesson-1-3',
-          title: 'Knowledge Representation',
-          description: 'How AI systems represent and reason with knowledge',
-          knowledgePoints: [
-            { id: 'kp-7', title: 'Logic Systems', description: 'Propositional and predicate logic in AI', proficiency: 0 },
-            { id: 'kp-8', title: 'Semantic Networks', description: 'Graph-based knowledge representation', proficiency: 0 },
-            { id: 'kp-9', title: 'Inference Rules', description: 'Automated reasoning and rule-based systems', proficiency: 0 }
-          ],
-          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-          estimatedTime: 50,
-          completed: false
-        }
-      ]
-    },
-    {
-      id: 'chapter-2',
-      title: 'Machine Learning Basics',
-      description: 'Introduction to learning algorithms and data-driven AI',
-      order: 2,
-      progress: 25,
-      estimatedTime: '3.5 hours',
-      testScore: null, // No test taken yet
-      lessons: [
-        {
-          id: 'lesson-2-1',
-          title: 'Learning from Data',
-          description: 'Supervised, unsupervised, and reinforcement learning',
-          knowledgePoints: [
-            { id: 'kp-10', title: 'Supervised Learning', description: 'Learning with labeled examples', proficiency: 75 },
-            { id: 'kp-11', title: 'Unsupervised Learning', description: 'Finding patterns in unlabeled data', proficiency: 60 },
-            { id: 'kp-12', title: 'Reinforcement Learning', description: 'Learning through trial and error', proficiency: 30 }
-          ],
-          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-          estimatedTime: 60,
-          completed: false
-        },
-        {
-          id: 'lesson-2-2',
-          title: 'Neural Networks Introduction',
-          description: 'Basic neural network concepts and architectures',
-          knowledgePoints: [
-            { id: 'kp-13', title: 'Artificial Neurons', description: 'Mathematical model of biological neurons', proficiency: 0 },
-            { id: 'kp-14', title: 'Network Layers', description: 'Input, hidden, and output layers', proficiency: 0 },
-            { id: 'kp-15', title: 'Training Process', description: 'How neural networks learn from data', proficiency: 0 }
-          ],
-          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-          estimatedTime: 90,
-          completed: false
-        }
-      ]
-    },
-    {
-      id: 'chapter-3',
-      title: 'AI Ethics and Future',
-      description: 'Responsible AI development and future implications',
-      order: 3,
-      progress: 0,
-      estimatedTime: '4 hours',
-      testScore: null, // No test taken yet
-      lessons: [
-        {
-          id: 'lesson-3-1',
-          title: 'AI Ethics and Bias',
-          description: 'Ethical considerations and bias in AI systems',
-          knowledgePoints: [
-            { id: 'kp-16', title: 'Algorithmic Bias', description: 'Understanding and mitigating bias in AI', proficiency: 0 },
-            { id: 'kp-17', title: 'Fairness Metrics', description: 'Measuring and ensuring AI fairness', proficiency: 0 },
-            { id: 'kp-18', title: 'AI Governance', description: 'Policies and frameworks for responsible AI', proficiency: 0 }
-          ],
-          availableGameTypes: ['written-material', 'video', 'audio-material', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-          estimatedTime: 120,
-          completed: false
-        }
-      ]
-    }
-  ]
+
+
+interface NewCourseOverviewProps {
+  course?: Course
 }
 
-
-export function NewCourseOverview() {
+export function NewCourseOverview({ course }: NewCourseOverviewProps) {
   const [selectedLesson, setSelectedLesson] = useState<any>(null)
   const [showLearnModal, setShowLearnModal] = useState(false)
   const [selectedLessonForAnalytics, setSelectedLessonForAnalytics] = useState<any>(null)
@@ -144,7 +27,8 @@ export function NewCourseOverview() {
 
   // Get all lessons for filtering and search
   const allLessons = useMemo(() => {
-    return mockCourse.chapters.flatMap(chapter => 
+    if (!course) return []
+    return course.chapters.flatMap(chapter => 
       chapter.lessons.map(lesson => ({
         ...lesson,
         chapterTitle: chapter.title,
@@ -152,10 +36,10 @@ export function NewCourseOverview() {
         chapterOrder: chapter.order
       }))
     )
-  }, [])
+  }, [course])
 
   // Just use the chapters directly since we're not filtering
-  const groupedLessons = mockCourse.chapters
+  const groupedLessons = course?.chapters || []
 
   // Modal components now handle their own scroll prevention using React Portal
 
@@ -193,6 +77,17 @@ export function NewCourseOverview() {
   const courseKnowledgePoints = allLessons.flatMap(lesson => lesson.knowledgePoints)
   const courseTestReadiness = calculateTestReadiness(courseKnowledgePoints)
 
+  if (!course) {
+    return (
+      <div className="flex h-screen bg-vergil-off-white overflow-hidden items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-vergil-off-black mb-2">No Course Data Available</h2>
+          <p className="text-vergil-off-black/60">Please connect to the backend to load course information.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-screen bg-vergil-off-white overflow-hidden">
       {/* Main Content */}
@@ -206,7 +101,7 @@ export function NewCourseOverview() {
                   Courses
                 </a>
                 <span className="mx-2 text-vergil-off-black/40">/</span>
-                <span className="text-vergil-off-black font-medium">{mockCourse.title}</span>
+                <span className="text-vergil-off-black font-medium">{course?.title || ''}</span>
               </nav>
             </div>
 
@@ -214,9 +109,9 @@ export function NewCourseOverview() {
             <Card className="mb-4 p-4 bg-gradient-to-br from-vergil-off-white to-white border-vergil-purple/10">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h1 className="text-xl font-bold text-vergil-off-black mb-1">{mockCourse.title}</h1>
+                  <h1 className="text-xl font-bold text-vergil-off-black mb-1">{course?.title || 'No Course Selected'}</h1>
                   <p className="text-sm text-vergil-off-black/70 max-w-2xl">
-                    {mockCourse.description}
+                    {course?.description || 'Select a course to view its details'}
                   </p>
                 </div>
                 
@@ -269,18 +164,18 @@ export function NewCourseOverview() {
                     <div className="flex flex-col items-center mb-1">
                       <div className="w-6 h-6 bg-vergil-purple/15 rounded-md flex items-center justify-center mb-1">
                         <span className="w-3 h-3 bg-vergil-purple rounded flex items-center justify-center">
-                          <span className="text-white text-[8px] font-bold">{mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}</span>
+                          <span className="text-white text-[8px] font-bold">{course?.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length || 0}</span>
                         </span>
                       </div>
                       <span className="text-xs font-semibold text-vergil-off-black">Chapter Tests</span>
                     </div>
                     <div className="text-xl font-bold text-vergil-off-black mb-1">
-                      {mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length}/{mockCourse.chapters.length}
+                      {course?.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined).length || 0}/{course?.chapters.length || 0}
                     </div>
                     <div className="text-xs text-vergil-off-black/60 text-center">
                       Completed
                       {(() => {
-                        const completedTests = mockCourse.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined)
+                        const completedTests = course?.chapters.filter(ch => ch.testScore !== null && ch.testScore !== undefined) || []
                         if (completedTests.length > 0) {
                           const avgScore = Math.round(completedTests.reduce((acc, ch) => acc + (ch.testScore || 0), 0) / completedTests.length)
                           return ` (Avg: ${avgScore}%)`
@@ -374,6 +269,9 @@ export function NewCourseOverview() {
           setShowLearnModal(true)
         }}
       />
+      
+      {/* Debug Panel - only show in development */}
+      <DebugPanel />
     </div>
   )
 }

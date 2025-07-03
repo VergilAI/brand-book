@@ -1,0 +1,154 @@
+{
+  "gameType": "flashcards",
+  "lessonId": "lesson-2-1",
+  "content": {
+    "id": "deck-lesson-2-1-v2",
+    "title": "Network Security Deep Dive",
+    "description": "Advanced network security concepts and protocols",
+    "cards": [
+      {
+        "id": "card-1",
+        "front": "What is the difference between IDS and IPS?",
+        "back": "IDS detects and alerts on threats (passive), IPS detects and blocks threats (active)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-2",
+        "front": "What are the three types of firewall architectures?",
+        "back": "1. Packet Filtering\n2. Stateful Inspection\n3. Application Layer (Proxy)",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-3",
+        "front": "What is a DMZ in network security?",
+        "back": "Demilitarized Zone - a network segment between internal network and internet for public-facing services",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-4",
+        "front": "Explain Network Segmentation",
+        "back": "Dividing network into smaller segments to limit breach impact and control access between segments",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-5",
+        "front": "What is a VLAN?",
+        "back": "Virtual Local Area Network - logical separation of networks on the same physical infrastructure",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-6",
+        "front": "What is NAT and its security benefit?",
+        "back": "Network Address Translation - hides internal IP addresses from external networks",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-7",
+        "front": "What is a honeypot?",
+        "back": "A decoy system designed to attract and detect attackers",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-8",
+        "front": "What is DDoS mitigation?",
+        "back": "Techniques to detect and block Distributed Denial of Service attacks (rate limiting, blackholing, scrubbing)",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-9",
+        "front": "What is port knocking?",
+        "back": "Security technique where closed ports open only after receiving a specific sequence of connection attempts",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-10",
+        "front": "What is ARP spoofing?",
+        "back": "Attack where attacker sends false ARP messages to associate their MAC with another IP",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-11",
+        "front": "What is 802.1X?",
+        "back": "IEEE standard for port-based network access control (NAC)",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-12",
+        "front": "What is a bastion host?",
+        "back": "Hardened server exposed to untrusted networks, serving as a single entry point",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-13",
+        "front": "What is microsegmentation?",
+        "back": "Creating secure zones in data centers and cloud deployments down to individual workload level",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-14",
+        "front": "What are the benefits of IPv6 for security?",
+        "back": "Built-in IPSec support, larger address space (harder to scan), improved header structure",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-15",
+        "front": "What is BGP hijacking?",
+        "back": "Malicious rerouting of internet traffic by falsely announcing IP prefixes",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-16",
+        "front": "What is a WAF?",
+        "back": "Web Application Firewall - protects web apps by filtering HTTP/HTTPS traffic",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-17",
+        "front": "What is SASE?",
+        "back": "Secure Access Service Edge - cloud-based security combining network and security functions",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "card-18",
+        "front": "What is lateral movement?",
+        "back": "Technique attackers use to move through a network after initial compromise",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-19",
+        "front": "What is network forensics?",
+        "back": "Capturing, recording, and analyzing network traffic to detect intrusions and investigate incidents",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "card-20",
+        "front": "What is SDN and its security implications?",
+        "back": "Software-Defined Networking - centralized control can improve security but creates single point of failure",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-6"
+      }
+    ],
+    "totalCards": 20,
+    "estimatedTime": 18,
+    "category": "Network Security"
+  }
+}

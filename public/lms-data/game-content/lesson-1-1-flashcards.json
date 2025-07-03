@@ -1,0 +1,174 @@
+{
+  "gameType": "flashcards",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "id": "deck-1",
+    "title": "The Cybersecurity Landscape",
+    "description": "Master fundamental cybersecurity concepts, threat actors, and attack vectors",
+    "cards": [
+      {
+        "id": "card-1",
+        "front": "What does the 'C' in CIA Triad stand for?",
+        "back": "Confidentiality - Ensuring that information is accessible only to those authorized to have access. It's about keeping sensitive data private and preventing unauthorized disclosure.",
+        "hint": "Think about keeping secrets safe",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-2",
+        "front": "What does the 'I' in CIA Triad stand for?",
+        "back": "Integrity - Safeguarding the accuracy and completeness of information and processing methods. It ensures data hasn't been tampered with or altered by unauthorized users.",
+        "hint": "Think about keeping data accurate and unmodified",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-3",
+        "front": "What does the 'A' in CIA Triad stand for?",
+        "back": "Availability - Ensuring that authorized users have reliable and timely access to information and resources when needed. Systems must be resilient and recoverable.",
+        "hint": "Think about systems being accessible when needed",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-4",
+        "front": "Define a Nation-State Threat Actor",
+        "back": "Government-sponsored groups that conduct cyber operations for espionage, sabotage, or warfare. They have significant resources, advanced persistent threats (APTs), and often target critical infrastructure, government agencies, or steal intellectual property.",
+        "hint": "Think about government-backed cyber operations",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-5",
+        "front": "What are Hacktivists?",
+        "back": "Individuals or groups who use hacking to promote political agendas or social change. They often deface websites, leak sensitive information, or conduct DDoS attacks to raise awareness for their cause. Examples include Anonymous and WikiLeaks.",
+        "hint": "Hacking + Activism",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-6",
+        "front": "Describe Cybercriminal Threat Actors",
+        "back": "Financially motivated attackers who use malware, ransomware, and fraud to steal money or valuable data. They operate individually or in organized crime groups, often selling stolen data on dark web markets or demanding ransom payments.",
+        "hint": "Think money and profit motivation",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-7",
+        "front": "What is an Insider Threat?",
+        "back": "Current or former employees, contractors, or business partners who have authorized access to an organization's systems and use it inappropriately. Can be malicious (intentional harm) or accidental (negligence, mistakes).",
+        "hint": "The threat comes from within the organization",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-8",
+        "front": "What is Phishing?",
+        "back": "A social engineering attack where attackers impersonate trusted entities via email, text, or phone to trick victims into revealing sensitive information, clicking malicious links, or downloading malware. Often uses urgency and fear tactics.",
+        "hint": "Fake emails that look legitimate",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-9",
+        "front": "Explain Spear Phishing vs Regular Phishing",
+        "back": "Spear phishing is highly targeted, personalized attacks aimed at specific individuals or organizations using researched information, while regular phishing uses generic messages sent to many potential victims hoping someone will fall for it.",
+        "hint": "One is targeted, one is spray-and-pray",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-10",
+        "front": "What is Malware?",
+        "back": "Malicious software designed to damage, disrupt, or gain unauthorized access to computer systems. Includes viruses, worms, trojans, ransomware, spyware, and rootkits. Often delivered through email attachments, downloads, or exploited vulnerabilities.",
+        "hint": "Malicious + Software",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-11",
+        "front": "Define Social Engineering in Cybersecurity",
+        "back": "Psychological manipulation techniques used to trick people into divulging confidential information or performing actions that compromise security. Exploits human psychology rather than technical vulnerabilities - the 'human firewall' weakness.",
+        "hint": "Hacking humans instead of computers",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-12",
+        "front": "What is a Zero-Day Vulnerability?",
+        "back": "A software security flaw unknown to the vendor and for which no patch exists. Called 'zero-day' because developers have zero days to fix it once discovered. Highly valuable to attackers as targets have no defense.",
+        "hint": "Unknown vulnerability = zero days to patch",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-13",
+        "front": "Explain the Principle of Least Privilege",
+        "back": "Security concept where users are given the minimum levels of access needed to perform their job functions. Reduces attack surface and limits damage from compromised accounts. Key principle: 'Need to know' basis for access rights.",
+        "hint": "Give only the access that's absolutely necessary",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-14",
+        "front": "What is Defense in Depth?",
+        "back": "Layered security strategy using multiple defensive mechanisms so if one fails, others still provide protection. Like a medieval castle with moat, walls, and guards. Includes physical, technical, and administrative controls working together.",
+        "hint": "Multiple layers of defense, like an onion",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-15",
+        "front": "Describe Advanced Persistent Threats (APTs)",
+        "back": "Stealthy, continuous hacking processes often orchestrated by nation-states or sophisticated groups. They maintain long-term presence in networks to steal data over time. Characteristics: highly targeted, well-resourced, patient, and difficult to detect.",
+        "hint": "Advanced + Persistent = long-term sophisticated attacks",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-16",
+        "front": "What is Ransomware?",
+        "back": "Malware that encrypts victim's files and demands payment (usually cryptocurrency) for the decryption key. Modern variants also steal data before encryption, threatening to leak it if ransom isn't paid (double extortion).",
+        "hint": "Pay ransom to get your files back",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-17",
+        "front": "Explain the Difference Between Confidentiality and Privacy",
+        "back": "Confidentiality is about protecting information from unauthorized access (a security measure), while Privacy is about the right to control how personal information is collected, used, and shared (a human right). Confidentiality protects privacy.",
+        "hint": "One is a security control, one is a human right",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-18",
+        "front": "What is a Supply Chain Attack?",
+        "back": "Targeting less-secure elements in an organization's supply chain to reach the primary target. Attackers compromise trusted third-party vendors, software providers, or service providers to gain access to their customers' systems. SolarWinds is a famous example.",
+        "hint": "Attack the supplier to reach the target",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-19",
+        "front": "Define Script Kiddies",
+        "back": "Inexperienced hackers who use existing tools and scripts created by others without understanding how they work. Limited technical skills but can still cause damage. Often motivated by notoriety or curiosity rather than financial gain.",
+        "hint": "Amateur hackers using others' tools",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-20",
+        "front": "What is the Dark Web's Role in Cybercrime?",
+        "back": "Hidden part of internet requiring special software (like Tor) to access. Provides anonymity for illegal activities: selling stolen data, malware-as-a-service, hiring hackers, drug trafficking. Also used for legitimate privacy purposes in oppressive regimes.",
+        "hint": "Anonymous marketplace for cybercriminals",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      }
+    ],
+    "totalCards": 20,
+    "estimatedTime": 25,
+    "category": "Cybersecurity Fundamentals"
+  }
+}

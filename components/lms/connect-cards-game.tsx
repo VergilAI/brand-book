@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { ProgressAPI } from '@/app/lms/new_course_overview/api/progress-api'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Trophy, 
@@ -61,6 +62,7 @@ interface ConnectCardsGameProps {
   onComplete: (result: ConnectCardsGameResult) => void
   onQuit: () => void
   className?: string
+  lessonId?: string // Add lesson ID for progress tracking
 }
 
 export function ConnectCardsGame({
@@ -68,7 +70,8 @@ export function ConnectCardsGame({
   title = "Connect the Cards",
   onComplete,
   onQuit,
-  className
+  className,
+  lessonId
 }: ConnectCardsGameProps) {
   const [gameState, setGameState] = useState<ConnectCardsGameState>({
     selectedLeftCard: null,
@@ -299,9 +302,41 @@ export function ConnectCardsGame({
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => {
+                  onClick={async () => {
                     const completionTime = (gameState.endTime! - gameState.startTime) / 1000
                     const accuracy = (gameState.correctAnswers / (gameState.correctAnswers + gameState.incorrectAnswers)) * 100
+                    
+                    // Process progress if lessonId is provided
+                    if (lessonId) {
+                      try {
+                        // Create results for progress tracking
+                        const results = pairs.map((pair, index) => ({
+                          pairId: pair.matchId,
+                          isCorrect: gameState.matchedPairs.has(pair.matchId),
+                          attempts: gameState.matchedPairs.has(pair.matchId) ? 1 : 2 // Mock attempts
+                        }))
+                        
+                        console.log('🃏 CONNECT CARDS: About to process completion:', {
+                          lessonId,
+                          results,
+                          totalPairs: pairs.length,
+                          matchedPairs: gameState.matchedPairs.size
+                        })
+                        
+                        await ProgressAPI.processConnectCardsCompletion(lessonId, results)
+                        console.log('✅ CONNECT CARDS: Progress updated for lesson:', lessonId)
+                        
+                        // Check localStorage immediately after
+                        console.log('📂 CONNECT CARDS: Checking localStorage after update:')
+                        console.log('Lesson data:', localStorage.getItem(`lesson_progress_${lessonId}`))
+                        console.log('Course data:', localStorage.getItem(`user-progress-course-1`))
+                        
+                      } catch (error) {
+                        console.error('❌ CONNECT CARDS: Failed to update progress:', error)
+                      }
+                    } else {
+                      console.warn('⚠️ CONNECT CARDS: No lessonId provided, skipping progress update')
+                    }
                     
                     onComplete({
                       correctAnswers: gameState.correctAnswers,

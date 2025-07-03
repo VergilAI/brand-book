@@ -1,0 +1,203 @@
+{
+  "gameType": "millionaire",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "questions": [
+      {
+        "id": "q-1",
+        "question": "Which of the following is NOT part of the CIA Triad?",
+        "answers": {
+          "A": "Confidentiality",
+          "B": "Integrity",
+          "C": "Authentication",
+          "D": "Availability"
+        },
+        "correctAnswer": "C",
+        "difficulty": 1,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-2",
+        "question": "What does 'Confidentiality' in the CIA Triad primarily protect against?",
+        "answers": {
+          "A": "System downtime",
+          "B": "Unauthorized disclosure of information",
+          "C": "Data corruption",
+          "D": "Physical theft"
+        },
+        "correctAnswer": "B",
+        "difficulty": 2,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-3",
+        "question": "Which threat actor is typically motivated by financial gain?",
+        "answers": {
+          "A": "Hacktivists",
+          "B": "Nation-states",
+          "C": "Cybercriminals",
+          "D": "Script kiddies"
+        },
+        "correctAnswer": "C",
+        "difficulty": 3,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-4",
+        "question": "What type of attack specifically targets high-profile individuals with personalized messages?",
+        "answers": {
+          "A": "Phishing",
+          "B": "Spear phishing",
+          "C": "Vishing",
+          "D": "Smishing"
+        },
+        "correctAnswer": "B",
+        "difficulty": 4,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-5",
+        "question": "Which principle ensures that data hasn't been tampered with or altered?",
+        "answers": {
+          "A": "Confidentiality",
+          "B": "Availability",
+          "C": "Integrity",
+          "D": "Non-repudiation"
+        },
+        "correctAnswer": "C",
+        "difficulty": 5,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-6",
+        "question": "What distinguishes an Advanced Persistent Threat (APT) from other attacks?",
+        "answers": {
+          "A": "They are always ransomware attacks",
+          "B": "They maintain long-term presence in networks",
+          "C": "They only target individuals",
+          "D": "They are performed by script kiddies"
+        },
+        "correctAnswer": "B",
+        "difficulty": 6,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-7",
+        "question": "In cybersecurity, what is 'Social Engineering' primarily targeting?",
+        "answers": {
+          "A": "Computer hardware",
+          "B": "Network protocols",
+          "C": "Human psychology",
+          "D": "Operating systems"
+        },
+        "correctAnswer": "C",
+        "difficulty": 7,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-8",
+        "question": "Which attack vector involves compromising a trusted third-party to reach the actual target?",
+        "answers": {
+          "A": "Direct attack",
+          "B": "Supply chain attack",
+          "C": "Brute force attack",
+          "D": "Man-in-the-middle attack"
+        },
+        "correctAnswer": "B",
+        "difficulty": 8,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-9",
+        "question": "What type of threat can be either malicious or accidental but comes from within the organization?",
+        "answers": {
+          "A": "Nation-state threat",
+          "B": "Hacktivist threat",
+          "C": "Insider threat",
+          "D": "Zero-day threat"
+        },
+        "correctAnswer": "C",
+        "difficulty": 9,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-10",
+        "question": "Which security principle states that users should only have the minimum access required for their job?",
+        "answers": {
+          "A": "Defense in Depth",
+          "B": "Principle of Least Privilege",
+          "C": "Separation of Duties",
+          "D": "Security through Obscurity"
+        },
+        "correctAnswer": "B",
+        "difficulty": 10,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-11",
+        "question": "What makes a 'Zero-Day' vulnerability particularly dangerous?",
+        "answers": {
+          "A": "It affects zero systems",
+          "B": "No patch exists yet",
+          "C": "It only lasts for one day",
+          "D": "It's easy to detect"
+        },
+        "correctAnswer": "B",
+        "difficulty": 11,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-12",
+        "question": "Which group is known for using hacking to promote political agendas?",
+        "answers": {
+          "A": "Script kiddies",
+          "B": "Cybercriminals",
+          "C": "Hacktivists",
+          "D": "Insider threats"
+        },
+        "correctAnswer": "C",
+        "difficulty": 12,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-13",
+        "question": "What type of malware encrypts files and demands payment for decryption?",
+        "answers": {
+          "A": "Spyware",
+          "B": "Adware",
+          "C": "Rootkit",
+          "D": "Ransomware"
+        },
+        "correctAnswer": "D",
+        "difficulty": 13,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-14",
+        "question": "The 'Defense in Depth' strategy is best compared to which physical security model?",
+        "answers": {
+          "A": "A single locked door",
+          "B": "A medieval castle with multiple defenses",
+          "C": "A hidden bunker",
+          "D": "An open field"
+        },
+        "correctAnswer": "B",
+        "difficulty": 14,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-15",
+        "question": "Which statement best describes the relationship between Confidentiality and Privacy?",
+        "answers": {
+          "A": "They are the same thing",
+          "B": "Privacy is a technical control, Confidentiality is a human right",
+          "C": "Confidentiality protects Privacy",
+          "D": "Privacy protects Confidentiality"
+        },
+        "correctAnswer": "C",
+        "difficulty": 15,
+        "knowledgePointId": "kp-1"
+      }
+    ]
+  }
+}

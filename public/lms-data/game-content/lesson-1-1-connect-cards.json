@@ -1,0 +1,183 @@
+{
+  "gameType": "connect-cards",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "title": "Cybersecurity Fundamentals - Match the Concepts",
+    "description": "Connect security principles, threats, and attack vectors with their definitions",
+    "pairs": [
+      {
+        "matchId": "match-1",
+        "leftCard": {
+          "id": "l-1",
+          "content": "Confidentiality",
+          "matchId": "match-1",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-1",
+          "content": "Keeping information secret from unauthorized users",
+          "matchId": "match-1",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-2",
+        "leftCard": {
+          "id": "l-2",
+          "content": "Integrity",
+          "matchId": "match-2",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-2",
+          "content": "Ensuring data remains accurate and unmodified",
+          "matchId": "match-2",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-3",
+        "leftCard": {
+          "id": "l-3",
+          "content": "Availability",
+          "matchId": "match-3",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-3",
+          "content": "Systems accessible when authorized users need them",
+          "matchId": "match-3",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-4",
+        "leftCard": {
+          "id": "l-4",
+          "content": "Nation-State Actor",
+          "matchId": "match-4",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-4",
+          "content": "Government-sponsored cyber operations",
+          "matchId": "match-4",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-5",
+        "leftCard": {
+          "id": "l-5",
+          "content": "Hacktivist",
+          "matchId": "match-5",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-5",
+          "content": "Attacks for political or social causes",
+          "matchId": "match-5",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-6",
+        "leftCard": {
+          "id": "l-6",
+          "content": "Phishing",
+          "matchId": "match-6",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-6",
+          "content": "Fake emails to steal credentials or data",
+          "matchId": "match-6",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-7",
+        "leftCard": {
+          "id": "l-7",
+          "content": "Ransomware",
+          "matchId": "match-7",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-7",
+          "content": "Encrypts files and demands payment",
+          "matchId": "match-7",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-8",
+        "leftCard": {
+          "id": "l-8",
+          "content": "Zero-Day",
+          "matchId": "match-8",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-8",
+          "content": "Unknown vulnerability with no patch",
+          "matchId": "match-8",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-9",
+        "leftCard": {
+          "id": "l-9",
+          "content": "Social Engineering",
+          "matchId": "match-9",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-9",
+          "content": "Manipulating people to divulge information",
+          "matchId": "match-9",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-10",
+        "leftCard": {
+          "id": "l-10",
+          "content": "APT",
+          "matchId": "match-10",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-10",
+          "content": "Advanced Persistent Threat - long-term network presence",
+          "matchId": "match-10",
+          "side": "right",
+          "type": "text"
+        }
+      }
+    ],
+    "difficulty": "easy",
+    "timeLimit": 120,
+    "category": "Cybersecurity Fundamentals"
+  }
+}

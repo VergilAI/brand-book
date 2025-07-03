@@ -135,13 +135,19 @@ export function LessonModal({
                       {category === 'chat' ? 'Interactive' : category} Activities
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {categoryGames.map(game => (
-                        <GameTypeCard
-                          key={game.id}
-                          gameType={game}
-                          onClick={() => onSelectGame?.(game.id)}
-                        />
-                      ))}
+                      {categoryGames.map(game => {
+                        // Disable audio and video materials for now
+                        const isAvailable = !['video', 'audio-material'].includes(game.id)
+                        
+                        return (
+                          <GameTypeCard
+                            key={game.id}
+                            gameType={game}
+                            isAvailable={isAvailable}
+                            onClick={isAvailable ? () => onSelectGame?.(game.id) : undefined}
+                          />
+                        )
+                      })}
                     </div>
                   </div>
                 )

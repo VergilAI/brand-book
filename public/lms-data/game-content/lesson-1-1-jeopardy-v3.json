@@ -1,0 +1,212 @@
+{
+  "gameType": "jeopardy",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "categories": [
+      {
+        "name": "Real-World Attacks",
+        "questions": [
+          {
+            "id": "real-100",
+            "value": 100,
+            "question": "This 2021 attack shut down the largest fuel pipeline in the US.",
+            "answer": "What is the Colonial Pipeline ransomware attack?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "real-200",
+            "value": 200,
+            "question": "This retailer's 2013 breach started through an HVAC vendor.",
+            "answer": "What is Target?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "real-300",
+            "value": 300,
+            "question": "This 2020 supply chain attack affected 18,000 organizations.",
+            "answer": "What is SolarWinds?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "real-400",
+            "value": 400,
+            "question": "This virus in 2000 caused $10 billion in damages via email.",
+            "answer": "What is the ILOVEYOU virus?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "real-500",
+            "value": 500,
+            "question": "This 1988 worm led to the creation of CERT.",
+            "answer": "What is the Morris Worm?",
+            "knowledgePointId": "kp-2"
+          }
+        ]
+      },
+      {
+        "name": "Security Acronyms",
+        "questions": [
+          {
+            "id": "acro-100",
+            "value": 100,
+            "question": "MFA",
+            "answer": "What is Multi-Factor Authentication?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "acro-200",
+            "value": 200,
+            "question": "SIEM",
+            "answer": "What is Security Information and Event Management?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "acro-300",
+            "value": 300,
+            "question": "EDR",
+            "answer": "What is Endpoint Detection and Response?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "acro-400",
+            "value": 400,
+            "question": "CASB",
+            "answer": "What is Cloud Access Security Broker?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "acro-500",
+            "value": 500,
+            "question": "SOAR",
+            "answer": "What is Security Orchestration, Automation and Response?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      },
+      {
+        "name": "Attack Techniques",
+        "questions": [
+          {
+            "id": "tech-100",
+            "value": 100,
+            "question": "Sending fake emails to steal credentials.",
+            "answer": "What is phishing?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "tech-200",
+            "value": 200,
+            "question": "Creating similar domain names to catch typos.",
+            "answer": "What is typosquatting?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "tech-300",
+            "value": 300,
+            "question": "Using tools already on the victim's system.",
+            "answer": "What is Living Off the Land?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "tech-400",
+            "value": 400,
+            "question": "Compromising sites frequently visited by targets.",
+            "answer": "What is a watering hole attack?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "tech-500",
+            "value": 500,
+            "question": "Malware that changes code to evade detection.",
+            "answer": "What is polymorphic malware?",
+            "knowledgePointId": "kp-3"
+          }
+        ]
+      },
+      {
+        "name": "By the Numbers",
+        "questions": [
+          {
+            "id": "num-100",
+            "value": 100,
+            "question": "Percentage of attacks that exploit human error.",
+            "answer": "What is 95%?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "num-200",
+            "value": 200,
+            "question": "Average cost of a data breach in 2024.",
+            "answer": "What is $4.45 million?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "num-300",
+            "value": 300,
+            "question": "Amazon's loss per minute of downtime.",
+            "answer": "What is $66,240?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "num-400",
+            "value": 400,
+            "question": "Maximum price for an iOS zero-day.",
+            "answer": "What is $2.5 million?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "num-500",
+            "value": 500,
+            "question": "Average attacker dwell time in days.",
+            "answer": "What is 200+ days (or several months)?",
+            "knowledgePointId": "kp-2"
+          }
+        ]
+      },
+      {
+        "name": "Defense Strategies",
+        "questions": [
+          {
+            "id": "def-100",
+            "value": 100,
+            "question": "Giving users only the access they need.",
+            "answer": "What is Least Privilege?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "def-200",
+            "value": 200,
+            "question": "Multiple layers of security controls.",
+            "answer": "What is Defense in Depth?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "def-300",
+            "value": 300,
+            "question": "Assuming no trust, even for internal users.",
+            "answer": "What is Zero Trust?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "def-400",
+            "value": 400,
+            "question": "A decoy system to attract attackers.",
+            "answer": "What is a honeypot?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "def-500",
+            "value": 500,
+            "question": "Dividing networks to limit breach impact.",
+            "answer": "What is network segmentation?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      }
+    ],
+    "dailyDouble": {
+      "categoryIndex": 0,
+      "questionIndex": 2
+    }
+  }
+}

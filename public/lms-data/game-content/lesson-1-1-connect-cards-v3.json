@@ -1,0 +1,183 @@
+{
+  "gameType": "connect-cards",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "title": "Cybersecurity History & Evolution - Timeline Matching",
+    "description": "Match significant cybersecurity events and milestones with their dates and impacts",
+    "pairs": [
+      {
+        "matchId": "match-1",
+        "leftCard": {
+          "id": "l-1",
+          "content": "Morris Worm (1988)",
+          "matchId": "match-1",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-1",
+          "content": "First major internet worm, led to CERT creation",
+          "matchId": "match-1",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-2",
+        "leftCard": {
+          "id": "l-2",
+          "content": "ILOVEYOU Virus (2000)",
+          "matchId": "match-2",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-2",
+          "content": "$10 billion in damages, email attachment attack",
+          "matchId": "match-2",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-3",
+        "leftCard": {
+          "id": "l-3",
+          "content": "Stuxnet (2010)",
+          "matchId": "match-3",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-3",
+          "content": "First known cyberweapon targeting physical infrastructure",
+          "matchId": "match-3",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-4",
+        "leftCard": {
+          "id": "l-4",
+          "content": "WannaCry (2017)",
+          "matchId": "match-4",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-4",
+          "content": "Global ransomware, exploited EternalBlue vulnerability",
+          "matchId": "match-4",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-5",
+        "leftCard": {
+          "id": "l-5",
+          "content": "Target Breach (2013)",
+          "matchId": "match-5",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-5",
+          "content": "40 million credit cards stolen via HVAC vendor",
+          "matchId": "match-5",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-6",
+        "leftCard": {
+          "id": "l-6",
+          "content": "Equifax Breach (2017)",
+          "matchId": "match-6",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-6",
+          "content": "147 million SSNs exposed, unpatched Apache Struts",
+          "matchId": "match-6",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-7",
+        "leftCard": {
+          "id": "l-7",
+          "content": "SolarWinds (2020)",
+          "matchId": "match-7",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-7",
+          "content": "Supply chain attack affecting 18,000 organizations",
+          "matchId": "match-7",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-8",
+        "leftCard": {
+          "id": "l-8",
+          "content": "Colonial Pipeline (2021)",
+          "matchId": "match-8",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-8",
+          "content": "Ransomware shut down fuel pipeline, $4.4M paid",
+          "matchId": "match-8",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-9",
+        "leftCard": {
+          "id": "l-9",
+          "content": "Kevin Mitnick Arrest (1995)",
+          "matchId": "match-9",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-9",
+          "content": "Most wanted hacker, highlighted social engineering",
+          "matchId": "match-9",
+          "side": "right",
+          "type": "text"
+        }
+      },
+      {
+        "matchId": "match-10",
+        "leftCard": {
+          "id": "l-10",
+          "content": "GDPR Enacted (2018)",
+          "matchId": "match-10",
+          "side": "left",
+          "type": "text"
+        },
+        "rightCard": {
+          "id": "r-10",
+          "content": "EU privacy law with fines up to 4% of revenue",
+          "matchId": "match-10",
+          "side": "right",
+          "type": "text"
+        }
+      }
+    ],
+    "difficulty": "hard",
+    "timeLimit": 180,
+    "category": "Cybersecurity History"
+  }
+}

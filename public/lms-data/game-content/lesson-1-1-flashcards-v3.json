@@ -1,0 +1,174 @@
+{
+  "gameType": "flashcards",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "id": "deck-1-v3",
+    "title": "The Cybersecurity Landscape - Real-World Scenarios",
+    "description": "Practical applications and case studies of cybersecurity principles",
+    "cards": [
+      {
+        "id": "card-1",
+        "front": "How does the CIA Triad apply to a hospital's patient records system?",
+        "back": "Confidentiality: Patient data must be private (HIPAA compliance). Integrity: Medical records must be accurate (wrong data could be fatal). Availability: 24/7 access needed for emergencies. Balance is critical - encryption can't slow emergency access.",
+        "hint": "Life-or-death data protection",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-2",
+        "front": "What was the SolarWinds attack and why was it significant?",
+        "back": "A supply chain attack where Russian hackers compromised SolarWinds' Orion software updates, affecting 18,000+ organizations including US government agencies. Showed vulnerability of trusted software providers and difficulty of supply chain security.",
+        "hint": "Major 2020 supply chain breach",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-3",
+        "front": "How do ransomware groups operate as 'Ransomware-as-a-Service' (RaaS)?",
+        "back": "Criminal groups develop ransomware and lease it to affiliates who conduct attacks. Developers get 20-30% of ransom, affiliates get 70-80%. Lowers barrier to entry, professionalizes cybercrime. Examples: REvil, DarkSide, LockBit.",
+        "hint": "Cybercrime franchise model",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-4",
+        "front": "What security principles did the Equifax breach violate?",
+        "back": "Failed patch management (Apache Struts vulnerability unpatched for months), poor network segmentation (attackers moved laterally), weak incident response (breach undetected for 76 days), inadequate data protection (SSNs in cleartext).",
+        "hint": "2017 breach affecting 147 million",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-5",
+        "front": "How do 'Bug Bounty' programs improve security?",
+        "back": "Organizations pay ethical hackers to find vulnerabilities before criminals do. Creates positive incentive for security research, continuous testing, and responsible disclosure. Major programs: HackerOne, Bugcrowd. Google paid $6.7M in 2020.",
+        "hint": "Paying good guys to find bugs",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-6",
+        "front": "What is 'Credential Stuffing' and why does it work?",
+        "back": "Automated injection of stolen username/password pairs into login forms. Works because people reuse passwords across sites. Billions of credentials available from breaches. Not technically hacking - uses legitimate login process.",
+        "hint": "Exploiting password reuse",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-7",
+        "front": "Explain the Colonial Pipeline ransomware impact",
+        "back": "2021 DarkSide ransomware shut down largest US fuel pipeline for 6 days. Caused gas shortages, price spikes, panic buying. Paid $4.4M ransom. Showed critical infrastructure vulnerability and real-world impact of cyber attacks.",
+        "hint": "When cyber attacks affect gas pumps",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-8",
+        "front": "How does 'Deepfake' technology threaten security?",
+        "back": "AI-generated fake videos/audio used for social engineering, fraud, disinformation. CEO fraud using voice cloning, fake evidence, reputation attacks. Detection becoming harder. Threatens trust in digital communications.",
+        "hint": "AI-powered impersonation",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-9",
+        "front": "What is 'Juice Jacking' and how to prevent it?",
+        "back": "Malware installation or data theft through public USB charging stations. Malicious cables or compromised ports can access phone data. Prevention: Use AC outlets, bring your own cables, use USB data blockers, or portable battery packs.",
+        "hint": "Danger in public charging",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-10",
+        "front": "How did Stuxnet change the cybersecurity landscape?",
+        "back": "First known cyberweapon targeting physical infrastructure (Iranian nuclear centrifuges). Showed cyber attacks could cause physical damage. Attributed to US/Israel. Opened era of nation-state cyber warfare and critical infrastructure targeting.",
+        "hint": "The cyber weapon that broke things",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-11",
+        "front": "What is 'Sim Swapping' and its dangers?",
+        "back": "Attackers transfer victim's phone number to their SIM card by social engineering carriers. Bypasses SMS-based 2FA, allows password resets, account takeovers. Used to steal cryptocurrency, hijack social media. Shows weakness of SMS for authentication.",
+        "hint": "Stealing phone numbers for account access",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-12",
+        "front": "Explain 'Business Email Compromise' (BEC) tactics",
+        "back": "Criminals impersonate executives or vendors to trick employees into transferring money. Uses social engineering, email spoofing, similar domains. FBI: $43B lost 2016-2021. Often targets finance departments, uses urgency, appears legitimate.",
+        "hint": "Fake boss, real money loss",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-13",
+        "front": "What security lessons came from the Target breach?",
+        "back": "Third-party vendor (HVAC) credentials led to network access. Poor network segmentation allowed lateral movement to POS systems. Ignored security alerts. Cost: $202M, CEO resigned. Led to increased focus on vendor risk management.",
+        "hint": "2013 holiday shopping nightmare",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-14",
+        "front": "How do 'Cryptojacking' attacks work?",
+        "back": "Malware or scripts hijack computing resources to mine cryptocurrency without owner's knowledge. Can be delivered via malware, browser scripts, or compromised websites. Slows systems, increases power bills. Hard to detect as no data is stolen.",
+        "hint": "Secret cryptocurrency mining",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-15",
+        "front": "What is 'Vishing' and common techniques?",
+        "back": "Voice phishing using phone calls to steal information. Techniques: Spoofed caller ID, urgency (account compromised), authority (IRS/police), tech support scams. Often targets elderly. Can be combined with other attacks for credibility.",
+        "hint": "Phishing via phone calls",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-16",
+        "front": "Explain the 'NotPetya' attack and its impact",
+        "back": "2017 Russian cyberattack disguised as ransomware but designed to destroy. Spread via Ukrainian tax software, caused $10B+ damage globally. Hit Maersk, FedEx, Merck. Showed how regional attacks can cascade globally through interconnected systems.",
+        "hint": "Ransomware that wasn't after money",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-17",
+        "front": "How does 'Doxing' work as a cyber threat?",
+        "back": "Publishing private information (address, phone, SSN) to harass or endanger victims. Uses OSINT, data breaches, social engineering. Can lead to swatting, harassment, identity theft. Often used by hacktivists or in targeted harassment campaigns.",
+        "hint": "Weaponizing personal information",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-18",
+        "front": "What are 'Adversarial AI' attacks?",
+        "back": "Attacks targeting AI/ML systems: poisoning training data, adversarial examples (slightly modified inputs causing misclassification), model extraction, privacy attacks on training data. Growing threat as AI adoption increases.",
+        "hint": "Hacking artificial intelligence",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-19",
+        "front": "How do 'Magecart' attacks compromise e-commerce?",
+        "back": "JavaScript-based attacks that steal credit card data from e-commerce checkout pages. Inject malicious code via compromised third-party scripts, supply chain attacks, or direct website compromise. Affects thousands of sites, millions of cards.",
+        "hint": "Credit card skimming on websites",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-20",
+        "front": "What is 'Zoom Bombing' and broader implications?",
+        "back": "Uninvited participants disrupting video conferences with inappropriate content. Highlighted security vs usability trade-offs, importance of default security settings, and new attack vectors from rapid digital transformation during COVID-19.",
+        "hint": "When meetings get crashed",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      }
+    ],
+    "totalCards": 20,
+    "estimatedTime": 30,
+    "category": "Cybersecurity Fundamentals"
+  }
+}

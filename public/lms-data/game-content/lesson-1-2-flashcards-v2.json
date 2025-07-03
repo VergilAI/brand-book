@@ -1,0 +1,154 @@
+{
+  "gameType": "flashcards",
+  "lessonId": "lesson-1-2",
+  "content": {
+    "id": "deck-lesson-1-2-v2",
+    "title": "Risk Assessment in Practice",
+    "description": "Real-world risk scenarios and practical applications",
+    "cards": [
+      {
+        "id": "card-1",
+        "front": "Company discovers unpatched servers. What type of risk component is this?",
+        "back": "Vulnerability - a weakness that could be exploited",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-2",
+        "front": "A hurricane threatening a data center represents what?",
+        "back": "Threat - a potential danger to assets (environmental threat)",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-3",
+        "front": "Calculate: SLE = $100,000, ARO = 0.1. What is ALE?",
+        "back": "ALE = $10,000 (SLE × ARO = $100,000 × 0.1)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-4",
+        "front": "A small business accepts the risk of minor data loss. This is an example of?",
+        "back": "Risk Acceptance - choosing to tolerate the risk",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-5",
+        "front": "What's the difference between Risk Appetite and Risk Tolerance?",
+        "back": "Appetite is overall willingness to take risks; Tolerance is specific limits around objectives",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-6",
+        "front": "A bank implements MFA after password breaches. This demonstrates?",
+        "back": "Risk Mitigation - reducing likelihood/impact through controls",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-7",
+        "front": "In a 5x5 risk matrix, what does a score of 20 typically indicate?",
+        "back": "Critical/High risk (4×5 or 5×4 = likelihood × impact)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-8",
+        "front": "Company buys cyber insurance. What risk treatment is this?",
+        "back": "Risk Transfer - shifting financial impact to insurer",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-9",
+        "front": "After implementing firewalls, some risk remains. This is called?",
+        "back": "Residual Risk - risk left after controls are applied",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-10",
+        "front": "Company decides not to store credit cards. What risk treatment?",
+        "back": "Risk Avoidance - eliminating the risk entirely",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-11",
+        "front": "What should be documented for each risk in a Risk Register?",
+        "back": "Risk ID, Description, Owner, Likelihood, Impact, Treatment Plan, Status",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-12",
+        "front": "CCTV cameras are what type of control?",
+        "back": "Physical and Detective - physical security that detects incidents",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-13",
+        "front": "A security policy is what type of control?",
+        "back": "Administrative/Managerial Control",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-14",
+        "front": "What's the main advantage of Qualitative Risk Assessment?",
+        "back": "Quick, easy to understand, doesn't require extensive data",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-15",
+        "front": "What's the main advantage of Quantitative Risk Assessment?",
+        "back": "Provides specific financial values for decision-making",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-16",
+        "front": "When would you use a Compensating Control?",
+        "back": "When the primary control is too expensive, impractical, or incompatible",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-17",
+        "front": "A startup with high risk appetite vs. a bank - who accepts more risk?",
+        "back": "Startup - typically has higher risk appetite for growth",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-18",
+        "front": "Risk of $1M loss with 5% chance. What's the Risk Exposure?",
+        "back": "$50,000 (Impact × Probability = $1M × 0.05)",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-19",
+        "front": "What's the first step in any risk assessment?",
+        "back": "Asset Identification - know what you're protecting",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-20",
+        "front": "How often should risk assessments be performed?",
+        "back": "Regularly (annually) and when significant changes occur",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      }
+    ],
+    "totalCards": 20,
+    "estimatedTime": 15,
+    "category": "Risk Management"
+  }
+}

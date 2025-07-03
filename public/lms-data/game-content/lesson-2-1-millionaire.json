@@ -1,0 +1,203 @@
+{
+  "gameType": "millionaire",
+  "lessonId": "lesson-2-1",
+  "content": {
+    "questions": [
+      {
+        "id": "q-1",
+        "question": "What layer of the OSI model do traditional firewalls operate at?",
+        "answers": {
+          "A": "Application Layer",
+          "B": "Transport Layer",
+          "C": "Network Layer",
+          "D": "Physical Layer"
+        },
+        "correctAnswer": "C",
+        "difficulty": 1,
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "q-2",
+        "question": "Which protocol is commonly used for secure remote access?",
+        "answers": {
+          "A": "Telnet",
+          "B": "FTP",
+          "C": "SSH",
+          "D": "HTTP"
+        },
+        "correctAnswer": "C",
+        "difficulty": 2,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-3",
+        "question": "What does VLAN stand for?",
+        "answers": {
+          "A": "Virtual Link Area Network",
+          "B": "Virtual Local Area Network",
+          "C": "Variable Length Allocated Network",
+          "D": "Verified Local Access Network"
+        },
+        "correctAnswer": "B",
+        "difficulty": 3,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-4",
+        "question": "Which device operates at Layer 2 of the OSI model?",
+        "answers": {
+          "A": "Router",
+          "B": "Hub",
+          "C": "Switch",
+          "D": "Firewall"
+        },
+        "correctAnswer": "C",
+        "difficulty": 4,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-5",
+        "question": "What is the purpose of a DMZ?",
+        "answers": {
+          "A": "Increase network speed",
+          "B": "Isolate public-facing services",
+          "C": "Encrypt all traffic",
+          "D": "Block all external access"
+        },
+        "correctAnswer": "B",
+        "difficulty": 5,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-6",
+        "question": "Which attack targets the ARP protocol?",
+        "answers": {
+          "A": "SQL Injection",
+          "B": "Cross-site Scripting",
+          "C": "ARP Spoofing",
+          "D": "Buffer Overflow"
+        },
+        "correctAnswer": "C",
+        "difficulty": 6,
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "q-7",
+        "question": "What does IPS stand for?",
+        "answers": {
+          "A": "Internet Protocol Security",
+          "B": "Intrusion Prevention System",
+          "C": "Internal Protection Service",
+          "D": "Integrated Platform Security"
+        },
+        "correctAnswer": "B",
+        "difficulty": 7,
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "q-8",
+        "question": "Which port does HTTPS use by default?",
+        "answers": {
+          "A": "80",
+          "B": "22",
+          "C": "443",
+          "D": "8080"
+        },
+        "correctAnswer": "C",
+        "difficulty": 8,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-9",
+        "question": "What is the main difference between IDS and IPS?",
+        "answers": {
+          "A": "IDS is faster than IPS",
+          "B": "IPS blocks threats, IDS only detects",
+          "C": "IDS is more expensive",
+          "D": "They are the same thing"
+        },
+        "correctAnswer": "B",
+        "difficulty": 9,
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "q-10",
+        "question": "What is network segmentation primarily used for?",
+        "answers": {
+          "A": "Increasing bandwidth",
+          "B": "Reducing costs",
+          "C": "Limiting breach impact",
+          "D": "Improving latency"
+        },
+        "correctAnswer": "C",
+        "difficulty": 10,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-11",
+        "question": "Which technology hides internal IP addresses?",
+        "answers": {
+          "A": "DNS",
+          "B": "NAT",
+          "C": "DHCP",
+          "D": "VPN"
+        },
+        "correctAnswer": "B",
+        "difficulty": 11,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-12",
+        "question": "What is a honeypot designed to do?",
+        "answers": {
+          "A": "Encrypt data",
+          "B": "Speed up networks",
+          "C": "Attract attackers",
+          "D": "Block malware"
+        },
+        "correctAnswer": "C",
+        "difficulty": 12,
+        "knowledgePointId": "kp-7"
+      },
+      {
+        "id": "q-13",
+        "question": "802.1X is a standard for?",
+        "answers": {
+          "A": "Wireless encryption",
+          "B": "Port-based access control",
+          "C": "VPN protocols",
+          "D": "Firewall rules"
+        },
+        "correctAnswer": "B",
+        "difficulty": 13,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-14",
+        "question": "What does SASE combine?",
+        "answers": {
+          "A": "Storage and compute",
+          "B": "Network and security functions",
+          "C": "Hardware and software",
+          "D": "Users and devices"
+        },
+        "correctAnswer": "B",
+        "difficulty": 14,
+        "knowledgePointId": "kp-6"
+      },
+      {
+        "id": "q-15",
+        "question": "What is microsegmentation?",
+        "answers": {
+          "A": "Small network packets",
+          "B": "Dividing storage into parts",
+          "C": "Security zones per workload",
+          "D": "Tiny firewall rules"
+        },
+        "correctAnswer": "C",
+        "difficulty": 15,
+        "knowledgePointId": "kp-6"
+      }
+    ]
+  }
+}

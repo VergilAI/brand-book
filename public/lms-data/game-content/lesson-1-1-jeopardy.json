@@ -1,0 +1,212 @@
+{
+  "gameType": "jeopardy",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "categories": [
+      {
+        "name": "CIA Triad",
+        "questions": [
+          {
+            "id": "cia-100",
+            "value": 100,
+            "question": "What is the property that ensures data is only accessible to authorized users?",
+            "answer": "What is Confidentiality?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "cia-200",
+            "value": 200,
+            "question": "What is the property that ensures data remains accurate and unmodified?",
+            "answer": "What is Integrity?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "cia-300",
+            "value": 300,
+            "question": "What is the property that ensures systems are accessible when needed?",
+            "answer": "What is Availability?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "cia-400",
+            "value": 400,
+            "question": "What security principle adds Possession, Authenticity, and Utility to the CIA Triad?",
+            "answer": "What is the Parkerian Hexad?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "cia-500",
+            "value": 500,
+            "question": "In the CIA Triad, which two principles often conflict when implementing contact tracing apps?",
+            "answer": "What are Confidentiality and Availability?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      },
+      {
+        "name": "Threat Actors",
+        "questions": [
+          {
+            "id": "threat-100",
+            "value": 100,
+            "question": "These attackers have the least technical skill and use pre-made tools.",
+            "answer": "Who are Script Kiddies?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "threat-200",
+            "value": 200,
+            "question": "These attackers are motivated by political or social causes.",
+            "answer": "Who are Hacktivists?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "threat-300",
+            "value": 300,
+            "question": "These attackers have the most resources and often target other governments.",
+            "answer": "Who are Nation-State Actors?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "threat-400",
+            "value": 400,
+            "question": "This threat comes from employees or contractors with legitimate access.",
+            "answer": "What is an Insider Threat?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "threat-500",
+            "value": 500,
+            "question": "APT stands for this type of sophisticated, long-term threat.",
+            "answer": "What is Advanced Persistent Threat?",
+            "knowledgePointId": "kp-2"
+          }
+        ]
+      },
+      {
+        "name": "Attack Vectors",
+        "questions": [
+          {
+            "id": "attack-100",
+            "value": 100,
+            "question": "This attack uses fake emails to steal credentials.",
+            "answer": "What is Phishing?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "attack-200",
+            "value": 200,
+            "question": "This malware encrypts files and demands payment for decryption.",
+            "answer": "What is Ransomware?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "attack-300",
+            "value": 300,
+            "question": "This vulnerability has no known patch available.",
+            "answer": "What is a Zero-Day?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "attack-400",
+            "value": 400,
+            "question": "This attack targets websites frequently visited by intended victims.",
+            "answer": "What is a Watering Hole attack?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "attack-500",
+            "value": 500,
+            "question": "This technique manipulates people into divulging confidential information.",
+            "answer": "What is Social Engineering?",
+            "knowledgePointId": "kp-3"
+          }
+        ]
+      },
+      {
+        "name": "Famous Breaches",
+        "questions": [
+          {
+            "id": "breach-100",
+            "value": 100,
+            "question": "This 2017 ransomware attack affected 150 countries and exploited EternalBlue.",
+            "answer": "What is WannaCry?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "breach-200",
+            "value": 200,
+            "question": "This 2013 retailer breach exposed 40 million credit cards via an HVAC vendor.",
+            "answer": "What is the Target breach?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "breach-300",
+            "value": 300,
+            "question": "This 2017 credit bureau breach exposed 147 million Social Security numbers.",
+            "answer": "What is the Equifax breach?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "breach-400",
+            "value": 400,
+            "question": "This 2020 supply chain attack affected 18,000 organizations through software updates.",
+            "answer": "What is the SolarWinds attack?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "breach-500",
+            "value": 500,
+            "question": "This 2010 malware was the first known cyberweapon targeting Iranian nuclear facilities.",
+            "answer": "What is Stuxnet?",
+            "knowledgePointId": "kp-2"
+          }
+        ]
+      },
+      {
+        "name": "Security Basics",
+        "questions": [
+          {
+            "id": "basics-100",
+            "value": 100,
+            "question": "MFA stands for this type of authentication using multiple factors.",
+            "answer": "What is Multi-Factor Authentication?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "basics-200",
+            "value": 200,
+            "question": "This principle gives users only the minimum access needed for their job.",
+            "answer": "What is Least Privilege?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "basics-300",
+            "value": 300,
+            "question": "This security strategy uses multiple layers of protection.",
+            "answer": "What is Defense in Depth?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "basics-400",
+            "value": 400,
+            "question": "This security model assumes no trust by default, even for internal users.",
+            "answer": "What is Zero Trust?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "basics-500",
+            "value": 500,
+            "question": "This is the average cost of a data breach in 2024 according to IBM.",
+            "answer": "What is $4.45 million?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      }
+    ],
+    "dailyDouble": {
+      "categoryIndex": 2,
+      "questionIndex": 3
+    }
+  }
+}

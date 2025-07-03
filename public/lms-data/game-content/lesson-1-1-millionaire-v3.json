@@ -1,0 +1,203 @@
+{
+  "gameType": "millionaire",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "questions": [
+      {
+        "id": "q-1",
+        "question": "What does 'CIA' stand for in the CIA Triad?",
+        "answers": {
+          "A": "Central Intelligence Agency",
+          "B": "Confidentiality, Integrity, Availability",
+          "C": "Cyber Intelligence Assessment",
+          "D": "Critical Infrastructure Analysis"
+        },
+        "correctAnswer": "B",
+        "difficulty": 1,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-2",
+        "question": "Which threat actor has the least technical skill?",
+        "answers": {
+          "A": "Nation-states",
+          "B": "Cybercriminals",
+          "C": "Script kiddies",
+          "D": "Hacktivists"
+        },
+        "correctAnswer": "C",
+        "difficulty": 2,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-3",
+        "question": "What is the most common initial attack vector?",
+        "answers": {
+          "A": "Physical break-ins",
+          "B": "Phishing emails",
+          "C": "Quantum computers",
+          "D": "Carrier pigeons"
+        },
+        "correctAnswer": "B",
+        "difficulty": 3,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-4",
+        "question": "Which type of malware encrypts files and demands payment?",
+        "answers": {
+          "A": "Spyware",
+          "B": "Adware",
+          "C": "Ransomware",
+          "D": "Scareware"
+        },
+        "correctAnswer": "C",
+        "difficulty": 4,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-5",
+        "question": "What percentage of successful attacks exploit human error?",
+        "answers": {
+          "A": "25%",
+          "B": "50%",
+          "C": "75%",
+          "D": "95%"
+        },
+        "correctAnswer": "D",
+        "difficulty": 5,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-6",
+        "question": "Which attack targets websites frequently visited by intended victims?",
+        "answers": {
+          "A": "Spear phishing",
+          "B": "Watering hole",
+          "C": "Dumpster diving",
+          "D": "Shoulder surfing"
+        },
+        "correctAnswer": "B",
+        "difficulty": 6,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-7",
+        "question": "What is the average cost of a data breach in 2024?",
+        "answers": {
+          "A": "$1.2 million",
+          "B": "$2.8 million",
+          "C": "$4.45 million",
+          "D": "$8.9 million"
+        },
+        "correctAnswer": "C",
+        "difficulty": 7,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-8",
+        "question": "Which principle involves multiple layers of security controls?",
+        "answers": {
+          "A": "Single point of failure",
+          "B": "Security through obscurity",
+          "C": "Defense in depth",
+          "D": "Open design"
+        },
+        "correctAnswer": "C",
+        "difficulty": 8,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-9",
+        "question": "What malware changes its signature to evade detection?",
+        "answers": {
+          "A": "Static malware",
+          "B": "Polymorphic malware",
+          "C": "Monomorphic malware",
+          "D": "Isomorphic malware"
+        },
+        "correctAnswer": "B",
+        "difficulty": 9,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-10",
+        "question": "Which famous malware targeted Iranian nuclear facilities?",
+        "answers": {
+          "A": "WannaCry",
+          "B": "NotPetya",
+          "C": "Stuxnet",
+          "D": "Conficker"
+        },
+        "correctAnswer": "C",
+        "difficulty": 10,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-11",
+        "question": "What is 'typosquatting' designed to exploit?",
+        "answers": {
+          "A": "Weak passwords",
+          "B": "Unpatched systems",
+          "C": "Typing errors in URLs",
+          "D": "Slow internet connections"
+        },
+        "correctAnswer": "C",
+        "difficulty": 11,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-12",
+        "question": "Which security model assumes no trust by default?",
+        "answers": {
+          "A": "Perimeter security",
+          "B": "Zero trust",
+          "C": "Trust but verify",
+          "D": "Castle and moat"
+        },
+        "correctAnswer": "B",
+        "difficulty": 12,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-13",
+        "question": "What is the average 'dwell time' for attackers in networks?",
+        "answers": {
+          "A": "24 hours",
+          "B": "1 week",
+          "C": "1 month",
+          "D": "Several months"
+        },
+        "correctAnswer": "D",
+        "difficulty": 13,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-14",
+        "question": "Which attack method was used in the Colonial Pipeline incident?",
+        "answers": {
+          "A": "Physical sabotage",
+          "B": "DDoS attack",
+          "C": "Ransomware",
+          "D": "Logic bomb"
+        },
+        "correctAnswer": "C",
+        "difficulty": 14,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-15",
+        "question": "What is the Parkerian Hexad's addition to the CIA Triad?",
+        "answers": {
+          "A": "Possession, Authenticity, Utility",
+          "B": "Privacy, Authentication, Usability",
+          "C": "Performance, Accuracy, Understanding",
+          "D": "Protection, Assurance, Unity"
+        },
+        "correctAnswer": "A",
+        "difficulty": 15,
+        "knowledgePointId": "kp-1"
+      }
+    ]
+  }
+}

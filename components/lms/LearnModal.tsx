@@ -157,19 +157,25 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 pt-6">
-            {availableGameTypes.map((gameType) => (
-              <GameTypeCard
-                key={gameType.id}
-                gameType={gameType}
-                isAvailable={true}
-                isRecommended={gameType.id === recommendedGameTypeId && lesson.availableGameTypes.includes(recommendedGameTypeId)}
-                onClick={() => setSelectedGameType(gameType.id)}
-                className={cn(
-                  "cursor-pointer transition-all",
-                  selectedGameType === gameType.id && "ring-2 ring-vergil-purple ring-offset-2"
-                )}
-              />
-              ))}
+            {availableGameTypes.map((gameType) => {
+              // Disable audio and video materials for now
+              const isAvailable = !['video', 'audio-material'].includes(gameType.id)
+              
+              return (
+                <GameTypeCard
+                  key={gameType.id}
+                  gameType={gameType}
+                  isAvailable={isAvailable}
+                  isRecommended={isAvailable && gameType.id === recommendedGameTypeId && lesson.availableGameTypes.includes(recommendedGameTypeId)}
+                  onClick={isAvailable ? () => setSelectedGameType(gameType.id) : undefined}
+                  className={cn(
+                    "transition-all",
+                    isAvailable && "cursor-pointer",
+                    selectedGameType === gameType.id && "ring-2 ring-vergil-purple ring-offset-2"
+                  )}
+                />
+              )
+            })}
             </div>
 
             </div>

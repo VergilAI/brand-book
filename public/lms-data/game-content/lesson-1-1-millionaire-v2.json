@@ -1,0 +1,203 @@
+{
+  "gameType": "millionaire",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "questions": [
+      {
+        "id": "q-1",
+        "question": "Which principle ensures systems remain operational during an attack?",
+        "answers": {
+          "A": "Confidentiality",
+          "B": "Integrity",
+          "C": "Availability",
+          "D": "Authenticity"
+        },
+        "correctAnswer": "C",
+        "difficulty": 1,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-2",
+        "question": "What type of threat actor is typically motivated by political or social causes?",
+        "answers": {
+          "A": "Script kiddies",
+          "B": "Hacktivists",
+          "C": "Cybercriminals",
+          "D": "Insider threats"
+        },
+        "correctAnswer": "B",
+        "difficulty": 2,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-3",
+        "question": "Which attack method relies on human psychology rather than technical vulnerabilities?",
+        "answers": {
+          "A": "Buffer overflow",
+          "B": "SQL injection",
+          "C": "Social engineering",
+          "D": "Denial of service"
+        },
+        "correctAnswer": "C",
+        "difficulty": 3,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-4",
+        "question": "What does 'APT' stand for in cybersecurity?",
+        "answers": {
+          "A": "Application Protection Technology",
+          "B": "Advanced Persistent Threat",
+          "C": "Automated Penetration Testing",
+          "D": "Active Protocol Transfer"
+        },
+        "correctAnswer": "B",
+        "difficulty": 4,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-5",
+        "question": "Which is NOT a common characteristic of nation-state attackers?",
+        "answers": {
+          "A": "Significant resources",
+          "B": "Quick financial profit motive",
+          "C": "Long-term persistence",
+          "D": "Custom malware development"
+        },
+        "correctAnswer": "B",
+        "difficulty": 5,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-6",
+        "question": "What type of malware can spread without human interaction?",
+        "answers": {
+          "A": "Trojan",
+          "B": "Worm",
+          "C": "Spyware",
+          "D": "Adware"
+        },
+        "correctAnswer": "B",
+        "difficulty": 6,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-7",
+        "question": "Which security principle is violated when unauthorized users can modify data?",
+        "answers": {
+          "A": "Confidentiality",
+          "B": "Availability",
+          "C": "Integrity",
+          "D": "Non-repudiation"
+        },
+        "correctAnswer": "C",
+        "difficulty": 7,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-8",
+        "question": "What makes insider threats particularly dangerous?",
+        "answers": {
+          "A": "They use sophisticated malware",
+          "B": "They already have legitimate access",
+          "C": "They work in large groups",
+          "D": "They only attack at night"
+        },
+        "correctAnswer": "B",
+        "difficulty": 8,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-9",
+        "question": "Which attack vector was used in the 2020 SolarWinds breach?",
+        "answers": {
+          "A": "Phishing email",
+          "B": "USB drop attack",
+          "C": "Supply chain compromise",
+          "D": "Brute force attack"
+        },
+        "correctAnswer": "C",
+        "difficulty": 9,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-10",
+        "question": "What is the primary goal of a 'false flag' cyber operation?",
+        "answers": {
+          "A": "Steal financial data",
+          "B": "Disrupt services",
+          "C": "Misattribute the attack to another party",
+          "D": "Test security defenses"
+        },
+        "correctAnswer": "C",
+        "difficulty": 10,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-11",
+        "question": "Which concept describes the time between initial compromise and detection?",
+        "answers": {
+          "A": "Kill chain",
+          "B": "Dwell time",
+          "C": "Attack surface",
+          "D": "Blast radius"
+        },
+        "correctAnswer": "B",
+        "difficulty": 11,
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "q-12",
+        "question": "What distinguishes 'spear phishing' from regular phishing?",
+        "answers": {
+          "A": "It uses malware attachments",
+          "B": "It targets specific individuals with personalized messages",
+          "C": "It only works on mobile devices",
+          "D": "It requires physical access"
+        },
+        "correctAnswer": "B",
+        "difficulty": 12,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-13",
+        "question": "Which principle states that security should work even if the system design is known?",
+        "answers": {
+          "A": "Least privilege",
+          "B": "Defense in depth",
+          "C": "Kerckhoffs's principle",
+          "D": "Separation of duties"
+        },
+        "correctAnswer": "C",
+        "difficulty": 13,
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "q-14",
+        "question": "What type of attack uses legitimate tools already present on the victim's system?",
+        "answers": {
+          "A": "Zero-day exploit",
+          "B": "Living off the land",
+          "C": "Watering hole",
+          "D": "Man-in-the-middle"
+        },
+        "correctAnswer": "B",
+        "difficulty": 14,
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "q-15",
+        "question": "In the context of availability, what does 'five nines' refer to?",
+        "answers": {
+          "A": "99% uptime",
+          "B": "99.9% uptime",
+          "C": "99.99% uptime",
+          "D": "99.999% uptime"
+        },
+        "correctAnswer": "D",
+        "difficulty": 15,
+        "knowledgePointId": "kp-1"
+      }
+    ]
+  }
+}

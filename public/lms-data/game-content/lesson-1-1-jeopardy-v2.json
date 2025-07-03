@@ -1,0 +1,212 @@
+{
+  "gameType": "jeopardy",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "categories": [
+      {
+        "name": "Malware Types",
+        "questions": [
+          {
+            "id": "mal-100",
+            "value": 100,
+            "question": "This malware displays unwanted advertisements.",
+            "answer": "What is Adware?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "mal-200",
+            "value": 200,
+            "question": "This malware secretly monitors user activity.",
+            "answer": "What is Spyware?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "mal-300",
+            "value": 300,
+            "question": "This malware provides backdoor access to systems.",
+            "answer": "What is a Trojan?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "mal-400",
+            "value": 400,
+            "question": "This malware changes its code to avoid detection.",
+            "answer": "What is Polymorphic malware?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "mal-500",
+            "value": 500,
+            "question": "This malware spreads automatically without user interaction.",
+            "answer": "What is a Worm?",
+            "knowledgePointId": "kp-3"
+          }
+        ]
+      },
+      {
+        "name": "Security Tools",
+        "questions": [
+          {
+            "id": "tools-100",
+            "value": 100,
+            "question": "This tool protects networks from unauthorized access.",
+            "answer": "What is a Firewall?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "tools-200",
+            "value": 200,
+            "question": "SIEM stands for this type of security monitoring system.",
+            "answer": "What is Security Information and Event Management?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "tools-300",
+            "value": 300,
+            "question": "This tool detects and prevents network intrusions.",
+            "answer": "What is an IDS/IPS?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "tools-400",
+            "value": 400,
+            "question": "EDR stands for this type of endpoint protection.",
+            "answer": "What is Endpoint Detection and Response?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "tools-500",
+            "value": 500,
+            "question": "This tool prevents sensitive data from leaving the organization.",
+            "answer": "What is DLP (Data Loss Prevention)?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      },
+      {
+        "name": "Attack Methods",
+        "questions": [
+          {
+            "id": "methods-100",
+            "value": 100,
+            "question": "This attack floods a system with traffic to make it unavailable.",
+            "answer": "What is a DDoS attack?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "methods-200",
+            "value": 200,
+            "question": "This attack intercepts communication between two parties.",
+            "answer": "What is a Man-in-the-Middle attack?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "methods-300",
+            "value": 300,
+            "question": "This attack exploits website forms to access databases.",
+            "answer": "What is SQL Injection?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "methods-400",
+            "value": 400,
+            "question": "This attack uses legitimate tools already on the victim's system.",
+            "answer": "What is Living Off the Land?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "methods-500",
+            "value": 500,
+            "question": "This attack compromises a vendor to reach the actual target.",
+            "answer": "What is a Supply Chain attack?",
+            "knowledgePointId": "kp-3"
+          }
+        ]
+      },
+      {
+        "name": "Security Stats",
+        "questions": [
+          {
+            "id": "stats-100",
+            "value": 100,
+            "question": "This percentage of successful attacks exploit human error.",
+            "answer": "What is 95%?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "stats-200",
+            "value": 200,
+            "question": "The average time attackers remain undetected in networks.",
+            "answer": "What is several months (or 200+ days)?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "stats-300",
+            "value": 300,
+            "question": "Amazon loses this much money per minute of downtime.",
+            "answer": "What is $66,240?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "stats-400",
+            "value": 400,
+            "question": "An iOS zero-day vulnerability can sell for up to this amount.",
+            "answer": "What is $2.5 million?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "stats-500",
+            "value": 500,
+            "question": "The ILOVEYOU virus caused this much in global damages.",
+            "answer": "What is $10 billion?",
+            "knowledgePointId": "kp-2"
+          }
+        ]
+      },
+      {
+        "name": "Terms & Concepts",
+        "questions": [
+          {
+            "id": "terms-100",
+            "value": 100,
+            "question": "The total points where an attacker could enter your environment.",
+            "answer": "What is Attack Surface?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "terms-200",
+            "value": 200,
+            "question": "The time between a breach and its detection.",
+            "answer": "What is Dwell Time?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "terms-300",
+            "value": 300,
+            "question": "Creating similar domain names to catch typing errors.",
+            "answer": "What is Typosquatting?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "terms-400",
+            "value": 400,
+            "question": "The seven stages of a cyberattack framework.",
+            "answer": "What is the Kill Chain?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "terms-500",
+            "value": 500,
+            "question": "Unauthorized technology used within organizations.",
+            "answer": "What is Shadow IT?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      }
+    ],
+    "dailyDouble": {
+      "categoryIndex": 3,
+      "questionIndex": 4
+    }
+  }
+}

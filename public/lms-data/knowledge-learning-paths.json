@@ -1,0 +1,162 @@
+{
+  "kp-1": [
+    {
+      "lessonId": "lesson-1-1",
+      "lessonTitle": "The Cybersecurity Landscape",
+      "chapterTitle": "Introduction to Cybersecurity",
+      "gameTypes": ["written-material", "video", "flashcards", "millionaire"]
+    }
+  ],
+  "kp-2": [
+    {
+      "lessonId": "lesson-1-1",
+      "lessonTitle": "The Cybersecurity Landscape",
+      "chapterTitle": "Introduction to Cybersecurity",
+      "gameTypes": ["written-material", "video", "flashcards", "jeopardy"]
+    }
+  ],
+  "kp-3": [
+    {
+      "lessonId": "lesson-1-1",
+      "lessonTitle": "The Cybersecurity Landscape",
+      "chapterTitle": "Introduction to Cybersecurity",
+      "gameTypes": ["written-material", "video", "millionaire", "connect-cards"]
+    }
+  ],
+  "kp-4": [
+    {
+      "lessonId": "lesson-1-2",
+      "lessonTitle": "Security Risk Management",
+      "chapterTitle": "Introduction to Cybersecurity",
+      "gameTypes": ["written-material", "audio-material", "flashcards", "connect-cards"]
+    }
+  ],
+  "kp-5": [
+    {
+      "lessonId": "lesson-1-2",
+      "lessonTitle": "Security Risk Management",
+      "chapterTitle": "Introduction to Cybersecurity",
+      "gameTypes": ["written-material", "flashcards", "millionaire", "jeopardy"]
+    }
+  ],
+  "kp-6": [
+    {
+      "lessonId": "lesson-2-1",
+      "lessonTitle": "Network Security Fundamentals",
+      "chapterTitle": "Network Security",
+      "gameTypes": ["written-material", "video", "flashcards", "jeopardy"]
+    }
+  ],
+  "kp-7": [
+    {
+      "lessonId": "lesson-2-1",
+      "lessonTitle": "Network Security Fundamentals",
+      "chapterTitle": "Network Security",
+      "gameTypes": ["written-material", "audio-material", "flashcards", "millionaire"]
+    }
+  ],
+  "kp-8": [
+    {
+      "lessonId": "lesson-2-1",
+      "lessonTitle": "Network Security Fundamentals",
+      "chapterTitle": "Network Security",
+      "gameTypes": ["written-material", "video", "connect-cards", "jeopardy"]
+    }
+  ],
+  "kp-9": [
+    {
+      "lessonId": "lesson-2-2",
+      "lessonTitle": "Wireless and IoT Security",
+      "chapterTitle": "Network Security",
+      "gameTypes": ["written-material", "video", "flashcards", "millionaire"]
+    }
+  ],
+  "kp-10": [
+    {
+      "lessonId": "lesson-2-2",
+      "lessonTitle": "Wireless and IoT Security",
+      "chapterTitle": "Network Security",
+      "gameTypes": ["written-material", "audio-material", "connect-cards", "jeopardy"]
+    }
+  ],
+  "kp-11": [
+    {
+      "lessonId": "lesson-3-1",
+      "lessonTitle": "Cryptography Essentials",
+      "chapterTitle": "Cryptography and Access Control",
+      "gameTypes": ["written-material", "video", "flashcards", "millionaire"]
+    }
+  ],
+  "kp-12": [
+    {
+      "lessonId": "lesson-3-1",
+      "lessonTitle": "Cryptography Essentials",
+      "chapterTitle": "Cryptography and Access Control",
+      "gameTypes": ["written-material", "audio-material", "connect-cards", "jeopardy"]
+    }
+  ],
+  "kp-13": [
+    {
+      "lessonId": "lesson-3-2",
+      "lessonTitle": "Identity and Access Management",
+      "chapterTitle": "Cryptography and Access Control",
+      "gameTypes": ["written-material", "video", "flashcards", "jeopardy"]
+    }
+  ],
+  "kp-14": [
+    {
+      "lessonId": "lesson-3-2",
+      "lessonTitle": "Identity and Access Management",
+      "chapterTitle": "Cryptography and Access Control",
+      "gameTypes": ["written-material", "audio-material", "millionaire", "connect-cards"]
+    }
+  ],
+  "kp-15": [
+    {
+      "lessonId": "lesson-4-1",
+      "lessonTitle": "Secure Software Development",
+      "chapterTitle": "Application and Cloud Security",
+      "gameTypes": ["written-material", "video", "flashcards", "millionaire"]
+    }
+  ],
+  "kp-16": [
+    {
+      "lessonId": "lesson-4-1",
+      "lessonTitle": "Secure Software Development",
+      "chapterTitle": "Application and Cloud Security",
+      "gameTypes": ["written-material", "audio-material", "flashcards", "jeopardy"]
+    }
+  ],
+  "kp-17": [
+    {
+      "lessonId": "lesson-4-1",
+      "lessonTitle": "Secure Software Development",
+      "chapterTitle": "Application and Cloud Security",
+      "gameTypes": ["written-material", "video", "connect-cards", "millionaire"]
+    }
+  ],
+  "kp-18": [
+    {
+      "lessonId": "lesson-4-2",
+      "lessonTitle": "Cloud Security Architecture",
+      "chapterTitle": "Application and Cloud Security",
+      "gameTypes": ["written-material", "video", "flashcards", "jeopardy"]
+    }
+  ],
+  "kp-19": [
+    {
+      "lessonId": "lesson-4-2",
+      "lessonTitle": "Cloud Security Architecture",
+      "chapterTitle": "Application and Cloud Security",
+      "gameTypes": ["written-material", "audio-material", "millionaire", "connect-cards"]
+    }
+  ],
+  "kp-20": [
+    {
+      "lessonId": "lesson-4-2",
+      "lessonTitle": "Cloud Security Architecture",
+      "chapterTitle": "Application and Cloud Security",
+      "gameTypes": ["written-material", "video", "flashcards", "jeopardy"]
+    }
+  ]
+}

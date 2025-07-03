@@ -1,0 +1,174 @@
+{
+  "gameType": "flashcards",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "id": "deck-1-v2",
+    "title": "The Cybersecurity Landscape - Advanced Concepts",
+    "description": "Deep dive into security principles, emerging threats, and defensive strategies",
+    "cards": [
+      {
+        "id": "card-1",
+        "front": "What is the Parkerian Hexad?",
+        "back": "An extension of the CIA Triad adding: Possession (Control), Authenticity (Genuineness), and Utility (Usefulness). Provides a more comprehensive view of information security beyond CIA.",
+        "hint": "Six elements instead of three",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-2",
+        "front": "Explain 'Security Through Obscurity' and why it's problematic",
+        "back": "Relying on secrecy of design or implementation for security. It's problematic because once the secret is revealed, all security is lost. Security should remain even if the system is fully known (Kerckhoffs's principle).",
+        "hint": "Hiding how something works isn't real security",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-3",
+        "front": "What is a Watering Hole Attack?",
+        "back": "Compromising websites frequently visited by target victims, then waiting for them to get infected. Named after predators waiting at watering holes for prey. Often used by APT groups targeting specific organizations.",
+        "hint": "Predators wait where prey drinks",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-4",
+        "front": "Define 'Living Off the Land' (LOtL) attacks",
+        "back": "Using legitimate tools and features already present in the victim's environment to conduct attacks. Examples: PowerShell, WMI, legitimate admin tools. Hard to detect because they use trusted applications.",
+        "hint": "Using the victim's own tools against them",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-5",
+        "front": "What characterizes a 'Polymorphic' malware?",
+        "back": "Malware that changes its code signature every time it replicates or infects a new system, making signature-based detection ineffective. Uses encryption, code obfuscation, or mutation engines.",
+        "hint": "Shape-shifting malware",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-6",
+        "front": "Explain the 'Kill Chain' concept in cybersecurity",
+        "back": "A model describing stages of a cyberattack: Reconnaissance, Weaponization, Delivery, Exploitation, Installation, Command & Control, Actions on Objectives. Breaking any link stops the attack.",
+        "hint": "Seven stages from recon to objective",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-7",
+        "front": "What is 'Dwell Time' in cybersecurity?",
+        "back": "The duration between an attacker's initial compromise and their detection. Average dwell time is often months. Longer dwell time means more damage and data exfiltration. Key metric for security effectiveness.",
+        "hint": "How long attackers hide in your network",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-8",
+        "front": "Describe a 'False Flag' cyber operation",
+        "back": "Cyberattacks designed to appear as if they originate from another party. Attackers plant false evidence, use another group's tools/techniques, or leave misleading artifacts to misdirect attribution.",
+        "hint": "Framing someone else for your attack",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-9",
+        "front": "What is 'Cyber Threat Intelligence' (CTI)?",
+        "back": "Evidence-based knowledge about threats including context, mechanisms, indicators, implications, and actionable advice. Helps organizations make informed decisions about defending against specific threats.",
+        "hint": "Actionable information about threats",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-10",
+        "front": "Explain 'Indicators of Compromise' (IoCs)",
+        "back": "Forensic evidence of potential intrusions: unusual network traffic, suspicious files, registry changes, anomalous user behavior. Used to detect breaches and shared between organizations for collective defense.",
+        "hint": "Digital breadcrumbs left by attackers",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-11",
+        "front": "What is the difference between RPO and RTO?",
+        "back": "Recovery Point Objective (RPO): Maximum acceptable data loss measured in time. Recovery Time Objective (RTO): Maximum acceptable downtime. Both critical for disaster recovery and maintaining availability.",
+        "hint": "Data loss tolerance vs downtime tolerance",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-12",
+        "front": "Define 'Shadow IT' and its security implications",
+        "back": "IT systems, devices, software, and services used without explicit organizational approval. Creates unmanaged security risks, compliance issues, and potential data breaches outside IT's visibility and control.",
+        "hint": "Unauthorized technology use in organizations",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-13",
+        "front": "What is 'Typosquatting'?",
+        "back": "Registering domain names that are misspellings of popular websites to catch users who make typing errors. Used for phishing, malware distribution, or stealing credentials. Example: gooogle.com instead of google.com.",
+        "hint": "Exploiting typing mistakes in URLs",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-14",
+        "front": "Explain 'Lateral Movement' in cyberattacks",
+        "back": "Techniques attackers use to move through a network after initial compromise, searching for key assets and data. Uses stolen credentials, exploits, and legitimate tools to access other systems progressively.",
+        "hint": "Moving sideways through a network",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-15",
+        "front": "What is a 'Canary Token'?",
+        "back": "A digital tripwire that alerts when accessed. Examples: fake files, URLs, or credentials that trigger alerts when used. Helps detect breaches early by placing them where attackers might find them.",
+        "hint": "Early warning system for breaches",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-16",
+        "front": "Describe 'Threat Hunting' vs traditional security monitoring",
+        "back": "Proactively searching for threats that evade existing security solutions, rather than waiting for alerts. Assumes breach has occurred and looks for anomalies. Uses hypothesis-driven investigation and human expertise.",
+        "hint": "Actively searching vs passively waiting",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-2"
+      },
+      {
+        "id": "card-17",
+        "front": "What is 'Data Exfiltration' and common methods?",
+        "back": "Unauthorized transfer of data from a computer or network. Methods include: email, cloud storage, USB devices, DNS tunneling, steganography, or disguising as normal traffic. Often the final stage of an attack.",
+        "hint": "Stealing data from organizations",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-3"
+      },
+      {
+        "id": "card-18",
+        "front": "Explain the concept of 'Blast Radius' in security",
+        "back": "The potential impact and scope of damage if a security control fails or system is compromised. Used in risk assessment to determine segmentation needs and implement appropriate containment strategies.",
+        "hint": "How far damage can spread",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-19",
+        "front": "What is 'Security Orchestration, Automation and Response' (SOAR)?",
+        "back": "Technologies that enable organizations to collect security threats data and alerts from different sources, and respond to low-level security events without human assistance. Improves incident response efficiency.",
+        "hint": "Automating security response workflows",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-1"
+      },
+      {
+        "id": "card-20",
+        "front": "Define 'Zero Trust Architecture'",
+        "back": "Security model that assumes no trust and verifies everything. Core principles: Never trust, always verify; Assume breach; Verify explicitly. Eliminates concept of trusted internal networks.",
+        "hint": "Trust nothing, verify everything",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-1"
+      }
+    ],
+    "totalCards": 20,
+    "estimatedTime": 30,
+    "category": "Cybersecurity Fundamentals"
+  }
+}

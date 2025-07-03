@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { FileText, Video, Volume2, MessageSquare, X, CheckCircle, Upload, Play, Pause, Clock, List } from 'lucide-react'
 import type { Lesson } from '@/lib/lms/new-course-types'
+import { useGameContent } from '@/app/lms/new_course_overview/hooks/useGameContent'
 
 interface GameLauncherProps {
   gameTypeId: string
@@ -19,6 +20,8 @@ interface GameLauncherProps {
 }
 
 export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLauncherProps) {
+  // Load content from API
+  const { content, loading, error } = useGameContent(lesson.id, gameTypeId)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -52,196 +55,175 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
       window.scrollTo(0, scrollY)
     }
   }, [])
-  // Mock data for games - in production, this would come from the lesson data
-  // Generate 15 flashcards with variations
-  const mockFlashcardDeck = {
-    id: 'deck-1',
-    title: lesson.title,
-    description: lesson.description,
-    cards: Array.from({ length: 15 }, (_, i) => {
-      const kpIndex = i % lesson.knowledgePoints.length
-      const kp = lesson.knowledgePoints[kpIndex]
-      const variations = [
-        { front: kp.title, back: kp.description },
-        { front: `Define: ${kp.title}`, back: `${kp.description} This concept is fundamental to understanding the lesson.` },
-        { front: `What is the purpose of ${kp.title}?`, back: `${kp.description} It helps in achieving better understanding of the subject matter.` },
-        { front: `Explain ${kp.title} in simple terms`, back: `In simple terms: ${kp.description}` },
-        { front: `Key aspects of ${kp.title}`, back: `The main aspects are: ${kp.description}` }
-      ]
-      const variation = variations[Math.floor(i / lesson.knowledgePoints.length) % variations.length]
-      
-      return {
+  // Use content from API or generate fallback data
+  const getFlashcardDeck = () => {
+    if (content?.content) {
+      return content.content
+    }
+    // Fallback mock data if content not loaded
+    return {
+      id: 'deck-1',
+      title: lesson.title,
+      description: lesson.description,
+      cards: lesson.knowledgePoints.map((kp, i) => ({
         id: `card-${i}`,
-        front: variation.front,
-        back: variation.back,
+        front: kp.title,
+        back: kp.description,
         hint: `Think about the key aspects of ${kp.title.toLowerCase()}`,
-        difficulty: i < 5 ? 'easy' : i < 10 ? 'medium' : 'hard'
-      }
-    }),
-    totalCards: 15,
-    estimatedTime: 10,
-    category: 'AI Fundamentals'
+        difficulty: 'medium'
+      })),
+      totalCards: lesson.knowledgePoints.length,
+      estimatedTime: 10,
+      category: 'General'
+    }
   }
 
-  // Generate 15 questions for the full money ladder
-  const mockMillionaireQuestions = Array.from({ length: 15 }, (_, index) => {
-    const kp = lesson.knowledgePoints[index % lesson.knowledgePoints.length]
-    const questionTypes = [
-      {
-        question: `What is ${kp.title}?`,
-        answers: {
-          A: kp.description,
-          B: 'An incorrect definition that sounds plausible',
-          C: 'Another wrong answer that might confuse',
-          D: 'A completely unrelated concept'
-        },
-        correctAnswer: 'A' as const
-      },
-      {
-        question: `Which statement best describes ${kp.title}?`,
-        answers: {
-          A: 'A misleading but technical-sounding description',
-          B: kp.description,
-          C: 'A partially correct but incomplete answer',
-          D: 'An outdated or obsolete definition'
-        },
-        correctAnswer: 'B' as const
-      },
-      {
-        question: `In the context of ${lesson.title}, what role does ${kp.title} play?`,
-        answers: {
-          A: 'A secondary or supporting concept',
-          B: 'An unrelated principle',
-          C: kp.description,
-          D: 'A conflicting or opposite approach'
-        },
-        correctAnswer: 'C' as const
-      },
-      {
-        question: `Which of the following is NOT true about ${kp.title}?`,
-        answers: {
-          A: kp.description,
-          B: 'It is a fundamental concept in this field',
-          C: 'It helps in understanding related topics',
-          D: 'It contradicts established principles'
-        },
-        correctAnswer: 'D' as const
-      }
-    ]
-    
-    const selectedQuestion = questionTypes[index % questionTypes.length]
-    
-    return {
+  const getMillionaireQuestions = () => {
+    if (content?.content?.questions) {
+      return content.content.questions
+    }
+    // Fallback mock data if content not loaded
+    return lesson.knowledgePoints.slice(0, 15).map((kp, index) => ({
       id: `q-${index}`,
-      ...selectedQuestion,
+      question: `What is ${kp.title}?`,
+      answers: {
+        A: kp.description,
+        B: 'An incorrect answer',
+        C: 'Another incorrect answer',
+        D: 'A third incorrect answer'
+      },
+      correctAnswer: 'A' as const,
       difficulty: index + 1
-    }
-  })
+    }))
+  }
 
-  // Generate Jeopardy categories with 5 clues each
-  const mockJeopardyCategories = [
-    {
-      name: "Fundamentals",
-      clues: Array.from({ length: 5 }, (_, i) => {
-        const kp = lesson.knowledgePoints[i % lesson.knowledgePoints.length]
-        return {
-          id: `clue-1-${i}`,
-          category: "Fundamentals",
-          value: (i + 1) * 200,
-          clue: kp.description,
-          answer: kp.title,
-          isDailyDouble: i === 2 && Math.random() > 0.7
-        }
-      })
-    },
-    {
-      name: "Applications",
-      clues: Array.from({ length: 5 }, (_, i) => {
-        const kp = lesson.knowledgePoints[(i + 1) % lesson.knowledgePoints.length]
-        return {
-          id: `clue-2-${i}`,
-          category: "Applications",
-          value: (i + 1) * 200,
-          clue: `How is ${kp.title} applied in practice?`,
-          answer: kp.description,
-          isDailyDouble: i === 3 && Math.random() > 0.7
-        }
-      })
-    },
-    {
-      name: "Key Concepts",
-      clues: Array.from({ length: 5 }, (_, i) => {
-        const kp = lesson.knowledgePoints[(i + 2) % lesson.knowledgePoints.length]
-        return {
-          id: `clue-3-${i}`,
-          category: "Key Concepts",
-          value: (i + 1) * 200,
-          clue: `This concept ${kp.description.toLowerCase()}`,
-          answer: `What is ${kp.title}?`,
-          isDailyDouble: i === 1 && Math.random() > 0.7
-        }
-      })
-    },
-    {
+  const getJeopardyCategories = () => {
+    if (content?.content?.categories) {
+      return content.content.categories
+    }
+    // Fallback mock data if content not loaded
+    return [{
       name: lesson.title,
-      clues: Array.from({ length: 5 }, (_, i) => {
-        const kp = lesson.knowledgePoints[(i + 3) % lesson.knowledgePoints.length]
-        return {
-          id: `clue-4-${i}`,
-          category: lesson.title,
-          value: (i + 1) * 200,
-          clue: `The main purpose of ${kp.title}`,
-          answer: kp.description,
-          isDailyDouble: i === 4 && Math.random() > 0.7
-        }
-      })
-    },
-    {
-      name: "Advanced Topics",
-      clues: Array.from({ length: 5 }, (_, i) => {
-        const kp = lesson.knowledgePoints[(i + 4) % lesson.knowledgePoints.length]
-        return {
-          id: `clue-5-${i}`,
-          category: "Advanced Topics",
-          value: (i + 1) * 200,
-          clue: `An advanced application of ${kp.title}`,
-          answer: `${kp.description} in complex scenarios`,
-          isDailyDouble: false
-        }
-      })
-    }
-  ]
+      clues: lesson.knowledgePoints.slice(0, 5).map((kp, i) => ({
+        id: `clue-${i}`,
+        category: lesson.title,
+        value: (i + 1) * 200,
+        clue: kp.description,
+        answer: kp.title,
+        isDailyDouble: false
+      }))
+    }]
+  }
 
-  const mockConnectPairs = lesson.knowledgePoints.map((kp, index) => ({
-    matchId: `match-${index}`,
-    leftCard: { 
-      id: `l-${index}`, 
-      content: kp.title,
-      matchId: `match-${index}`,
-      side: 'left' as const,
-      type: 'text' as const
-    },
-    rightCard: { 
-      id: `r-${index}`, 
-      content: kp.description,
-      matchId: `match-${index}`,
-      side: 'right' as const,
-      type: 'text' as const
+  const getConnectPairs = () => {
+    if (content?.content?.pairs) {
+      return content.content.pairs
     }
-  }))
+    // Fallback mock data if content not loaded
+    return lesson.knowledgePoints.map((kp, index) => ({
+      matchId: `match-${index}`,
+      leftCard: { 
+        id: `l-${index}`, 
+        content: kp.title,
+        matchId: `match-${index}`,
+        side: 'left' as const,
+        type: 'text' as const
+      },
+      rightCard: { 
+        id: `r-${index}`, 
+        content: kp.description,
+        matchId: `match-${index}`,
+        side: 'right' as const,
+        type: 'text' as const
+      }
+    }))
+  }
+
+  // Show loading state
+  if (loading) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vergil-purple mx-auto mb-4"></div>
+          <p className="text-white">Loading content...</p>
+        </div>
+      </div>,
+      document.body
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center">
+        <Card className="p-8 text-center bg-white max-w-md">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error Loading Content</h2>
+          <p className="text-vergil-off-black/60 mb-6">{error}</p>
+          <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+        </Card>
+      </div>,
+      document.body
+    )
+  }
 
   // Render the game content
   let gameContent = null
 
+  // Block disabled content types
+  if (['video', 'audio-material'].includes(gameTypeId)) {
+    gameContent = (
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
+        <div className="max-w-4xl mx-auto p-6">
+          <Card className="p-8 text-center bg-white">
+            <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Coming Soon</h2>
+            <p className="text-vergil-off-black/60 mb-6">{gameTypeId.replace('-', ' ')} content is currently under development.</p>
+            <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+  // Handle loading and error states for content types first
+  else if (['written-material'].includes(gameTypeId)) {
+    if (loading) {
+      gameContent = (
+        <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
+          <div className="max-w-4xl mx-auto p-6">
+            <Card className="p-8 text-center bg-white">
+              <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Loading Content...</h2>
+              <p className="text-vergil-off-black/60 mb-6">Please wait while we load the {gameTypeId.replace('-', ' ')} content.</p>
+              <Button onClick={onQuit} variant="outline">Cancel</Button>
+            </Card>
+          </div>
+        </div>
+      )
+    } else if (error) {
+      gameContent = (
+        <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
+          <div className="max-w-4xl mx-auto p-6">
+            <Card className="p-8 text-center bg-white">
+              <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Content Not Available</h2>
+              <p className="text-vergil-off-black/60 mb-6">Sorry, we couldn't load the content: {error}</p>
+              <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+            </Card>
+          </div>
+        </div>
+      )
+    }
+  }
+
   // Content viewers
-  if (gameTypeId === 'written-material') {
+  if (gameTypeId === 'written-material' && content) {
+    const pages = content.content?.pages || []
+    const title = content.content?.title || lesson.title
+    
     gameContent = (
       <div className="fixed inset-0 bg-gray-100 flex flex-col z-[9999]">
         {/* Simple Header */}
         <div className="bg-white shadow-sm z-10">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-800">{lesson.title}</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
               <Button variant="ghost" size="sm" onClick={onQuit}>
                 <X className="w-5 h-5" />
               </Button>
@@ -252,100 +234,25 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         {/* PDF-style Content */}
         <div className="flex-1 overflow-auto bg-gray-600 p-4">
           <div className="max-w-4xl mx-auto">
-            {/* Mock PDF Pages */}
-            <div className="bg-white shadow-2xl mb-4" style={{ minHeight: '1056px', padding: '72px' }}>
-              <h1 className="text-3xl font-bold text-black mb-8">Introduction to Artificial Intelligence</h1>
-              
-              <p className="text-gray-800 mb-6 leading-relaxed">
-                Artificial Intelligence (AI) represents one of the most transformative technologies of our time. This document provides a comprehensive overview of AI concepts, applications, and implications for the future.
-              </p>
-
-              <h2 className="text-2xl font-semibold text-black mt-12 mb-4">Chapter 1: What is Artificial Intelligence?</h2>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                Artificial Intelligence refers to the simulation of human intelligence in machines that are programmed to think and learn. These systems can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation.
-              </p>
-
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                The field of AI research was founded on the assumption that human intelligence can be so precisely described that a machine can be made to simulate it. This notion, proposed in the 1950s, has evolved significantly over the decades.
-              </p>
-
-              <h3 className="text-xl font-semibold text-black mt-8 mb-3">1.1 Types of Artificial Intelligence</h3>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                AI can be categorized into three main types:
-              </p>
-
-              <ul className="list-disc list-inside mb-6 text-gray-800 space-y-2 ml-6">
-                <li><strong>Narrow AI (ANI):</strong> Designed to perform a specific task, such as facial recognition or internet searches.</li>
-                <li><strong>General AI (AGI):</strong> Possesses the ability to understand, learn, and apply knowledge across different domains, similar to human intelligence.</li>
-                <li><strong>Superintelligent AI (ASI):</strong> Surpasses human intelligence and ability in all aspects, from creativity to general wisdom.</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold text-black mt-8 mb-3">1.2 Core Components of AI</h3>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                Modern AI systems rely on several key components:
-              </p>
-
-              <ul className="list-disc list-inside mb-6 text-gray-800 space-y-2 ml-6">
-                <li><strong>Machine Learning:</strong> Algorithms that improve through experience without being explicitly programmed.</li>
-                <li><strong>Neural Networks:</strong> Computing systems inspired by biological neural networks in animal brains.</li>
-                <li><strong>Natural Language Processing:</strong> Enabling machines to understand and respond to human language.</li>
-                <li><strong>Computer Vision:</strong> Allowing machines to interpret and understand visual information from the world.</li>
-              </ul>
-
-              <div className="text-center text-gray-400 text-sm mt-auto pt-16">
-                Page 1
+            {/* Render each page from the JSON content */}
+            {pages.map((page: any, index: number) => (
+              <div key={index} className="bg-white shadow-2xl mb-4" style={{ minHeight: '1056px', padding: '72px' }}>
+                <div 
+                  className="prose prose-lg max-w-none [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-black [&_h1]:mb-8 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-black [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-black [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:text-gray-800 [&_p]:mb-4 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:list-inside [&_ul]:mb-6 [&_ul]:text-gray-800 [&_ul]:space-y-2 [&_ul]:ml-6 [&_li]:text-gray-800 [&_strong]:font-semibold [&_strong]:text-black"
+                  dangerouslySetInnerHTML={{ __html: page.content }} 
+                />
+                <div className="text-center text-gray-400 text-sm mt-auto pt-16">
+                  Page {page.pageNumber || index + 1}
+                </div>
               </div>
-            </div>
-
-            {/* Page 2 */}
-            <div className="bg-white shadow-2xl mb-4" style={{ minHeight: '1056px', padding: '72px' }}>
-              <h2 className="text-2xl font-semibold text-black mb-4">Chapter 2: Applications of AI</h2>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                AI has found applications across virtually every industry, revolutionizing how we work, communicate, and solve complex problems.
-              </p>
-
-              <h3 className="text-xl font-semibold text-black mt-8 mb-3">2.1 Healthcare</h3>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                In healthcare, AI assists in diagnosis, drug discovery, personalized treatment plans, and patient monitoring. Machine learning algorithms can analyze medical images to detect diseases like cancer at early stages, often with greater accuracy than human specialists.
-              </p>
-
-              <h3 className="text-xl font-semibold text-black mt-8 mb-3">2.2 Transportation</h3>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                Self-driving cars represent one of the most visible applications of AI in transportation. These vehicles use a combination of sensors, cameras, and AI algorithms to navigate roads, avoid obstacles, and make split-second decisions.
-              </p>
-
-              <h3 className="text-xl font-semibold text-black mt-8 mb-3">2.3 Finance</h3>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                Financial institutions use AI for fraud detection, algorithmic trading, credit scoring, and customer service. AI-powered chatbots handle customer inquiries, while sophisticated algorithms analyze market patterns to make investment decisions.
-              </p>
-
-              <h3 className="text-xl font-semibold text-black mt-8 mb-3">2.4 Education</h3>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                AI personalizes learning experiences by adapting to individual student needs, providing instant feedback, and identifying areas where students need additional support. Virtual tutors and automated grading systems are becoming increasingly common.
-              </p>
-
-              <h2 className="text-2xl font-semibold text-black mt-12 mb-4">Chapter 3: The Future of AI</h2>
-              
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                As we look to the future, AI promises both tremendous opportunities and significant challenges. The technology continues to advance at a rapid pace, with breakthroughs in quantum computing, neuromorphic chips, and advanced algorithms pushing the boundaries of what's possible.
-              </p>
-
-              <p className="text-gray-800 mb-4 leading-relaxed">
-                However, with these advances come important considerations about ethics, privacy, job displacement, and the need for responsible AI development. Ensuring that AI benefits all of humanity while minimizing potential harms remains one of our greatest challenges.
-              </p>
-
-              <div className="text-center text-gray-400 text-sm mt-auto pt-16">
-                Page 2
+            ))}
+            
+            {/* Fallback if no pages */}
+            {pages.length === 0 && (
+              <div className="bg-white shadow-2xl mb-4 p-16 text-center">
+                <p className="text-gray-600">No content available for this lesson.</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -354,7 +261,7 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Viewing: Introduction to AI (2 pages)
+                Viewing: {title} ({pages.length} pages)
               </div>
               <Button 
                 onClick={() => onComplete({ completed: true })} 
@@ -704,19 +611,19 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
     // Game components
     switch (gameTypeId) {
       case 'flashcards':
-        gameContent = <FlashcardGame deck={mockFlashcardDeck} onComplete={onComplete} onQuit={onQuit} />
+        gameContent = <FlashcardGame deck={getFlashcardDeck()} onComplete={onComplete} onQuit={onQuit} lessonId={lesson.id} />
         break
       
       case 'millionaire':
-        gameContent = <MillionaireGame questions={mockMillionaireQuestions} onGameEnd={(winnings, status) => onComplete({ winnings, status })} />
+        gameContent = <MillionaireGame questions={getMillionaireQuestions()} onGameEnd={(winnings, status) => onComplete({ winnings, status })} lessonId={lesson.id} />
         break
       
       case 'jeopardy':
-        gameContent = <JeopardyGame categories={mockJeopardyCategories} onGameEnd={(finalScore) => onComplete({ score: finalScore })} />
+        gameContent = <JeopardyGame categories={getJeopardyCategories()} onGameEnd={(finalScore) => onComplete({ score: finalScore })} />
         break
       
       case 'connect-cards':
-        gameContent = <ConnectCardsGame pairs={mockConnectPairs} onComplete={onComplete} onQuit={onQuit} />
+        gameContent = <ConnectCardsGame pairs={getConnectPairs()} onComplete={onComplete} onQuit={onQuit} lessonId={lesson.id} />
         break
       
       default:

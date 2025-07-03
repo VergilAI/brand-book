@@ -1,0 +1,203 @@
+{
+  "gameType": "millionaire",
+  "lessonId": "lesson-1-2",
+  "content": {
+    "questions": [
+      {
+        "id": "q-1",
+        "question": "What are the three components of risk?",
+        "answers": {
+          "A": "People, Process, Technology",
+          "B": "Threat, Vulnerability, Impact",
+          "C": "Confidentiality, Integrity, Availability",
+          "D": "Prevention, Detection, Response"
+        },
+        "correctAnswer": "B",
+        "difficulty": 1,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-2",
+        "question": "Which risk treatment involves implementing security controls?",
+        "answers": {
+          "A": "Risk Acceptance",
+          "B": "Risk Avoidance",
+          "C": "Risk Mitigation",
+          "D": "Risk Transfer"
+        },
+        "correctAnswer": "C",
+        "difficulty": 2,
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "q-3",
+        "question": "What type of risk assessment uses High/Medium/Low ratings?",
+        "answers": {
+          "A": "Quantitative",
+          "B": "Qualitative",
+          "C": "Numerical",
+          "D": "Financial"
+        },
+        "correctAnswer": "B",
+        "difficulty": 3,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-4",
+        "question": "ALE stands for?",
+        "answers": {
+          "A": "Annual Loss Expectancy",
+          "B": "Average Loss Estimate",
+          "C": "Asset Loss Evaluation",
+          "D": "Actual Loss Experience"
+        },
+        "correctAnswer": "A",
+        "difficulty": 4,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-5",
+        "question": "What remains after implementing security controls?",
+        "answers": {
+          "A": "Inherent Risk",
+          "B": "Residual Risk",
+          "C": "Transferred Risk",
+          "D": "Accepted Risk"
+        },
+        "correctAnswer": "B",
+        "difficulty": 5,
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "q-6",
+        "question": "A 5x5 risk matrix multiplies what two factors?",
+        "answers": {
+          "A": "Cost x Time",
+          "B": "Threat x Vulnerability",
+          "C": "Likelihood x Impact",
+          "D": "Assets x Controls"
+        },
+        "correctAnswer": "C",
+        "difficulty": 6,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-7",
+        "question": "Cyber insurance is an example of?",
+        "answers": {
+          "A": "Risk Mitigation",
+          "B": "Risk Transfer",
+          "C": "Risk Avoidance",
+          "D": "Risk Acceptance"
+        },
+        "correctAnswer": "B",
+        "difficulty": 7,
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "q-8",
+        "question": "The risk level before any controls are applied is?",
+        "answers": {
+          "A": "Residual Risk",
+          "B": "Net Risk",
+          "C": "Inherent Risk",
+          "D": "Gross Risk"
+        },
+        "correctAnswer": "C",
+        "difficulty": 8,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-9",
+        "question": "If SLE = $50,000 and ARO = 0.2, what is ALE?",
+        "answers": {
+          "A": "$250,000",
+          "B": "$10,000",
+          "C": "$100,000",
+          "D": "$25,000"
+        },
+        "correctAnswer": "B",
+        "difficulty": 9,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-10",
+        "question": "A bank's willingness to take risks is called?",
+        "answers": {
+          "A": "Risk Tolerance",
+          "B": "Risk Threshold",
+          "C": "Risk Appetite",
+          "D": "Risk Capacity"
+        },
+        "correctAnswer": "C",
+        "difficulty": 10,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-11",
+        "question": "Which control type includes security policies?",
+        "answers": {
+          "A": "Technical",
+          "B": "Physical",
+          "C": "Administrative",
+          "D": "Logical"
+        },
+        "correctAnswer": "C",
+        "difficulty": 11,
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "q-12",
+        "question": "Not collecting sensitive data is an example of?",
+        "answers": {
+          "A": "Risk Mitigation",
+          "B": "Risk Avoidance",
+          "C": "Risk Transfer",
+          "D": "Risk Acceptance"
+        },
+        "correctAnswer": "B",
+        "difficulty": 12,
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "q-13",
+        "question": "What document tracks all identified risks?",
+        "answers": {
+          "A": "Risk Matrix",
+          "B": "Risk Register",
+          "C": "Risk Report",
+          "D": "Risk Profile"
+        },
+        "correctAnswer": "B",
+        "difficulty": 13,
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "q-14",
+        "question": "A control implemented when the primary control fails?",
+        "answers": {
+          "A": "Preventive Control",
+          "B": "Detective Control",
+          "C": "Compensating Control",
+          "D": "Corrective Control"
+        },
+        "correctAnswer": "C",
+        "difficulty": 14,
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "q-15",
+        "question": "The first step in risk assessment is?",
+        "answers": {
+          "A": "Identify vulnerabilities",
+          "B": "Calculate risk scores",
+          "C": "Identify assets",
+          "D": "Implement controls"
+        },
+        "correctAnswer": "C",
+        "difficulty": 15,
+        "knowledgePointId": "kp-4"
+      }
+    ]
+  }
+}

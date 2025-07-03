@@ -1,0 +1,154 @@
+{
+  "gameType": "flashcards",
+  "lessonId": "lesson-1-2",
+  "content": {
+    "id": "deck-lesson-1-2",
+    "title": "Risk Assessment Fundamentals",
+    "description": "Master the concepts of risk identification, assessment, and management",
+    "cards": [
+      {
+        "id": "card-1",
+        "front": "What is Risk?",
+        "back": "The potential for loss, damage, or destruction of assets as a result of a threat exploiting a vulnerability",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-2",
+        "front": "Risk = ?",
+        "back": "Risk = Threat × Vulnerability × Impact (or Likelihood × Impact)",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-3",
+        "front": "What is a Threat?",
+        "back": "Any potential danger to information or systems (e.g., hackers, malware, natural disasters)",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-4",
+        "front": "What is a Vulnerability?",
+        "back": "A weakness in a system that can be exploited by threats (e.g., unpatched software, weak passwords)",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-5",
+        "front": "What is Risk Appetite?",
+        "back": "The amount of risk an organization is willing to accept in pursuit of its objectives",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-6",
+        "front": "Qualitative vs Quantitative Risk Assessment",
+        "back": "Qualitative uses descriptive scales (High/Medium/Low), Quantitative uses numerical values and calculations ($)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-7",
+        "front": "What is ALE?",
+        "back": "Annual Loss Expectancy = Single Loss Expectancy (SLE) × Annual Rate of Occurrence (ARO)",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-8",
+        "front": "What is Risk Mitigation?",
+        "back": "Implementing controls to reduce the likelihood or impact of a risk",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-9",
+        "front": "Four Risk Treatment Options",
+        "back": "1. Accept (tolerate)\n2. Mitigate (reduce)\n3. Transfer (insurance/outsource)\n4. Avoid (eliminate)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-10",
+        "front": "What is Residual Risk?",
+        "back": "The risk that remains after controls have been implemented",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-11",
+        "front": "What is a Risk Register?",
+        "back": "A document that lists identified risks, their assessment scores, owners, and treatment plans",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-12",
+        "front": "What is Risk Tolerance?",
+        "back": "The specific maximum risk that an organization is willing to accept around a specific objective",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-13",
+        "front": "What is a Control?",
+        "back": "A safeguard or countermeasure designed to reduce risk (preventive, detective, or corrective)",
+        "difficulty": "easy",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-14",
+        "front": "Types of Security Controls",
+        "back": "Technical (firewalls), Administrative (policies), Physical (locks)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-15",
+        "front": "What is Inherent Risk?",
+        "back": "The risk level before any controls are applied",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-16",
+        "front": "Risk Assessment Process Steps",
+        "back": "1. Identify assets\n2. Identify threats\n3. Identify vulnerabilities\n4. Analyze risk\n5. Determine treatment",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-17",
+        "front": "What is a Risk Matrix?",
+        "back": "A grid showing likelihood vs impact to categorize risks (typically 3x3 or 5x5)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-4"
+      },
+      {
+        "id": "card-18",
+        "front": "What is Due Diligence?",
+        "back": "Reasonable steps taken to identify and manage risks before making decisions",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-19",
+        "front": "What is a Compensating Control?",
+        "back": "An alternative control used when the primary control cannot be implemented",
+        "difficulty": "hard",
+        "knowledgePointId": "kp-5"
+      },
+      {
+        "id": "card-20",
+        "front": "What is Risk Transference?",
+        "back": "Shifting risk to a third party (e.g., cyber insurance, outsourcing)",
+        "difficulty": "medium",
+        "knowledgePointId": "kp-5"
+      }
+    ],
+    "totalCards": 20,
+    "estimatedTime": 15,
+    "category": "Risk Management"
+  }
+}

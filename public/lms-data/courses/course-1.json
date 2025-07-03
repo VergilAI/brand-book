@@ -1,0 +1,254 @@
+{
+  "id": "course-1",
+  "title": "Cyber Security Fundamentals",
+  "description": "Master the essential concepts of cybersecurity, from threat analysis and network security to cryptography and incident response. Build a strong foundation for protecting digital assets in today's interconnected world.",
+  "totalLessons": 8,
+  "completedLessons": 0,
+  "progress": 0,
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "Introduction to Cybersecurity",
+      "description": "Understanding the cybersecurity landscape, threats, and core principles",
+      "order": 1,
+      "progress": 0,
+      "estimatedTime": "3 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-1-1",
+          "title": "The Cybersecurity Landscape",
+          "description": "Explore the current state of cybersecurity, major threats, and why security matters in our digital age",
+          "knowledgePoints": [
+            {
+              "id": "kp-1",
+              "title": "CIA Triad",
+              "description": "Understanding Confidentiality, Integrity, and Availability - the fundamental principles of information security",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-2",
+              "title": "Threat Actors",
+              "description": "Identifying different types of attackers: hacktivists, cybercriminals, nation-states, and insider threats",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-3",
+              "title": "Attack Vectors",
+              "description": "Common pathways attackers use to breach systems: phishing, malware, social engineering, and physical access",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 45,
+          "completed": false
+        },
+        {
+          "id": "lesson-1-2",
+          "title": "Security Risk Management",
+          "description": "Learn to identify, assess, and mitigate security risks in organizational contexts",
+          "knowledgePoints": [
+            {
+              "id": "kp-4",
+              "title": "Risk Assessment",
+              "description": "Methodologies for identifying and evaluating security risks: quantitative vs qualitative analysis",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-5",
+              "title": "Security Controls",
+              "description": "Preventive, detective, and corrective controls to manage security risks effectively",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 60,
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "title": "Network Security",
+      "description": "Protecting computer networks from intrusions and attacks",
+      "order": 2,
+      "progress": 0,
+      "estimatedTime": "4 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-2-1",
+          "title": "Network Security Fundamentals",
+          "description": "Core concepts of network security, protocols, and defense mechanisms",
+          "knowledgePoints": [
+            {
+              "id": "kp-6",
+              "title": "OSI Security Architecture",
+              "description": "Security considerations at each layer of the OSI model and common vulnerabilities",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-7",
+              "title": "Firewalls and IDS/IPS",
+              "description": "Network security devices: firewalls, intrusion detection and prevention systems",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-8",
+              "title": "VPNs and Secure Protocols",
+              "description": "Virtual Private Networks, SSL/TLS, IPSec, and secure communication protocols",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 75,
+          "completed": false
+        },
+        {
+          "id": "lesson-2-2",
+          "title": "Wireless and IoT Security",
+          "description": "Securing wireless networks and Internet of Things devices",
+          "knowledgePoints": [
+            {
+              "id": "kp-9",
+              "title": "Wi-Fi Security Protocols",
+              "description": "WEP, WPA, WPA2, WPA3, and wireless security best practices",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-10",
+              "title": "IoT Security Challenges",
+              "description": "Unique security challenges in IoT ecosystems and mitigation strategies",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 60,
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "chapter-3",
+      "title": "Cryptography and Access Control",
+      "description": "Mathematical foundations of security and identity management",
+      "order": 3,
+      "progress": 0,
+      "estimatedTime": "5 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-3-1",
+          "title": "Cryptography Essentials",
+          "description": "Understanding encryption, hashing, and digital signatures",
+          "knowledgePoints": [
+            {
+              "id": "kp-11",
+              "title": "Symmetric vs Asymmetric Encryption",
+              "description": "AES, DES, RSA, and ECC - when and how to use different encryption methods",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-12",
+              "title": "Hashing and Digital Signatures",
+              "description": "SHA algorithms, MD5, digital certificates, and PKI infrastructure",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 90,
+          "completed": false
+        },
+        {
+          "id": "lesson-3-2",
+          "title": "Identity and Access Management",
+          "description": "Authentication, authorization, and access control mechanisms",
+          "knowledgePoints": [
+            {
+              "id": "kp-13",
+              "title": "Authentication Methods",
+              "description": "Multi-factor authentication, biometrics, SSO, and passwordless authentication",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-14",
+              "title": "Access Control Models",
+              "description": "DAC, MAC, RBAC, ABAC - understanding different access control paradigms",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 75,
+          "completed": false
+        }
+      ]
+    },
+    {
+      "id": "chapter-4",
+      "title": "Application and Cloud Security",
+      "description": "Securing modern applications and cloud environments",
+      "order": 4,
+      "progress": 0,
+      "estimatedTime": "4.5 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-4-1",
+          "title": "Secure Software Development",
+          "description": "Building security into applications from the ground up",
+          "knowledgePoints": [
+            {
+              "id": "kp-15",
+              "title": "OWASP Top 10",
+              "description": "Most critical web application security risks and how to prevent them",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-16",
+              "title": "Secure Coding Practices",
+              "description": "Input validation, output encoding, and secure session management",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-17",
+              "title": "DevSecOps",
+              "description": "Integrating security into CI/CD pipelines and agile development",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 90,
+          "completed": false
+        },
+        {
+          "id": "lesson-4-2",
+          "title": "Cloud Security Architecture",
+          "description": "Securing data and applications in cloud environments",
+          "knowledgePoints": [
+            {
+              "id": "kp-18",
+              "title": "Cloud Security Models",
+              "description": "Shared responsibility model, IaaS/PaaS/SaaS security considerations",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-19",
+              "title": "Container and Kubernetes Security",
+              "description": "Securing containerized applications and orchestration platforms",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-20",
+              "title": "Cloud Compliance and Governance",
+              "description": "Meeting regulatory requirements in cloud environments",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 75,
+          "completed": false
+        }
+      ]
+    }
+  ]
+}
