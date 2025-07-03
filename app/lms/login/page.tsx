@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { VergilLogo } from '@/components/lms/vergil-logo'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { VergilLogo } from '@/components/vergil-logo'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
+import { Label } from '@/components/label'
+import { Checkbox } from '@/components/checkbox'
+import { Alert, AlertDescription } from '@/components/alert'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')

@@ -223,7 +223,7 @@ interface GameTerritory extends TerritoryNode {
 ### Basic Implementation
 
 ```typescript
-import { TerritoryConquest } from '@/components/lms/territory-conquest'
+import { TerritoryConquest } from '@/components/territory-conquest'
 import { createTerritoryGraph } from '@/lib/lms/territory-conquest-data'
 
 const graph = createTerritoryGraph()

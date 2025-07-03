@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { UserManagementHeader } from '@/components/lms/user-management-header'
+import { UserManagementHeader } from '@/components/user-management-header'
 import { 
   ArrowLeft, 
   Save, 
@@ -26,25 +26,25 @@ import {
   MapPin,
   Lock
 } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Card } from '@/components/card'
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/select'
+import { Badge } from '@/components/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/dropdown-menu'
 import { mockUsers, getRoleName } from '@/lib/lms/mock-data'
 import { initialRoles } from '@/lib/lms/roles-data'
 

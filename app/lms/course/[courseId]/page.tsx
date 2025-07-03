@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, use } from 'react'
-import { LMSHeader } from '@/components/lms/lms-header'
-import { LMSSidebar } from '@/components/lms/lms-sidebar'
-import { CourseDetail } from '@/components/lms/course-detail'
+import { LMSHeader } from '@/components/lms-header'
+import { LMSSidebar } from '@/components/lms-sidebar'
+import { CourseDetail } from '@/components/course-detail'
 
 interface CoursePageProps {
   params: Promise<{

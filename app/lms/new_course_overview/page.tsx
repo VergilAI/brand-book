@@ -1,7 +1,7 @@
 'use client'
 
-import { LMSHeader } from '@/components/lms/lms-header'
-import { NewCourseOverview } from '@/components/lms/new-course-overview'
+import { LMSHeader } from '@/components/lms-header'
+import { NewCourseOverview } from '@/components/new-course-overview'
 import { useCourseData } from './hooks/useCourseData'
 
 export default function NewCourseOverviewPage() {

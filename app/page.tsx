@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { LMSHeader } from '@/components/lms/lms-header'
-import { LMSSidebar } from '@/components/lms/lms-sidebar'
-import { StudentDashboard } from '@/components/lms/student-dashboard'
+import { LMSHeader } from '@/components/lms-header'
+import { LMSSidebar } from '@/components/lms-sidebar'
+import { StudentDashboard } from '@/components/student-dashboard'
 
 export default function LMSPage() {
   const [currentView, setCurrentView] = useState<'dashboard' | 'course' | 'lesson'>('dashboard')

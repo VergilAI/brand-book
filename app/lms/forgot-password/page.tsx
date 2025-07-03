@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import { VergilLogo } from '@/components/lms/vergil-logo'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { VergilLogo } from '@/components/vergil-logo'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card'
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
+import { Label } from '@/components/label'
+import { Alert, AlertDescription } from '@/components/alert'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

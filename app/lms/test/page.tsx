@@ -1,7 +1,7 @@
 'use client'
 
-import { LMSHeader } from '@/components/lms/lms-header'
-import { TestInterface } from '@/components/lms/TestInterface'
+import { LMSHeader } from '@/components/lms-header'
+import { TestInterface } from '@/components/TestInterface'
 
 export default function TestPage() {
   return (

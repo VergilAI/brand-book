@@ -3,26 +3,26 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Plus, Edit2, Trash2, Shield, Users, MoreVertical, Palette, X, Check, Lock } from 'lucide-react'
-import { UserManagementHeader } from '@/components/lms/user-management-header'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
+import { UserManagementHeader } from '@/components/user-management-header'
+import { Card } from '@/components/card'
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
+import { Badge } from '@/components/badge'
+import { Checkbox } from '@/components/checkbox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/select'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/dropdown-menu'
 import { Role, initialRoles, calculateNewRolePosition } from '@/lib/lms/roles-data'
 import { updateRoleUserCounts } from '@/lib/lms/mock-data'
 

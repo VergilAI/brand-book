@@ -4,18 +4,18 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Plus, X, AlertCircle } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Card } from '@/components/card'
+import { Button } from '@/components/button'
+import { Input } from '@/components/input'
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
+} from '@/components/select'
+import { Badge } from '@/components/badge'
+import { Checkbox } from '@/components/checkbox'
 import { initialRoles } from '@/lib/lms/roles-data'
 import { mockUsers } from '@/lib/lms/mock-data'
 

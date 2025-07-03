@@ -1,7 +1,7 @@
 'use client'
 
 import { use } from 'react'
-import { LessonViewer } from '@/components/lms/lesson-viewer'
+import { LessonViewer } from '@/components/lesson-viewer'
 
 interface LessonPageProps {
   params: Promise<{

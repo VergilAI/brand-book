@@ -1,5 +1,5 @@
-import { AdminLayout } from '@/components/lms/admin/admin-layout'
-import { UserManagement } from '@/components/lms/admin/user-management'
+import { AdminLayout } from '@/components/admin/admin-layout'
+import { UserManagement } from '@/components/admin/user-management'
 
 export default function UsersPage() {
   return (

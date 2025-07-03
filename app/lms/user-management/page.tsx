@@ -4,20 +4,20 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle } from 'lucide-react'
 import Image from 'next/image'
-import { UserManagementHeader } from '@/components/lms/user-management-header'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
+import { UserManagementHeader } from '@/components/user-management-header'
+import { Card } from '@/components/card'
+import { Input } from '@/components/input'
+import { Button } from '@/components/button'
+import { Select } from '@/components/select'
+import { Badge } from '@/components/badge'
+import { Checkbox } from '@/components/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/dropdown-menu'
 import { mockUsers, getRoleName } from '@/lib/lms/mock-data'
 import { initialRoles } from '@/lib/lms/roles-data'
 

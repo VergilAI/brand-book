@@ -1,7 +1,7 @@
 'use client'
 
 import { use } from 'react'
-import { GameInterface } from '@/components/lms/game-interface'
+import { GameInterface } from '@/components/game-interface'
 
 interface GamePageProps {
   params: Promise<{

@@ -1,5 +1,5 @@
-import { AdminLayout } from '@/components/lms/admin/admin-layout'
-import { AnalyticsDashboard } from '@/components/lms/admin/analytics-dashboard'
+import { AdminLayout } from '@/components/admin/admin-layout'
+import { AnalyticsDashboard } from '@/components/admin/analytics-dashboard'
 
 export default function AnalyticsPage() {
   return (

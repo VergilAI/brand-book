@@ -1,7 +1,7 @@
 'use client'
 
 import { use } from 'react'
-import { CourseBuilder } from '@/components/lms/admin/course-builder'
+import { CourseBuilder } from '@/components/admin/course-builder'
 
 interface EditCoursePageProps {
   params: Promise<{

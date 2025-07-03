@@ -1,7 +1,7 @@
 'use client'
 
 import { use } from 'react'
-import { TestInterface } from '@/components/lms/test-interface'
+import { TestInterface } from '@/components/test-interface'
 
 interface TestPageProps {
   params: Promise<{
