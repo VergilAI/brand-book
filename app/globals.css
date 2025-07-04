@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Import generated tokens */
-@import url('/packages/design-system/generated/tokens.css');
+@import '../packages/design-system/generated/tokens.css';
 
 /* Vergil Brand Design Tokens */
 :root {

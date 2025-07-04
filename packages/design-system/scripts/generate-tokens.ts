@@ -204,8 +204,17 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
   addBase({
     ':root': {
       ${Object.entries(primitives.colors)
-        .filter(([_, value]) => typeof value === 'string')
-        .map(([key, value]) => `'--${toKebabCase(key)}': '${value}'`)
+        .map(([key, value]) => {
+          if (typeof value === 'string') {
+            return `'--${toKebabCase(key)}': '${value}'`;
+          } else if (typeof value === 'object' && value !== null) {
+            return Object.entries(value)
+              .map(([shade, color]) => `'--color-${key}-${shade}': '${color}'`)
+              .join(',\n      ');
+          }
+          return '';
+        })
+        .filter(Boolean)
         .join(',\n      ')},
       ${Object.entries(primitives.spacing)
         .map(([key, value]) => `'--spacing-${key}': '${value}'`)
@@ -301,8 +310,20 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       colors: {
         // Primitive colors
         ${Object.entries(primitives.colors)
-          .filter(([_, value]) => typeof value === 'string')
-          .map(([key, value]) => `'${toKebabCase(key)}': '${value}'`)
+          .map(([key, value]) => {
+            if (typeof value === 'string') {
+              return `'${toKebabCase(key)}': '${value}'`;
+            } else if (typeof value === 'object' && value !== null) {
+              // Handle color scales
+              return `'${key}': {
+          ${Object.entries(value)
+            .map(([shade, color]) => `'${shade}': '${color}'`)
+            .join(',\n          ')}
+        }`;
+            }
+            return '';
+          })
+          .filter(Boolean)
           .join(',\n        ')},
         
         // Semantic text colors
