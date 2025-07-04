@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const vergilTokensPlugin = require('./packages/design-system/tailwind-plugin');
+
 module.exports = {
   darkMode: "class",
   content: [
@@ -206,5 +208,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [vergilTokensPlugin, require("tailwindcss-animate")],
 }

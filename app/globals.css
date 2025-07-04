@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import generated tokens */
+@import url('/packages/design-system/generated/tokens.css');
+
 /* Vergil Brand Design Tokens */
 :root {
   /* Primary Palette */
@@ -35,8 +38,8 @@
   --midnight-black: #1E293B;
   
   /* Selection & Hover States */
-  --selection-purple: #8B5CF6; /* Used in drawing tools for hover/selection */
-  --selection-primary: #6366F1; /* Used for primary selection */
+  --selection-purple: #8B5CF6;
+  --selection-primary: #6366F1;
   
   /* Grays - Tailwind defaults being used locally */
   --gray-400: #9CA3AF;
@@ -47,12 +50,12 @@
   --gray-900: #111827;
   
   /* Tool-specific colors */
-  --map-selection: #8B5CF6; /* Map editor selection state */
-  --drawing-selection: #8B5CF6; /* Drawing tool selection */
-  --bezier-handle: #8B5CF6; /* Bezier curve handles */
-  --territory-player6: #8B5CF6; /* LMS territory game player 6 */
-  --vertex-selected: #1E40AF; /* Selected vertices in editors */
-  --snap-center: #FF6600; /* Center snap indicator */
+  --map-selection: #8B5CF6;
+  --drawing-selection: #8B5CF6;
+  --bezier-handle: #8B5CF6;
+  --territory-player6: #8B5CF6;
+  --vertex-selected: #1E40AF;
+  --snap-center: #FF6600;
   
   /* One-off colors that need semantic names */
   --orange-brand: #FF6600;
@@ -64,25 +67,25 @@
   --cyan-bright: #06B6D4;
   
   /* Brand Book v2 Colors - Monochrome System */
-  --vergil-purple: #7B00FF; /* THE brand purple */
-  --vergil-purple-light: #9933FF; /* Hover states */
-  --vergil-purple-lighter: #BB66FF; /* Dark theme primary */
-  --vergil-purple-lightest: #D199FF; /* Dark theme secondary */
-  --cosmic-purple: #6366F1; /* DEPRECATED - Legacy v1 purple, use vergil-purple instead */
+  --vergil-purple: #7B00FF;
+  --vergil-purple-light: #9933FF;
+  --vergil-purple-lighter: #BB66FF;
+  --vergil-purple-lightest: #D199FF;
+  --cosmic-purple: #6366F1;
   
   /* Apple-Inspired Neutral Palette */
-  --vergil-full-black: #000000; /* Full black - backgrounds only */
-  --vergil-off-black: #1D1D1F; /* Off-black - primary text */
-  --vergil-full-white: #FFFFFF; /* Full white - backgrounds only */
-  --vergil-off-white: #F5F5F7; /* Off-white - text on dark, containers */
+  --vergil-full-black: #000000;
+  --vergil-off-black: #1D1D1F;
+  --vergil-full-white: #FFFFFF;
+  --vergil-off-white: #F5F5F7;
   
   /* Subtle Attention Hierarchy (Apple-inspired) */
-  --vergil-footnote-text: #6C6C6D; /* Small footnote text on off-white bg */
-  --vergil-emphasis-bg: #F0F0F2; /* Temporary headers needing attention */
-  --vergil-emphasis-input-bg: #FAFAFC; /* Interactive elements (dropdowns, inputs) within emphasis areas */
-  --vergil-emphasis-text: #303030; /* Text directly on emphasis-bg */
-  --vergil-emphasis-input-text: #323232; /* Darker text inside emphasis-input-bg elements */
-  --vergil-emphasis-button-hover: #272729; /* Button hover state */
+  --vergil-footnote-text: #6C6C6D;
+  --vergil-emphasis-bg: #F0F0F2;
+  --vergil-emphasis-input-bg: #FAFAFC;
+  --vergil-emphasis-text: #303030;
+  --vergil-emphasis-input-text: #323232;
+  --vergil-emphasis-button-hover: #272729;
   
   /* Functional Colors v2 */
   --vergil-success: #0F8A0F;
@@ -112,38 +115,39 @@
   --vergil-info: var(--synaptic-blue);
   --vergil-warning: var(--neural-pink);
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
   
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.627 0.177 265.75); /* cosmic-purple */
-  --primary-foreground: oklch(0.985 0 0); /* pure-light */
-  --secondary: oklch(0.756 0.108 265.75); /* electric-violet */
-  --secondary-foreground: oklch(0.145 0 0); /* deep-space */
-  --muted: oklch(0.97 0 0); /* whisper-gray */
-  --muted-foreground: oklch(0.556 0 0); /* stone-gray */
-  --accent: oklch(0.705 0.121 265.75); /* luminous-indigo */
-  --accent-foreground: oklch(0.985 0 0); /* pure-light */
-  --destructive: oklch(0.708 0.191 22.216); /* neural-pink */
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 237 84% 61%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 72.2% 50.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 237 84% 61%;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  --sidebar: 0 0% 98%;
+  --sidebar-foreground: 0 0% 3.9%;
+  --sidebar-primary: 0 0% 9%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 0 0% 96.1%;
+  --sidebar-accent-foreground: 0 0% 9%;
+  --sidebar-border: 0 0% 89.8%;
+  --sidebar-ring: 0 0% 3.9%;
 }
 
 body {
@@ -186,7 +190,6 @@ body {
   background: radial-gradient(circle at center, rgba(99,102,241,0.2) 0%, transparent 70%);
 }
 
-
 /* Brand Keyframe Animations */
 @keyframes breathing {
   0%, 100% { transform: scale3d(1, 1, 1); opacity: 0.8; }
@@ -225,7 +228,6 @@ body {
   100% { stroke-dashoffset: 0; opacity: 0; }
 }
 
-
 /* Iris Rays Animations */
 @keyframes pulse-slow {
   0%, 100% { opacity: 0.6; }
@@ -235,7 +237,6 @@ body {
 .animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
 }
-
 
 /* Blob Animation */
 .animate-blob {
@@ -328,44 +329,44 @@ body {
   background-clip: text;
 }
 
-
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.627 0.177 265.75); /* cosmic-purple */
-  --primary-foreground: oklch(0.985 0 0); /* pure-light */
-  --secondary: oklch(0.269 0 0); /* dark surface */
-  --secondary-foreground: oklch(0.756 0.108 265.75); /* electric-violet */
-  --muted: oklch(0.269 0 0); /* dark surface */
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.705 0.121 265.75); /* luminous-indigo */
-  --accent-foreground: oklch(0.985 0 0); /* pure-light */
-  --destructive: oklch(0.708 0.191 22.216); /* neural-pink */
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 237 84% 61%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 63.9%;
+  --accent: 0 0% 14.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 14.9%;
+  --input: 0 0% 14.9%;
+  --ring: 0 0% 83.1%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  --sidebar: 0 0% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 237 84% 61%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 0 0% 14.9%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 14.9%;
+  --sidebar-ring: 237 84% 61%;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
@@ -375,7 +376,6 @@ body {
 /* Carousel Smooth Scrolling Enhancement */
 body.carousel-active {
   scroll-behavior: smooth;
-  /* Improves momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
 }
 

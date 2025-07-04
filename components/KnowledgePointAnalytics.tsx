@@ -48,11 +48,11 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
   }, [selectedLesson])
 
   const getProficiencyColor = (proficiency: number) => {
-    if (proficiency >= 80) return '#10B981' // green
-    if (proficiency >= 60) return '#F59E0B' // yellow  
-    if (proficiency >= 40) return '#F97316' // orange
-    if (proficiency > 0) return '#EF4444' // red
-    return '#6B7280' // gray
+    if (proficiency >= 80) return 'var(--color-success)' // green
+    if (proficiency >= 60) return 'var(--color-warning)' // yellow  
+    if (proficiency >= 40) return 'var(--color-warning)' // orange
+    if (proficiency > 0) return 'var(--color-error)' // red
+    return 'var(--color-gray-500)' // gray
   }
 
   const getStatusLabel = (proficiency: number) => {
@@ -135,11 +135,11 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
           {/* Subtle background pattern */}
           <defs>
             <pattern id="dotGrid" patternUnits="userSpaceOnUse" width="20" height="20">
-              <circle cx="10" cy="10" r="1" fill="#F3F4F6" opacity="0.5"/>
+              <circle cx="10" cy="10" r="1" fill="var(--color-gray-100)" opacity="0.5"/>
             </pattern>
             <radialGradient id="centerGradient" cx="50%" cy="50%">
-              <stop offset="0%" stopColor="#7B00FF" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#7B00FF" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="var(--color-vergil-purple)" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="var(--color-vergil-purple)" stopOpacity="0.05" />
             </radialGradient>
           </defs>
           
@@ -152,7 +152,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             cy={centerY}
             r="135"
             fill="none"
-            stroke="#E5E7EB"
+            stroke="var(--color-mist-gray)"
             strokeWidth="1"
             strokeDasharray="4,4"
             opacity="0.3"
@@ -189,7 +189,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 y1={startY}
                 x2={endX}
                 y2={endY}
-                stroke={isConnected ? getProficiencyColor(pos.proficiency) : selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)}
+                stroke={isConnected ? getProficiencyColor(pos.proficiency) : selectedLesson ? (isInSelectedLesson ? "var(--color-vergil-purple)" : "var(--color-stone-gray)") : getProficiencyColor(pos.proficiency)}
                 strokeWidth={isConnected ? "2" : selectedLesson && isInSelectedLesson ? "1.5" : "1"}
                 opacity={isConnected ? "0.8" : selectedLesson ? (isInSelectedLesson ? "0.6" : "0.2") : "0.4"}
                 className="transition-all duration-300"
@@ -216,7 +216,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
             cy={centerY}
             r="22"
             fill="none"
-            stroke="#7B00FF"
+            stroke="var(--color-vergil-purple)"
             strokeWidth="2.5"
             opacity="0.8"
           />
@@ -273,7 +273,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   cy={pos.y}
                   r={nodeSize}
                   fill="none"
-                  stroke={selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)}
+                  stroke={selectedLesson ? (isInSelectedLesson ? "var(--color-vergil-purple)" : "var(--color-stone-gray)") : getProficiencyColor(pos.proficiency)}
                   strokeWidth={strokeWidth}
                   className="cursor-pointer transition-all duration-300 ease-out pointer-events-none"
                   style={{
@@ -308,7 +308,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                   dominantBaseline="central"
                   fontSize={nodeSize > 18 ? "12" : "10"}
                   fontWeight="bold"
-                  fill={selectedLesson ? (isInSelectedLesson ? "#1F2937" : "#4B5563") : "#1F2937"}
+                  fill={selectedLesson ? (isInSelectedLesson ? "var(--color-gray-800)" : "var(--color-gray-600)") : "var(--color-gray-800)"}
                   className="pointer-events-none transition-all duration-300"
                   style={{
                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
@@ -321,8 +321,8 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
                 {/* Gradient definitions */}
                 <defs>
                   <radialGradient id={`gradient-${pos.id}`} cx="30%" cy="30%">
-                    <stop offset="0%" stopColor={selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)} stopOpacity={opacity + 0.1} />
-                    <stop offset="100%" stopColor={selectedLesson ? (isInSelectedLesson ? "#7B00FF" : "#9CA3AF") : getProficiencyColor(pos.proficiency)} stopOpacity={opacity} />
+                    <stop offset="0%" stopColor={selectedLesson ? (isInSelectedLesson ? "var(--color-vergil-purple)" : "var(--color-stone-gray)") : getProficiencyColor(pos.proficiency)} stopOpacity={opacity + 0.1} />
+                    <stop offset="100%" stopColor={selectedLesson ? (isInSelectedLesson ? "var(--color-vergil-purple)" : "var(--color-stone-gray)") : getProficiencyColor(pos.proficiency)} stopOpacity={opacity} />
                   </radialGradient>
                 </defs>
               </g>
