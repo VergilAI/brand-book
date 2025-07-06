@@ -1,0 +1,28 @@
+.scrollablePanel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+.scrollablePanel::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollablePanel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollablePanel::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.scrollablePanel::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(155, 155, 155, 0.7);
+}
+
+.scrollablePanel::-webkit-scrollbar-corner {
+  background: transparent;
+}
