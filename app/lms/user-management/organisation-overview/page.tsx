@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users, Plus, Minus } from 'lucide-react'
+import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users, Plus, Minus, Edit2 } from 'lucide-react'
 import { UserManagementHeader } from '@/components/user-management-header'
 import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
-import { Switch } from '@/components/switch'
+import { Progress } from '@/components/progress'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
 import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
@@ -237,7 +237,8 @@ export default function OrganisationOverviewPage() {
     setViewState({
       zoom: 1.2,
       pan: { x: -250, y: -20 },
-      showGrid: viewState.showGrid
+      showGrid: viewState.showGrid,
+      viewMode: viewState.viewMode
     })
   }
 
@@ -360,12 +361,12 @@ export default function OrganisationOverviewPage() {
     if (roleUsers.length === 0) return
     
     // Start transition
-    setIsTransitioning(true)
+    // setIsTransitioning(true)
     
     // Clear any existing transition timeout
-    if (transitionTimeout.current) {
-      clearTimeout(transitionTimeout.current)
-    }
+    // if (transitionTimeout.current) {
+    //   clearTimeout(transitionTimeout.current)
+    // }
     
     // Switch to users list view
     setViewState(prev => ({
@@ -375,9 +376,9 @@ export default function OrganisationOverviewPage() {
     }))
     
     // End transition after animation completes
-    transitionTimeout.current = setTimeout(() => {
-      setIsTransitioning(false)
-    }, 300) // Shorter since we're just switching views
+    // transitionTimeout.current = setTimeout(() => {
+    //   // setIsTransitioning(false)
+    // }, 300) // Shorter since we're just switching views
     
     setSelectedRole(null)
     setSelectedUser(null)
@@ -385,12 +386,12 @@ export default function OrganisationOverviewPage() {
 
   // Go back to roles view with smooth transition
   const goBackToRoles = useCallback(() => {
-    setIsTransitioning(true)
+    // setIsTransitioning(true)
     
     // Clear any existing transition timeout
-    if (transitionTimeout.current) {
-      clearTimeout(transitionTimeout.current)
-    }
+    // if (transitionTimeout.current) {
+    //   clearTimeout(transitionTimeout.current)
+    // }
     
     setViewState(prev => ({
       ...prev,
@@ -401,9 +402,9 @@ export default function OrganisationOverviewPage() {
     }))
     
     // End transition after animation completes
-    transitionTimeout.current = setTimeout(() => {
-      setIsTransitioning(false)
-    }, 600)
+    // transitionTimeout.current = setTimeout(() => {
+    //   // setIsTransitioning(false)
+    // }, 600)
     
     setSelectedUser(null)
     setSelectedRole(null)
@@ -1184,7 +1185,7 @@ export default function OrganisationOverviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-vergil-off-white">
+    <div className="min-h-screen bg-secondary">
       <div className="h-screen flex flex-col">
         {/* Header with Tabs */}
         <div className="px-4 sm:px-6 lg:px-8 pt-4 bg-white">
@@ -1198,18 +1199,18 @@ export default function OrganisationOverviewPage() {
             {/* Canvas */}
             <div 
               ref={containerRef} 
-              className="flex-1 relative bg-gray-50"
+              className="flex-1 relative bg-secondary"
               onWheel={handleWheel}
             >
-            {/* View Toggle */}
-            <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-md p-1">
+              {/* View Toggle */}
+              <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-md p-1">
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setViewState(prev => ({ ...prev, viewMode: 'roles' }))}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                     viewState.viewMode === 'roles'
-                      ? 'bg-vergil-purple text-white'
-                      : 'text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-gray-100'
+                      ? 'bg-brand text-white'
+                      : 'text-secondary hover:text-primary hover:bg-emphasis'
                   }`}
                 >
                   <Users className="w-4 h-4 inline-block mr-2" />
@@ -1219,8 +1220,8 @@ export default function OrganisationOverviewPage() {
                   onClick={() => setViewState(prev => ({ ...prev, viewMode: 'employees' }))}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                     viewState.viewMode === 'employees'
-                      ? 'bg-vergil-purple text-white'
-                      : 'text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-gray-100'
+                      ? 'bg-brand text-white'
+                      : 'text-secondary hover:text-primary hover:bg-emphasis'
                   }`}
                 >
                   <UserIcon className="w-4 h-4 inline-block mr-2" />
@@ -1277,9 +1278,9 @@ export default function OrganisationOverviewPage() {
                         height="65"
                         style={{ display: 'none', pointerEvents: 'none', overflow: 'visible' }}
                       >
-                        <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg w-full">
+                        <div className="bg-text-primary text-white text-xs rounded-lg px-3 py-2 shadow-lg w-full">
                           <p className="font-semibold text-white">Team Progress</p>
-                          <p className="text-[11px] text-gray-200 mt-1">
+                          <p className="text-[11px] text-inverse opacity-80 mt-1">
                             Average completion of all subordinates
                           </p>
                         </div>
@@ -1313,10 +1314,10 @@ export default function OrganisationOverviewPage() {
               <div className="absolute inset-0 bg-white p-6 overflow-y-auto">
                 <div className="max-w-4xl mx-auto">
                   <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-vergil-off-black mb-2">
+                    <h2 className="text-xl font-semibold text-primary mb-spacing-xs">
                       {roles.find(r => r.id === viewState.focusedRoleId)?.name || 'Unknown'} Team Members
                     </h2>
-                    <p className="text-vergil-off-black/60">
+                    <p className="text-secondary">
                       {users.filter(u => u.roleId === viewState.focusedRoleId).length} team members
                     </p>
                   </div>
@@ -1333,8 +1334,8 @@ export default function OrganisationOverviewPage() {
                             key={user.id}
                             className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${
                               isSelected 
-                                ? 'border-vergil-purple shadow-md ring-2 ring-vergil-purple/20' 
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-brand shadow-md ring-2 ring-brand'
+                                : 'border-subtle hover:border-default'
                             }`}
                             onClick={() => setSelectedUser(isSelected ? null : user.id)}
                           >
@@ -1352,21 +1353,21 @@ export default function OrganisationOverviewPage() {
                                 {/* Name and Details */}
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-semibold text-vergil-off-black">{user.name}</h3>
+                                    <h3 className="font-semibold text-primary">{user.name}</h3>
                                     <div
                                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                                         user.status === 'on_track' 
                                           ? 'bg-green-100 text-green-800'
                                           : user.status === 'at_risk'
                                           ? 'bg-amber-100 text-amber-800'
-                                          : 'bg-red-100 text-red-800'
+                                          : 'bg-errorLight text-error'
                                       }`}
                                     >
                                       {user.completionRate}% Complete
                                     </div>
                                   </div>
                                   
-                                  <div className="flex items-center gap-6 text-sm text-vergil-off-black/70">
+                                  <div className="flex items-center gap-6 text-sm text-secondary">
                                     <div className="flex items-center gap-1">
                                       <Mail className="w-4 h-4" />
                                       <span>{user.email}</span>
@@ -1383,7 +1384,7 @@ export default function OrganisationOverviewPage() {
                               <div className="flex items-center gap-2">
                                 <Button
                                   size="sm"
-                                  variant="outline"
+                                  variant="secondary"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     // Send Slack message
@@ -1395,7 +1396,7 @@ export default function OrganisationOverviewPage() {
                                 </Button>
                                 <Button
                                   size="sm"
-                                  variant="outline"
+                                  variant="secondary"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     // Edit user action
@@ -1409,35 +1410,24 @@ export default function OrganisationOverviewPage() {
                             
                             {/* Expanded Details */}
                             {isSelected && (
-                              <div className="mt-4 pt-4 border-t border-gray-100">
+                              <div className="mt-4 pt-4 border-t border-subtle">
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                   <div>
-                                    <span className="font-medium text-vergil-off-black/60">Role:</span>
+                                    <span className="font-medium text-secondary">Role:</span>
                                     <span className="ml-2">{role?.name || 'Unknown'}</span>
                                   </div>
                                   <div>
-                                    <span className="font-medium text-vergil-off-black/60">Status:</span>
+                                    <span className="font-medium text-secondary">Status:</span>
                                     <span className="ml-2 capitalize">{user.status?.replace('_', ' ') || 'Unknown'}</span>
                                   </div>
                                   <div>
-                                    <span className="font-medium text-vergil-off-black/60">Training Progress:</span>
+                                    <span className="font-medium text-secondary">Training Progress:</span>
                                     <div className="mt-1">
-                                      <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div 
-                                          className={`h-2 rounded-full ${
-                                            user.status === 'on_track' 
-                                              ? 'bg-green-500'
-                                              : user.status === 'at_risk'
-                                              ? 'bg-amber-500'
-                                              : 'bg-red-500'
-                                          }`}
-                                          style={{ width: `${user.completionRate}%` }}
-                                        />
-                                      </div>
-                                      <span className="text-xs text-vergil-off-black/60 mt-1">
+                                      <Progress value={user.overallProgress || 0} className="h-2" />
+                                    </div>
+                                    <span className="text-xs text-secondary mt-1">
                                         {user.completionRate}% of required training completed
                                       </span>
-                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -1474,7 +1464,7 @@ export default function OrganisationOverviewPage() {
             {/* Zoom controls */}
             <div className="absolute bottom-4 right-4 flex flex-col gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={handleZoomIn}
                 className="bg-white shadow-sm hover:bg-vergil-off-white w-10 h-10 p-0"
@@ -1483,7 +1473,7 @@ export default function OrganisationOverviewPage() {
                 <Plus className="w-4 h-4" />
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={handleZoomOut}
                 className="bg-white shadow-sm hover:bg-vergil-off-white w-10 h-10 p-0"
@@ -1667,7 +1657,7 @@ export default function OrganisationOverviewPage() {
                         <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Quick Actions</h5>
                         <div className="space-y-2">
                           <Button 
-                            variant="outline" 
+                            variant="secondary" 
                             size="sm"
                             className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
                             onClick={() => {
@@ -1680,7 +1670,7 @@ export default function OrganisationOverviewPage() {
                             <span className="text-vergil-off-black">Send Slack Message</span>
                           </Button>
                           <Button 
-                            variant="outline" 
+                            variant="secondary" 
                             size="sm"
                             className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
                             onClick={() => {
@@ -1694,7 +1684,7 @@ export default function OrganisationOverviewPage() {
                           </Button>
                           <Link href={`/lms/user-management/${user.id}`}>
                             <Button 
-                              variant="outline" 
+                              variant="secondary" 
                               size="sm" 
                               className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
                             >
@@ -1987,9 +1977,9 @@ export default function OrganisationOverviewPage() {
                                   <div className="flex flex-col items-end gap-1">
                                     <Badge 
                                       variant={
-                                        user.status === 'ahead' ? 'default' :
+                                        user.status === 'ahead' ? 'success' :
                                         user.status === 'on_track' ? 'default' : 
-                                        user.status === 'at_risk' ? 'secondary' : 'destructive'
+                                        user.status === 'at_risk' ? 'warning' : 'error'
                                       }
                                       className={`text-xs ${
                                         user.status === 'ahead' ? 'bg-cyan-100 text-cyan-800 border-cyan-300' :
@@ -2015,7 +2005,7 @@ export default function OrganisationOverviewPage() {
                         <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Quick Actions</h5>
                         <div className="space-y-2">
                           <Button 
-                            variant="outline" 
+                            variant="secondary" 
                             size="sm"
                             className="w-full justify-start"
                             onClick={() => {
@@ -2026,7 +2016,7 @@ export default function OrganisationOverviewPage() {
                             Send Team Email
                           </Button>
                           <Button 
-                            variant="outline" 
+                            variant="secondary" 
                             size="sm"
                             className="w-full justify-start"
                             onClick={() => {
@@ -2242,7 +2232,7 @@ export default function OrganisationOverviewPage() {
                         <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Actions</h5>
                         <div className="space-y-2">
                           <Button 
-                            variant="outline" 
+                            variant="secondary" 
                             size="sm"
                             className="w-full justify-start"
                             onClick={() => {
@@ -2253,7 +2243,7 @@ export default function OrganisationOverviewPage() {
                             Send Organization Announcement
                           </Button>
                           <Link href="/lms/user-management">
-                            <Button variant="outline" size="sm" className="w-full justify-start">
+                            <Button variant="secondary" size="sm" className="w-full justify-start">
                               <Users className="w-4 h-4 mr-2" />
                               Manage All Users
                             </Button>
@@ -2266,9 +2256,9 @@ export default function OrganisationOverviewPage() {
               </div>
             )}
           </div>
-          </div>
         </div>
       </div>
     </div>
+  </div>
   )
 }
