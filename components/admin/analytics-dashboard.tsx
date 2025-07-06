@@ -251,12 +251,11 @@ export function AnalyticsDashboard() {
       sortable: true,
       render: (course: any) => (
         <Badge 
-          variant="outline" 
-          className={cn(
-            course.dropoffRate > 20 ? 'border-red-200 text-red-700' : 
-            course.dropoffRate > 15 ? 'border-yellow-200 text-yellow-700' : 
-            'border-green-200 text-green-700'
-          )}
+          variant={
+            course.dropoffRate > 20 ? 'error' : 
+            course.dropoffRate > 15 ? 'warning' : 
+            'success'
+          }
         >
           {course.dropoffRate}%
         </Badge>
@@ -302,7 +301,7 @@ export function AnalyticsDashboard() {
               <SelectItem value="1y">Last year</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="secondary">
             <Download className="h-4 w-4 mr-2" />
             Export Report
           </Button>
@@ -532,7 +531,7 @@ export function AnalyticsDashboard() {
               <CardTitle>Course Performance Analysis</CardTitle>
               <CardDescription>Detailed metrics for each course</CardDescription>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="secondary" size="sm">
               <BarChart3 className="h-4 w-4 mr-2" />
               View Detailed Reports
             </Button>

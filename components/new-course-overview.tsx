@@ -9,7 +9,7 @@ import { ChapterCard } from './ChapterCard'
 import { LearnModal } from './LearnModal'
 import { GameLauncher } from './game-launcher'
 import { KnowledgePointAnalytics } from './KnowledgePointAnalytics'
-import { DebugPanel } from './debug-panel'
+import { DebugPanel } from './ui/debug-panel'
 import { cn } from '@/lib/utils'
 import type { Course, LessonWithChapter } from '@/lib/lms/new-course-types'
 

@@ -194,7 +194,7 @@ export function AdminDashboard() {
       label: 'Status',
       render: (course: Course) => (
         <Badge 
-          variant={course.status === 'published' ? 'default' : 'secondary'}
+          variant={course.status === 'published' ? 'success' : 'default'}
           className={course.status === 'published' ? 'bg-green-100 text-green-800' : ''}
         >
           {course.status}
@@ -241,7 +241,7 @@ export function AdminDashboard() {
           <p className="text-muted-foreground">Welcome back! Here's what's happening in your LMS.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button variant="secondary">
             <Calendar className="h-4 w-4 mr-2" />
             Last 30 days
           </Button>
@@ -297,19 +297,19 @@ export function AdminDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/lms/admin/courses/new">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="secondary">
                 <Plus className="h-4 w-4 mr-2" />
                 Create New Course
               </Button>
             </Link>
             <Link href="/lms/admin/users/new">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="secondary">
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add User
               </Button>
             </Link>
             <Link href="/lms/admin/analytics">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="secondary">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 View Full Analytics
               </Button>
@@ -348,7 +348,7 @@ export function AdminDashboard() {
                 ))}
               </div>
               
-              <Button variant="outline" className="w-full mt-4" size="sm">
+              <Button variant="secondary" className="w-full mt-4" size="sm">
                 View All Activity
               </Button>
             </CardContent>
@@ -365,7 +365,7 @@ export function AdminDashboard() {
                   <CardDescription>Recent courses and their performance</CardDescription>
                 </div>
                 <Link href="/lms/admin/courses">
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     View All Courses
                   </Button>
                 </Link>
@@ -412,7 +412,7 @@ export function AdminDashboard() {
                         </div>
                         <span className="text-sm">{course.title}</span>
                       </div>
-                      <Badge variant="outline">{course.completionRate}%</Badge>
+                      <Badge variant="default">{course.completionRate}%</Badge>
                     </div>
                   ))}
               </div>

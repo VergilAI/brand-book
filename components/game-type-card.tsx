@@ -23,11 +23,11 @@ export function GameTypeCard({
   const Icon = gameType.icon
   
   const categoryColors = {
-    content: 'bg-synaptic-blue/10 text-synaptic-blue border-synaptic-blue/20',
-    quiz: 'bg-electric-violet/10 text-electric-violet border-electric-violet/20',
-    game: 'bg-phosphor-cyan/10 text-phosphor-cyan border-phosphor-cyan/20',
-    chat: 'bg-cosmic-purple/10 text-cosmic-purple border-cosmic-purple/20',
-    test: 'bg-luminous-indigo/10 text-luminous-indigo border-luminous-indigo/20'
+    content: 'bg-bg-info/10 text-text-info border-border-info',
+    quiz: 'bg-bg-brand/10 text-text-brand border-border-brand',
+    game: 'bg-bg-success/10 text-text-success border-border-success',
+    chat: 'bg-bg-warning/10 text-text-warning border-border-warning',
+    test: 'bg-bg-error/10 text-text-error border-border-error'
   }
 
   // Determine the category label based on game type
@@ -44,28 +44,26 @@ export function GameTypeCard({
     <div className="relative">
       <Card
         className={cn(
-          "relative overflow-hidden transition-all duration-300 h-full group",
-          isAvailable 
-            ? "cursor-pointer hover:shadow-xl hover:scale-105 hover:-translate-y-1" 
-            : "opacity-50 cursor-not-allowed",
+          "card-interactive h-full",
+          !isAvailable && "opacity-50 cursor-not-allowed",
           className
         )}
         onClick={isAvailable ? onClick : undefined}
       >
         {/* Recommended Badge on Border */}
         {isRecommended && (
-          <div className="absolute top-1 left-1 z-10">
-            <div className="bg-vergil-purple text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-sm">
+          <div className="absolute top-1 left-1 z-dropdown">
+            <div className="bg-bg-brand text-text-inverse text-[10px] font-medium px-sm py-0.5 rounded-full shadow-sm">
               Recommended
             </div>
           </div>
         )}
-        <CardContent className="p-6 h-full flex flex-col">
+        <CardContent className="p-lg h-full flex flex-col">
         {/* Category Badge */}
         <Badge 
-          variant="outline" 
+          variant="secondary" 
           className={cn(
-            "absolute top-2 right-2 text-xs",
+            "absolute top-sm right-sm text-xs",
             categoryColors[gameType.category]
           )}
         >
@@ -74,7 +72,7 @@ export function GameTypeCard({
 
         {/* Icon Container */}
         <div className={cn(
-          "w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-all",
+          "w-16 h-16 rounded-xl flex items-center justify-center mb-md transition-all duration-normal",
           categoryColors[gameType.category],
           isAvailable && "group-hover:scale-110"
         )}>
@@ -83,17 +81,17 @@ export function GameTypeCard({
 
         {/* Content */}
         <div className="flex-1">
-          <h3 className="font-display font-semibold text-deep-space mb-2">
+          <h3 className="font-semibold text-text-primary mb-sm">
             {gameType.name}
           </h3>
-          <p className="text-sm text-stone-gray">
+          <p className="text-sm text-text-secondary">
             {gameType.description}
           </p>
         </div>
 
         {!isAvailable && (
-          <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-            <span className="text-stone-gray font-medium">Coming Soon</span>
+          <div className="absolute inset-0 bg-bg-elevated/80 flex items-center justify-center rounded-lg">
+            <span className="text-text-tertiary font-medium">Coming Soon</span>
           </div>
         )}
       </CardContent>
@@ -101,4 +99,3 @@ export function GameTypeCard({
     </div>
   )
 }
-

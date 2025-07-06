@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Alert, AlertDescription, AlertTitle } from './alert';
-import { AlertCircle, CheckCircle, Info, XCircle, Brain, Zap, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { Brain, Zap, Shield, Sparkles, Activity, Database, Layers } from 'lucide-react';
 
 const meta = {
   title: 'UI/Alert',
@@ -9,7 +10,7 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Alert component for displaying important messages. Supports different variants and can include icons.',
+        component: 'Modern alert component with semantic token system. Features subtle animations, variant-specific styling, and optional dismissible functionality.',
       },
     },
   },
@@ -17,11 +18,19 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'destructive'],
-      description: 'Visual style variant',
+      options: ['info', 'success', 'warning', 'error'],
+      description: 'Alert variant determining color scheme and icon',
       table: {
-        type: { summary: 'default | destructive' },
-        defaultValue: { summary: 'default' },
+        type: { summary: 'info | success | warning | error' },
+        defaultValue: { summary: 'info' },
+      },
+    },
+    dismissible: {
+      control: 'boolean',
+      description: 'Whether the alert can be dismissed',
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
       },
     },
     className: {
@@ -34,36 +43,45 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Info: Story = {
   render: () => (
-    <Alert>
-      <AlertTitle>Default Alert</AlertTitle>
-      <AlertDescription>
-        This is a default alert message. Use it to display important information to users.
-      </AlertDescription>
-    </Alert>
-  ),
-};
-
-export const WithIcon: Story = {
-  render: () => (
-    <Alert>
-      <Info className="h-4 w-4" />
+    <Alert variant="info">
       <AlertTitle>Information</AlertTitle>
       <AlertDescription>
-        This alert includes an icon to help convey the message type.
+        This is an informational alert using semantic info tokens for consistent theming.
       </AlertDescription>
     </Alert>
   ),
 };
 
-export const Destructive: Story = {
+export const Success: Story = {
   render: () => (
-    <Alert variant="destructive">
-      <XCircle className="h-4 w-4" />
-      <AlertTitle>Error</AlertTitle>
+    <Alert variant="success">
+      <AlertTitle>Success!</AlertTitle>
       <AlertDescription>
-        Something went wrong. Please try again or contact support if the problem persists.
+        Your operation completed successfully. The alert uses semantic success tokens.
+      </AlertDescription>
+    </Alert>
+  ),
+};
+
+export const Warning: Story = {
+  render: () => (
+    <Alert variant="warning">
+      <AlertTitle>Warning</AlertTitle>
+      <AlertDescription>
+        Please review this warning message. Uses semantic warning color tokens.
+      </AlertDescription>
+    </Alert>
+  ),
+};
+
+export const Error: Story = {
+  render: () => (
+    <Alert variant="error">
+      <AlertTitle>Error Occurred</AlertTitle>
+      <AlertDescription>
+        Something went wrong. This alert uses semantic error tokens for visual hierarchy.
       </AlertDescription>
     </Alert>
   ),
@@ -72,65 +90,124 @@ export const Destructive: Story = {
 export const AllVariants: Story = {
   render: () => (
     <div className="space-y-4 w-full max-w-xl">
-      <Alert>
-        <CheckCircle className="h-4 w-4 text-green-600" />
-        <AlertTitle>Success</AlertTitle>
+      <Alert variant="info">
+        <AlertTitle>New Feature Available</AlertTitle>
         <AlertDescription>
-          Your changes have been saved successfully.
+          Check out our latest AI model improvements in the dashboard.
         </AlertDescription>
       </Alert>
       
-      <Alert>
-        <Info className="h-4 w-4 text-blue-600" />
-        <AlertTitle>Information</AlertTitle>
+      <Alert variant="success">
+        <AlertTitle>Model Training Complete</AlertTitle>
         <AlertDescription>
-          A new version of the application is available. Refresh to update.
+          Your model achieved 96.8% accuracy on the validation set.
         </AlertDescription>
       </Alert>
       
-      <Alert>
-        <AlertCircle className="h-4 w-4 text-yellow-600" />
-        <AlertTitle>Warning</AlertTitle>
+      <Alert variant="warning">
+        <AlertTitle>Resource Usage High</AlertTitle>
         <AlertDescription>
-          Your subscription will expire in 5 days. Please renew to continue using all features.
+          You've used 85% of your monthly GPU hours. Consider upgrading your plan.
         </AlertDescription>
       </Alert>
       
-      <Alert variant="destructive">
-        <XCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+      <Alert variant="error">
+        <AlertTitle>Connection Failed</AlertTitle>
         <AlertDescription>
-          Failed to connect to the server. Please check your internet connection.
+          Unable to connect to the inference server. Please try again.
         </AlertDescription>
       </Alert>
     </div>
   ),
 };
 
+export const Dismissible: Story = {
+  render: () => {
+    const [alerts, setAlerts] = useState([
+      { id: 1, variant: 'info' as const, title: 'Tip', message: 'Use keyboard shortcuts for faster navigation.' },
+      { id: 2, variant: 'success' as const, title: 'Saved', message: 'Your preferences have been updated.' },
+      { id: 3, variant: 'warning' as const, title: 'Heads up', message: 'This action cannot be undone.' },
+      { id: 4, variant: 'error' as const, title: 'Failed', message: 'Please check your input and try again.' },
+    ]);
+
+    return (
+      <div className="space-y-4 w-full max-w-xl">
+        {alerts.map((alert) => (
+          <Alert
+            key={alert.id}
+            variant={alert.variant}
+            dismissible
+            onDismiss={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}
+          >
+            <AlertTitle>{alert.title}</AlertTitle>
+            <AlertDescription>{alert.message}</AlertDescription>
+          </Alert>
+        ))}
+        {alerts.length === 0 && (
+          <p className="text-center text-[var(--text-secondary)]">
+            All alerts dismissed! Refresh to see them again.
+          </p>
+        )}
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Dismissible alerts with smooth animations and interactive dismiss buttons.',
+      },
+    },
+  },
+};
+
 export const AISystemAlerts: Story = {
   render: () => (
     <div className="space-y-4 w-full max-w-xl">
-      <Alert>
-        <Brain className="h-4 w-4 text-cosmic-purple" />
-        <AlertTitle>AI Model Updated</AlertTitle>
+      <Alert variant="info">
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Brain className="h-4 w-4 inline" />
+            Model Architecture Updated
+          </span>
+        </AlertTitle>
         <AlertDescription>
-          The AI model has been updated to version 2.0 with improved accuracy and faster response times.
+          New transformer blocks have been added to improve context understanding.
         </AlertDescription>
       </Alert>
       
-      <Alert>
-        <Zap className="h-4 w-4 text-electric-violet" />
-        <AlertTitle>Training Complete</AlertTitle>
+      <Alert variant="success">
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Zap className="h-4 w-4 inline" />
+            Training Completed
+          </span>
+        </AlertTitle>
         <AlertDescription>
-          Your custom model has finished training. Accuracy: 94.2%, Loss: 0.0231
+          Model converged after 47 epochs. Final loss: 0.0142, Accuracy: 98.3%
         </AlertDescription>
       </Alert>
       
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>GPU Memory Limit Reached</AlertTitle>
+      <Alert variant="warning">
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Activity className="h-4 w-4 inline" />
+            High Memory Usage
+          </span>
+        </AlertTitle>
         <AlertDescription>
-          The model requires more GPU memory than available. Consider using a smaller batch size or model.
+          GPU memory at 92%. Consider reducing batch size to prevent OOM errors.
+        </AlertDescription>
+      </Alert>
+      
+      <Alert variant="error">
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Database className="h-4 w-4 inline" />
+            Dataset Error
+          </span>
+        </AlertTitle>
+        <AlertDescription>
+          Corrupted data detected in training batch 1247. Skipping affected samples.
         </AlertDescription>
       </Alert>
     </div>
@@ -138,7 +215,7 @@ export const AISystemAlerts: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'AI-themed alerts for model training, system updates, and resource management.',
+        story: 'AI-themed alerts with custom icons for machine learning workflows.',
       },
     },
   },
@@ -147,49 +224,64 @@ export const AISystemAlerts: Story = {
 export const SecurityAlerts: Story = {
   render: () => (
     <div className="space-y-4 w-full max-w-xl">
-      <Alert>
-        <Shield className="h-4 w-4 text-green-600" />
-        <AlertTitle>Security Update Applied</AlertTitle>
+      <Alert variant="success" dismissible>
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Shield className="h-4 w-4 inline" />
+            Security Scan Complete
+          </span>
+        </AlertTitle>
         <AlertDescription>
-          All security patches have been successfully applied. Your system is up to date.
+          No vulnerabilities detected. All dependencies are up to date.
         </AlertDescription>
       </Alert>
       
-      <Alert variant="destructive">
-        <Shield className="h-4 w-4" />
-        <AlertTitle>Suspicious Activity Detected</AlertTitle>
+      <Alert variant="error" dismissible>
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Shield className="h-4 w-4 inline" />
+            Authentication Failed
+          </span>
+        </AlertTitle>
         <AlertDescription>
-          We detected unusual login attempts from an unrecognized location. Please verify your recent activity.
+          Invalid API key. Please check your credentials and try again.
         </AlertDescription>
       </Alert>
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Security-related alerts for compliance and safety notifications.',
-      },
-    },
-  },
 };
 
-export const ComplexAlert: Story = {
+export const ComplexContent: Story = {
   render: () => (
-    <Alert className="max-w-2xl">
-      <Info className="h-4 w-4" />
-      <AlertTitle>System Maintenance Scheduled</AlertTitle>
+    <Alert variant="info" className="max-w-2xl">
+      <AlertTitle>
+        <span className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 inline" />
+          New Features in Vergil 3.0
+        </span>
+      </AlertTitle>
       <AlertDescription>
-        <p className="mb-2">
-          We will be performing system maintenance on Saturday, March 15th from 2:00 AM to 4:00 AM EST.
+        <p className="mb-3">
+          We're excited to announce the release of Vergil 3.0 with groundbreaking improvements:
         </p>
-        <p className="font-semibold mb-1">What to expect:</p>
-        <ul className="list-disc list-inside space-y-1 text-sm">
-          <li>The platform will be temporarily unavailable</li>
-          <li>All running training jobs will be paused and resumed automatically</li>
-          <li>API services will return 503 status codes during maintenance</li>
+        <ul className="space-y-2 ml-4">
+          <li className="flex items-start gap-2">
+            <span className="text-[var(--text-brand)] mt-0.5">•</span>
+            <span><strong>Multi-modal Understanding:</strong> Process text, images, and audio in a single model</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[var(--text-brand)] mt-0.5">•</span>
+            <span><strong>70% Faster Inference:</strong> Optimized architecture reduces latency significantly</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[var(--text-brand)] mt-0.5">•</span>
+            <span><strong>Extended Context:</strong> Support for up to 128K tokens in a single prompt</span>
+          </li>
         </ul>
-        <p className="mt-2">
-          We apologize for any inconvenience. For questions, contact support@vergil.ai
+        <p className="mt-3 text-[var(--text-secondary)]">
+          <a href="#" className="text-[var(--text-brand)] hover:underline">
+            Read the full changelog →
+          </a>
         </p>
       </AlertDescription>
     </Alert>
@@ -197,7 +289,47 @@ export const ComplexAlert: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Complex alert with formatted content including lists and multiple paragraphs.',
+        story: 'Complex alert with rich content, lists, and semantic typography tokens.',
+      },
+    },
+  },
+};
+
+export const LiveNotification: Story = {
+  render: () => (
+    <div className="space-y-4 w-full max-w-xl">
+      <Alert variant="info" dismissible>
+        <AlertTitle>
+          <span className="flex items-center gap-2">
+            <Layers className="h-4 w-4 inline animate-pulse" />
+            Live Training Progress
+          </span>
+        </AlertTitle>
+        <AlertDescription>
+          <div className="space-y-2 mt-2">
+            <div className="flex justify-between text-sm">
+              <span>Epoch 12/50</span>
+              <span className="text-[var(--text-brand)]">24%</span>
+            </div>
+            <div className="w-full bg-[var(--bg-emphasis)] rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-[var(--gradient-consciousness)] rounded-full transition-all duration-500"
+                style={{ width: '24%' }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-[var(--text-secondary)]">
+              <span>Loss: 0.342</span>
+              <span>ETA: 2h 14m</span>
+            </div>
+          </div>
+        </AlertDescription>
+      </Alert>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Alert with live progress indicator using semantic tokens and animations.',
       },
     },
   },

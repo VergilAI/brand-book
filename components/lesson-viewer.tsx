@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -13,7 +13,13 @@ import {
   Pause,
   Volume2,
   Maximize,
-  Home
+  Home,
+  Video,
+  FileQuestion,
+  Sparkles,
+  BookOpen,
+  X,
+  Minimize
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
@@ -24,13 +30,14 @@ import { cn } from '@/lib/utils'
 interface LessonViewerProps {
   courseId: string
   lessonId: string
+  onClose?: () => void
 }
 
 interface Lesson {
   id: string
   title: string
   content: string
-  type: 'lesson' | 'test' | 'game' | 'material'
+  type: 'lesson' | 'test' | 'game' | 'material' | 'video' | 'quiz' | 'interactive'
   duration: string
   progress: number
   completed: boolean
@@ -56,9 +63,23 @@ interface Course {
   progress: number
 }
 
-export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
+const getLessonIcon = (type: string) => {
+  switch (type) {
+    case 'video':
+      return Video
+    case 'quiz':
+      return FileQuestion
+    case 'interactive':
+      return Sparkles
+    default:
+      return BookOpen
+  }
+}
+
+export function LessonViewer({ courseId, lessonId, onClose }: LessonViewerProps) {
   const [lessonProgress, setLessonProgress] = useState(45)
   const [videoPlaying, setVideoPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Mock data
   const course: Course = {
@@ -180,21 +201,38 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
     }
   }
 
+  const LessonIcon = getLessonIcon(lesson.type)
+
+  useEffect(() => {
+    // Simulate progress
+    const interval = setInterval(() => {
+      setLessonProgress(prev => Math.min(prev + 0.5, 95))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Fixed header */}
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              <Home className="h-4 w-4 mr-2" />
+      <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]/95 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-[var(--spacing-lg)] py-[var(--spacing-md)]">
+          <div className="flex items-center gap-[var(--spacing-md)]">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={onClose}
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
+              <Home className="h-4 w-4 mr-[var(--spacing-sm)]" />
               Back to Course
             </Button>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-[var(--font-size-sm)] text-[var(--text-tertiary)]">
               {breadcrumbs.map((item, index) => (
                 <span key={index}>
-                  {index > 0 && <span className="mx-2">/</span>}
-                  <span className={index === breadcrumbs.length - 1 ? 'text-foreground font-medium' : ''}>
+                  {index > 0 && <span className="mx-[var(--spacing-sm)]">/</span>}
+                  <span className={cn(
+                    index === breadcrumbs.length - 1 && "text-[var(--text-primary)] font-[var(--font-weight-medium)]"
+                  )}>
                     {item.title}
                   </span>
                 </span>
@@ -202,17 +240,19 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              <Clock className="h-4 w-4 inline mr-1" />
-              {lesson.duration}
+          <div className="flex items-center gap-[var(--spacing-md)]">
+            <div className="flex items-center gap-[var(--spacing-xs)] text-[var(--font-size-sm)] text-[var(--text-tertiary)]">
+              <Clock className="h-4 w-4" />
+              <span>{lesson.duration}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Progress</span>
+            <div className="flex items-center gap-[var(--spacing-sm)]">
+              <span className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">Progress</span>
               <div className="w-24">
                 <Progress value={lessonProgress} className="h-2" />
               </div>
-              <span className="text-sm">{lessonProgress}%</span>
+              <span className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-[var(--text-brand)]">
+                {lessonProgress}%
+              </span>
             </div>
           </div>
         </div>
@@ -220,18 +260,22 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
 
       <div className="flex">
         {/* Main content */}
-        <main className="flex-1 max-w-4xl mx-auto p-6">
-          <div className="space-y-8">
+        <main className="flex-1 max-w-4xl mx-auto p-[var(--spacing-lg)]">
+          <div className="space-y-[var(--spacing-xl)]">
             {/* Lesson header */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-cosmic-purple to-electric-violet rounded-lg flex items-center justify-center">
-                  <Book className="h-6 w-6 text-white" />
+            <div className="space-y-[var(--spacing-md)]">
+              <div className="flex items-center gap-[var(--spacing-md)]">
+                <div className="w-12 h-12 bg-[var(--gradient-consciousness)] rounded-[var(--radius-lg)] flex items-center justify-center shadow-brand-sm">
+                  <LessonIcon className="h-6 w-6 text-[var(--text-inverse)]" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">{lesson.title}</h1>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <Badge variant="outline">Lesson</Badge>
+                  <h1 className="text-[var(--font-size-3xl)] font-[var(--font-weight-bold)] text-[var(--text-primary)]">
+                    {lesson.title}
+                  </h1>
+                  <div className="flex items-center gap-[var(--spacing-md)] text-[var(--font-size-sm)] text-[var(--text-tertiary)]">
+                    <Badge variant="secondary" className="text-[var(--font-size-xs)]">
+                      {lesson.type.charAt(0).toUpperCase() + lesson.type.slice(1)}
+                    </Badge>
                     <span>{lesson.duration}</span>
                     <span>•</span>
                     <span>{course.title}</span>
@@ -242,44 +286,70 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
 
             {/* Video player placeholder */}
             {lesson.materials.some(m => m.type === 'video') && (
-              <Card className="overflow-hidden">
-                <div className="aspect-video bg-black flex items-center justify-center relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-cosmic-purple/20 to-electric-violet/20" />
+              <Card variant="neural" className="overflow-hidden">
+                <div className="aspect-video bg-[var(--bg-inverse)] flex items-center justify-center relative group">
+                  <div className="absolute inset-0 bg-[var(--gradient-ambient)]" />
                   <Button
                     size="lg"
-                    className="bg-white/90 text-black hover:bg-white z-10"
+                    className="bg-[var(--bg-primary)]/90 text-[var(--text-primary)] hover:bg-[var(--bg-primary)] z-10 shadow-lg"
                     onClick={() => setVideoPlaying(!videoPlaying)}
                   >
                     {videoPlaying ? (
-                      <Pause className="h-6 w-6 mr-2" />
+                      <Pause className="h-6 w-6 mr-[var(--spacing-sm)]" />
                     ) : (
-                      <Play className="h-6 w-6 mr-2" />
+                      <Play className="h-6 w-6 mr-[var(--spacing-sm)]" />
                     )}
                     {videoPlaying ? 'Pause' : 'Play'} Video
                   </Button>
                   
                   {/* Video controls */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center gap-4 text-white">
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
-                      <Volume2 className="h-4 w-4" />
-                    </Button>
-                    <div className="flex-1">
-                      <Progress value={30} className="h-1" />
+                  <div className="absolute bottom-0 left-0 right-0 p-[var(--spacing-md)] bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-normal)]">
+                    <div className="flex items-center gap-[var(--spacing-md)] text-[var(--text-inverse)]">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-[var(--text-inverse)] hover:bg-white/20"
+                      >
+                        <Volume2 className="h-4 w-4" />
+                      </Button>
+                      <div className="flex-1">
+                        <Progress value={30} className="h-1 bg-white/20" />
+                      </div>
+                      <span className="text-[var(--font-size-sm)]">2:34 / 8:45</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-[var(--text-inverse)] hover:bg-white/20"
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                      >
+                        {isFullscreen ? (
+                          <Minimize className="h-4 w-4" />
+                        ) : (
+                          <Maximize className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
-                    <span className="text-sm">2:34 / 8:45</span>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
-                      <Maximize className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               </Card>
             )}
 
             {/* Lesson content */}
-            <Card>
-              <CardContent className="p-8">
+            <Card variant="default">
+              <CardContent className="p-[var(--spacing-xl)]">
                 <div 
-                  className="prose prose-lg max-w-none"
+                  className="prose prose-lg max-w-none 
+                    prose-headings:text-[var(--text-primary)]
+                    prose-p:text-[var(--text-secondary)]
+                    prose-strong:text-[var(--text-emphasis)]
+                    prose-ul:text-[var(--text-secondary)]
+                    prose-blockquote:text-[var(--text-tertiary)]
+                    prose-blockquote:border-[var(--border-brand)]
+                    prose-blockquote:bg-[var(--bg-brandLight)]
+                    prose-blockquote:rounded-[var(--radius-md)]
+                    prose-blockquote:px-[var(--spacing-md)]
+                    prose-blockquote:py-[var(--spacing-sm)]
+                  "
                   dangerouslySetInnerHTML={{ __html: lesson.content }}
                 />
               </CardContent>
@@ -287,32 +357,38 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
 
             {/* Associated materials */}
             {lesson.materials.length > 0 && (
-              <Card>
+              <Card variant="feature">
                 <CardHeader>
-                  <CardTitle>Additional Materials</CardTitle>
+                  <CardTitle className="text-[var(--font-size-xl)]">Additional Materials</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4">
+                  <div className="grid gap-[var(--spacing-md)]">
                     {lesson.materials.map((material) => {
                       const Icon = getMaterialIcon(material.type)
                       return (
                         <div
                           key={material.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between p-[var(--spacing-md)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] hover:bg-[var(--bg-secondary)] hover:border-[var(--border-default)] transition-all duration-[var(--duration-normal)] group"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                              <Icon className="h-5 w-5 text-muted-foreground" />
+                          <div className="flex items-center gap-[var(--spacing-md)]">
+                            <div className="w-10 h-10 bg-[var(--bg-emphasis)] rounded-[var(--radius-md)] flex items-center justify-center group-hover:bg-[var(--gradient-consciousness)] group-hover:text-[var(--text-inverse)] transition-all duration-[var(--duration-normal)]">
+                              <Icon className="h-5 w-5" />
                             </div>
                             <div>
-                              <div className="font-medium">{material.title}</div>
-                              <div className="text-sm text-muted-foreground capitalize">
+                              <div className="font-[var(--font-weight-medium)] text-[var(--text-primary)]">
+                                {material.title}
+                              </div>
+                              <div className="text-[var(--font-size-sm)] text-[var(--text-tertiary)] capitalize">
                                 {material.type}
                               </div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
+                          <Button 
+                            variant="secondary" 
+                            size="sm"
+                            className="group-hover:border-[var(--border-brand)] group-hover:text-[var(--text-brand)]"
+                          >
+                            <Download className="h-4 w-4 mr-[var(--spacing-sm)]" />
                             {material.type === 'link' ? 'Open' : 'Download'}
                           </Button>
                         </div>
@@ -326,17 +402,17 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
         </main>
 
         {/* Sidebar */}
-        <aside className="w-80 border-l bg-gray-50 p-6">
-          <div className="space-y-6">
+        <aside className="w-80 border-l border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-[var(--spacing-lg)]">
+          <div className="space-y-[var(--spacing-lg)]">
             {/* Progress */}
-            <Card>
+            <Card variant="gradient">
               <CardHeader>
-                <CardTitle className="text-lg">Lesson Progress</CardTitle>
+                <CardTitle className="text-[var(--font-size-lg)]">Lesson Progress</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="relative w-20 h-20 mx-auto">
-                    <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 36 36">
+                <div className="space-y-[var(--spacing-md)]">
+                  <div className="relative w-24 h-24 mx-auto">
+                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
                       <path
                         d="M18 2.0845
                           a 15.9155 15.9155 0 0 1 0 31.831
@@ -344,36 +420,45 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        className="text-muted-foreground/20"
+                        className="text-[var(--border-subtle)]"
                       />
                       <path
                         d="M18 2.0845
                           a 15.9155 15.9155 0 0 1 0 31.831
                           a 15.9155 15.9155 0 0 1 0 -31.831"
                         fill="none"
-                        stroke="currentColor"
+                        stroke="url(#progress-gradient)"
                         strokeWidth="2"
                         strokeDasharray={`${lessonProgress}, 100`}
-                        className="text-cosmic-purple"
+                        strokeLinecap="round"
                       />
+                      <defs>
+                        <linearGradient id="progress-gradient" gradientTransform="rotate(90)">
+                          <stop offset="0%" stopColor="var(--color-purple-600)" />
+                          <stop offset="50%" stopColor="var(--color-purple-500)" />
+                          <stop offset="100%" stopColor="var(--color-purple-300)" />
+                        </linearGradient>
+                      </defs>
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg font-bold">{lessonProgress}%</span>
+                      <span className="text-[var(--font-size-xl)] font-[var(--font-weight-bold)] text-[var(--text-brand)]">
+                        {lessonProgress}%
+                      </span>
                     </div>
                   </div>
                   
                   {lessonProgress < 100 ? (
                     <Button 
                       onClick={handleMarkComplete}
-                      className="w-full bg-cosmic-purple hover:bg-cosmic-purple/90"
+                      className="w-full bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)] shadow-brand-sm hover:shadow-brand-md"
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="h-4 w-4 mr-[var(--spacing-sm)]" />
                       Mark as Complete
                     </Button>
                   ) : (
-                    <div className="flex items-center justify-center gap-2 text-green-600">
+                    <div className="flex items-center justify-center gap-[var(--spacing-sm)] text-[var(--text-success)]">
                       <CheckCircle className="h-5 w-5" />
-                      <span className="font-medium">Completed!</span>
+                      <span className="font-[var(--font-weight-medium)]">Completed!</span>
                     </div>
                   )}
                 </div>
@@ -383,47 +468,47 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
             {/* Navigation */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Navigation</CardTitle>
+                <CardTitle className="text-[var(--font-size-lg)]">Navigation</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-[var(--spacing-sm)]">
                 {lesson.previousLesson && (
-                  <Button variant="outline" className="w-full justify-start">
-                    <ChevronLeft className="h-4 w-4 mr-2" />
+                  <Button variant="secondary" className="w-full justify-start group">
+                    <ChevronLeft className="h-4 w-4 mr-[var(--spacing-sm)] group-hover:-translate-x-1 transition-transform duration-[var(--duration-normal)]" />
                     <div className="text-left">
-                      <div className="text-xs text-muted-foreground">Previous</div>
-                      <div className="font-medium truncate">{lesson.previousLesson.title}</div>
+                      <div className="text-[var(--font-size-xs)] text-[var(--text-tertiary)]">Previous</div>
+                      <div className="font-[var(--font-weight-medium)] truncate">{lesson.previousLesson.title}</div>
                     </div>
                   </Button>
                 )}
                 
                 {lesson.nextLesson && (
                   <Button 
-                    className="w-full justify-start bg-cosmic-purple hover:bg-cosmic-purple/90"
+                    className="w-full justify-start bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)] group"
                     disabled={lessonProgress < 100}
                   >
                     <div className="text-left flex-1">
-                      <div className="text-xs opacity-90">Next</div>
-                      <div className="font-medium truncate">{lesson.nextLesson.title}</div>
+                      <div className="text-[var(--font-size-xs)] opacity-90">Next</div>
+                      <div className="font-[var(--font-weight-medium)] truncate">{lesson.nextLesson.title}</div>
                     </div>
-                    <ChevronRight className="h-4 w-4 ml-2" />
+                    <ChevronRight className="h-4 w-4 ml-[var(--spacing-sm)] group-hover:translate-x-1 transition-transform duration-[var(--duration-normal)]" />
                   </Button>
                 )}
               </CardContent>
             </Card>
 
             {/* Course progress */}
-            <Card>
+            <Card variant="feature">
               <CardHeader>
-                <CardTitle className="text-lg">Course Progress</CardTitle>
+                <CardTitle className="text-[var(--font-size-lg)]">Course Progress</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{course.title}</span>
-                    <span>{course.progress}%</span>
+                <div className="space-y-[var(--spacing-sm)]">
+                  <div className="flex items-center justify-between text-[var(--font-size-sm)]">
+                    <span className="text-[var(--text-secondary)] truncate flex-1">{course.title}</span>
+                    <span className="font-[var(--font-weight-medium)] text-[var(--text-brand)]">{course.progress}%</span>
                   </div>
                   <Progress value={course.progress} className="h-2" />
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
                     Keep learning to improve your progress!
                   </div>
                 </div>

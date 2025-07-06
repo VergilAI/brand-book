@@ -1045,7 +1045,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     if (!shapeId) return
     
     // Import shape library to get shape definition
-    import('../components/shapes/ShapeLibrary').then(({ shapeLibrary }) => {
+    import('@/components/diagram-tool/shapes/ShapeLibrary').then(({ shapeLibrary }) => {
       const shape = shapeLibrary.getShape(shapeId)
       if (!shape) return
       

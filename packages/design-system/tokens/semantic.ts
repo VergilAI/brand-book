@@ -14,7 +14,7 @@ export const semanticColors = {
     tertiary: colors.gray[400],     // Placeholders
     emphasis: colors.gray[750],     // Emphasis text
     inverse: colors.gray[50],       // Off-white
-    brand: colors.purple[600],      // Brand purple
+    brand: colors.purple[400],      // Brand purple (changed from 600)
     brandLight: colors.purple[500], // Hover states
     success: colors.green[600],     // Success
     warning: colors.yellow[500],    // Warning
@@ -30,7 +30,7 @@ export const semanticColors = {
     emphasis: colors.gray[100],     // Emphasis sections
     emphasisInput: colors.gray[25], // Emphasis input backgrounds
     inverse: colors.black,          // Dark mode primary
-    brand: colors.purple[600],      // Brand backgrounds
+    brand: colors.purple[400],      // Brand backgrounds (changed from 600)
     brandLight: colors.purple[50],  // Light brand backgrounds
     elevated: colors.white,         // Elevated surfaces
     overlay: `rgba(0, 0, 0, ${opacity.backdrop})`, // Modal backdrops
@@ -46,9 +46,9 @@ export const semanticColors = {
   border: {
     default: borderColor.default,
     subtle: borderColor.subtle,
-    emphasis: `rgba(123, 0, 255, 0.1)`, // Purple-tinted borders
+    emphasis: `rgba(166, 77, 255, 0.1)`, // Purple-tinted borders (updated to purple-400)
     focus: borderColor.focus,
-    brand: colors.purple[600],
+    brand: colors.purple[400],
     error: colors.red[300],         // Error borders
     warning: colors.yellow[300],    // Warning borders
     success: colors.green[300],     // Success borders
@@ -59,7 +59,7 @@ export const semanticColors = {
   // Interactive states
   interactive: {
     primary: {
-      default: colors.purple[600],  // Brand purple
+      default: colors.purple[400],  // Brand purple (changed from 600)
       hover: colors.purple[500],    // Hover state
       pressed: colors.purple[700],  // Pressed state
       disabled: colors.gray[300],
@@ -88,7 +88,7 @@ export const semanticColors = {
   icon: {
     primary: colors.gray[850],      // Primary icons
     secondary: colors.gray[500],    // Secondary icons
-    brand: colors.purple[600],      // Brand icons
+    brand: colors.purple[400],      // Brand icons (changed from 600)
     error: colors.red[400],         // Error icons
     warning: colors.yellow[400],    // Warning icons
     success: colors.green[400],     // Success icons
@@ -140,7 +140,7 @@ export const semanticShadows = {
   brandGlow: shadows.brandGlow,
   
   // Focus shadows
-  focus: `0 0 0 3px rgba(123, 0, 255, 0.2)`, // Vergil purple focus ring
+  focus: `0 0 0 3px rgba(166, 77, 255, 0.2)`, // Vergil purple focus ring (updated to purple-400)
   focusError: `0 0 0 3px rgba(229, 28, 35, 0.2)`, // Error focus ring (using red-500)
   focusSuccess: `0 0 0 3px rgba(15, 138, 15, 0.2)`, // Success focus ring (using green-600)
 } as const;

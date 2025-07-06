@@ -10,7 +10,8 @@ import { Input } from '@/components/input'
 import { Button } from '@/components/button'
 import { Select } from '@/components/select'
 import { Badge } from '@/components/badge'
-import { Checkbox } from '@/components/checkbox'
+import { Checkbox } from '@/components/atomic/checkbox'
+import { Progress } from '@/components/progress'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/dropdown-menu'
-import { mockUsers, getRoleName } from '@/lib/lms/mock-data'
+import { mockUsers, getRoleName, type User } from '@/lib/lms/mock-data'
 import { initialRoles } from '@/lib/lms/roles-data'
 
 // Map status for compatibility with existing UI
@@ -164,13 +165,13 @@ export default function UserManagementPage() {
 
   const activeFiltersCount = filters.roles.length + filters.statuses.length + filters.progressRanges.length
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string): "error" | "default" | "info" | "success" | "warning" | "brand" => {
     switch (status) {
       case 'ahead': return 'default' // Will use custom class
       case 'on_track': return 'default' // Already using custom class
       case 'falling_behind': return 'default' // Will use custom class
       case 'drastically_behind': return 'default' // Will use custom class
-      default: return 'outline'
+      default: return 'default'
     }
   }
   
@@ -405,29 +406,29 @@ export default function UserManagementPage() {
               {/* Actions */}
               <div className="flex gap-2">
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  className={showFilters ? 'bg-vergil-purple/10 text-vergil-purple border-vergil-purple' : ''}
+                  className={showFilters ? 'bg-brandLight text-brand border-brand' : ''} // rgba(166, 77, 255, 0.05), #A64DFF
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                   {activeFiltersCount > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 bg-vergil-purple text-white rounded-full text-xs">
+                    <span className="ml-2 px-1.5 py-0.5 bg-brand text-white rounded-full text-xs"> {/* #A64DFF */}
                       {activeFiltersCount}
                     </span>
                   )}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
+                <Button variant="secondary" size="sm" onClick={() => setShowImportModal(true)}>
                   <Upload className="w-4 h-4 mr-2" />
                   Import
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleExport}>
+                <Button variant="secondary" size="sm" onClick={handleExport}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
                 <Link href="/lms/user-management/new">
-                  <Button size="sm" className="bg-vergil-purple hover:bg-vergil-purple-lighter">
+                  <Button size="sm" variant="primary">
                     <Plus className="w-4 h-4 mr-2" />
                     Add User
                   </Button>
@@ -437,11 +438,11 @@ export default function UserManagementPage() {
 
             {/* Filters Panel */}
             {showFilters && (
-              <div className="mt-4 p-4 bg-vergil-off-white rounded-lg">
+              <div className="mt-4 p-4 bg-secondary rounded-lg"> {/* #F5F5F7 */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Role Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-vergil-off-black mb-2">Role</label>
+                    <label className="block text-sm font-medium text-primary mb-2">Role</label> {/* #1D1D1F */}
                     <div className="space-y-2">
                       {initialRoles.map(role => (
                         <label key={role.id} className="flex items-center gap-2">
@@ -538,13 +539,13 @@ export default function UserManagementPage() {
                   </Button>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="text-vergil-error border-vergil-error/20 hover:bg-vergil-error/10">
+                  <Button variant="secondary" size="sm" className="text-vergil-error border-vergil-error/20 hover:bg-vergil-error/10">
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="secondary" size="sm">
                         <MoreVertical className="w-4 h-4 mr-2" />
                         More Actions
                       </Button>
@@ -670,60 +671,37 @@ export default function UserManagementPage() {
                       </Link>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-medium text-sm text-vergil-off-black">
+                      <span className="font-medium text-sm text-primary"> {/* #1D1D1F */}
                         {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {user.status === 'ahead' ? (
-                        <Badge className="bg-cyan-100 text-cyan-800 border-cyan-300">
-                          {getStatusLabel(user.status)}
-                        </Badge>
-                      ) : user.status === 'on_track' ? (
-                        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                          {getStatusLabel(user.status)}
-                        </Badge>
-                      ) : user.status === 'falling_behind' ? (
-                        <Badge className="bg-orange-100 text-orange-800 border-orange-300">
-                          {getStatusLabel(user.status)}
-                        </Badge>
-                      ) : user.status === 'drastically_behind' ? (
-                        <Badge className="bg-red-100 text-red-700 border-red-200">
-                          {getStatusLabel(user.status)}
-                        </Badge>
-                      ) : (
-                        <Badge variant={getStatusBadgeVariant(user.status)}>
-                          {getStatusLabel(user.status)}
-                        </Badge>
-                      )}
+                      <Badge variant={user.status === 'ahead' ? 'info' : user.status === 'on_track' ? 'success' : user.status === 'falling_behind' ? 'warning' : 'destructive'}>
+                        {getStatusLabel(user.status)}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-vergil-purple-lighter h-2 rounded-full transition-all"
-                            style={{ width: `${user.overallProgress}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-vergil-off-black/60 min-w-[3ch]">
+                        <Progress value={user.overallProgress} className="flex-1" />
+                        <span className="text-sm text-secondary min-w-[3ch]"> {/* #6C6C6D */}
                           {user.overallProgress}%
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-vergil-off-black/60">{formatDate(user.lastLogin)}</p>
+                      <p className="text-sm text-secondary">{formatDate(user.lastLogin)}</p> {/* #6C6C6D */}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <Link href={`/lms/user-management/${user.id}`}>
-                          <Button variant="ghost" size="sm" className="text-vergil-purple hover:text-vergil-purple-lighter">
+                          <Button variant="ghost" size="sm" className="text-brand hover:text-brandLight"> {/* #A64DFF, #9933FF */}
                             View
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="sm" className="text-vergil-purple hover:text-vergil-purple-lighter">
+                        <Button variant="ghost" size="sm" className="text-brand hover:text-brandLight"> {/* #A64DFF, #9933FF */}
                           <Mail className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-vergil-off-black/60 hover:text-vergil-off-black">
+                        <Button variant="ghost" size="sm" className="text-secondary hover:text-primary"> {/* #6C6C6D, #1D1D1F */}
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -735,15 +713,15 @@ export default function UserManagementPage() {
           </div>
 
           {/* Pagination */}
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-vergil-off-black/60">
+          <div className="px-spacing-lg py-spacing-md border-t border-subtle flex items-center justify-between"> {/* 24px, 16px, rgba(0,0,0,0.05) */}
+            <p className="text-sm text-secondary"> {/* #6C6C6D */}
               Showing {filteredAndSortedUsers.length} of {mockUsers.length} users
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled>
+              <Button variant="secondary" size="sm" disabled>
                 Previous
               </Button>
-              <Button variant="outline" size="sm" disabled>
+              <Button variant="secondary" size="sm" disabled>
                 Next
               </Button>
             </div>
@@ -752,13 +730,13 @@ export default function UserManagementPage() {
 
         {/* Import Modal */}
         {showImportModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50"> {/* rgba(0, 0, 0, 0.5), 16px */}
             <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col">
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-spacing-lg border-b border-subtle"> {/* 24px, rgba(0,0,0,0.05) */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-vergil-off-black">Import Users</h3>
-                    <p className="text-sm text-vergil-off-black/60 mt-1">
+                    <h3 className="text-lg font-semibold text-primary">Import Users</h3> {/* #1D1D1F */}
+                    <p className="text-sm text-secondary mt-spacing-xs"> {/* #6C6C6D, 4px */}
                       Upload a CSV file to import multiple users at once
                     </p>
                   </div>
@@ -811,16 +789,16 @@ export default function UserManagementPage() {
                     {/* Template Download */}
                     <Card variant="outlined" className="p-4">
                       <div className="flex items-start gap-3">
-                        <FileText className="w-5 h-5 text-vergil-purple mt-0.5" />
+                        <FileText className="w-5 h-5 text-brand mt-0.5" /> {/* #A64DFF */}
                         <div className="flex-1">
-                          <h4 className="font-medium text-vergil-off-black mb-1">
+                          <h4 className="font-medium text-primary mb-1"> {/* #1D1D1F */}
                             Need a template?
                           </h4>
-                          <p className="text-sm text-vergil-off-black/60 mb-3">
+                          <p className="text-sm text-secondary mb-3"> {/* #6C6C6D */}
                             Download our CSV template with the correct format and example data
                           </p>
                           <Button
-                            variant="outline"
+                            variant="secondary"
                             size="sm"
                             onClick={handleDownloadTemplate}
                           >
@@ -832,11 +810,11 @@ export default function UserManagementPage() {
                     </Card>
 
                     {/* Format Requirements */}
-                    <div className="bg-vergil-off-white rounded-lg p-4">
-                      <h4 className="font-medium text-vergil-off-black mb-2">
+                    <div className="bg-secondary rounded-lg p-4"> {/* #F5F5F7 */}
+                      <h4 className="font-medium text-primary mb-2"> {/* #1D1D1F */}
                         CSV Format Requirements
                       </h4>
-                      <ul className="space-y-1 text-sm text-vergil-off-black/60">
+                      <ul className="space-y-1 text-sm text-secondary"> {/* #6C6C6D */}
                         <li>• Required columns: Name, Email, Role</li>
                         <li>• Optional columns: Phone, Location, Department, Manager</li>
                         <li>• Roles must be one of: {initialRoles.map(r => r.name).join(', ')}</li>
@@ -873,14 +851,14 @@ export default function UserManagementPage() {
 
                     {/* Errors */}
                     {importErrors.length > 0 && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="bg-errorLight border border-error rounded-lg p-4"> {/* #FEF2F2, #FCA5A5 */}
                         <div className="flex items-start gap-2">
-                          <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                          <AlertCircle className="w-5 h-5 text-error mt-0.5" /> {/* #E51C23 */}
                           <div className="flex-1">
-                            <h4 className="font-medium text-red-900 mb-1">
+                            <h4 className="font-medium text-error mb-1"> {/* #E51C23 */}
                               Validation Errors
                             </h4>
-                            <ul className="space-y-1 text-sm text-red-700">
+                            <ul className="space-y-1 text-sm text-error"> {/* #E51C23 */}
                               {importErrors.map((error, index) => (
                                 <li key={index}>• {error}</li>
                               ))}
@@ -893,20 +871,20 @@ export default function UserManagementPage() {
                     {/* Preview */}
                     {importPreview.length > 0 && (
                       <div>
-                        <h4 className="font-medium text-vergil-off-black mb-2">
+                        <h4 className="font-medium text-primary mb-2"> {/* #1D1D1F */}
                           Preview ({importPreview.length} users)
                         </h4>
-                        <div className="border border-gray-200 rounded-lg overflow-x-auto">
+                        <div className="border border-subtle rounded-lg overflow-x-auto"> {/* rgba(0,0,0,0.05) */}
                           <table className="w-full text-sm">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                            <thead className="bg-secondary border-b border-subtle"> {/* #F5F5F7, rgba(0,0,0,0.05) */}
                               <tr>
-                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Name</th>
-                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Email</th>
-                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Role</th>
-                                <th className="px-4 py-2 text-left font-medium text-vergil-off-black">Status</th>
+                                <th className="px-4 py-2 text-left font-medium text-primary">Name</th> {/* #1D1D1F */}
+                                <th className="px-4 py-2 text-left font-medium text-primary">Email</th>
+                                <th className="px-4 py-2 text-left font-medium text-primary">Role</th>
+                                <th className="px-4 py-2 text-left font-medium text-primary">Status</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-border-subtle"> {/* rgba(0,0,0,0.05) */}
                               {importPreview.slice(0, 5).map((user, index) => (
                                 <tr key={index}>
                                   <td className="px-4 py-2">{user.name}</td>
@@ -920,7 +898,7 @@ export default function UserManagementPage() {
                             </tbody>
                           </table>
                           {importPreview.length > 5 && (
-                            <div className="px-4 py-2 bg-gray-50 text-sm text-vergil-off-black/60">
+                            <div className="px-4 py-2 bg-secondary text-sm text-secondary"> {/* #F5F5F7, #6C6C6D */}
                               And {importPreview.length - 5} more users...
                             </div>
                           )}
@@ -940,7 +918,7 @@ export default function UserManagementPage() {
                   </p>
                   <div className="flex gap-3">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => {
                         setShowImportModal(false)
                         setImportFile(null)

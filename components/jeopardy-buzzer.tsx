@@ -115,7 +115,7 @@ export function JeopardyBuzzer({
                       `border-${player.color} text-${player.color}`,
                       `hover:bg-${player.color} hover:text-white`
                     )}
-                    variant="outline"
+                    variant="secondary"
                   >
                     <div className="flex items-center gap-3">
                       <div className={cn(

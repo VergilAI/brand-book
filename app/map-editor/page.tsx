@@ -1,11 +1,11 @@
 "use client"
 
 import React from 'react'
-import { MapCanvas } from './components/canvas/MapCanvas'
-import { Toolbar } from './components/tools/Toolbar'
-import { FloatingPropertiesPanel } from './components/panels/FloatingPropertiesPanel'
-import { TemplateLibraryPanel } from './components/template-library/TemplateLibraryPanel'
-import { HelpInfo } from './components/HelpInfo'
+import { MapCanvas } from '@/components/diagram-tool/canvas/MapCanvas'
+import { Toolbar } from '@/components/diagram-tool/tools/Toolbar'
+import { FloatingPropertiesPanel } from '@/components/diagram-tool/panels/FloatingPropertiesPanel'
+import { TemplateLibraryPanel } from '@/components/diagram-tool/template-library/TemplateLibraryPanel'
+import { HelpInfo } from '@/components/diagram-tool/HelpInfo'
 
 export default function MapEditorPage() {
   return (

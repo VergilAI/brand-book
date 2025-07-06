@@ -293,24 +293,24 @@ export function MillionaireGame({
     const knowledgePointsImproved = Math.round((correctAnswersCount / 15) * 100)
     
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-        <div className="min-h-full flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-space-md">
           <Card className={cn(
-            "p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto",
+            "p-space-lg max-w-3xl w-full border-border-subtle bg-gradient-to-br from-bg-secondary to-bg-primary my-auto max-h-[90vh] overflow-y-auto",
             className
           )}>
-            <div className="space-y-6">
-          {/* Header Section */}
-          <div className="text-center space-y-4">
+            <div className="space-y-space-lg">
+              {/* Header Section */}
+              <div className="text-center space-y-space-md">
             {gameState.gameStatus === 'won' && (
               <>
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
-                  <Trophy className="w-10 h-10 text-white" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-color-brand-primary to-color-brand-secondary mx-auto flex items-center justify-center animate-pulse">
+                  <Trophy className="w-10 h-10 text-text-inverse" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                <h2 className="text-3xl font-display font-bold text-text-primary">
                   Millionaire Champion!
                 </h2>
-                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                <p className="text-base text-text-secondary max-w-md mx-auto">
                   Incredible achievement! You've conquered all 15 questions and claimed the ultimate prize.
                 </p>
               </>
@@ -318,14 +318,14 @@ export function MillionaireGame({
             
             {gameState.gameStatus === 'lost' && (
               <>
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 mx-auto flex items-center justify-center">
-                  <XCircle className="w-10 h-10 text-red-600" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-color-error/20 to-color-error-dark/20 mx-auto flex items-center justify-center">
+                  <XCircle className="w-10 h-10 text-text-error" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                <h2 className="text-3xl font-display font-bold text-text-primary">
                   Game Over
                 </h2>
-                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
-                  Good effort! The correct answer was <span className="font-semibold text-vergil-purple">{lastQuestion?.correctAnswer || 'A'}</span>. 
+                <p className="text-base text-text-secondary max-w-md mx-auto">
+                  Good effort! The correct answer was <span className="font-semibold text-text-brand">{lastQuestion?.correctAnswer || 'A'}</span>. 
                   Every question is a learning opportunity.
                 </p>
               </>
@@ -333,13 +333,13 @@ export function MillionaireGame({
             
             {gameState.gameStatus === 'walkaway' && (
               <>
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple/20 to-electric-violet/20 mx-auto flex items-center justify-center">
-                  <DollarSign className="w-10 h-10 text-vergil-purple" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-color-brand-primary/20 to-color-brand-secondary/20 mx-auto flex items-center justify-center">
+                  <DollarSign className="w-10 h-10 text-text-brand" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                <h2 className="text-3xl font-display font-bold text-text-primary">
                   Smart Decision!
                 </h2>
-                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                <p className="text-base text-text-secondary max-w-md mx-auto">
                   You made a strategic choice to secure your winnings. Well played!
                 </p>
               </>
@@ -347,51 +347,51 @@ export function MillionaireGame({
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-              <div className="text-2xl font-bold text-vergil-purple mb-1">
+          <div className="grid grid-cols-3 gap-space-md">
+            <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+              <div className="text-2xl font-bold text-text-brand mb-space-xs">
                 ${gameState.totalWinnings.toLocaleString()}
               </div>
-              <div className="text-sm text-vergil-off-black/60">Prize Money</div>
+              <div className="text-sm text-text-tertiary">Prize Money</div>
             </Card>
             
-            <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-              <div className="text-2xl font-bold text-phosphor-cyan mb-1">
+            <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+              <div className="text-2xl font-bold text-text-accent mb-space-xs">
                 {correctAnswersCount}/15
               </div>
-              <div className="text-sm text-vergil-off-black/60">Correct Answers</div>
+              <div className="text-sm text-text-tertiary">Correct Answers</div>
             </Card>
             
-            <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-              <div className="text-2xl font-bold text-electric-violet mb-1">
+            <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+              <div className="text-2xl font-bold text-text-brand-secondary mb-space-xs">
                 Level {gameState.currentLevel + (gameState.gameStatus === 'walkaway' ? 0 : 1)}
               </div>
-              <div className="text-sm text-vergil-off-black/60">Reached</div>
+              <div className="text-sm text-text-tertiary">Reached</div>
             </Card>
           </div>
 
           {/* Knowledge Impact Section */}
-          <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
-                <Brain className="w-5 h-5 text-vergil-purple" />
+          <Card variant="outlined" className="p-space-md border-border-brand/20 bg-bg-brand/5">
+            <div className="flex items-start gap-space-sm">
+              <div className="w-10 h-10 rounded-lg bg-bg-brand/10 flex items-center justify-center flex-shrink-0">
+                <Brain className="w-5 h-5 text-text-brand" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                <h3 className="text-sm font-semibold text-text-primary mb-space-xs">
                   Knowledge Point Impact
                 </h3>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
-                  <span className="text-lg font-bold text-vergil-purple">+{knowledgePointsImproved}%</span>
+                  <span className="text-sm text-text-tertiary">Estimated improvement</span>
+                  <span className="text-lg font-bold text-text-brand">+{knowledgePointsImproved}%</span>
                 </div>
               </div>
             </div>
           </Card>
           
-          <div className="flex gap-4">
+          <div className="flex gap-space-md">
             <Button
               size="lg"
-              variant="outline"
+              variant="secondary"
               onClick={() => handleGameEndWithProgress(gameState.totalWinnings, gameState.gameStatus)}
             >
               Exit Game
@@ -415,7 +415,7 @@ export function MillionaireGame({
                 })
                 setLastQuestion(null)
               }}
-              className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+              className="bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
             >
               Play Again
             </Button>
@@ -428,12 +428,12 @@ export function MillionaireGame({
   }
 
   return (
-    <div className={cn("fixed inset-0 bg-gray-100 flex flex-col", className)}>
+    <div className={cn("fixed inset-0 bg-bg-secondary flex flex-col", className)}>
       {/* Fixed Header */}
-      <div className="bg-white shadow-sm z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="bg-bg-primary shadow-base z-elevation-high">
+        <div className="max-w-7xl mx-auto px-space-lg py-space-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800">Who Wants to Be a Millionaire</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Who Wants to Be a Millionaire</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -447,33 +447,33 @@ export function MillionaireGame({
 
       {/* Game Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="max-w-7xl mx-auto p-space-lg">
           <div className="flex items-center justify-between">
             <div className="flex-1 px-12">
-              <h1 className="text-2xl font-bold text-vergil-off-black text-center">
+              <h1 className="text-2xl font-bold text-text-primary text-center">
                 Who Wants to Be a Millionaire?
               </h1>
-              <p className="text-sm text-vergil-off-black/60 mt-1 text-center">Test your knowledge and win big</p>
+              <p className="text-sm text-text-tertiary mt-space-xs text-center">Test your knowledge and win big</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-vergil-off-black/60">Playing For</p>
-              <p className="text-2xl font-bold text-vergil-purple">
+              <p className="text-xs text-text-tertiary">Playing For</p>
+              <p className="text-2xl font-bold text-text-brand">
                 ${currentPrize.toLocaleString()}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-3 space-y-4">
-            <Card className="p-4 bg-white border-vergil-off-black/10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
-                    <span className="text-sm font-bold text-vergil-purple">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-space-md">
+          <div className="lg:col-span-3 space-y-space-md">
+            <Card className="p-space-md bg-bg-primary border-border-subtle">
+              <div className="flex items-center justify-between mb-space-md">
+                <div className="flex items-center gap-space-sm">
+                  <div className="w-8 h-8 rounded-full bg-bg-brand/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-text-brand">
                       {gameState.currentLevel + 1}
                     </span>
                   </div>
-                  <h2 className="text-xl font-semibold text-vergil-off-black">
+                  <h2 className="text-xl font-semibold text-text-primary">
                     Question {gameState.currentLevel + 1} of 15
                   </h2>
                 </div>
@@ -496,10 +496,10 @@ export function MillionaireGame({
             onSelectAnswer={handleAnswerSelect}
           />
 
-          <div className="flex gap-4">
+          <div className="flex gap-space-md">
             <Button
               size="lg"
-              variant="outline"
+              variant="secondary"
               onClick={handleWalkAway}
               disabled={gameState.isLocked}
               className="flex-1"
@@ -512,7 +512,7 @@ export function MillionaireGame({
               size="lg"
               onClick={handleFinalAnswer}
               disabled={!gameState.selectedAnswer || gameState.isLocked}
-              className="flex-1 bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+              className="flex-1 bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
             >
               <Zap className="w-4 h-4 mr-2" />
               Final Answer
@@ -540,15 +540,15 @@ export function MillionaireGame({
       )}
 
       {showPhoneAnimation && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal flex items-center justify-center p-space-md overflow-y-auto">
           <div className="min-h-full flex items-center justify-center">
-            <Card className="p-8 max-w-md bg-white border-vergil-off-black/10 my-auto">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-vergil-purple/10 rounded-full mx-auto animate-pulse flex items-center justify-center">
-                  <div className="w-8 h-8 bg-vergil-purple rounded-full animate-ping" />
+            <Card className="p-space-lg max-w-md bg-bg-primary border-border-subtle my-auto">
+              <div className="text-center space-y-space-md">
+                <div className="w-16 h-16 bg-bg-brand/10 rounded-full mx-auto animate-pulse flex items-center justify-center">
+                  <div className="w-8 h-8 bg-bg-brand rounded-full animate-ping" />
                 </div>
-                <h3 className="text-xl font-semibold text-vergil-off-black">Calling a Friend...</h3>
-                <p className="text-vergil-off-black/60">Getting expert advice on this question</p>
+                <h3 className="text-xl font-semibold text-text-primary">Calling a Friend...</h3>
+                <p className="text-text-secondary">Getting expert advice on this question</p>
               </div>
             </Card>
           </div>
@@ -556,17 +556,17 @@ export function MillionaireGame({
       )}
       
       {showExitConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="p-6 max-w-md bg-white border-vergil-off-black/10">
-            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal flex items-center justify-center p-space-md">
+          <Card className="p-space-lg max-w-md bg-bg-primary border-border-subtle">
+            <h3 className="text-xl font-semibold text-text-primary mb-space-md">
               Exit Game?
             </h3>
-            <p className="text-vergil-off-black/60 mb-6">
+            <p className="text-text-secondary mb-space-lg">
               Are you sure you want to exit? You'll lose your current progress and winnings.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-space-sm">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowExitConfirm(false)}
                 className="flex-1"
               >
@@ -577,7 +577,7 @@ export function MillionaireGame({
                   setShowExitConfirm(false)
                   handleGameEndWithProgress(gameState.guaranteedAmount, 'walkaway')
                 }}
-                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                className="flex-1 bg-bg-error text-text-inverse hover:bg-bg-error-hover"
               >
                 Exit Game
               </Button>

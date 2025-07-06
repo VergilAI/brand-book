@@ -104,63 +104,63 @@ export function JeopardyGame({
     const knowledgeImprovement = Math.round(answeredCorrectly * 0.8)
     
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-        <div className="min-h-full flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-space-md">
           <Card className={cn(
-            "p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto",
+            "p-space-lg max-w-3xl w-full border-border-subtle bg-gradient-to-br from-bg-secondary to-bg-primary my-auto max-h-[90vh] overflow-y-auto",
             className
           )}>
-            <div className="space-y-6">
+            <div className="space-y-space-lg">
               {/* Header Section */}
-              <div className="text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-10 h-10 text-white" />
+              <div className="text-center space-y-space-md">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-color-brand-primary to-color-brand-secondary mx-auto flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-10 h-10 text-text-inverse" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                <h2 className="text-3xl font-display font-bold text-text-primary">
                   Jeopardy Complete!
                 </h2>
-                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                <p className="text-base text-text-secondary max-w-md mx-auto">
                   Great job navigating through all those challenging questions!
                 </p>
               </div>
               
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-4">
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+              <div className="grid grid-cols-3 gap-space-md">
+                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
                     ${gameState.score.toLocaleString()}
                   </div>
-                  <div className="text-sm text-vergil-off-black/60">Final Score</div>
+                  <div className="text-sm text-text-tertiary">Final Score</div>
                 </Card>
                 
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
                     {gameState.usedClues.size}
                   </div>
-                  <div className="text-sm text-vergil-off-black/60">Questions Answered</div>
+                  <div className="text-sm text-text-tertiary">Questions Answered</div>
                 </Card>
                 
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
                     {totalClues - gameState.usedClues.size}
                   </div>
-                  <div className="text-sm text-vergil-off-black/60">Questions Left</div>
+                  <div className="text-sm text-text-tertiary">Questions Left</div>
                 </Card>
               </div>
               
               {/* Knowledge Impact */}
-              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5 text-vergil-purple" />
+              <Card variant="outlined" className="p-space-md border-border-brand/20 bg-bg-brand/5">
+                <div className="flex items-start gap-space-sm">
+                  <div className="w-10 h-10 rounded-lg bg-bg-brand/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5 text-text-brand" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                    <h3 className="text-sm font-semibold text-text-primary mb-space-xs">
                       Knowledge Point Impact
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
-                      <span className="text-lg font-bold text-vergil-purple">
+                      <span className="text-sm text-text-tertiary">Estimated improvement</span>
+                      <span className="text-lg font-bold text-text-brand">
                         +{knowledgeImprovement}%
                       </span>
                     </div>
@@ -168,10 +168,10 @@ export function JeopardyGame({
                 </div>
               </Card>
               
-              <div className="flex gap-4">
+              <div className="flex gap-space-md">
                 <Button
                   size="lg"
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => onGameEnd?.(gameState.score)}
                 >
                   Exit Game
@@ -179,7 +179,7 @@ export function JeopardyGame({
                 <Button
                   size="lg"
                   onClick={() => window.location.reload()}
-                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                  className="bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
                 >
                   Play Again
                 </Button>
@@ -217,12 +217,12 @@ export function JeopardyGame({
   }, [])
 
   return (
-    <div className={cn("fixed inset-0 bg-gray-100 flex flex-col", className)}>
+    <div className={cn("fixed inset-0 bg-bg-secondary flex flex-col", className)}>
       {/* Fixed Header */}
-      <div className="bg-white shadow-sm z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="bg-bg-primary shadow-base z-elevation-high">
+        <div className="max-w-7xl mx-auto px-space-lg py-space-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800">Jeopardy!</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Jeopardy!</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -236,13 +236,13 @@ export function JeopardyGame({
 
       {/* Game Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-gray-600">Test your knowledge across categories</p>
+        <div className="max-w-7xl mx-auto p-space-lg space-y-space-md">
+          <div className="flex justify-between items-center mb-space-md">
+            <p className="text-sm text-text-secondary">Test your knowledge across categories</p>
             <JeopardyScore score={gameState.score} />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-space-sm">
             <JeopardyBoard
               categories={categories}
               usedClues={gameState.usedClues}
@@ -253,9 +253,9 @@ export function JeopardyGame({
             <div className="flex justify-center">
               <Button
                 onClick={chooseRandomClue}
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="border-vergil-purple/40 text-vergil-purple hover:bg-vergil-purple/10 hover:border-vergil-purple"
+                className="border-border-brand/40 text-text-brand hover:bg-bg-brand/10 hover:border-border-brand"
                 disabled={gameState.usedClues.size === categories.reduce((acc, cat) => acc + cat.clues.length, 0)}
               >
                 <Shuffle className="w-4 h-4 mr-2" />
@@ -276,17 +276,17 @@ export function JeopardyGame({
       </div>
       
       {showExitConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="p-6 max-w-md bg-white border-vergil-off-black/10">
-            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal flex items-center justify-center p-space-md">
+          <Card className="p-space-lg max-w-md bg-bg-primary border-border-subtle">
+            <h3 className="text-xl font-semibold text-text-primary mb-space-md">
               Exit Game?
             </h3>
-            <p className="text-vergil-off-black/60 mb-6">
+            <p className="text-text-secondary mb-space-lg">
               Are you sure you want to exit? You'll lose your current score and progress.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-space-sm">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowExitConfirm(false)}
                 className="flex-1"
               >
@@ -297,7 +297,7 @@ export function JeopardyGame({
                   setShowExitConfirm(false)
                   onGameEnd?.(gameState.score)
                 }}
-                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                className="flex-1 bg-bg-error text-text-inverse hover:bg-bg-error-hover"
               >
                 Exit Game
               </Button>

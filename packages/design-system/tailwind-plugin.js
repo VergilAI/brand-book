@@ -77,7 +77,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       '--black': '#000000',
       '--transparent': 'transparent',
       '--current': 'currentColor',
-      '--vergil-purple': '#7B00FF',
+      '--vergil-purple': '#A64DFF',
       '--vergil-off-black': '#1D1D1F',
       '--vergil-off-white': '#F5F5F7',
       '--cosmic-purple': '#6366F1',
@@ -110,7 +110,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
     // Button components
     
     '.btn-primary': {
-      backgroundColor: '#7B00FF',
+      backgroundColor: '#A64DFF',
       color: '#F5F5F7',
       border: 'none',
       fontWeight: '500',
@@ -231,9 +231,9 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
     },
     '.card-neural': {
       backgroundColor: 'linear-gradient(135deg, rgba(123, 0, 255, 0.05) 0%, rgba(153, 51, 255, 0.05) 100%)',
-      border: '1px solid rgba(123, 0, 255, 0.1)',
+      border: '1px solid rgba(166, 77, 255, 0.1)',
       borderRadius: '12px',
-      boxShadow: '0 2px 4px rgba(123, 0, 255, 0.1)',
+      boxShadow: '0 2px 4px rgba(166, 77, 255, 0.1)',
       padding: '24px',
       
       
@@ -269,7 +269,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       color: '#F5F5F7',
     },
     '.text-brand': {
-      color: '#7B00FF',
+      color: '#A64DFF',
     },
     '.text-brandLight': {
       color: '#9933FF',
@@ -308,7 +308,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       backgroundColor: '#000000',
     },
     '.bg-brand': {
-      backgroundColor: '#7B00FF',
+      backgroundColor: '#A64DFF',
     },
     '.bg-brandLight': {
       backgroundColor: '#F3E6FF',
@@ -344,13 +344,13 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       borderColor: 'rgba(0,0,0,0.05)',
     },
     '.border-emphasis': {
-      borderColor: 'rgba(123, 0, 255, 0.1)',
+      borderColor: 'rgba(166, 77, 255, 0.1)',
     },
     '.border-focus': {
       borderColor: '#007AFF',
     },
     '.border-brand': {
-      borderColor: '#7B00FF',
+      borderColor: '#A64DFF',
     },
     '.border-error': {
       borderColor: '#FCA5A5',
@@ -389,19 +389,19 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)',
     },
     '.shadow-brand-sm': {
-      boxShadow: '0 2px 4px rgba(123, 0, 255, 0.1)',
+      boxShadow: '0 2px 4px rgba(166, 77, 255, 0.1)',
     },
     '.shadow-brand-md': {
-      boxShadow: '0 4px 8px rgba(123, 0, 255, 0.12)',
+      boxShadow: '0 4px 8px rgba(166, 77, 255, 0.12)',
     },
     '.shadow-brand-lg': {
-      boxShadow: '0 8px 16px rgba(123, 0, 255, 0.16)',
+      boxShadow: '0 8px 16px rgba(166, 77, 255, 0.16)',
     },
     '.shadow-brand-glow': {
-      boxShadow: '0 0 24px rgba(123, 0, 255, 0.4)',
+      boxShadow: '0 0 24px rgba(166, 77, 255, 0.4)',
     },
     '.shadow-focus': {
-      boxShadow: '0 0 0 3px rgba(123, 0, 255, 0.2)',
+      boxShadow: '0 0 0 3px rgba(166, 77, 255, 0.2)',
     },
     '.shadow-focus-error': {
       boxShadow: '0 0 0 3px rgba(229, 28, 35, 0.2)',
@@ -497,7 +497,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
         'black': '#000000',
         'transparent': 'transparent',
         'current': 'currentColor',
-        'vergil-purple': '#7B00FF',
+        'vergil-purple': '#A64DFF',
         'vergil-off-black': '#1D1D1F',
         'vergil-off-white': '#F5F5F7',
         'cosmic-purple': '#6366F1',
@@ -514,7 +514,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
           'tertiary': '#71717A',
           'emphasis': '#303030',
           'inverse': '#F5F5F7',
-          'brand': '#7B00FF',
+          'brand': '#A64DFF',
           'brandLight': '#9933FF',
           'success': '#0F8A0F',
           'warning': '#FFC700',
@@ -530,7 +530,7 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
           'emphasis': '#F0F0F2',
           'emphasisInput': '#FAFAFC',
           'inverse': '#000000',
-          'brand': '#7B00FF',
+          'brand': '#A64DFF',
           'brandLight': '#F3E6FF',
           'elevated': '#FFFFFF',
           'overlay': 'rgba(0, 0, 0, 0.5)',
@@ -545,9 +545,9 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
         border: {
           'default': 'rgba(0,0,0,0.1)',
           'subtle': 'rgba(0,0,0,0.05)',
-          'emphasis': 'rgba(123, 0, 255, 0.1)',
+          'emphasis': 'rgba(166, 77, 255, 0.1)',
           'focus': '#007AFF',
-          'brand': '#7B00FF',
+          'brand': '#A64DFF',
           'error': '#FCA5A5',
           'warning': '#FFF490',
           'success': '#86EFAC',
@@ -614,21 +614,21 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
         'md': '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)',
         'lg': '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
         'xl': '0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04)',
-        'brandSm': '0 2px 4px rgba(123, 0, 255, 0.1)',
-        'brandMd': '0 4px 8px rgba(123, 0, 255, 0.12)',
-        'brandLg': '0 8px 16px rgba(123, 0, 255, 0.16)',
-        'brandGlow': '0 0 24px rgba(123, 0, 255, 0.4)',
+        'brandSm': '0 2px 4px rgba(166, 77, 255, 0.1)',
+        'brandMd': '0 4px 8px rgba(166, 77, 255, 0.12)',
+        'brandLg': '0 8px 16px rgba(166, 77, 255, 0.16)',
+        'brandGlow': '0 0 24px rgba(166, 77, 255, 0.4)',
         'card': '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
         'card-hover': '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)',
         'dropdown': '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
         'modal': '0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04)',
         'popover': '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
         'toast': '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)',
-        'brand-sm': '0 2px 4px rgba(123, 0, 255, 0.1)',
-        'brand-md': '0 4px 8px rgba(123, 0, 255, 0.12)',
-        'brand-lg': '0 8px 16px rgba(123, 0, 255, 0.16)',
-        'brand-glow': '0 0 24px rgba(123, 0, 255, 0.4)',
-        'focus': '0 0 0 3px rgba(123, 0, 255, 0.2)',
+        'brand-sm': '0 2px 4px rgba(166, 77, 255, 0.1)',
+        'brand-md': '0 4px 8px rgba(166, 77, 255, 0.12)',
+        'brand-lg': '0 8px 16px rgba(166, 77, 255, 0.16)',
+        'brand-glow': '0 0 24px rgba(166, 77, 255, 0.4)',
+        'focus': '0 0 0 3px rgba(166, 77, 255, 0.2)',
         'focus-error': '0 0 0 3px rgba(229, 28, 35, 0.2)',
         'focus-success': '0 0 0 3px rgba(15, 138, 15, 0.2)',
       },
@@ -651,8 +651,8 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       },
       
       backgroundImage: {
-        'consciousness': 'linear-gradient(135deg, #7B00FF 0%, #9933FF 50%, #BB66FF 100%)',
-        'ambient': 'radial-gradient(circle at center, rgba(123, 0, 255, 0.1) 0%, transparent 70%)',
+        'consciousness': 'linear-gradient(135deg, #A64DFF 0%, #BB66FF 50%, #D199FF 100%)',
+        'ambient': 'radial-gradient(circle at center, rgba(166, 77, 255, 0.1) 0%, transparent 70%)',
         'awakening': 'linear-gradient(90deg, #6366F1 0%, #3B82F6 100%)',
         'synaptic': 'linear-gradient(135deg, #A78BFA 0%, #F472B6 100%)',
         'light-ray': 'radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%)',

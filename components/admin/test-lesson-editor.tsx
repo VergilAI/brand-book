@@ -21,7 +21,7 @@ import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Label } from '@/components/label'
 import { Textarea } from '@/components/textarea'
-import { Switch } from '@/components/switch'
+import { Switch } from '@/components/ui/Switch'
 import { Badge } from '@/components/badge'
 import {
   Select,
@@ -318,7 +318,7 @@ export function TestLessonEditor({ content, onChange }: TestLessonEditorProps) {
             </CardTitle>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setPreviewMode(!previewMode)}
               >
@@ -397,7 +397,7 @@ export function TestLessonEditor({ content, onChange }: TestLessonEditorProps) {
                           <Circle className="h-4 w-4" />
                           <span>{option}</span>
                           {option === question.correctAnswer && (
-                            <Badge variant="outline" className="text-green-600">
+                            <Badge variant="success">
                               Correct
                             </Badge>
                           )}
@@ -485,7 +485,7 @@ function QuestionEditor({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline">
+              <Badge variant="default">
                 {question.type === 'multiple-choice' ? 'Multiple Choice' : 'Text Box'}
               </Badge>
               <div className="flex items-center gap-1">
@@ -570,7 +570,7 @@ function QuestionEditor({
                 <div className="flex items-center justify-between mb-3">
                   <Label className="text-sm font-medium">Answer Options</Label>
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={onAddOption}
                     disabled={question.options.length >= 8}
@@ -646,10 +646,10 @@ function QuestionEditor({
 
             {/* Actions */}
             <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button variant="outline" size="sm" onClick={onDuplicate}>
+              <Button variant="secondary" size="sm" onClick={onDuplicate}>
                 Duplicate
               </Button>
-              <Button variant="outline" size="sm" onClick={onDelete} className="text-red-600">
+              <Button variant="secondary" size="sm" onClick={onDelete} className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </Button>

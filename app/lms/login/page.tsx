@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Label } from '@/components/label'
-import { Checkbox } from '@/components/checkbox'
+import { Checkbox } from '@/components/atomic/checkbox'
 import { Alert, AlertDescription } from '@/components/alert'
 
 export default function LoginPage() {
@@ -84,7 +84,7 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="error">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

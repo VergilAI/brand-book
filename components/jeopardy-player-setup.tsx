@@ -120,7 +120,7 @@ export function JeopardyPlayerSetup({ onStartGame, className }: JeopardyPlayerSe
         <div className="flex gap-4">
           {players.length < 5 && (
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={addPlayer}
               className="flex-1"
             >

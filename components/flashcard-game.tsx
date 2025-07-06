@@ -171,12 +171,12 @@ export function FlashcardGame({
   }
 
   return (
-    <div className={cn("fixed inset-0 bg-gray-100 flex flex-col", className)}>
+    <div className={cn("fixed inset-0 bg-bg-secondary flex flex-col", className)}>
       {/* Fixed Header */}
-      <div className="bg-white shadow-sm z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="bg-bg-elevated shadow-card z-sticky">
+        <div className="max-w-7xl mx-auto px-lg py-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800">Flashcard Practice</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Flashcard Practice</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -190,19 +190,19 @@ export function FlashcardGame({
 
       {/* Game Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-600">{deck.title}</p>
-            <div className="flex items-center gap-6">
+        <div className="max-w-7xl mx-auto p-lg">
+          <div className="flex items-center justify-between mb-md">
+            <p className="text-sm text-text-secondary">{deck.title}</p>
+            <div className="flex items-center gap-lg">
               <div className="text-center">
-                <p className="text-xs text-vergil-off-black/60">Correct</p>
-                <p className="text-2xl font-bold text-vergil-purple">
+                <p className="text-xs text-text-tertiary">Correct</p>
+                <p className="text-2xl font-bold text-text-brand">
                   {gameState.correctAnswers}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-vergil-off-black/60">Incorrect</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-xs text-text-tertiary">Incorrect</p>
+                <p className="text-2xl font-bold text-text-error">
                   {gameState.incorrectAnswers}
                 </p>
               </div>
@@ -210,28 +210,28 @@ export function FlashcardGame({
           </div>
 
           {/* Main content grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-3 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-md">
+          <div className="lg:col-span-3 space-y-md">
             {/* Progress card */}
-            <Card className="p-4 bg-white border-vergil-off-black/10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
-                    <span className="text-sm font-bold text-vergil-purple">
+            <Card className="card-default p-md">
+              <div className="flex items-center justify-between mb-md">
+                <div className="flex items-center gap-sm">
+                  <div className="w-8 h-8 rounded-full bg-bg-brand/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-text-brand">
                       {gameState.currentIndex + 1}
                     </span>
                   </div>
-                  <h2 className="text-xl font-semibold text-vergil-off-black">
+                  <h2 className="text-xl font-semibold text-text-primary">
                     Card {gameState.currentIndex + 1} of {deck.cards.length}
                   </h2>
                 </div>
-                <span className="text-sm font-medium text-vergil-purple">
+                <span className="text-sm font-medium text-text-brand">
                   {Math.round(progress)}% Complete
                 </span>
               </div>
-              <div className="w-full h-2 bg-vergil-off-black/10 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-bg-tertiary rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-vergil-purple transition-all duration-300"
+                  className="h-full bg-bg-brand transition-all duration-slow"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -263,7 +263,7 @@ export function FlashcardGame({
                       return (
                         <div
                           key={`stack-${i}`}
-                          className="absolute inset-0 bg-white rounded-xl shadow-md border border-vergil-off-black/5"
+                          className="absolute inset-0 bg-bg-elevated rounded-xl shadow-card border border-border-subtle"
                           style={{
                             transform: `translateY(${offset}px) rotate(${rotation}deg)`,
                             opacity: opacity,
@@ -274,7 +274,7 @@ export function FlashcardGame({
                     })}
                     
                     {/* Main Card */}
-                    <Card className="relative h-full border-vergil-off-black/10 overflow-hidden">
+                    <Card className="card-default h-full overflow-hidden">
                       <motion.div
                         className="h-full"
                         style={{ transformStyle: 'preserve-3d' }}
@@ -283,21 +283,21 @@ export function FlashcardGame({
                       >
                         {/* Front of Card */}
                         <div
-                          className="absolute inset-0 p-6 flex flex-col items-center justify-center bg-white rounded-xl"
+                          className="absolute inset-0 p-lg flex flex-col items-center justify-center bg-bg-elevated rounded-xl"
                           style={{ backfaceVisibility: 'hidden' }}
                         >
-                          <div className="w-12 h-12 rounded-full bg-vergil-purple/10 flex items-center justify-center mb-4">
-                            <Brain className="w-6 h-6 text-vergil-purple" />
+                          <div className="w-12 h-12 rounded-full bg-bg-brand/10 flex items-center justify-center mb-md">
+                            <Brain className="w-6 h-6 text-text-brand" />
                           </div>
                           
-                          <h3 className="text-xl font-semibold text-vergil-off-black text-center px-4">
+                          <h3 className="text-xl font-semibold text-text-primary text-center px-md">
                             {currentCard.front}
                           </h3>
                         </div>
 
                         {/* Back of Card */}
                         <div
-                          className="absolute inset-0 p-6 flex flex-col items-center justify-center bg-white rounded-xl"
+                          className="absolute inset-0 p-lg flex flex-col items-center justify-center bg-bg-elevated rounded-xl"
                           style={{ 
                             backfaceVisibility: 'hidden',
                             transform: 'rotateY(180deg)'
@@ -305,30 +305,30 @@ export function FlashcardGame({
                         >
                           {isCorrect !== null && (
                             <div className={cn(
-                              "w-12 h-12 rounded-full flex items-center justify-center mb-3",
+                              "w-12 h-12 rounded-full flex items-center justify-center mb-sm",
                               isCorrect 
-                                ? "bg-vergil-purple/10"
-                                : "bg-red-600/10"
+                                ? "bg-bg-success/10"
+                                : "bg-bg-error/10"
                             )}>
                               {isCorrect ? (
-                                <Check className="w-6 h-6 text-vergil-purple" />
+                                <Check className="w-6 h-6 text-text-success" />
                               ) : (
-                                <X className="w-6 h-6 text-red-600" />
+                                <X className="w-6 h-6 text-text-error" />
                               )}
                             </div>
                           )}
 
-                          <h4 className="text-base font-medium text-vergil-off-black/70 mb-2">
+                          <h4 className="text-base font-medium text-text-secondary mb-sm">
                             {isCorrect ? "Correct!" : "The answer is:"}
                           </h4>
                           
-                          <p className="text-lg text-vergil-off-black text-center font-medium mb-3 px-4">
+                          <p className="text-lg text-text-primary text-center font-medium mb-sm px-md">
                             {currentCard.back}
                           </p>
 
                           {userAnswer && !isCorrect && (
-                            <div className="p-3 bg-vergil-off-black/10 rounded-lg max-w-md">
-                              <p className="text-sm text-vergil-off-black/60">
+                            <div className="p-sm bg-bg-tertiary rounded-lg max-w-md">
+                              <p className="text-sm text-text-secondary">
                                 Your answer: "{userAnswer}"
                               </p>
                             </div>
@@ -340,8 +340,8 @@ export function FlashcardGame({
 
                   {/* Controls */}
                   {!isFlipped ? (
-                    <Card className="p-4 bg-white border-vergil-off-black/10">
-                      <div className="space-y-4">
+                    <Card className="card-default p-md">
+                      <div className="space-y-md">
                         <Input
                           ref={inputRef}
                           type="text"
@@ -353,19 +353,18 @@ export function FlashcardGame({
                           disabled={isAnswered}
                         />
                         
-                        <div className="flex gap-3">
+                        <div className="flex gap-sm">
                           <Button
                             onClick={checkAnswer}
                             disabled={!userAnswer.trim() || isAnswered}
-                            className="flex-1 bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+                            className="flex-1 btn-primary"
                           >
                             Check Answer
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="secondary"
                             onClick={skipCard}
                             disabled={isAnswered}
-                            className="border-vergil-off-black/20"
                           >
                             Skip
                           </Button>
@@ -376,7 +375,7 @@ export function FlashcardGame({
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowHint(true)}
-                            className="w-full text-vergil-off-black/60"
+                            className="w-full text-text-tertiary"
                           >
                             <Lightbulb className="w-4 h-4 mr-1" />
                             Need a hint?
@@ -387,9 +386,9 @@ export function FlashcardGame({
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-3 bg-vergil-purple/10 rounded-lg"
+                            className="p-sm bg-bg-brand/10 rounded-lg"
                           >
-                            <p className="text-sm text-vergil-off-black/60">
+                            <p className="text-sm text-text-secondary">
                               <Lightbulb className="w-4 h-4 inline mr-1" />
                               {currentCard.hint}
                             </p>
@@ -402,7 +401,7 @@ export function FlashcardGame({
                       <Button
                         onClick={nextCard}
                         size="lg"
-                        className="bg-vergil-purple hover:bg-vergil-purple-lighter"
+                        className="btn-primary"
                       >
                         {gameState.currentIndex < deck.cards.length - 1 ? (
                           <>
@@ -450,17 +449,17 @@ export function FlashcardGame({
 
           {/* Sidebar - Card deck overview */}
           <div className="lg:col-span-1 lg:h-[450px]">
-            <Card className="p-4 h-full flex flex-col border-vergil-off-black/10">
-              <div className="flex items-center gap-2 mb-4">
-                <Layers className="w-5 h-5 text-vergil-purple" />
-                <h3 className="text-lg font-semibold text-vergil-off-black">Deck Progress</h3>
+            <Card className="card-default p-md h-full flex flex-col">
+              <div className="flex items-center gap-sm mb-md">
+                <Layers className="w-5 h-5 text-text-brand" />
+                <h3 className="text-lg font-semibold text-text-primary">Deck Progress</h3>
               </div>
               
-              <div className="flex-1 overflow-y-auto pr-2" style={{ 
+              <div className="flex-1 overflow-y-auto pr-sm" style={{ 
                 scrollbarWidth: 'thin',
                 scrollbarColor: 'rgba(156, 163, 175, 0.3) transparent'
               }}>
-                <div className="space-y-2">
+                <div className="space-y-sm">
                   {deck.cards.map((card, index) => {
                     const isAnswered = gameState.answeredCards.has(card.id)
                     const isCurrent = index === gameState.currentIndex
@@ -476,27 +475,27 @@ export function FlashcardGame({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.02 }}
                         className={cn(
-                          "relative flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200",
-                          isCurrent && "bg-vergil-purple/10 border border-vergil-purple",
-                          isAnswered && wasCorrect && "bg-green-50 border border-green-200",
-                          isAnswered && !wasCorrect && "bg-red-50 border border-red-200",
-                          !isCurrent && !isAnswered && "text-vergil-off-black/40"
+                          "relative flex items-center justify-between px-sm py-sm rounded-lg transition-all duration-fast",
+                          isCurrent && "bg-bg-brand/10 border border-border-brand",
+                          isAnswered && wasCorrect && "bg-bg-success/10 border border-border-success",
+                          isAnswered && !wasCorrect && "bg-bg-error/10 border border-border-error",
+                          !isCurrent && !isAnswered && "text-text-tertiary"
                         )}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-sm">
                           <div className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2",
-                            isCurrent && "bg-vergil-purple text-white border-vergil-purple",
-                            isAnswered && wasCorrect && "bg-green-500 text-white border-green-500",
-                            isAnswered && !wasCorrect && "bg-red-500 text-white border-red-500",
-                            !isCurrent && !isAnswered && "bg-white border-vergil-off-black/20 text-vergil-off-black/60"
+                            isCurrent && "bg-bg-brand text-text-inverse border-border-brand",
+                            isAnswered && wasCorrect && "bg-bg-success text-text-inverse border-border-success",
+                            isAnswered && !wasCorrect && "bg-bg-error text-text-inverse border-border-error",
+                            !isCurrent && !isAnswered && "bg-bg-elevated border-border-subtle text-text-tertiary"
                           )}>
                             {index + 1}
                           </div>
                           <span className={cn(
                             "text-sm font-medium truncate max-w-[150px]",
-                            isAnswered && wasCorrect && "text-green-700",
-                            isAnswered && !wasCorrect && "text-red-700"
+                            isAnswered && wasCorrect && "text-text-success",
+                            isAnswered && !wasCorrect && "text-text-error"
                           )}>
                             Card {index + 1}
                           </span>
@@ -505,16 +504,16 @@ export function FlashcardGame({
                         {isAnswered && (
                           <div className="w-5 h-5">
                             {wasCorrect ? (
-                              <Check className="w-5 h-5 text-green-600" />
+                              <Check className="w-5 h-5 text-text-success" />
                             ) : (
-                              <X className="w-5 h-5 text-red-600" />
+                              <X className="w-5 h-5 text-text-error" />
                             )}
                           </div>
                         )}
 
                         {isCurrent && (
                           <motion.div
-                            className="absolute inset-0 rounded-lg border-2 border-vergil-purple pointer-events-none"
+                            className="absolute inset-0 rounded-lg border-2 border-border-brand pointer-events-none"
                             animate={{
                               opacity: [0.3, 0.8, 0.3],
                             }}
@@ -531,8 +530,8 @@ export function FlashcardGame({
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-vergil-off-black/10 flex-shrink-0">
-                <div className="text-sm text-vergil-off-black/60">
+              <div className="mt-md pt-md border-t border-border-default flex-shrink-0">
+                <div className="text-sm text-text-secondary">
                   {deck.cards.length - gameState.answeredCards.size} cards remaining
                 </div>
               </div>
@@ -543,17 +542,17 @@ export function FlashcardGame({
       </div>
       
       {showExitConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="p-6 max-w-md bg-white border-vergil-off-black/10">
-            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center p-md">
+          <Card className="card-default p-lg max-w-md">
+            <h3 className="text-xl font-semibold text-text-primary mb-md">
               Exit Game?
             </h3>
-            <p className="text-vergil-off-black/60 mb-6">
+            <p className="text-text-secondary mb-lg">
               Are you sure you want to exit? You'll lose your current progress.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-sm">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowExitConfirm(false)}
                 className="flex-1"
               >
@@ -564,7 +563,7 @@ export function FlashcardGame({
                   setShowExitConfirm(false)
                   onQuit()
                 }}
-                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                className="flex-1 btn-destructive"
               >
                 Exit Game
               </Button>
@@ -604,60 +603,60 @@ function FlashcardCompletionModal({
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-      <div className="min-h-full flex items-center justify-center p-4">
-        <Card className="p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto">
-          <div className="space-y-6">
+    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal overflow-y-auto">
+      <div className="min-h-full flex items-center justify-center p-md">
+        <Card className="card-neural p-2xl max-w-3xl w-full my-auto max-h-[90vh] overflow-y-auto">
+          <div className="space-y-lg">
             {/* Header Section */}
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
-                <Sparkles className="w-10 h-10 text-white" />
+            <div className="text-center space-y-md">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-bg-brand to-bg-brand/80 mx-auto flex items-center justify-center animate-pulse shadow-brand-md">
+                <Sparkles className="w-10 h-10 text-text-inverse" />
               </div>
-              <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+              <h2 className="text-3xl font-bold text-text-primary">
                 Great Job!
               </h2>
-              <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+              <p className="text-base text-text-secondary max-w-md mx-auto">
                 You've completed all {result.totalCards} flashcards in this deck
               </p>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-4">
-              <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                <div className="text-2xl font-bold text-vergil-purple mb-1">
+            <div className="grid grid-cols-3 gap-md">
+              <Card className="card-outlined p-md text-center">
+                <div className="text-2xl font-bold text-text-brand mb-1">
                   {result.correctAnswers}
                 </div>
-                <div className="text-sm text-vergil-off-black/60">Correct</div>
+                <div className="text-sm text-text-secondary">Correct</div>
               </Card>
               
-              <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                <div className="text-2xl font-bold text-vergil-purple mb-1">
+              <Card className="card-outlined p-md text-center">
+                <div className="text-2xl font-bold text-text-brand mb-1">
                   {Math.round(result.accuracy)}%
                 </div>
-                <div className="text-sm text-vergil-off-black/60">Accuracy</div>
+                <div className="text-sm text-text-secondary">Accuracy</div>
               </Card>
               
-              <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                <div className="text-2xl font-bold text-vergil-purple mb-1">
+              <Card className="card-outlined p-md text-center">
+                <div className="text-2xl font-bold text-text-brand mb-1">
                   {formatTime(result.timeSpent)}
                 </div>
-                <div className="text-sm text-vergil-off-black/60">Time</div>
+                <div className="text-sm text-text-secondary">Time</div>
               </Card>
             </div>
 
             {/* Knowledge Impact */}
-            <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
-                  <Brain className="w-5 h-5 text-vergil-purple" />
+            <Card className="card-outlined p-md bg-bg-brand/5 border-border-brand">
+              <div className="flex items-start gap-sm">
+                <div className="w-10 h-10 rounded-lg bg-bg-brand/10 flex items-center justify-center flex-shrink-0">
+                  <Brain className="w-5 h-5 text-text-brand" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                  <h3 className="text-sm font-semibold text-text-primary mb-1">
                     Knowledge Point Impact
                   </h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
-                    <span className="text-lg font-bold text-vergil-purple">
+                    <span className="text-sm text-text-secondary">Estimated improvement</span>
+                    <span className="text-lg font-bold text-text-brand">
                       +{Math.round((result.correctAnswers / result.totalCards) * 100)}%
                     </span>
                   </div>
@@ -665,10 +664,10 @@ function FlashcardCompletionModal({
               </div>
             </Card>
 
-            <div className="flex gap-4">
+            <div className="flex gap-md">
               <Button
                 size="lg"
-                variant="outline"
+                variant="secondary"
                 onClick={() => {
                   // Pass the result to parent when exiting
                   onBackToLesson()
@@ -682,7 +681,7 @@ function FlashcardCompletionModal({
                   // Reset game state
                   window.location.reload()
                 }}
-                className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                className="btn-primary"
               >
                 Play Again
               </Button>

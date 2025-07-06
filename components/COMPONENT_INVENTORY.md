@@ -4,9 +4,9 @@ This document provides a comprehensive list of all components in the LMS system 
 
 ## Component Status Overview
 
-Total Components: **68**  
-Using Semantic Tokens: **0** (0%)  
-Not Using Semantic Tokens: **68** (100%)
+Total Components: **69**  
+Using Semantic Tokens: **31** (45%)  
+Not Using Semantic Tokens: **38** (55%)
 
 ## Component List
 
@@ -14,45 +14,46 @@ Not Using Semantic Tokens: **68** (100%)
 
 | Component | Description | Uses Semantic Tokens |
 |-----------|-------------|---------------------|
-| `alert.tsx` | Alert/notification component | ❌ |
-| `avatar.tsx` | User avatar display | ❌ |
-| `badge.tsx` | Badge/tag component | ❌ |
-| `button.tsx` | Button component with variants | ❌ |
-| `card.tsx` | Card with multiple variants | ❌ |
-| `checkbox.tsx` | Checkbox input | ❌ |
-| `collapsible.tsx` | Collapsible/expandable content | ❌ |
-| `dialog.tsx` | Modal dialog component | ❌ |
-| `dropdown-menu.tsx` | Dropdown menu component | ❌ |
-| `input.tsx` | Text input component | ❌ |
-| `label.tsx` | Form label component | ❌ |
-| `popover.tsx` | Popover/floating content | ❌ |
-| `progress.tsx` | Progress bar component | ❌ |
-| `select.tsx` | Select dropdown component | ❌ |
-| `switch.tsx` | Toggle switch component | ❌ |
-| `tabs.tsx` | Tab navigation component | ❌ |
-| `textarea.tsx` | Multi-line text input | ❌ |
-| `tooltip.tsx` | Tooltip component | ❌ |
+| `alert.tsx` | Alert/notification component | ✅ |
+| `avatar.tsx` | User avatar display | ✅ |
+| `atomic/avatar.tsx` | New atomic avatar component with proper sizing | ✅ |
+| `badge.tsx` | Badge/tag component | ✅ |
+| `button.tsx` | Button component with variants | ✅ |
+| `card.tsx` | Card with multiple variants | ✅ |
+| `checkbox.tsx` | Checkbox input | ✅ |
+| `collapsible.tsx` | Collapsible/expandable content | ✅ |
+| `dialog.tsx` | Modal dialog component | ✅ |
+| `dropdown-menu.tsx` | Dropdown menu component | ✅ |
+| `input.tsx` | Text input component | ✅ |
+| `label.tsx` | Form label component | ✅ |
+| `popover.tsx` | Popover/floating content | ✅ |
+| `progress.tsx` | Progress bar component | ✅ |
+| `select.tsx` | Select dropdown component | ✅ |
+| `switch.tsx` | Toggle switch component | ✅ |
+| `tabs.tsx` | Tab navigation component | ✅ |
+| `textarea.tsx` | Multi-line text input | ✅ |
+| `tooltip.tsx` | Tooltip component | ✅ |
 
 ### LMS Components
 
 | Component | Description | Uses Semantic Tokens |
 |-----------|-------------|---------------------|
 | `ChapterCard.tsx` | Chapter display card | ❌ |
-| `course-detail.tsx` | Course detail view | ❌ |
-| `course-overview.tsx` | Course overview display | ❌ |
-| `course-section.tsx` | Course section component | ❌ |
+| `course-detail.tsx` | Course detail view | ✅ |
+| `course-overview.tsx` | Course overview display | ✅ |
+| `course-section.tsx` | Course section component | ✅ |
 | `KnowledgePointAnalytics.tsx` | Analytics for knowledge points | ❌ |
 | `LearnModal.tsx` | Modal for learning content | ❌ |
-| `lesson-card.tsx` | Individual lesson card | ❌ |
-| `lesson-modal.tsx` | Modal for lesson content | ❌ |
-| `lesson-viewer.tsx` | Lesson content viewer | ❌ |
+| `lesson-card.tsx` | Individual lesson card | ✅ |
+| `lesson-modal.tsx` | Modal for lesson content | ✅ |
+| `lesson-viewer.tsx` | Lesson content viewer | ✅ |
 | `LessonRow.tsx` | Lesson row display | ❌ |
-| `lms-header.tsx` | LMS header navigation | ❌ |
-| `lms-sidebar.tsx` | LMS sidebar navigation | ❌ |
-| `new-course-overview.tsx` | New course overview design | ❌ |
-| `student-dashboard.tsx` | Student dashboard view | ❌ |
-| `test-interface.tsx` | Test/quiz interface | ❌ |
-| `TestInterface.tsx` | Alternative test interface | ❌ |
+| `lms-header.tsx` | LMS header navigation | ✅ |
+| `lms-sidebar.tsx` | LMS sidebar navigation | ✅ |
+| `new-course-overview.tsx` | New course overview design | ✅ |
+| `student-dashboard.tsx` | Student dashboard view | ✅ |
+| `test-interface.tsx` | Test/quiz interface | ✅ |
+| `TestInterface.tsx` | Alternative test interface | ✅ |
 
 ### Game Components
 
@@ -132,4 +133,4 @@ When implementing semantic tokens, consider prioritizing:
 
 ---
 
-*Last updated: July 4, 2025*
+*Last updated: July 4, 2025 - Semantic token migration in progress*

@@ -113,7 +113,7 @@ export const colors = {
   current: 'currentColor',
   
   // Legacy colors for backwards compatibility
-  vergilPurple: '#7B00FF',
+  vergilPurple: '#A64DFF', // Changed from purple-600 to purple-400
   vergilOffBlack: '#1D1D1F',
   vergilOffWhite: '#F5F5F7',
   cosmicPurple: '#6366F1',
@@ -182,10 +182,10 @@ export const shadows = {
   lg: '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',    // modals, dropdowns
   xl: '0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04)',  // highest priority
   // Brand shadows
-  brandSm: '0 2px 4px rgba(123, 0, 255, 0.1)',
-  brandMd: '0 4px 8px rgba(123, 0, 255, 0.12)',
-  brandLg: '0 8px 16px rgba(123, 0, 255, 0.16)',
-  brandGlow: '0 0 24px rgba(123, 0, 255, 0.4)',
+  brandSm: '0 2px 4px rgba(166, 77, 255, 0.1)',
+  brandMd: '0 4px 8px rgba(166, 77, 255, 0.12)',
+  brandLg: '0 8px 16px rgba(166, 77, 255, 0.16)',
+  brandGlow: '0 0 24px rgba(166, 77, 255, 0.4)',
 } as const;
 
 // Border widths
@@ -247,8 +247,8 @@ export const duration = {
 
 // Gradients - Living patterns
 export const gradients = {
-  consciousness: 'linear-gradient(135deg, #7B00FF 0%, #9933FF 50%, #BB66FF 100%)', // Using purple scale
-  ambient: 'radial-gradient(circle at center, rgba(123, 0, 255, 0.1) 0%, transparent 70%)',
+  consciousness: 'linear-gradient(135deg, #A64DFF 0%, #BB66FF 50%, #D199FF 100%)', // Using purple scale
+  ambient: 'radial-gradient(circle at center, rgba(166, 77, 255, 0.1) 0%, transparent 70%)',
   
   // Legacy gradients for backwards compatibility
   awakening: 'linear-gradient(90deg, #6366F1 0%, #3B82F6 100%)',

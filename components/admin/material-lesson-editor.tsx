@@ -22,7 +22,7 @@ import { Input } from '@/components/input'
 import { Label } from '@/components/label'
 import { Textarea } from '@/components/textarea'
 import { Badge } from '@/components/badge'
-import { Switch } from '@/components/switch'
+import { Switch } from '@/components/ui/Switch'
 import {
   Select,
   SelectContent,
@@ -177,7 +177,7 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
         <CardContent>
           <Tabs
             value={content.materialType}
-            onValueChange={(value: 'video' | 'text') => updateContent({ materialType: value })}
+            onValueChange={(value) => updateContent({ materialType: value as 'video' | 'text' })}
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="video" className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
                         className="hidden"
                         id="video-upload"
                       />
-                      <Button asChild variant="outline">
+                      <Button asChild variant="secondary">
                         <label htmlFor="video-upload" className="cursor-pointer">
                           Browse Files
                         </label>
@@ -263,7 +263,7 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
                           onChange={(e) => handleVideoUrl(e.target.value)}
                         />
                         {content.videoUrl && (
-                          <Button variant="outline" onClick={() => handleVideoUrl('')}>
+                          <Button variant="secondary" onClick={() => handleVideoUrl('')}>
                             <X className="h-4 w-4" />
                           </Button>
                         )}
@@ -271,10 +271,10 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
                       {content.videoUrl && (
                         <div className="mt-2">
                           {isYouTubeUrl(content.videoUrl) && (
-                            <Badge variant="outline" className="text-red-600">YouTube Video</Badge>
+                            <Badge variant="default" className="text-red-600">YouTube Video</Badge>
                           )}
                           {isVimeoUrl(content.videoUrl) && (
-                            <Badge variant="outline" className="text-blue-600">Vimeo Video</Badge>
+                            <Badge variant="default" className="text-blue-600">Vimeo Video</Badge>
                           )}
                         </div>
                       )}
@@ -286,7 +286,7 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Label className="text-sm font-medium">Video Preview</Label>
-                        <Button variant="outline" size="sm" onClick={removeVideo}>
+                        <Button variant="secondary" size="sm" onClick={removeVideo}>
                           <X className="h-4 w-4 mr-2" />
                           Remove Video
                         </Button>
@@ -465,7 +465,7 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
                               className="hidden"
                               id="captions-upload"
                             />
-                            <Button asChild variant="outline" size="sm">
+                            <Button asChild variant="secondary" size="sm">
                               <label htmlFor="captions-upload" className="cursor-pointer">
                                 <Upload className="h-4 w-4 mr-2" />
                                 Upload Captions (.vtt, .srt)
@@ -519,8 +519,8 @@ export function MaterialLessonEditor({ content, onChange }: MaterialLessonEditor
       </Card>
 
       {/* Live Preview */}
-      {(content.materialType === 'text' && content.richTextContent) || 
-       (content.materialType === 'video' && (content.videoFile || content.videoUrl)) && (
+      {((content.materialType === 'text' && content.richTextContent) || 
+       (content.materialType === 'video' && (content.videoFile || content.videoUrl))) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

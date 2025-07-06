@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
-import { Checkbox } from '@/components/checkbox'
+import { Checkbox } from '@/components/atomic/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,7 +130,7 @@ export function DataTable<T extends Record<string, any>>({
             {bulkActions.map((action, index) => (
               <Button
                 key={index}
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => {
                   const selected = data.filter(item => 

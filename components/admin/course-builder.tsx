@@ -436,7 +436,7 @@ export function CourseBuilder({ courseId }: CourseBuilderProps) {
             <div className="flex items-center gap-4">
               <h1 className="text-xl font-bold">{course.title}</h1>
               {isDirty && (
-                <Badge variant="outline" className="text-orange-600 border-orange-200">
+                <Badge variant="warning">
                   Unsaved Changes
                 </Badge>
               )}
@@ -444,7 +444,7 @@ export function CourseBuilder({ courseId }: CourseBuilderProps) {
             
             <div className="flex items-center gap-3">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowPreview(!showPreview)}
               >
                 <Eye className="h-4 w-4 mr-2" />
@@ -452,7 +452,7 @@ export function CourseBuilder({ courseId }: CourseBuilderProps) {
               </Button>
               
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={handleSave}
                 disabled={!isDirty}
               >
@@ -480,7 +480,7 @@ export function CourseBuilder({ courseId }: CourseBuilderProps) {
               <CardHeader>
                 <CardTitle className="text-lg">Course Structure</CardTitle>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={addSection}
                   className="w-full"
@@ -575,7 +575,7 @@ export function CourseBuilder({ courseId }: CourseBuilderProps) {
                                 <GripVertical className="h-3 w-3 text-gray-400" />
                                 {getContentIcon(lesson.type)}
                                 <span className="truncate">{lesson.title}</span>
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="default" className="text-xs">
                                   {lesson.duration}m
                                 </Badge>
                               </button>
@@ -742,7 +742,7 @@ function CourseSettingsEditor({ course, onUpdate }: {
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-medium">Learning Objectives</label>
-            <Button variant="outline" size="sm" onClick={addObjective}>
+            <Button variant="secondary" size="sm" onClick={addObjective}>
               <Plus className="h-4 w-4 mr-2" />
               Add Objective
             </Button>
@@ -959,7 +959,7 @@ function LessonEditor({ lesson, onUpdate }: {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Associated Materials</CardTitle>
-            <Button variant="outline" size="sm">
+            <Button variant="secondary" size="sm">
               <Upload className="h-4 w-4 mr-2" />
               Upload File
             </Button>

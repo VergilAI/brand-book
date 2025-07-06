@@ -142,10 +142,10 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
   // Show loading state
   if (loading) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center">
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-tooltip flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vergil-purple mx-auto mb-4"></div>
-          <p className="text-white">Loading content...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-border-brand mx-auto mb-md"></div>
+          <p className="text-text-inverse">Loading content...</p>
         </div>
       </div>,
       document.body
@@ -155,11 +155,11 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
   // Show error state
   if (error) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999] flex items-center justify-center">
-        <Card className="p-8 text-center bg-white max-w-md">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error Loading Content</h2>
-          <p className="text-vergil-off-black/60 mb-6">{error}</p>
-          <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-tooltip flex items-center justify-center">
+        <Card className="card-default p-2xl text-center max-w-md">
+          <h2 className="text-xl font-bold text-text-error mb-md">Error Loading Content</h2>
+          <p className="text-text-secondary mb-lg">{error}</p>
+          <Button onClick={onQuit} variant="secondary">Back to Selection</Button>
         </Card>
       </div>,
       document.body
@@ -172,12 +172,12 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
   // Block disabled content types
   if (['video', 'audio-material'].includes(gameTypeId)) {
     gameContent = (
-      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
-        <div className="max-w-4xl mx-auto p-6">
-          <Card className="p-8 text-center bg-white">
-            <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Coming Soon</h2>
-            <p className="text-vergil-off-black/60 mb-6">{gameTypeId.replace('-', ' ')} content is currently under development.</p>
-            <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+      <div className="fixed inset-0 bg-bg-primary flex items-center justify-center z-tooltip">
+        <div className="max-w-4xl mx-auto p-lg">
+          <Card className="card-default p-2xl text-center">
+            <h2 className="text-2xl font-bold text-text-primary mb-md">Coming Soon</h2>
+            <p className="text-text-secondary mb-lg">{gameTypeId.replace('-', ' ')} content is currently under development.</p>
+            <Button onClick={onQuit} variant="secondary">Back to Selection</Button>
           </Card>
         </div>
       </div>
@@ -187,24 +187,24 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
   else if (['written-material'].includes(gameTypeId)) {
     if (loading) {
       gameContent = (
-        <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
-          <div className="max-w-4xl mx-auto p-6">
-            <Card className="p-8 text-center bg-white">
-              <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Loading Content...</h2>
-              <p className="text-vergil-off-black/60 mb-6">Please wait while we load the {gameTypeId.replace('-', ' ')} content.</p>
-              <Button onClick={onQuit} variant="outline">Cancel</Button>
+        <div className="fixed inset-0 bg-bg-primary flex items-center justify-center z-tooltip">
+          <div className="max-w-4xl mx-auto p-lg">
+            <Card className="card-default p-2xl text-center">
+              <h2 className="text-2xl font-bold text-text-primary mb-md">Loading Content...</h2>
+              <p className="text-text-secondary mb-lg">Please wait while we load the {gameTypeId.replace('-', ' ')} content.</p>
+              <Button onClick={onQuit} variant="secondary">Cancel</Button>
             </Card>
           </div>
         </div>
       )
     } else if (error) {
       gameContent = (
-        <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
-          <div className="max-w-4xl mx-auto p-6">
-            <Card className="p-8 text-center bg-white">
-              <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Content Not Available</h2>
-              <p className="text-vergil-off-black/60 mb-6">Sorry, we couldn't load the content: {error}</p>
-              <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+        <div className="fixed inset-0 bg-bg-primary flex items-center justify-center z-tooltip">
+          <div className="max-w-4xl mx-auto p-lg">
+            <Card className="card-default p-2xl text-center">
+              <h2 className="text-2xl font-bold text-text-primary mb-md">Content Not Available</h2>
+              <p className="text-text-secondary mb-lg">Sorry, we couldn't load the content: {error}</p>
+              <Button onClick={onQuit} variant="secondary">Back to Selection</Button>
             </Card>
           </div>
         </div>
@@ -218,12 +218,12 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
     const title = content.content?.title || lesson.title
     
     gameContent = (
-      <div className="fixed inset-0 bg-gray-100 flex flex-col z-[9999]">
+      <div className="fixed inset-0 bg-bg-secondary flex flex-col z-tooltip">
         {/* Simple Header */}
-        <div className="bg-white shadow-sm z-10">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-bg-elevated shadow-card z-sticky">
+          <div className="max-w-7xl mx-auto px-lg py-md">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+              <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
               <Button variant="ghost" size="sm" onClick={onQuit}>
                 <X className="w-5 h-5" />
               </Button>
@@ -232,16 +232,16 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         </div>
 
         {/* PDF-style Content */}
-        <div className="flex-1 overflow-auto bg-gray-600 p-4">
+        <div className="flex-1 overflow-auto bg-bg-tertiary p-md">
           <div className="max-w-4xl mx-auto">
             {/* Render each page from the JSON content */}
             {pages.map((page: any, index: number) => (
-              <div key={index} className="bg-white shadow-2xl mb-4" style={{ minHeight: '1056px', padding: '72px' }}>
+              <div key={index} className="bg-bg-elevated shadow-modal mb-md rounded-lg" style={{ minHeight: '1056px', padding: '72px' }}>
                 <div 
-                  className="prose prose-lg max-w-none [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-black [&_h1]:mb-8 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-black [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-black [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:text-gray-800 [&_p]:mb-4 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:list-inside [&_ul]:mb-6 [&_ul]:text-gray-800 [&_ul]:space-y-2 [&_ul]:ml-6 [&_li]:text-gray-800 [&_strong]:font-semibold [&_strong]:text-black"
+                  className="prose prose-lg max-w-none [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-text-primary [&_h1]:mb-lg [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-text-primary [&_h2]:mt-xl [&_h2]:mb-md [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-text-primary [&_h3]:mt-lg [&_h3]:mb-sm [&_p]:text-text-secondary [&_p]:mb-md [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:list-inside [&_ul]:mb-lg [&_ul]:text-text-secondary [&_ul]:space-y-sm [&_ul]:ml-lg [&_li]:text-text-secondary [&_strong]:font-semibold [&_strong]:text-text-primary"
                   dangerouslySetInnerHTML={{ __html: page.content }} 
                 />
-                <div className="text-center text-gray-400 text-sm mt-auto pt-16">
+                <div className="text-center text-text-tertiary text-sm mt-auto pt-xl">
                   Page {page.pageNumber || index + 1}
                 </div>
               </div>
@@ -249,23 +249,23 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
             
             {/* Fallback if no pages */}
             {pages.length === 0 && (
-              <div className="bg-white shadow-2xl mb-4 p-16 text-center">
-                <p className="text-gray-600">No content available for this lesson.</p>
+              <div className="bg-bg-elevated shadow-card mb-md p-xl text-center rounded-lg">
+                <p className="text-text-secondary">No content available for this lesson.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Simple Footer */}
-        <div className="bg-white border-t shadow-sm z-10">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-bg-elevated border-t border-border-default shadow-card z-sticky">
+          <div className="max-w-7xl mx-auto px-lg py-md">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-secondary">
                 Viewing: {title} ({pages.length} pages)
               </div>
               <Button 
                 onClick={() => onComplete({ completed: true })} 
-                className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+                className="btn-primary"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Complete Reading
@@ -297,17 +297,17 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
     }
     
     gameContent = (
-      <div className="fixed inset-0 bg-black flex flex-col z-[9999]">
+      <div className="fixed inset-0 bg-bg-inverse flex flex-col z-tooltip">
         {/* Video Header */}
-        <div className="bg-black/90 backdrop-blur z-10">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-bg-inverse/90 backdrop-blur-sm z-sticky">
+          <div className="max-w-7xl mx-auto px-lg py-md">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">{lesson.title}</h2>
+              <h2 className="text-xl font-semibold text-text-inverse">{lesson.title}</h2>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={onQuit} 
-                className="text-white hover:bg-white/10"
+                className="text-text-inverse hover:bg-bg-elevated/10"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -317,70 +317,70 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
 
         {/* Video Player Area */}
         <div className="flex-1 flex items-center justify-center relative">
-          <div className="relative w-full max-w-6xl mx-auto px-6">
+          <div className="relative w-full max-w-6xl mx-auto px-lg">
             {/* Mock Video Screen */}
-            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden relative">
+            <div className="aspect-video bg-bg-inverse rounded-lg overflow-hidden relative shadow-modal">
               {/* Video Thumbnail/Content */}
-              <div className="absolute inset-0 bg-gradient-to-br from-vergil-purple/20 to-blue-600/20 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-bg-brand/20 to-bg-info/20 flex items-center justify-center">
                 {!videoPlaying ? (
                   <div className="text-center">
-                    <div className="w-24 h-24 bg-white/10 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4 cursor-pointer hover:bg-white/20 transition-colors"
+                    <div className="w-24 h-24 bg-bg-elevated/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-md cursor-pointer hover:bg-bg-elevated/20 transition-colors duration-normal"
                          onClick={() => setVideoPlaying(true)}>
-                      <Play className="w-10 h-10 text-white ml-2" />
+                      <Play className="w-10 h-10 text-text-inverse ml-2" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Introduction to {lesson.title}</h3>
-                    <p className="text-white/80">Click to play video • {formatVideoTime(videoDuration)}</p>
+                    <h3 className="text-2xl font-bold text-text-inverse mb-sm">Introduction to {lesson.title}</h3>
+                    <p className="text-text-inverse/80">Click to play video • {formatVideoTime(videoDuration)}</p>
                   </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-center">
-                      <Video className="w-32 h-32 text-white/20 mx-auto mb-4" />
-                      <p className="text-white/60 text-lg">Video is playing...</p>
-                      <p className="text-white/40 mt-2">Mock educational content about {lesson.title}</p>
+                      <Video className="w-32 h-32 text-text-inverse/20 mx-auto mb-md" />
+                      <p className="text-text-inverse/60 text-lg">Video is playing...</p>
+                      <p className="text-text-inverse/40 mt-sm">Mock educational content about {lesson.title}</p>
                     </div>
                   </div>
                 )}
               </div>
               
               {/* Video Controls Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <div className="flex items-center gap-4 mb-2">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-bg-inverse/80 to-transparent p-md">
+                <div className="flex items-center gap-md mb-sm">
                   <button
                     onClick={() => setVideoPlaying(!videoPlaying)}
-                    className="text-white hover:text-vergil-purple transition-colors"
+                    className="text-text-inverse hover:text-text-brand transition-colors duration-fast"
                   >
                     {videoPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                   </button>
                   
                   <div className="flex-1">
-                    <div className="bg-white/20 rounded-full h-1 relative">
+                    <div className="bg-bg-elevated/20 rounded-full h-1 relative">
                       <div 
-                        className="bg-vergil-purple h-full rounded-full transition-all duration-300"
+                        className="bg-bg-brand h-full rounded-full transition-all duration-slow"
                         style={{ width: `${(videoTime / videoDuration) * 100}%` }}
                       />
                     </div>
                   </div>
                   
-                  <span className="text-white text-sm">
+                  <span className="text-text-inverse text-sm">
                     {formatVideoTime(videoTime)} / {formatVideoTime(videoDuration)}
                   </span>
                   
-                  <Volume2 className="w-5 h-5 text-white/60" />
+                  <Volume2 className="w-5 h-5 text-text-inverse/60" />
                 </div>
               </div>
             </div>
             
             {/* Video Info Below */}
-            <div className="mt-6 bg-gray-900/50 backdrop-blur rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">About this video</h3>
-              <p className="text-white/70 mb-4">{lesson.description}</p>
+            <div className="mt-lg bg-bg-inverse/50 backdrop-blur-sm rounded-lg p-lg">
+              <h3 className="text-lg font-semibold text-text-inverse mb-sm">About this video</h3>
+              <p className="text-text-inverse/70 mb-md">{lesson.description}</p>
               
-              <div className="flex items-center gap-6 text-sm text-white/60">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-lg text-sm text-text-inverse/60">
+                <div className="flex items-center gap-sm">
                   <Clock className="w-4 h-4" />
                   <span>Duration: {formatVideoTime(videoDuration)}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-sm">
                   <List className="w-4 h-4" />
                   <span>{lesson.knowledgePoints.length} key concepts covered</span>
                 </div>
@@ -390,15 +390,15 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         </div>
 
         {/* Fixed Footer */}
-        <div className="bg-black/90 backdrop-blur border-t border-white/10 z-10">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-bg-inverse/90 backdrop-blur-sm border-t border-border-subtle z-sticky">
+          <div className="max-w-7xl mx-auto px-lg py-md">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-white/60">
+              <div className="text-sm text-text-inverse/60">
                 {videoTime > 0 ? `Watched ${Math.round((videoTime / videoDuration) * 100)}%` : 'Video not started'}
               </div>
               <Button 
                 onClick={() => onComplete({ completed: true, watchTime: videoTime })} 
-                className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+                className="btn-primary"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Complete Video
@@ -471,13 +471,13 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
     }, [currentTime])
     
     gameContent = (
-      <div className="fixed inset-0 bg-gray-100 flex flex-col z-[9999]">
+      <div className="fixed inset-0 bg-bg-secondary flex flex-col z-tooltip">
         {/* Fixed Header */}
-        <div className="bg-vergil-off-black shadow-lg z-10">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-bg-inverse shadow-dropdown z-sticky">
+          <div className="max-w-7xl mx-auto px-lg py-md">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-vergil-off-white">{lesson.title}</h2>
-              <Button variant="ghost" size="sm" onClick={onQuit} className="text-vergil-off-white hover:bg-vergil-off-white/10">
+              <h2 className="text-xl font-semibold text-text-inverse">{lesson.title}</h2>
+              <Button variant="ghost" size="sm" onClick={onQuit} className="text-text-inverse hover:bg-bg-elevated/10">
                 <X className="w-5 h-5" />
               </Button>
             </div>
@@ -486,53 +486,53 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-6xl mx-auto p-6">
-            <Card className="overflow-hidden">
+          <div className="max-w-6xl mx-auto p-lg">
+            <Card className="card-default overflow-hidden">
               {/* Audio Player - Fixed at top of card */}
-              <div className="bg-white border-b sticky top-0 z-10 p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-vergil-purple/20 rounded-lg">
-                    <Volume2 className="w-6 h-6 text-vergil-purple" />
+              <div className="bg-bg-elevated border-b border-border-default sticky top-0 z-sticky p-2xl">
+                <div className="flex items-center gap-sm mb-md">
+                  <div className="p-sm bg-bg-brand/20 rounded-lg">
+                    <Volume2 className="w-6 h-6 text-text-brand" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-vergil-off-black">Audio Lesson</h3>
-                    <p className="text-vergil-off-black/60 text-sm">{formatTime(totalDuration)} total duration</p>
+                    <h3 className="text-lg font-semibold text-text-primary">Audio Lesson</h3>
+                    <p className="text-text-secondary text-sm">{formatTime(totalDuration)} total duration</p>
                   </div>
                 </div>
-                <div className="bg-gray-100 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
+                <div className="bg-bg-secondary rounded-lg p-lg">
+                  <div className="flex items-center justify-between mb-md">
+                    <div className="flex items-center gap-md">
                       <Button
                         size="lg"
-                        variant="outline"
+                        variant="secondary"
                         className="rounded-full w-14 h-14 p-0"
                         onClick={() => setIsPlaying(!isPlaying)}
                       >
                         {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
                       </Button>
                       <div>
-                        <p className="text-sm font-medium text-vergil-off-black">
+                        <p className="text-sm font-medium text-text-primary">
                           {audioChapters.find(ch => ch.id === selectedChapter)?.title || 'Select a chapter'}
                         </p>
-                        <p className="text-xs text-vergil-off-black/60">
+                        <p className="text-xs text-text-secondary">
                           {formatTime(currentTime)} / {formatTime(totalDuration)}
                         </p>
                       </div>
                     </div>
-                    <Volume2 className="w-5 h-5 text-vergil-off-black/40" />
+                    <Volume2 className="w-5 h-5 text-text-tertiary" />
                   </div>
                   
                   {/* Progress Bar */}
-                  <div className="w-full bg-gray-300 rounded-full h-2 relative">
+                  <div className="w-full bg-bg-tertiary rounded-full h-2 relative">
                     <div 
-                      className="bg-vergil-purple h-full rounded-full transition-all duration-300"
+                      className="bg-bg-brand h-full rounded-full transition-all duration-slow"
                       style={{ width: `${(currentTime / totalDuration) * 100}%` }}
                     />
                     {/* Chapter markers */}
                     {audioChapters.map((chapter) => (
                       <div
                         key={chapter.id}
-                        className="absolute top-1/2 -translate-y-1/2 w-1 h-4 bg-vergil-off-black/30"
+                        className="absolute top-1/2 -translate-y-1/2 w-1 h-4 bg-bg-inverse/30"
                         style={{ left: `${(chapter.start / totalDuration) * 100}%` }}
                       />
                     ))}
@@ -541,42 +541,42 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
               </div>
               
               {/* Scrollable Chapters List */}
-              <div className="p-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <List className="w-5 h-5 text-vergil-purple" />
-                  <h3 className="text-lg font-semibold text-vergil-off-black">Chapters</h3>
+              <div className="p-2xl">
+                <div className="flex items-center gap-sm mb-md">
+                  <List className="w-5 h-5 text-text-brand" />
+                  <h3 className="text-lg font-semibold text-text-primary">Chapters</h3>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-sm">
                   {audioChapters.map((chapter) => (
                     <button
                       key={chapter.id}
                       onClick={() => handleChapterClick(chapter)}
-                      className={`w-full text-left p-4 rounded-lg border transition-all hover:border-vergil-purple/40 ${
+                      className={`w-full text-left p-md rounded-lg border transition-all duration-fast hover:border-border-brand ${
                         selectedChapter === chapter.id
-                          ? 'bg-vergil-purple/10 border-vergil-purple'
-                          : 'bg-white border-gray-200'
+                          ? 'bg-bg-brand/10 border-border-brand'
+                          : 'bg-bg-elevated border-border-default'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-sm mb-sm">
                             <span className={`text-sm font-medium ${
-                              selectedChapter === chapter.id ? 'text-vergil-purple' : 'text-vergil-off-black/60'
+                              selectedChapter === chapter.id ? 'text-text-brand' : 'text-text-secondary'
                             }`}>
                               Chapter {chapter.id}
                             </span>
                             <h4 className={`font-medium ${
-                              selectedChapter === chapter.id ? 'text-vergil-purple' : 'text-vergil-off-black'
+                              selectedChapter === chapter.id ? 'text-text-brand' : 'text-text-primary'
                             }`}>
                               {chapter.title}
                             </h4>
                           </div>
-                          <p className="text-sm text-vergil-off-black/60 line-clamp-2">{chapter.summary}</p>
+                          <p className="text-sm text-text-secondary line-clamp-2">{chapter.summary}</p>
                         </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Clock className="w-4 h-4 text-vergil-off-black/40" />
-                          <span className="text-sm text-vergil-off-black/60">{formatTime(chapter.duration)}</span>
+                        <div className="flex items-center gap-sm ml-md">
+                          <Clock className="w-4 h-4 text-text-tertiary" />
+                          <span className="text-sm text-text-secondary">{formatTime(chapter.duration)}</span>
                         </div>
                       </div>
                     </button>
@@ -588,16 +588,16 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
         </div>
 
         {/* Fixed Footer */}
-        <div className="bg-white border-t shadow-lg z-10">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-bg-elevated border-t border-border-default shadow-card z-sticky">
+          <div className="max-w-7xl mx-auto px-lg py-md">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-vergil-off-black/60">
+              <div className="flex items-center gap-sm text-sm text-text-secondary">
                 <CheckCircle className="w-4 h-4" />
                 <span>Listen to all chapters to complete</span>
               </div>
               <Button 
                 onClick={() => onComplete({ completed: true, timeListened: currentTime })} 
-                className="bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
+                className="btn-primary"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Complete Audio
@@ -628,12 +628,12 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
       
       default:
         gameContent = (
-          <div className="fixed inset-0 bg-gray-100 flex items-center justify-center z-[9999]">
-            <div className="max-w-4xl mx-auto p-6">
-              <Card className="p-8 text-center bg-white">
-                <h2 className="text-2xl font-bold text-vergil-off-black mb-4">Game Not Available</h2>
-                <p className="text-vergil-off-black/60 mb-6">This learning method is not available yet.</p>
-                <Button onClick={onQuit} variant="outline">Back to Selection</Button>
+          <div className="fixed inset-0 bg-bg-secondary flex items-center justify-center z-tooltip">
+            <div className="max-w-4xl mx-auto p-lg">
+              <Card className="card-default p-2xl text-center">
+                <h2 className="text-2xl font-bold text-text-primary mb-md">Game Not Available</h2>
+                <p className="text-text-secondary mb-lg">This learning method is not available yet.</p>
+                <Button onClick={onQuit} variant="secondary">Back to Selection</Button>
               </Card>
             </div>
           </div>
@@ -645,7 +645,7 @@ export function GameLauncher({ gameTypeId, lesson, onComplete, onQuit }: GameLau
   if (typeof window === 'undefined') return null
   
   return createPortal(
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[9999]" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-tooltip" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
       {gameContent}
     </div>,
     document.body

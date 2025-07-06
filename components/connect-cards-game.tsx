@@ -176,21 +176,21 @@ export function ConnectCardsGame({
                               (gameState.currentAttempt.left.id === card.id || gameState.currentAttempt.right.id === card.id)
     
     if (isMatched) {
-      return 'bg-green-50 border-green-500 text-green-700 opacity-60'
+      return 'bg-bg-success/10 border-border-success text-text-success opacity-60'
     }
     
     if (isInCurrentAttempt && gameState.isCheckingMatch) {
       const isCorrect = gameState.currentAttempt!.left.matchId === gameState.currentAttempt!.right.matchId
       return isCorrect 
-        ? 'bg-green-50 border-green-500 text-green-700'
-        : 'bg-red-50 border-red-500 text-red-600 border-2'
+        ? 'bg-bg-success/10 border-border-success text-text-success'
+        : 'bg-bg-error/10 border-border-error text-text-error border-2'
     }
     
     if (isSelected) {
-      return 'bg-vergil-purple/5 border-vergil-purple text-vergil-off-black shadow-lg'
+      return 'bg-bg-brand/5 border-border-brand text-text-primary shadow-elevated'
     }
     
-    return 'bg-white border-vergil-off-black/10 hover:border-vergil-purple/40 hover:shadow-sm'
+    return 'bg-bg-primary border-border-subtle hover:border-border-brand/40 hover:shadow-base'
   }
 
   const getCardAnimation = (card: ConnectCard) => {
@@ -204,11 +204,7 @@ export function ConnectCardsGame({
         // Gentle wriggle animation with rotation for wrong matches
         return {
           x: [0, -6, 6, -4, 4, -2, 2, 0],
-          rotate: [0, -1.5, 1.5, -1, 1, -0.5, 0.5, 0],
-          transition: {
-            duration: 0.8,
-            ease: "easeInOut"
-          }
+          rotate: [0, -1.5, 1.5, -1, 1, -0.5, 0.5, 0]
         }
       }
     }
@@ -232,65 +228,65 @@ export function ConnectCardsGame({
     }, [])
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-        <div className="min-h-full flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-space-md">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="w-full max-w-md max-h-[90vh] overflow-y-auto"
         >
-          <Card className="p-8 bg-white border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white overflow-hidden">
-            <div className="space-y-6">
+          <Card className="p-space-lg bg-bg-primary border-border-subtle bg-gradient-to-br from-bg-secondary to-bg-primary overflow-hidden">
+            <div className="space-y-space-lg">
               {/* Header Section */}
-              <div className="text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-10 h-10 text-white" />
+              <div className="text-center space-y-space-md">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-color-brand-primary to-color-brand-secondary mx-auto flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-10 h-10 text-text-inverse" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
+                <h2 className="text-3xl font-display font-bold text-text-primary">
                   Excellent Matching!
                 </h2>
-                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
+                <p className="text-base text-text-secondary max-w-md mx-auto">
                   You've completed all card pairs
                 </p>
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-4">
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+              <div className="grid grid-cols-3 gap-space-md">
+                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
                     {gameState.correctAnswers}
                   </div>
-                  <div className="text-sm text-vergil-off-black/60">Correct</div>
+                  <div className="text-sm text-text-tertiary">Correct</div>
                 </Card>
                 
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
                     {Math.round(accuracy)}%
                   </div>
-                  <div className="text-sm text-vergil-off-black/60">Accuracy</div>
+                  <div className="text-sm text-text-tertiary">Accuracy</div>
                 </Card>
                 
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
+                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
+                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
                     {completionTime.toFixed(0)}s
                   </div>
-                  <div className="text-sm text-vergil-off-black/60">Time</div>
+                  <div className="text-sm text-text-tertiary">Time</div>
                 </Card>
               </div>
 
               {/* Knowledge Impact */}
-              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5 text-vergil-purple" />
+              <Card variant="outlined" className="p-space-md border-border-brand/20 bg-bg-brand/5">
+                <div className="flex items-start gap-space-sm">
+                  <div className="w-10 h-10 rounded-lg bg-bg-brand/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-5 h-5 text-text-brand" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
+                    <h3 className="text-sm font-semibold text-text-primary mb-space-xs">
                       Knowledge Point Impact
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
-                      <span className="text-lg font-bold text-vergil-purple">
+                      <span className="text-sm text-text-tertiary">Estimated improvement</span>
+                      <span className="text-lg font-bold text-text-brand">
                         +{Math.round(accuracy * 0.8)}%
                       </span>
                     </div>
@@ -298,10 +294,10 @@ export function ConnectCardsGame({
                 </div>
               </Card>
 
-              <div className="flex gap-3">
+              <div className="flex gap-space-sm">
                 <Button
                   size="lg"
-                  variant="outline"
+                  variant="secondary"
                   onClick={async () => {
                     const completionTime = (gameState.endTime! - gameState.startTime) / 1000
                     const accuracy = (gameState.correctAnswers / (gameState.correctAnswers + gameState.incorrectAnswers)) * 100
@@ -352,7 +348,7 @@ export function ConnectCardsGame({
                 <Button
                   size="lg"
                   onClick={() => window.location.reload()}
-                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                  className="bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Play Again
@@ -375,12 +371,12 @@ export function ConnectCardsGame({
   }, [])
 
   return (
-    <div className={cn("fixed inset-0 bg-gray-100 flex flex-col", className)}>
+    <div className={cn("fixed inset-0 bg-bg-secondary flex flex-col", className)}>
       {/* Fixed Header */}
-      <div className="bg-white shadow-sm z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="bg-bg-primary shadow-base z-elevation-high">
+        <div className="max-w-7xl mx-auto px-space-lg py-space-md">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+            <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -394,54 +390,54 @@ export function ConnectCardsGame({
 
       {/* Game Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-600">Match the cards from left to right</p>
-            <div className="flex items-center gap-6">
+        <div className="max-w-7xl mx-auto p-space-lg">
+          <div className="flex items-center justify-between mb-space-md">
+            <p className="text-sm text-text-secondary">Match the cards from left to right</p>
+            <div className="flex items-center gap-space-lg">
               <div className="text-center">
-                <p className="text-xs text-vergil-off-black/60">Matched</p>
-                <p className="text-2xl font-bold text-vergil-purple">
+                <p className="text-xs text-text-tertiary">Matched</p>
+                <p className="text-2xl font-bold text-text-brand">
                   {gameState.matchedPairs.size}/{pairs.length}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-vergil-off-black/60">Mistakes</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-xs text-text-tertiary">Mistakes</p>
+                <p className="text-2xl font-bold text-text-error">
                   {gameState.incorrectAnswers}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-space-md">
             {/* Progress */}
-            <Card className="p-4 bg-white border-vergil-off-black/10">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
-                    <span className="text-sm font-bold text-vergil-purple">
+            <Card className="p-space-md bg-bg-primary border-border-subtle">
+              <div className="flex items-center justify-between mb-space-md">
+                <div className="flex items-center gap-space-sm">
+                  <div className="w-8 h-8 rounded-full bg-bg-brand/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-text-brand">
                       {gameState.matchedPairs.size}
                     </span>
                   </div>
-                  <h2 className="text-xl font-semibold text-vergil-off-black">
+                  <h2 className="text-xl font-semibold text-text-primary">
                     Matching Progress
                   </h2>
                 </div>
-                <span className="text-sm font-medium text-vergil-purple">
+                <span className="text-sm font-medium text-text-brand">
                   {Math.round(progress)}% Complete
                 </span>
               </div>
-              <div className="w-full h-2 bg-vergil-off-black/10 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-vergil-purple transition-all duration-300"
+                  className="h-full bg-bg-brand transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </Card>
 
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <h3 className="text-lg font-display font-semibold text-vergil-off-black text-center">
+            <div className="grid grid-cols-2 gap-space-lg">
+              <div className="space-y-space-sm">
+                <h3 className="text-lg font-display font-semibold text-text-primary text-center">
                   Left Side
                 </h3>
           <AnimatePresence mode="popLayout">
@@ -455,16 +451,20 @@ export function ConnectCardsGame({
                   animate={{ 
                     opacity: 1, 
                     x: cardAnimation.x || 0,
-                    rotate: cardAnimation.rotate || 0,
-                    transition: cardAnimation.transition || { delay: index * 0.05 }
+                    rotate: cardAnimation.rotate || 0
                   }}
+                  transition={
+                    (cardAnimation.x && Array.isArray(cardAnimation.x)) 
+                      ? { duration: 0.8, ease: "easeInOut" }
+                      : { delay: index * 0.05 }
+                  }
                   exit={{ opacity: 0, x: -20, scale: 0.8 }}
                   onClick={() => handleCardSelect(card)}
                   disabled={gameState.isCheckingMatch}
                   className="w-full"
                 >
                 <Card className={cn(
-                  "p-6 text-center transition-all duration-200",
+                  "p-space-lg text-center transition-all duration-200",
                   getCardStyle(card)
                 )}>
                   <div className="space-y-2">
@@ -484,8 +484,8 @@ export function ConnectCardsGame({
           </AnimatePresence>
         </div>
 
-        <div className="space-y-3">
-          <h3 className="text-lg font-display font-semibold text-vergil-off-black text-center">
+        <div className="space-y-space-sm">
+          <h3 className="text-lg font-display font-semibold text-text-primary text-center">
             Right Side
           </h3>
           <AnimatePresence mode="popLayout">
@@ -499,16 +499,20 @@ export function ConnectCardsGame({
                   animate={{ 
                     opacity: 1, 
                     x: cardAnimation.x || 0,
-                    rotate: cardAnimation.rotate || 0,
-                    transition: cardAnimation.transition || { delay: index * 0.05 }
+                    rotate: cardAnimation.rotate || 0
                   }}
+                  transition={
+                    (cardAnimation.x && Array.isArray(cardAnimation.x)) 
+                      ? { duration: 0.8, ease: "easeInOut" }
+                      : { delay: index * 0.05 }
+                  }
                   exit={{ opacity: 0, x: 20, scale: 0.8 }}
                   onClick={() => handleCardSelect(card)}
                   disabled={gameState.isCheckingMatch}
                   className="w-full"
                 >
                 <Card className={cn(
-                  "p-6 text-center transition-all duration-200",
+                  "p-space-lg text-center transition-all duration-200",
                   getCardStyle(card)
                 )}>
                   <div className="space-y-2">
@@ -533,17 +537,17 @@ export function ConnectCardsGame({
       </div>
       
       {showExitConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="p-6 max-w-md bg-white border-vergil-off-black/10">
-            <h3 className="text-xl font-semibold text-vergil-off-black mb-4">
+        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal flex items-center justify-center p-space-md">
+          <Card className="p-space-lg max-w-md bg-bg-primary border-border-subtle">
+            <h3 className="text-xl font-semibold text-text-primary mb-space-md">
               Exit Game?
             </h3>
-            <p className="text-vergil-off-black/60 mb-6">
+            <p className="text-text-secondary mb-space-lg">
               Are you sure you want to exit? You'll lose your current progress.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-space-sm">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowExitConfirm(false)}
                 className="flex-1"
               >
@@ -554,7 +558,7 @@ export function ConnectCardsGame({
                   setShowExitConfirm(false)
                   onQuit()
                 }}
-                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                className="flex-1 bg-bg-error text-text-inverse hover:bg-bg-error-hover"
               >
                 Exit Game
               </Button>

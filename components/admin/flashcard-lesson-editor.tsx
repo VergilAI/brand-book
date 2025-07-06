@@ -24,7 +24,7 @@ import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Label } from '@/components/label'
 import { Textarea } from '@/components/textarea'
-import { Switch } from '@/components/switch'
+import { Switch } from '@/components/ui/Switch'
 import { Badge } from '@/components/badge'
 import {
   Select,
@@ -217,7 +217,7 @@ export function FlashcardLessonEditor({ content, onChange }: FlashcardLessonEdit
             </CardTitle>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setStudyMode(!studyMode)}
               >
@@ -225,7 +225,7 @@ export function FlashcardLessonEditor({ content, onChange }: FlashcardLessonEdit
                 {studyMode ? 'Exit Study' : 'Study Mode'}
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setPreviewMode(!previewMode)}
               >
@@ -264,7 +264,7 @@ export function FlashcardLessonEditor({ content, onChange }: FlashcardLessonEdit
                   {currentCardIndex + 1} of {content.cards.length}
                 </span>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => setStudyMode(false)}
                 >
@@ -466,7 +466,7 @@ function StudyCard({ card, onNext, onPrevious, canNext, canPrevious }: StudyCard
 
       <div className="flex justify-center items-center gap-4">
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={onPrevious}
           disabled={!canPrevious}
         >
@@ -474,7 +474,7 @@ function StudyCard({ card, onNext, onPrevious, canNext, canPrevious }: StudyCard
         </Button>
         
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={() => setIsFlipped(!isFlipped)}
         >
           <FlipHorizontal className="h-4 w-4 mr-2" />
@@ -482,7 +482,7 @@ function StudyCard({ card, onNext, onPrevious, canNext, canPrevious }: StudyCard
         </Button>
         
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={onNext}
           disabled={!canNext}
         >
@@ -536,7 +536,7 @@ function FlashcardPreview({
       isSelected ? "ring-2 ring-cosmic-purple" : ""
     )}>
       <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline">Card {index + 1}</Badge>
+        <Badge variant="default">Card {index + 1}</Badge>
         {!previewMode && (
           <div className="flex items-center gap-1">
             {canMoveUp && (
@@ -584,7 +584,7 @@ function FlashcardPreview({
 
       {previewMode ? (
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={onFlip}
           className="w-full"
@@ -595,7 +595,7 @@ function FlashcardPreview({
       ) : (
         <div className="flex gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={onSelect}
             className="flex-1"
@@ -603,14 +603,14 @@ function FlashcardPreview({
             Edit
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={onDuplicate}
           >
             <Copy className="h-4 w-4" />
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={onDelete}
             className="text-red-600"
@@ -726,7 +726,7 @@ function MediaSection({ side, media, onUpload, onRemove }: MediaSectionProps) {
               )}
               <span className="text-sm">{media.type} attached</span>
             </div>
-            <Button variant="outline" size="sm" onClick={onRemove}>
+            <Button variant="secondary" size="sm" onClick={onRemove}>
               Remove
             </Button>
           </div>
@@ -754,7 +754,7 @@ function MediaSection({ side, media, onUpload, onRemove }: MediaSectionProps) {
             className="hidden"
             id={`${side}-media-upload`}
           />
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="secondary" size="sm">
             <label htmlFor={`${side}-media-upload`} className="cursor-pointer">
               <Upload className="h-4 w-4 mr-2" />
               Upload Image or Audio

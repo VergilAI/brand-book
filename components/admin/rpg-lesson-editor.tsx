@@ -490,7 +490,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
             </CardTitle>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setGenerationMode(!generationMode)}
               >
@@ -498,7 +498,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
                 AI Assistant
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setPreviewMode(!previewMode)}
               >
@@ -563,7 +563,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
               <Label className="text-base font-medium mb-3 block">Quick Start Templates</Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   className="h-auto p-0 border-2 hover:border-cosmic-purple hover:bg-cosmic-purple/5"
                   onClick={() => generateGameIdea('business')}
                 >
@@ -575,16 +575,16 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
                       </div>
                       <p className="text-sm text-gray-600 mb-3 text-left leading-relaxed line-clamp-2">Navigate complex corporate partnerships and master negotiation strategies.</p>
                       <div className="flex flex-wrap gap-1">
-                        <Badge variant="outline" className="text-xs">2 Characters</Badge>
-                        <Badge variant="outline" className="text-xs">2 Scenarios</Badge>
-                        <Badge variant="outline" className="text-xs">Professional</Badge>
+                        <Badge variant="default" className="text-xs">2 Characters</Badge>
+                        <Badge variant="default" className="text-xs">2 Scenarios</Badge>
+                        <Badge variant="default" className="text-xs">Professional</Badge>
                       </div>
                     </CardContent>
                   </Card>
                 </Button>
 
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   className="h-auto p-0 border-2 hover:border-cosmic-purple hover:bg-cosmic-purple/5"
                   onClick={() => generateGameIdea('cybersecurity')}
                 >
@@ -596,16 +596,16 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
                       </div>
                       <p className="text-sm text-gray-600 mb-3 text-left leading-relaxed line-clamp-2">Become a cybersecurity detective and protect against email threats.</p>
                       <div className="flex flex-wrap gap-1">
-                        <Badge variant="outline" className="text-xs">2 Characters</Badge>
-                        <Badge variant="outline" className="text-xs">2 Scenarios</Badge>
-                        <Badge variant="outline" className="text-xs">Beginner</Badge>
+                        <Badge variant="default" className="text-xs">2 Characters</Badge>
+                        <Badge variant="default" className="text-xs">2 Scenarios</Badge>
+                        <Badge variant="default" className="text-xs">Beginner</Badge>
                       </div>
                     </CardContent>
                   </Card>
                 </Button>
 
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   className="h-auto p-0 border-2 hover:border-cosmic-purple hover:bg-cosmic-purple/5"
                   onClick={() => generateGameIdea('ai')}
                 >
@@ -617,9 +617,9 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
                       </div>
                       <p className="text-sm text-gray-600 mb-3 text-left leading-relaxed line-clamp-2">Master advanced AI prompting and achieve breakthrough results.</p>
                       <div className="flex flex-wrap gap-1">
-                        <Badge variant="outline" className="text-xs">2 Characters</Badge>
-                        <Badge variant="outline" className="text-xs">2 Scenarios</Badge>
-                        <Badge variant="outline" className="text-xs">Advanced</Badge>
+                        <Badge variant="default" className="text-xs">2 Characters</Badge>
+                        <Badge variant="default" className="text-xs">2 Scenarios</Badge>
+                        <Badge variant="default" className="text-xs">Advanced</Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -793,7 +793,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
                   scenario={scenario}
                   onEdit={() => setSelectedScenario(scenario.id)}
                   onDelete={() => deleteScenario(scenario.id)}
-                  onUpdate={(updates) => updateScenario(scenario.id, updates)}
+                  onUpdate={(updates: any) => updateScenario(scenario.id, updates)}
                 />
               ))}
             </div>
@@ -828,7 +828,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
                   scenarios={content.scenarios}
                   onEdit={() => setSelectedKnowledge(knowledge.id)}
                   onDelete={() => deleteKnowledgePoint(knowledge.id)}
-                  onUpdate={(updates) => updateKnowledgePoint(knowledge.id, updates)}
+                  onUpdate={(updates: any) => updateKnowledgePoint(knowledge.id, updates)}
                 />
               ))}
             </div>
@@ -857,7 +857,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
           character={content.characters.find(c => c.id === selectedCharacter)!}
           isOpen={!!selectedCharacter}
           onClose={() => setSelectedCharacter(null)}
-          onUpdate={(updates) => updateCharacter(selectedCharacter, updates)}
+          onUpdate={(updates: any) => updateCharacter(selectedCharacter, updates)}
         />
       )}
 
@@ -868,7 +868,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
           characters={content.characters}
           isOpen={!!selectedScenario}
           onClose={() => setSelectedScenario(null)}
-          onUpdate={(updates) => updateScenario(selectedScenario, updates)}
+          onUpdate={(updates: any) => updateScenario(selectedScenario, updates)}
         />
       )}
 
@@ -879,7 +879,7 @@ export function RPGLessonEditor({ content, onChange }: RPGLessonEditorProps) {
           scenarios={content.scenarios}
           isOpen={!!selectedKnowledge}
           onClose={() => setSelectedKnowledge(null)}
-          onUpdate={(updates) => updateKnowledgePoint(selectedKnowledge, updates)}
+          onUpdate={(updates: any) => updateKnowledgePoint(selectedKnowledge, updates)}
         />
       )}
     </div>
@@ -929,23 +929,23 @@ function CharacterCard({ character, onEdit, onDelete }: CharacterCardProps) {
         
         <div className="flex flex-wrap gap-1 mb-3">
           {character.personality.slice(0, 3).map((trait, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
+            <Badge key={index} variant="default" className="text-xs">
               {trait}
             </Badge>
           ))}
           {character.personality.length > 3 && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="default" className="text-xs">
               +{character.personality.length - 3} more
             </Badge>
           )}
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onEdit} className="flex-1">
+          <Button variant="primary" size="sm" onClick={onEdit} className="flex-1">
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
-          <Button variant="outline" size="sm" onClick={onDelete} className="text-red-600">
+          <Button variant="primary" size="sm" onClick={onDelete} className="text-red-600">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -966,10 +966,10 @@ function ScenarioCard({ scenario, onEdit, onDelete }: any) {
         <div className="flex items-center justify-between">
           <h4 className="font-medium">{scenario.title || 'Untitled Scenario'}</h4>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onEdit}>
+            <Button variant="primary" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={onDelete} className="text-red-600">
+            <Button variant="primary" size="sm" onClick={onDelete} className="text-red-600">
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -990,10 +990,10 @@ function KnowledgePointCard({ knowledgePoint, onEdit, onDelete }: any) {
         <div className="flex items-center justify-between">
           <h4 className="font-medium">{knowledgePoint.title || 'Untitled Knowledge Point'}</h4>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onEdit}>
+            <Button variant="primary" size="sm" onClick={onEdit}>
               <Edit className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={onDelete} className="text-red-600">
+            <Button variant="primary" size="sm" onClick={onDelete} className="text-red-600">
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>

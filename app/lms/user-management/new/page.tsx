@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/select'
 import { Badge } from '@/components/badge'
-import { Checkbox } from '@/components/checkbox'
+import { Checkbox } from '@/components/atomic/checkbox'
 import { initialRoles } from '@/lib/lms/roles-data'
 import { mockUsers } from '@/lib/lms/mock-data'
 
@@ -38,7 +38,7 @@ interface Course {
   id: string
   title: string
   mandatory: boolean
-  severity: 'low' | 'medium' | 'high'[]
+  severity: ('low' | 'medium' | 'high')[]
 }
 
 const availableCourses: Course[] = [
@@ -168,38 +168,38 @@ export default function NewUserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-vergil-off-white">
+    <div className="min-h-screen bg-secondary"> {/* #F5F5F7 */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/lms/user-management" className="inline-flex items-center gap-2 text-vergil-purple hover:text-vergil-purple-lighter mb-4">
+          <Link href="/lms/user-management" className="inline-flex items-center gap-2 text-brand hover:text-brandLight mb-spacing-md"> {/* #A64DFF, #9933FF, 16px */}
             <ArrowLeft className="w-4 h-4" />
             Back to User Management
           </Link>
           
-          <h1 className="text-3xl font-bold text-vergil-off-black mb-2">Create New User</h1>
-          <p className="text-vergil-off-black/70">Add a new user to the learning management system</p>
+          <h1 className="text-3xl font-bold text-primary mb-spacing-xs">Create New User</h1> {/* #1D1D1F, 4px */}
+          <p className="text-secondary">Add a new user to the learning management system</p> {/* #6C6C6D */}
         </div>
 
         <form onSubmit={handleSubmit}>
           {/* Basic Information */}
           <Card className="mb-6">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Basic Information</h2>
+              <h2 className="text-lg font-semibold text-primary mb-spacing-md">Basic Information</h2> {/* #1D1D1F, 16px */}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
-                    Full Name <span className="text-vergil-error">*</span>
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
+                    Full Name <span className="text-error">*</span> {/* #E51C23 */}
                   </label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className={errors.name ? 'border-vergil-error' : ''}
+                    className={errors.name ? 'border-error' : ''} // #FCA5A5
                     placeholder="John Smith"
                   />
                   {errors.name && (
-                    <p className="mt-1 text-sm text-vergil-error flex items-center gap-1">
+                    <p className="mt-1 text-sm text-error flex items-center gap-1"> {/* #E51C23 */}
                       <AlertCircle className="w-3 h-3" />
                       {errors.name}
                     </p>
@@ -207,7 +207,7 @@ export default function NewUserPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     Email Address <span className="text-vergil-error">*</span>
                   </label>
                   <Input
@@ -218,7 +218,7 @@ export default function NewUserPage() {
                     placeholder="john.smith@company.com"
                   />
                   {errors.email && (
-                    <p className="mt-1 text-sm text-vergil-error flex items-center gap-1">
+                    <p className="mt-1 text-sm text-error flex items-center gap-1"> {/* #E51C23 */}
                       <AlertCircle className="w-3 h-3" />
                       {errors.email}
                     </p>
@@ -226,7 +226,7 @@ export default function NewUserPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     Phone Number
                   </label>
                   <Input
@@ -238,7 +238,7 @@ export default function NewUserPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     Location
                   </label>
                   <Input
@@ -249,7 +249,7 @@ export default function NewUserPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     Department <span className="text-vergil-error">*</span>
                   </label>
                   <Input
@@ -259,7 +259,7 @@ export default function NewUserPage() {
                     placeholder="Engineering"
                   />
                   {errors.department && (
-                    <p className="mt-1 text-sm text-vergil-error flex items-center gap-1">
+                    <p className="mt-1 text-sm text-error flex items-center gap-1"> {/* #E51C23 */}
                       <AlertCircle className="w-3 h-3" />
                       {errors.department}
                     </p>
@@ -267,7 +267,7 @@ export default function NewUserPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     Manager
                   </label>
                   <Input
@@ -287,7 +287,7 @@ export default function NewUserPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     User Role <span className="text-vergil-error">*</span>
                   </label>
                   <Select
@@ -305,7 +305,7 @@ export default function NewUserPage() {
                       <SelectItem value="student">Student</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="mt-1 text-sm text-vergil-off-black/60">
+                  <p className="mt-1 text-sm text-secondary"> {/* #6C6C6D */}
                     {formData.role === 'super_admin' && 'Ultimate system access with all privileges and permissions'}
                     {formData.role === 'administrator' && 'Full system access and user management capabilities'}
                     {formData.role === 'manager' && 'Team management and oversight responsibilities'}
@@ -315,7 +315,7 @@ export default function NewUserPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-vergil-off-black mb-1">
+                  <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
                     Training Severity <span className="text-vergil-error">*</span>
                   </label>
                   <Select
@@ -331,7 +331,7 @@ export default function NewUserPage() {
                       <SelectItem value="high">High</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="mt-1 text-sm text-vergil-off-black/60">
+                  <p className="mt-1 text-sm text-secondary"> {/* #6C6C6D */}
                     {formData.severity === 'low' && 'Standard training pace with flexible deadlines'}
                     {formData.severity === 'medium' && 'Accelerated training with priority support'}
                     {formData.severity === 'high' && 'Intensive training with strict deadlines and monitoring'}
@@ -390,7 +390,7 @@ export default function NewUserPage() {
                     className={errors.tempPassword ? 'border-vergil-error' : ''}
                     placeholder="Enter temporary password"
                   />
-                  <Button type="button" variant="outline" onClick={generatePassword}>
+                  <Button type="button" variant="secondary" onClick={generatePassword}>
                     Generate
                   </Button>
                 </div>
@@ -429,8 +429,8 @@ export default function NewUserPage() {
                 </div>
                 
                 {formData.autoEnrollCourses && availableCourses.some(c => c.mandatory) && (
-                  <div className="mb-4 p-3 bg-vergil-emphasis-bg rounded-lg">
-                    <p className="text-sm text-vergil-emphasis-text">
+                  <div className="mb-4 p-3 bg-emphasis rounded-lg"> {/* #F0F0F2 */}
+                    <p className="text-sm text-primary"> {/* #1D1D1F */}
                       All mandatory courses will be automatically assigned to this user.
                     </p>
                   </div>
@@ -446,7 +446,7 @@ export default function NewUserPage() {
                         key={course.id}
                         htmlFor={`course-${course.id}`}
                         className={`block p-3 border rounded-lg transition-colors cursor-pointer ${
-                          isSelected ? 'border-vergil-purple bg-vergil-purple/5' : 'border-gray-200 hover:bg-vergil-off-white/50'
+                          isSelected ? 'border-brand bg-brandLight' : 'border-subtle hover:bg-emphasis' // #A64DFF, #F3E6FF, rgba(0,0,0,0.05), #F0F0F2
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -457,13 +457,13 @@ export default function NewUserPage() {
                               onCheckedChange={() => toggleCourse(course.id)}
                             />
                             <div>
-                              <p className="font-medium text-vergil-off-black">{course.title}</p>
+                              <p className="font-medium text-primary">{course.title}</p> {/* #1D1D1F */}
                               <div className="flex items-center gap-2 mt-1">
                                 {course.mandatory && (
-                                  <Badge variant="secondary" className="text-xs">Mandatory</Badge>
+                                  <Badge variant="default" className="text-xs">Mandatory</Badge>
                                 )}
                                 {isRecommended && (
-                                  <Badge variant="outline" className="text-xs">Recommended</Badge>
+                                  <Badge variant="info" className="text-xs">Recommended</Badge>
                                 )}
                               </div>
                             </div>
@@ -472,7 +472,7 @@ export default function NewUserPage() {
                             {course.severity.map((sev) => (
                               <Badge
                                 key={sev}
-                                variant={sev === 'high' ? 'destructive' : sev === 'medium' ? 'warning' : 'success'}
+                                variant={sev === 'high' ? 'error' : sev === 'medium' ? 'warning' : 'success'}
                                 className="text-xs"
                               >
                                 {sev}
@@ -508,7 +508,7 @@ export default function NewUserPage() {
                     }}
                   />
                   <div>
-                    <label htmlFor="welcome-email" className="text-vergil-off-black cursor-pointer">
+                    <label htmlFor="welcome-email" className="text-primary cursor-pointer"> {/* #1D1D1F */}
                       Send welcome email
                     </label>
                     <p className="text-sm text-vergil-off-black/60">
@@ -523,12 +523,12 @@ export default function NewUserPage() {
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <Link href="/lms/user-management">
-              <Button variant="outline">Cancel</Button>
+              <Button variant="secondary">Cancel</Button>
             </Link>
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-vergil-purple hover:bg-vergil-purple-lighter"
+              variant="primary"
             >
               {isSubmitting ? (
                 <>Creating...</>

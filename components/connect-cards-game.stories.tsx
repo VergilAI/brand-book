@@ -399,3 +399,229 @@ export const MinimalPairs: Story = {
     }
   }
 }
+
+export const WithHints: Story = {
+  args: {
+    pairs: [
+      {
+        matchId: 'capitals1',
+        leftCard: {
+          id: 'france-country',
+          content: 'France',
+          matchId: 'capitals1',
+          side: 'left',
+          type: 'text',
+          hint: 'European country'
+        },
+        rightCard: {
+          id: 'france-capital',
+          content: 'Paris',
+          matchId: 'capitals1',
+          side: 'right',
+          type: 'text',
+          hint: 'City of Light'
+        },
+        category: 'geography'
+      },
+      {
+        matchId: 'capitals2',
+        leftCard: {
+          id: 'japan-country',
+          content: 'Japan',
+          matchId: 'capitals2',
+          side: 'left',
+          type: 'text',
+          hint: 'Island nation'
+        },
+        rightCard: {
+          id: 'japan-capital',
+          content: 'Tokyo',
+          matchId: 'capitals2',
+          side: 'right',
+          type: 'text',
+          hint: 'Largest city in the world'
+        },
+        category: 'geography'
+      },
+      {
+        matchId: 'capitals3',
+        leftCard: {
+          id: 'brazil-country',
+          content: 'Brazil',
+          matchId: 'capitals3',
+          side: 'left',
+          type: 'text',
+          hint: 'South American country'
+        },
+        rightCard: {
+          id: 'brazil-capital',
+          content: 'Brasília',
+          matchId: 'capitals3',
+          side: 'right',
+          type: 'text',
+          hint: 'Planned capital city'
+        },
+        category: 'geography'
+      }
+    ],
+    title: 'World Capitals (with hints)',
+    onComplete: (result) => {
+      console.log('Geography game with hints completed:', result)
+    },
+    onQuit: () => {
+      console.log('Geography game quit')
+    }
+  }
+}
+
+export const LargeSet: Story = {
+  args: {
+    pairs: [
+      ...languagePairs,
+      {
+        matchId: 'good-morning',
+        leftCard: {
+          id: 'en-morning',
+          content: 'Good morning',
+          matchId: 'good-morning',
+          side: 'left',
+          type: 'text'
+        },
+        rightCard: {
+          id: 'es-morning',
+          content: 'Buenos días',
+          matchId: 'good-morning',
+          side: 'right',
+          type: 'text'
+        },
+        category: 'greetings'
+      },
+      {
+        matchId: 'good-night',
+        leftCard: {
+          id: 'en-night',
+          content: 'Good night',
+          matchId: 'good-night',
+          side: 'left',
+          type: 'text'
+        },
+        rightCard: {
+          id: 'es-night',
+          content: 'Buenas noches',
+          matchId: 'good-night',
+          side: 'right',
+          type: 'text'
+        },
+        category: 'greetings'
+      },
+      {
+        matchId: 'excuse-me',
+        leftCard: {
+          id: 'en-excuse',
+          content: 'Excuse me',
+          matchId: 'excuse-me',
+          side: 'left',
+          type: 'text'
+        },
+        rightCard: {
+          id: 'es-excuse',
+          content: 'Disculpe',
+          matchId: 'excuse-me',
+          side: 'right',
+          type: 'text'
+        },
+        category: 'politeness'
+      }
+    ],
+    title: 'Extended Language Practice',
+    onComplete: (result) => {
+      console.log('Large set completed:', result)
+    },
+    onQuit: () => {
+      console.log('Large set quit')
+    }
+  }
+}
+
+export const WithLessonTracking: Story = {
+  args: {
+    pairs: mathPairs,
+    title: 'Math Practice (Progress Tracked)',
+    lessonId: 'math-basics-101',
+    onComplete: (result) => {
+      console.log('Math lesson completed with tracking:', result)
+    },
+    onQuit: () => {
+      console.log('Math lesson quit')
+    }
+  }
+}
+
+export const DifferentThemes: Story = {
+  args: {
+    pairs: [
+      {
+        matchId: 'color1',
+        leftCard: {
+          id: 'red-hex',
+          content: '#FF0000',
+          matchId: 'color1',
+          side: 'left',
+          type: 'text'
+        },
+        rightCard: {
+          id: 'red-name',
+          content: 'Red',
+          matchId: 'color1',
+          side: 'right',
+          type: 'text'
+        },
+        category: 'colors'
+      },
+      {
+        matchId: 'color2',
+        leftCard: {
+          id: 'green-hex',
+          content: '#00FF00',
+          matchId: 'color2',
+          side: 'left',
+          type: 'text'
+        },
+        rightCard: {
+          id: 'green-name',
+          content: 'Green',
+          matchId: 'color2',
+          side: 'right',
+          type: 'text'
+        },
+        category: 'colors'
+      },
+      {
+        matchId: 'color3',
+        leftCard: {
+          id: 'blue-hex',
+          content: '#0000FF',
+          matchId: 'color3',
+          side: 'left',
+          type: 'text'
+        },
+        rightCard: {
+          id: 'blue-name',
+          content: 'Blue',
+          matchId: 'color3',
+          side: 'right',
+          type: 'text'
+        },
+        category: 'colors'
+      }
+    ],
+    title: 'Color Codes',
+    className: 'bg-gradient-to-br from-purple-50 to-pink-50',
+    onComplete: (result) => {
+      console.log('Color game completed:', result)
+    },
+    onQuit: () => {
+      console.log('Color game quit')
+    }
+  }
+}

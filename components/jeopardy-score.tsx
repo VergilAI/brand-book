@@ -15,13 +15,13 @@ export function JeopardyScore({ score, className }: JeopardyScoreProps) {
   const displayScore = Math.abs(score)
 
   return (
-    <Card className={cn("px-4 py-3 bg-white border-vergil-off-black shadow-sm", className)}>
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-vergil-purple/20 flex items-center justify-center">
-          <Trophy className="w-4 h-4 text-vergil-purple" />
+    <Card className={cn("px-space-md py-space-sm bg-bg-primary border-border-primary shadow-base", className)}>
+      <div className="flex items-center gap-space-sm">
+        <div className="w-8 h-8 rounded-full bg-bg-brand/20 flex items-center justify-center">
+          <Trophy className="w-4 h-4 text-text-brand" />
         </div>
         <div>
-          <div className="text-xs font-medium text-vergil-off-black/60 uppercase tracking-wider">Score</div>
+          <div className="text-xs font-medium text-text-tertiary uppercase tracking-wider">Score</div>
           <AnimatePresence mode="wait">
             <motion.div
               key={score}
@@ -30,7 +30,7 @@ export function JeopardyScore({ score, className }: JeopardyScoreProps) {
               exit={{ y: -10, opacity: 0 }}
               className={cn(
                 "text-xl font-bold font-mono",
-                isNegative ? "text-red-600" : "text-vergil-off-black"
+                isNegative ? "text-text-error" : "text-text-primary"
               )}
             >
               {isNegative && "-"}${displayScore.toLocaleString()}

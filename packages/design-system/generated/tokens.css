@@ -80,7 +80,7 @@
   --black: #000000;
   --transparent: transparent;
   --current: currentColor;
-  --vergil-purple: #7B00FF;
+  --vergil-purple: #A64DFF;
   --vergil-off-black: #1D1D1F;
   --vergil-off-white: #F5F5F7;
   --cosmic-purple: #6366F1;
@@ -136,10 +136,10 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
-  --shadow-brandSm: 0 2px 4px rgba(123, 0, 255, 0.1);
-  --shadow-brandMd: 0 4px 8px rgba(123, 0, 255, 0.12);
-  --shadow-brandLg: 0 8px 16px rgba(123, 0, 255, 0.16);
-  --shadow-brandGlow: 0 0 24px rgba(123, 0, 255, 0.4);
+  --shadow-brandSm: 0 2px 4px rgba(166, 77, 255, 0.1);
+  --shadow-brandMd: 0 4px 8px rgba(166, 77, 255, 0.12);
+  --shadow-brandLg: 0 8px 16px rgba(166, 77, 255, 0.16);
+  --shadow-brandGlow: 0 0 24px rgba(166, 77, 255, 0.4);
 
   /* Border Radius */
   --radius-none: 0;
@@ -165,8 +165,8 @@
   --duration-slowest: 500ms;
 
   /* Gradients */
-  --gradient-consciousness: linear-gradient(135deg, #7B00FF 0%, #9933FF 50%, #BB66FF 100%);
-  --gradient-ambient: radial-gradient(circle at center, rgba(123, 0, 255, 0.1) 0%, transparent 70%);
+  --gradient-consciousness: linear-gradient(135deg, #A64DFF 0%, #BB66FF 50%, #D199FF 100%);
+  --gradient-ambient: radial-gradient(circle at center, rgba(166, 77, 255, 0.1) 0%, transparent 70%);
   --gradient-awakening: linear-gradient(90deg, #6366F1 0%, #3B82F6 100%);
   --gradient-synaptic: linear-gradient(135deg, #A78BFA 0%, #F472B6 100%);
   --gradient-light-ray: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
@@ -179,7 +179,7 @@
   --text-tertiary: #71717A;
   --text-emphasis: #303030;
   --text-inverse: #F5F5F7;
-  --text-brand: #7B00FF;
+  --text-brand: #A64DFF;
   --text-brandLight: #9933FF;
   --text-success: #0F8A0F;
   --text-warning: #FFC700;
@@ -193,7 +193,7 @@
   --bg-emphasis: #F0F0F2;
   --bg-emphasisInput: #FAFAFC;
   --bg-inverse: #000000;
-  --bg-brand: #7B00FF;
+  --bg-brand: #A64DFF;
   --bg-brandLight: #F3E6FF;
   --bg-elevated: #FFFFFF;
   --bg-overlay: rgba(0, 0, 0, 0.5);
@@ -206,9 +206,9 @@
   /* Border Colors */
   --border-default: rgba(0,0,0,0.1);
   --border-subtle: rgba(0,0,0,0.05);
-  --border-emphasis: rgba(123, 0, 255, 0.1);
+  --border-emphasis: rgba(166, 77, 255, 0.1);
   --border-focus: #007AFF;
-  --border-brand: #7B00FF;
+  --border-brand: #A64DFF;
   --border-error: #FCA5A5;
   --border-warning: #FFF490;
   --border-success: #86EFAC;
@@ -222,11 +222,11 @@
   --shadow-modal: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
   --shadow-popover: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-toast: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
-  --shadow-brand-sm: 0 2px 4px rgba(123, 0, 255, 0.1);
-  --shadow-brand-md: 0 4px 8px rgba(123, 0, 255, 0.12);
-  --shadow-brand-lg: 0 8px 16px rgba(123, 0, 255, 0.16);
-  --shadow-brand-glow: 0 0 24px rgba(123, 0, 255, 0.4);
-  --shadow-focus: 0 0 0 3px rgba(123, 0, 255, 0.2);
+  --shadow-brand-sm: 0 2px 4px rgba(166, 77, 255, 0.1);
+  --shadow-brand-md: 0 4px 8px rgba(166, 77, 255, 0.12);
+  --shadow-brand-lg: 0 8px 16px rgba(166, 77, 255, 0.16);
+  --shadow-brand-glow: 0 0 24px rgba(166, 77, 255, 0.4);
+  --shadow-focus: 0 0 0 3px rgba(166, 77, 255, 0.2);
   --shadow-focus-error: 0 0 0 3px rgba(229, 28, 35, 0.2);
   --shadow-focus-success: 0 0 0 3px rgba(15, 138, 15, 0.2);
 }
@@ -339,9 +339,9 @@
 }
 .card-neural {
   background: linear-gradient(135deg, rgba(123, 0, 255, 0.05) 0%, rgba(153, 51, 255, 0.05) 100%);
-  border: 1px solid rgba(123, 0, 255, 0.1);
+  border: 1px solid rgba(166, 77, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(123, 0, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(166, 77, 255, 0.1);
   padding: 24px;
 }
 .card-outlined {

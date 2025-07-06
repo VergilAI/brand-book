@@ -22,9 +22,9 @@ export function JeopardyBoard({
   const values = [200, 400, 600, 800, 1000]
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-space-sm", className)}>
       {/* Category Headers */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-space-xs">
         {categories.map((category, catIndex) => (
           <motion.div
             key={`header-${category.name}`}
@@ -37,8 +37,8 @@ export function JeopardyBoard({
               damping: 20
             }}
           >
-            <Card className="relative h-16 flex items-center justify-center p-3 bg-white border-2 border-vergil-off-black overflow-hidden">
-              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-center text-vergil-off-black leading-tight">
+            <Card className="relative h-16 flex items-center justify-center p-space-sm bg-bg-primary border-2 border-border-primary overflow-hidden">
+              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-center text-text-primary leading-tight">
                 {category.name}
               </h3>
             </Card>
@@ -47,9 +47,9 @@ export function JeopardyBoard({
       </div>
       
       {/* Game Board */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-space-xs">
         {categories.map((category, catIndex) => (
-          <div key={category.name} className="space-y-2">
+          <div key={category.name} className="space-y-space-xs">
             {values.map((value, valueIndex) => {
             const clue = category.clues[valueIndex]
             const isUsed = usedClues.has(clue.id)
@@ -74,29 +74,29 @@ export function JeopardyBoard({
                   className={cn(
                     "h-16 flex items-center justify-center transition-all duration-200 relative overflow-hidden",
                     isUsed ? [
-                      "bg-vergil-off-black/5 border-vergil-off-black/10 cursor-default"
+                      "bg-bg-muted border-border-subtle cursor-default"
                     ] : [
-                      "bg-white border-vergil-off-black",
-                      "hover:border-vergil-purple hover:shadow-lg hover:scale-105",
-                      "group shadow-sm"
+                      "bg-bg-primary border-border-primary",
+                      "hover:border-border-brand hover:shadow-elevated hover:scale-105",
+                      "group shadow-base"
                     ]
                   )}
                 >
                   {isUsed ? (
                     <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-vergil-off-black/10" />
+                      <div className="w-8 h-8 rounded-full bg-bg-muted" />
                     </div>
                   ) : (
                     <>
                       <span className={cn(
                         "font-mono font-bold text-2xl transition-all duration-200 relative z-10",
-                        "text-vergil-off-black group-hover:text-vergil-purple group-hover:scale-110"
+                        "text-text-primary group-hover:text-text-brand group-hover:scale-110"
                       )}>
                         ${value}
                       </span>
                       
                       {/* Hover effect background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-vergil-purple/0 to-vergil-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-color-brand-primary/0 to-color-brand-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
                       {clue.isDailyDouble && (
                         <>
@@ -113,7 +113,7 @@ export function JeopardyBoard({
                               ease: "linear"
                             }}
                           >
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Star className="w-4 h-4 text-color-warning fill-color-warning" />
                           </motion.div>
                           
                           <motion.div

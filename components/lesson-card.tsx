@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
 import { Progress } from '@/components/progress'
 import { Badge } from '@/components/badge'
-import { Play, Clock, Target, Trophy, Lock } from 'lucide-react'
+import { Play, Clock, Target, Trophy, Lock, BookOpen, Video, FileQuestion, Sparkles } from 'lucide-react'
 import { LessonModal } from './lesson-modal'
 import type { Lesson } from '@/lib/lms/game-types'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,32 @@ interface LessonCardProps {
   lessonNumber: number
   onStartLesson?: (lessonId: string) => void
   className?: string
+}
+
+const getLessonIcon = (type: string) => {
+  switch (type) {
+    case 'video':
+      return Video
+    case 'quiz':
+      return FileQuestion
+    case 'interactive':
+      return Sparkles
+    default:
+      return BookOpen
+  }
+}
+
+const getDifficultyColor = (difficulty: 'beginner' | 'intermediate' | 'advanced') => {
+  switch (difficulty) {
+    case 'beginner':
+      return 'text-[var(--text-success)]'
+    case 'intermediate':
+      return 'text-[var(--text-info)]'
+    case 'advanced':
+      return 'text-[var(--text-error)]'
+    default:
+      return 'text-[var(--text-secondary)]'
+  }
 }
 
 export function LessonCard({ 
@@ -44,82 +70,117 @@ export function LessonCard({
     onStartLesson?.(gameTypeId)
   }
 
+  const isMastered = overallProficiency >= 80
+  const isInProgress = overallProficiency > 0 && overallProficiency < 80
+
+  const LessonIcon = getLessonIcon(lesson.type || 'lesson')
+
   return (
     <>
-      <Card className={cn(
-        "relative overflow-hidden transition-all duration-300",
-        !isLocked && "hover:shadow-lg hover:-translate-y-1",
-        isLocked && "opacity-60",
-        className
-      )}>
-        {/* Progress Bar at Top */}
-        <div className="h-2 bg-mist-gray/20">
+      <Card 
+        variant={isLocked ? "default" : isMastered ? "gradient" : isInProgress ? "feature" : "interactive"}
+        className={cn(
+          "relative transition-all duration-[var(--duration-slow)]",
+          isLocked && "opacity-60 cursor-not-allowed",
+          !isLocked && "group",
+          className
+        )}
+      >
+        {/* Progress Indicator */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--bg-secondary)] rounded-t-[var(--radius-lg)]">
           <div 
-            className="h-full bg-gradient-to-r from-cosmic-purple to-electric-violet transition-all duration-500"
+            className="h-full bg-[var(--gradient-consciousness)] rounded-t-[var(--radius-lg)] transition-all duration-[var(--duration-slower)]"
             style={{ width: `${overallProficiency}%` }}
           />
         </div>
 
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="text-xs">
+        <CardHeader className="pb-[var(--spacing-sm)]">
+          <div className="flex items-start justify-between gap-[var(--spacing-md)]">
+            <div className="flex-1 space-y-[var(--spacing-sm)]">
+              {/* Lesson Number & Status */}
+              <div className="flex items-center gap-[var(--spacing-xs)] flex-wrap">
+                <Badge variant="secondary" className="text-[var(--font-size-xs)] font-[var(--font-weight-medium)]">
                   {sectionNumber}.{lessonNumber}
                 </Badge>
-                {overallProficiency >= 80 && (
-                  <Badge className="text-xs bg-phosphor-cyan text-white">
-                    <Trophy className="w-3 h-3 mr-1" />
+                {lesson.difficulty && (
+                  <Badge 
+                    variant="secondary" 
+                    className={cn(
+                      "text-[var(--font-size-xs)] capitalize",
+                      getDifficultyColor(lesson.difficulty)
+                    )}
+                  >
+                    {lesson.difficulty}
+                  </Badge>
+                )}
+                {isMastered && (
+                  <Badge className="text-[var(--font-size-xs)] bg-[var(--bg-successLight)] text-[var(--text-success)] border-[var(--border-success)]">
+                    <Trophy className="w-3 h-3 mr-[var(--spacing-xs)]" />
                     Mastered
                   </Badge>
                 )}
               </div>
-              <CardTitle className="text-lg font-display">
+              
+              {/* Title */}
+              <CardTitle className="text-[var(--font-size-lg)] font-[var(--font-weight-semibold)] text-[var(--text-primary)] line-clamp-2">
                 {lesson.title}
               </CardTitle>
             </div>
-            {isLocked && (
-              <div className="w-10 h-10 rounded-full bg-stone-gray/10 flex items-center justify-center">
-                <Lock className="w-5 h-5 text-stone-gray" />
-              </div>
-            )}
+
+            {/* Icon */}
+            <div className={cn(
+              "w-12 h-12 rounded-[var(--radius-md)] flex items-center justify-center transition-all duration-[var(--duration-normal)]",
+              isLocked 
+                ? "bg-[var(--bg-disabled)] text-[var(--text-disabled)]" 
+                : "bg-[var(--gradient-consciousness)] text-[var(--text-inverse)] shadow-brand-sm group-hover:shadow-brand-md"
+            )}>
+              {isLocked ? (
+                <Lock className="w-5 h-5" />
+              ) : (
+                <LessonIcon className="w-5 h-5" />
+              )}
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <p className="text-sm text-stone-gray">
+        <CardContent className="space-y-[var(--spacing-md)]">
+          {/* Description */}
+          <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)] line-clamp-2">
             {lesson.description}
           </p>
 
-          {/* Stats */}
-          <div className="flex items-center gap-4 text-sm text-stone-gray">
-            <div className="flex items-center gap-1">
+          {/* Metadata */}
+          <div className="flex items-center gap-[var(--spacing-lg)] text-[var(--font-size-sm)]">
+            <div className="flex items-center gap-[var(--spacing-xs)] text-[var(--text-tertiary)]">
               <Target className="w-4 h-4" />
               <span>{lesson.knowledgePoints.length} points</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-[var(--spacing-xs)] text-[var(--text-tertiary)]">
               <Clock className="w-4 h-4" />
               <span>{lesson.estimatedTime} min</span>
             </div>
           </div>
 
           {/* Knowledge Points Preview */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-stone-gray uppercase tracking-wide">
-              Knowledge Points
+          <div className="space-y-[var(--spacing-xs)]">
+            <p className="text-[var(--font-size-xs)] font-[var(--font-weight-medium)] text-[var(--text-tertiary)] uppercase tracking-[var(--letter-spacing-wide)]">
+              Topics Covered
             </p>
-            <div className="flex flex-wrap gap-1">
-              {lesson.knowledgePoints.slice(0, 3).map((kp, index) => (
+            <div className="flex flex-wrap gap-[var(--spacing-xs)]">
+              {lesson.knowledgePoints.slice(0, 3).map((kp) => (
                 <Badge 
                   key={kp.id} 
                   variant="secondary" 
-                  className="text-xs"
+                  className="text-[var(--font-size-xs)] bg-[var(--bg-emphasis)] text-[var(--text-secondary)] border-[var(--border-subtle)]"
                 >
                   {kp.title}
                 </Badge>
               ))}
               {lesson.knowledgePoints.length > 3 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge 
+                  variant="secondary" 
+                  className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] border-[var(--border-subtle)]"
+                >
                   +{lesson.knowledgePoints.length - 3} more
                 </Badge>
               )}
@@ -131,21 +192,24 @@ export function LessonCard({
             onClick={handleLearnClick}
             disabled={isLocked}
             className={cn(
-              "w-full",
-              overallProficiency > 0 
-                ? "bg-electric-violet hover:bg-cosmic-purple" 
-                : "bg-cosmic-purple hover:bg-electric-violet"
+              "w-full transition-all duration-[var(--duration-normal)]",
+              !isLocked && "shadow-brand-sm hover:shadow-brand-md",
+              isMastered && "bg-[var(--bg-successLight)] hover:bg-[var(--bg-successLight)] text-[var(--text-success)] border border-[var(--border-success)]",
+              isInProgress && !isMastered && "bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)]",
+              !isInProgress && !isMastered && !isLocked && "bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)]"
             )}
+            variant={isMastered ? "outline" : "default"}
           >
-            <Play className="w-4 h-4 mr-2" />
-            {overallProficiency > 0 ? 'Continue Learning' : 'Start Learning'}
+            <Play className="w-4 h-4 mr-[var(--spacing-sm)]" />
+            {isMastered ? 'Review Lesson' : isInProgress ? 'Continue Learning' : 'Start Learning'}
           </Button>
 
-          {/* Proficiency Display */}
+          {/* Progress Display */}
           {overallProficiency > 0 && (
-            <div className="text-center">
-              <span className="text-sm font-medium text-cosmic-purple">
-                {Math.round(overallProficiency)}% Complete
+            <div className="flex items-center justify-between text-[var(--font-size-sm)]">
+              <span className="text-[var(--text-secondary)]">Progress</span>
+              <span className="font-[var(--font-weight-medium)] text-[var(--text-brand)]">
+                {Math.round(overallProficiency)}%
               </span>
             </div>
           )}

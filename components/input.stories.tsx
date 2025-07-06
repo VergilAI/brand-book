@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Input } from './input';
 import { Label } from './label';
-import { Search, Mail, Lock, User, Brain } from 'lucide-react';
+import { Search, Mail, Lock, User, Brain, Check, AlertCircle } from 'lucide-react';
 
 const meta = {
   title: 'UI/Input',
@@ -10,12 +10,42 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Basic input field component with consistent styling and focus states. Supports all native input types.',
+        component: 'Modern input component built with semantic design tokens. Features smooth transitions, Apple-inspired design, and comprehensive size/state variants.',
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+      description: 'Input size variant',
+      table: {
+        defaultValue: { summary: 'md' },
+      },
+    },
+    variant: {
+      control: 'select',
+      options: ['default', 'error', 'success'],
+      description: 'Input variant for different states',
+      table: {
+        defaultValue: { summary: 'default' },
+      },
+    },
+    error: {
+      control: 'boolean',
+      description: 'Error state (overrides variant)',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    success: {
+      control: 'boolean',
+      description: 'Success state (overrides variant)',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
     type: {
       control: 'select',
       options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'date', 'time', 'file'],
@@ -49,6 +79,65 @@ export const Default: Story = {
   args: {
     type: 'text',
     placeholder: 'Enter text...',
+    size: 'md',
+  },
+};
+
+export const Sizes: Story = {
+  render: () => (
+    <div className="space-y-4 w-full max-w-sm">
+      <div className="space-y-1.5">
+        <Label>Small Input</Label>
+        <Input size="sm" placeholder="Small size input" />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Medium Input (Default)</Label>
+        <Input size="md" placeholder="Medium size input" />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Large Input</Label>
+        <Input size="lg" placeholder="Large size input" />
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Input components in different sizes using semantic spacing tokens.',
+      },
+    },
+  },
+};
+
+export const Variants: Story = {
+  render: () => (
+    <div className="space-y-4 w-full max-w-sm">
+      <div className="space-y-1.5">
+        <Label>Default Variant</Label>
+        <Input placeholder="Default input" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-text-error" />
+          Error Variant
+        </Label>
+        <Input variant="error" placeholder="Error state input" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="flex items-center gap-2">
+          <Check className="h-4 w-4 text-text-success" />
+          Success Variant
+        </Label>
+        <Input variant="success" placeholder="Success state input" />
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Different input variants for various states using semantic color tokens.',
+      },
+    },
   },
 };
 
@@ -127,22 +216,33 @@ export const States: Story = {
     <div className="space-y-4 w-full max-w-sm">
       <div className="space-y-1.5">
         <Label>Default State</Label>
-        <Input placeholder="Default input" />
+        <Input placeholder="Default input with hover effect" />
       </div>
       <div className="space-y-1.5">
         <Label>Focused State</Label>
-        <Input placeholder="Click to see focus state" />
+        <Input placeholder="Click to see focus state with shadow" />
       </div>
       <div className="space-y-1.5">
         <Label>Disabled State</Label>
         <Input placeholder="Disabled input" disabled />
       </div>
       <div className="space-y-1.5">
-        <Label>Invalid State</Label>
-        <Input placeholder="Invalid input" aria-invalid="true" />
+        <Label>Error State</Label>
+        <Input error placeholder="Error input with red styling" />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Success State</Label>
+        <Input success placeholder="Success input with green styling" />
       </div>
     </div>
   ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'All input states with semantic token styling. Hover over inputs to see smooth transitions.',
+      },
+    },
+  },
 };
 
 export const AIPromptInput: Story = {
@@ -203,6 +303,62 @@ export const FormExample: Story = {
     docs: {
       description: {
         story: 'Complete form example showing typical input field usage.',
+      },
+    },
+  },
+};
+
+export const SemanticTokenShowcase: Story = {
+  render: () => (
+    <div className="space-y-6 w-full max-w-2xl">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-text-primary">Semantic Token System</h3>
+        <p className="text-text-secondary">
+          All inputs use semantic design tokens for colors, spacing, typography, and interactions.
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label>Primary Text Color</Label>
+          <Input placeholder="Uses text-primary token" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Secondary Text (Placeholder)</Label>
+          <Input placeholder="Uses text-secondary token" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Emphasis Background</Label>
+          <Input placeholder="Uses bg-emphasisInput token" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Border Colors</Label>
+          <Input placeholder="Uses border-default token" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Focus Shadow</Label>
+          <Input placeholder="Uses shadow-focus token" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Transition Timing</Label>
+          <Input placeholder="Uses duration-normal token" />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="text-base font-medium text-text-emphasis">Size Scale with Spacing Tokens</h4>
+        <div className="space-y-2">
+          <Input size="sm" placeholder="Small: px-sm py-xs" />
+          <Input size="md" placeholder="Medium: px-md py-sm" />
+          <Input size="lg" placeholder="Large: px-lg py-md" />
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Comprehensive showcase of the semantic token system used in the Input component.',
       },
     },
   },

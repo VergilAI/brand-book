@@ -1,255 +1,250 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from "@storybook/react"
+import { useState } from "react"
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
-  SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from './select';
-import { Label } from './label';
+} from "./select"
 
 const meta = {
-  title: 'UI/Select',
+  title: "UI/Select",
   component: Select,
   parameters: {
-    layout: 'centered',
-    docs: {
-      description: {
-        component: 'Dropdown select component built on Radix UI. Provides accessible, customizable select functionality.',
-      },
-    },
+    layout: "centered",
   },
-  tags: ['autodocs'],
-} satisfies Meta<typeof Select>;
+  tags: ["autodocs"],
+} satisfies Meta<typeof Select>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => (
-    <Select>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select an option" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="option1">Option 1</SelectItem>
-        <SelectItem value="option2">Option 2</SelectItem>
-        <SelectItem value="option3">Option 3</SelectItem>
-      </SelectContent>
-    </Select>
-  ),
-};
-
-export const WithLabel: Story = {
-  render: () => (
-    <div className="grid w-full max-w-sm items-center gap-1.5">
-      <Label htmlFor="framework">Framework</Label>
+    <div className="w-[280px]">
       <Select>
-        <SelectTrigger id="framework">
-          <SelectValue placeholder="Select a framework" />
+        <SelectTrigger>
+          <SelectValue placeholder="Select a fruit" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="next">Next.js</SelectItem>
-          <SelectItem value="react">React</SelectItem>
-          <SelectItem value="vue">Vue</SelectItem>
-          <SelectItem value="nuxt">Nuxt.js</SelectItem>
-          <SelectItem value="svelte">SvelteKit</SelectItem>
+          <SelectItem value="apple">Apple</SelectItem>
+          <SelectItem value="banana">Banana</SelectItem>
+          <SelectItem value="orange">Orange</SelectItem>
+          <SelectItem value="mango">Mango</SelectItem>
+          <SelectItem value="strawberry">Strawberry</SelectItem>
         </SelectContent>
       </Select>
     </div>
   ),
-};
+}
 
 export const WithGroups: Story = {
   render: () => (
-    <Select>
-      <SelectTrigger className="w-[280px]">
-        <SelectValue placeholder="Select a technology" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Frontend</SelectLabel>
-          <SelectItem value="react">React</SelectItem>
-          <SelectItem value="vue">Vue</SelectItem>
-          <SelectItem value="angular">Angular</SelectItem>
-        </SelectGroup>
-        <SelectSeparator />
-        <SelectGroup>
-          <SelectLabel>Backend</SelectLabel>
-          <SelectItem value="node">Node.js</SelectItem>
-          <SelectItem value="python">Python</SelectItem>
-          <SelectItem value="go">Go</SelectItem>
-        </SelectGroup>
-        <SelectSeparator />
-        <SelectGroup>
-          <SelectLabel>Database</SelectLabel>
-          <SelectItem value="postgres">PostgreSQL</SelectItem>
-          <SelectItem value="mysql">MySQL</SelectItem>
-          <SelectItem value="mongodb">MongoDB</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <div className="w-[280px]">
+      <Select>
+        <SelectTrigger>
+          <SelectValue placeholder="Select a timezone" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>North America</SelectLabel>
+            <SelectItem value="est">Eastern Standard Time (EST)</SelectItem>
+            <SelectItem value="cst">Central Standard Time (CST)</SelectItem>
+            <SelectItem value="mst">Mountain Standard Time (MST)</SelectItem>
+            <SelectItem value="pst">Pacific Standard Time (PST)</SelectItem>
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>Europe & Africa</SelectLabel>
+            <SelectItem value="gmt">Greenwich Mean Time (GMT)</SelectItem>
+            <SelectItem value="cet">Central European Time (CET)</SelectItem>
+            <SelectItem value="eet">Eastern European Time (EET)</SelectItem>
+            <SelectItem value="west">Western European Summer Time (WEST)</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Select with grouped options and separators for better organization.',
-      },
-    },
-  },
-};
+}
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-center gap-4">
-      <Select>
-        <SelectTrigger size="sm" className="w-[150px]">
+    <div className="flex flex-col gap-4 w-[280px]">
+      <Select size="sm">
+        <SelectTrigger>
           <SelectValue placeholder="Small select" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="small1">Small Option 1</SelectItem>
-          <SelectItem value="small2">Small Option 2</SelectItem>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+          <SelectItem value="3">Option 3</SelectItem>
         </SelectContent>
       </Select>
-      
-      <Select>
-        <SelectTrigger size="default" className="w-[180px]">
-          <SelectValue placeholder="Default select" />
+
+      <Select size="md">
+        <SelectTrigger>
+          <SelectValue placeholder="Medium select (default)" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="default1">Default Option 1</SelectItem>
-          <SelectItem value="default2">Default Option 2</SelectItem>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+          <SelectItem value="3">Option 3</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select size="lg">
+        <SelectTrigger>
+          <SelectValue placeholder="Large select" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">Option 1</SelectItem>
+          <SelectItem value="2">Option 2</SelectItem>
+          <SelectItem value="3">Option 3</SelectItem>
         </SelectContent>
       </Select>
     </div>
   ),
-};
+}
 
-export const DisabledState: Story = {
+export const States: Story = {
   render: () => (
-    <div className="space-y-4">
-      <Select disabled>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Disabled select" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="option1">Option 1</SelectItem>
-          <SelectItem value="option2">Option 2</SelectItem>
-        </SelectContent>
-      </Select>
-      
-      <Select>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select with disabled items" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="option1">Available Option</SelectItem>
-          <SelectItem value="option2" disabled>Disabled Option</SelectItem>
-          <SelectItem value="option3">Another Available</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  ),
-};
-
-export const AIModelSelector: Story = {
-  render: () => (
-    <div className="space-y-4 w-full max-w-sm">
-      <div className="space-y-1.5">
-        <Label htmlFor="ai-model">AI Model</Label>
-        <Select defaultValue="gpt4">
-          <SelectTrigger id="ai-model">
-            <SelectValue />
+    <div className="flex flex-col gap-4 w-[280px]">
+      <div>
+        <label className="text-[var(--text-secondary)] text-[var(--font-size-sm)] mb-2 block">
+          Normal State
+        </label>
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Select an option" />
           </SelectTrigger>
           <SelectContent>
-            <SelectGroup>
-              <SelectLabel>OpenAI Models</SelectLabel>
-              <SelectItem value="gpt4">GPT-4 Turbo</SelectItem>
-              <SelectItem value="gpt35">GPT-3.5 Turbo</SelectItem>
-            </SelectGroup>
-            <SelectSeparator />
-            <SelectGroup>
-              <SelectLabel>Anthropic Models</SelectLabel>
-              <SelectItem value="claude3">Claude 3 Opus</SelectItem>
-              <SelectItem value="claude2">Claude 2.1</SelectItem>
-            </SelectGroup>
-            <SelectSeparator />
-            <SelectGroup>
-              <SelectLabel>Open Source</SelectLabel>
-              <SelectItem value="llama2">LLaMA 2</SelectItem>
-              <SelectItem value="mistral">Mistral 7B</SelectItem>
-            </SelectGroup>
+            <SelectItem value="1">Option 1</SelectItem>
+            <SelectItem value="2">Option 2</SelectItem>
+            <SelectItem value="3">Option 3</SelectItem>
           </SelectContent>
         </Select>
       </div>
-      
-      <div className="space-y-1.5">
-        <Label htmlFor="temperature">Temperature</Label>
-        <Select defaultValue="0.7">
-          <SelectTrigger id="temperature">
-            <SelectValue />
+
+      <div>
+        <label className="text-[var(--text-secondary)] text-[var(--font-size-sm)] mb-2 block">
+          Error State
+        </label>
+        <Select>
+          <SelectTrigger error>
+            <SelectValue placeholder="Select an option" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0">0 (Deterministic)</SelectItem>
-            <SelectItem value="0.3">0.3 (Focused)</SelectItem>
-            <SelectItem value="0.7">0.7 (Balanced)</SelectItem>
-            <SelectItem value="1">1.0 (Creative)</SelectItem>
-            <SelectItem value="1.5">1.5 (Very Creative)</SelectItem>
+            <SelectItem value="1">Option 1</SelectItem>
+            <SelectItem value="2">Option 2</SelectItem>
+            <SelectItem value="3">Option 3</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-[var(--text-secondary)] text-[var(--font-size-sm)] mb-2 block">
+          Disabled State
+        </label>
+        <Select disabled>
+          <SelectTrigger disabled>
+            <SelectValue placeholder="Disabled select" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">Option 1</SelectItem>
+            <SelectItem value="2">Option 2</SelectItem>
+            <SelectItem value="3">Option 3</SelectItem>
           </SelectContent>
         </Select>
       </div>
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'AI model and parameter selection example for Vergil platform.',
-      },
-    },
-  },
-};
+}
 
-export const CourseSelector: Story = {
+export const WithDisabledItems: Story = {
   render: () => (
-    <div className="grid w-full max-w-sm items-center gap-1.5">
-      <Label htmlFor="course">Select Course</Label>
+    <div className="w-[280px]">
       <Select>
-        <SelectTrigger id="course">
-          <SelectValue placeholder="Choose a course to enroll" />
+        <SelectTrigger>
+          <SelectValue placeholder="Select availability" />
         </SelectTrigger>
         <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Beginner Courses</SelectLabel>
-            <SelectItem value="intro-ai">Introduction to AI</SelectItem>
-            <SelectItem value="python-basics">Python Basics</SelectItem>
-            <SelectItem value="ml-fundamentals">ML Fundamentals</SelectItem>
-          </SelectGroup>
-          <SelectSeparator />
-          <SelectGroup>
-            <SelectLabel>Intermediate Courses</SelectLabel>
-            <SelectItem value="deep-learning">Deep Learning</SelectItem>
-            <SelectItem value="nlp">Natural Language Processing</SelectItem>
-            <SelectItem value="computer-vision">Computer Vision</SelectItem>
-          </SelectGroup>
-          <SelectSeparator />
-          <SelectGroup>
-            <SelectLabel>Advanced Courses</SelectLabel>
-            <SelectItem value="transformers">Transformer Architecture</SelectItem>
-            <SelectItem value="rl">Reinforcement Learning</SelectItem>
-            <SelectItem value="mlops">MLOps & Deployment</SelectItem>
-          </SelectGroup>
+          <SelectItem value="available">Available</SelectItem>
+          <SelectItem value="busy">Busy</SelectItem>
+          <SelectItem value="away" disabled>
+            Away (Pro plan only)
+          </SelectItem>
+          <SelectItem value="dnd" disabled>
+            Do not disturb (Pro plan only)
+          </SelectItem>
         </SelectContent>
       </Select>
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Course selection dropdown as used in Vergil Learn LMS.',
-      },
-    },
+}
+
+export const Controlled: Story = {
+  render: () => {
+    const [value, setValue] = useState("")
+    
+    return (
+      <div className="space-y-4">
+        <div className="w-[280px]">
+          <Select value={value} onValueChange={setValue}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a framework" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="next">Next.js</SelectItem>
+              <SelectItem value="remix">Remix</SelectItem>
+              <SelectItem value="gatsby">Gatsby</SelectItem>
+              <SelectItem value="astro">Astro</SelectItem>
+              <SelectItem value="vite">Vite</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <p className="text-[var(--text-secondary)] text-[var(--font-size-sm)]">
+          Selected value: <span className="text-[var(--text-emphasis)] font-[var(--font-weight-medium)]">{value || "none"}</span>
+        </p>
+      </div>
+    )
   },
-};
+}
+
+export const LongContent: Story = {
+  render: () => (
+    <div className="w-[280px]">
+      <Select>
+        <SelectTrigger>
+          <SelectValue placeholder="Select a country" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="us">United States</SelectItem>
+          <SelectItem value="ca">Canada</SelectItem>
+          <SelectItem value="mx">Mexico</SelectItem>
+          <SelectItem value="br">Brazil</SelectItem>
+          <SelectItem value="ar">Argentina</SelectItem>
+          <SelectItem value="uk">United Kingdom</SelectItem>
+          <SelectItem value="de">Germany</SelectItem>
+          <SelectItem value="fr">France</SelectItem>
+          <SelectItem value="it">Italy</SelectItem>
+          <SelectItem value="es">Spain</SelectItem>
+          <SelectItem value="pt">Portugal</SelectItem>
+          <SelectItem value="nl">Netherlands</SelectItem>
+          <SelectItem value="be">Belgium</SelectItem>
+          <SelectItem value="ch">Switzerland</SelectItem>
+          <SelectItem value="at">Austria</SelectItem>
+          <SelectItem value="pl">Poland</SelectItem>
+          <SelectItem value="ru">Russia</SelectItem>
+          <SelectItem value="jp">Japan</SelectItem>
+          <SelectItem value="cn">China</SelectItem>
+          <SelectItem value="kr">South Korea</SelectItem>
+          <SelectItem value="in">India</SelectItem>
+          <SelectItem value="au">Australia</SelectItem>
+          <SelectItem value="nz">New Zealand</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  ),
+}

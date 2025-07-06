@@ -408,7 +408,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
               <div className="flex gap-4">
                 <Button 
                   size="lg"
-                  variant="outline" 
+                  variant="secondary" 
                   onClick={() => window.location.href = `/lms/course/${courseId}`}
                 >
                   Exit Game
@@ -416,7 +416,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
                 {test.allowReview && (
                   <Button 
                     size="lg"
-                    variant="outline" 
+                    variant="secondary" 
                     onClick={() => {
                       setShowResults(false)
                       setCurrentQuestion(0)
@@ -466,7 +466,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
               </div>
               
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => {
                   if (confirm('Are you sure you want to exit? Your progress will be saved.')) {
@@ -523,7 +523,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Badge variant="outline">
+                <Badge variant="secondary">
                   Question {currentQuestion + 1} of {test.questions.length}
                 </Badge>
                 <Badge className="bg-cosmic-purple/10 text-cosmic-purple">
@@ -531,7 +531,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
                 </Badge>
               </div>
               {currentQ.type === 'multiple-select' && (
-                <Badge variant="outline" className="bg-blue-50">
+                <Badge variant="secondary" className="bg-blue-50">
                   Select all that apply
                 </Badge>
               )}
@@ -630,7 +630,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
           <div className="border-t p-6">
             <div className="flex items-center justify-between">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={handlePrevious}
                 disabled={currentQuestion === 0}
               >
@@ -643,7 +643,7 @@ export function TestInterface({ courseId, testId }: TestInterfaceProps) {
                   <>
                     {test.allowReview && (
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         onClick={handleReview}
                       >
                         <Flag className="h-4 w-4 mr-2" />

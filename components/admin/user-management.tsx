@@ -31,7 +31,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Badge } from '@/components/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/atomic/avatar'
 import { Progress } from '@/components/progress'
 import {
   Select,
@@ -49,7 +49,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/dropdown-menu'
 import { Alert, AlertDescription } from '@/components/alert'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/atomic/tooltip'
 import { DataTable } from '@/components/admin/data-table'
 import { MetricCard } from '@/components/admin/metric-card'
 import Link from 'next/link'
@@ -485,11 +485,11 @@ export function UserManagement() {
           <p className="text-muted-foreground">Manage users, roles, permissions, and training severity levels</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button variant="secondary">
             <Download className="h-4 w-4 mr-2" />
             Export Users
           </Button>
-          <Button variant="outline">
+          <Button variant="secondary">
             <Upload className="h-4 w-4 mr-2" />
             Bulk Import
           </Button>
@@ -614,9 +614,9 @@ export function UserManagement() {
               {bulkActions.map((action, index) => (
                 <Button
                   key={index}
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
-                  onClick={() => action.onClick(Array.from(selectedUsers))}
+                  onClick={action.onClick}
                 >
                   {action.icon}
                   {action.label}

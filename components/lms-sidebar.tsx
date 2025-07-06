@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   X, 
   Search, 
@@ -14,12 +14,9 @@ import {
   ClipboardList,
   Clock,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from 'lucide-react'
-import { Button } from '@/components/button'
-import { Input } from '@/components/input'
-import { Progress } from '@/components/progress'
-import { Badge } from '@/components/badge'
 import { cn } from '@/lib/utils'
 
 interface LMSSidebarProps {
@@ -126,17 +123,27 @@ export function LMSSidebar({ isOpen, onClose, currentView }: LMSSidebarProps) {
   const getTypeColor = (type: Lesson['type']) => {
     switch (type) {
       case 'lesson':
-        return 'bg-cosmic-purple'
+        return 'var(--color-interactive-primary-default)'
       case 'test':
-        return 'bg-electric-violet'
+        return 'var(--color-text-warning)'
       case 'game':
-        return 'bg-phosphor-cyan'
+        return 'var(--color-text-success)'
       case 'material':
-        return 'bg-neural-pink'
+        return 'var(--color-text-info)'
       default:
-        return 'bg-cosmic-purple'
+        return 'var(--color-interactive-primary-default)'
     }
   }
+
+  const filteredSections = course.sections.map(section => ({
+    ...section,
+    lessons: section.lessons.filter(lesson =>
+      lesson.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(section => 
+    section.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    section.lessons.length > 0
+  )
 
   if (currentView === 'dashboard') {
     return null
@@ -147,39 +154,49 @@ export function LMSSidebar({ isOpen, onClose, currentView }: LMSSidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-overlay lg:hidden"
           onClick={onClose}
         />
       )}
       
       {/* Sidebar */}
-      <div className={cn(
-        "fixed left-0 top-16 z-50 h-[calc(100vh-4rem)] w-80 bg-white border-r transform transition-transform duration-200 ease-in-out lg:sticky lg:transform-none",
-        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      )}>
+      <div 
+        className={cn(
+          "fixed left-0 top-16 z-50 h-[calc(100vh-4rem)] w-80",
+          "bg-background-primary border-r border-default",
+          "transform transition-transform duration-[var(--duration-normal)] ease-[var(--easing-out)]",
+          "lg:sticky lg:transform-none",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
+      >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-[var(--spacing-component-md)] border-b border-subtle">
             <div>
-              <h2 className="font-semibold text-lg">{course.title}</h2>
-              <div className="text-sm text-muted-foreground">
+              <h2 className="text-[var(--font-size-lg)] font-[var(--font-weight-semibold)] leading-[var(--line-height-tight)] text-primary">
+                {course.title}
+              </h2>
+              <div className="text-[var(--font-size-sm)] text-secondary mt-[var(--spacing-component-xs)]">
                 {course.progress}% Complete
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden"
+            <button
+              className="lg:hidden p-[var(--spacing-component-sm)] rounded-[var(--border-radius-md)] hover:bg-background-emphasis transition-colors duration-[var(--duration-fast)]"
               onClick={onClose}
             >
-              <X className="h-4 w-4" />
-            </Button>
+              <X className="w-4 h-4 text-icon-secondary" />
+            </button>
           </div>
 
           {/* Progress */}
-          <div className="p-4 border-b">
-            <Progress value={course.progress} className="h-2" />
-            <div className="mt-2 text-xs text-muted-foreground">
+          <div className="p-[var(--spacing-component-md)] border-b border-subtle">
+            <div className="w-full h-2 bg-background-emphasis rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-interactive-primary-default transition-all duration-[var(--duration-slow)] ease-[var(--easing-out)]"
+                style={{ width: `${course.progress}%` }}
+              />
+            </div>
+            <div className="mt-[var(--spacing-component-sm)] text-[var(--font-size-xs)] text-secondary">
               {course.sections.reduce((acc, section) => 
                 acc + section.lessons.filter(lesson => lesson.completed).length, 0
               )} of {course.sections.reduce((acc, section) => acc + section.lessons.length, 0)} lessons completed
@@ -187,36 +204,49 @@ export function LMSSidebar({ isOpen, onClose, currentView }: LMSSidebarProps) {
           </div>
 
           {/* Search */}
-          <div className="p-4 border-b">
+          <div className="p-[var(--spacing-component-md)] border-b border-subtle">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-icon-secondary" />
+              <input
+                type="text"
                 placeholder="Search lessons..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="w-full pl-10 pr-4 py-[var(--spacing-component-sm)] 
+                  bg-background-emphasisInput rounded-[var(--border-radius-md)]
+                  border border-subtle focus:border-focus
+                  text-[var(--font-size-base)] text-primary
+                  placeholder:text-tertiary
+                  transition-all duration-[var(--duration-fast)]
+                  focus:outline-none focus:ring-2 focus:ring-[var(--shadow-focus)]"
               />
             </div>
           </div>
 
           {/* Course structure */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4 space-y-4">
-              {course.sections.map((section) => (
-                <div key={section.id} className="space-y-2">
+            <div className="p-[var(--spacing-component-md)] space-y-[var(--spacing-component-sm)]">
+              {filteredSections.map((section) => (
+                <div key={section.id} className="space-y-[var(--spacing-component-xs)]">
                   <button
                     onClick={() => toggleSection(section.id)}
-                    className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between w-full p-[var(--spacing-component-sm)] 
+                      rounded-[var(--border-radius-lg)] bg-background-emphasis 
+                      hover:bg-background-emphasisInput transition-all duration-[var(--duration-fast)]
+                      group"
                   >
-                    <div className="flex items-center gap-3">
-                      {section.expanded ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      )}
+                    <div className="flex items-center gap-[var(--spacing-component-sm)]">
+                      <div className={cn(
+                        "transition-transform duration-[var(--duration-fast)]",
+                        section.expanded ? "rotate-90" : "rotate-0"
+                      )}>
+                        <ChevronRight className="w-4 h-4 text-icon-secondary" />
+                      </div>
                       <div className="text-left">
-                        <div className="font-medium">{section.title}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-[var(--font-weight-medium)] text-primary">
+                          {section.title}
+                        </div>
+                        <div className="text-[var(--font-size-xs)] text-secondary">
                           {section.progress}% complete
                         </div>
                       </div>
@@ -228,37 +258,42 @@ export function LMSSidebar({ isOpen, onClose, currentView }: LMSSidebarProps) {
                             a 15.9155 15.9155 0 0 1 0 31.831
                             a 15.9155 15.9155 0 0 1 0 -31.831"
                           fill="none"
-                          stroke="currentColor"
+                          stroke="var(--color-border-subtle)"
                           strokeWidth="3"
-                          className="text-muted-foreground/20"
                         />
                         <path
                           d="M18 2.0845
                             a 15.9155 15.9155 0 0 1 0 31.831
                             a 15.9155 15.9155 0 0 1 0 -31.831"
                           fill="none"
-                          stroke="currentColor"
+                          stroke="var(--color-interactive-primary-default)"
                           strokeWidth="3"
                           strokeDasharray={`${section.progress}, 100`}
-                          className="text-cosmic-purple"
+                          className="transition-all duration-[var(--duration-slow)]"
                         />
                       </svg>
                     </div>
                   </button>
 
                   {section.expanded && (
-                    <div className="space-y-1 ml-4">
+                    <div className={cn(
+                      "space-y-[2px] ml-[var(--spacing-component-md)]",
+                      "animate-in slide-in-from-top-2 fade-in duration-[var(--duration-normal)]"
+                    )}>
                       {section.lessons.map((lesson) => {
                         const Icon = getIcon(lesson.type)
                         return (
                           <button
                             key={lesson.id}
                             className={cn(
-                              "flex items-center gap-3 w-full p-3 rounded-lg text-left transition-colors",
+                              "flex items-center gap-[var(--spacing-component-sm)] w-full p-[var(--spacing-component-sm)]",
+                              "rounded-[var(--border-radius-md)] text-left",
+                              "transition-all duration-[var(--duration-fast)]",
+                              "group relative overflow-hidden",
                               lesson.locked 
-                                ? "opacity-50 cursor-not-allowed" 
-                                : "hover:bg-gray-50",
-                              lesson.completed && "bg-green-50"
+                                ? "opacity-[var(--opacity-disabled)] cursor-not-allowed" 
+                                : "hover:bg-background-emphasis",
+                              lesson.completed && "bg-background-successLight"
                             )}
                             disabled={lesson.locked}
                             onClick={() => {
@@ -275,32 +310,39 @@ export function LMSSidebar({ isOpen, onClose, currentView }: LMSSidebarProps) {
                           >
                             <div className="flex-shrink-0">
                               {lesson.locked ? (
-                                <Lock className="h-4 w-4 text-muted-foreground" />
+                                <Lock className="w-4 h-4 text-icon-disabled" />
                               ) : lesson.completed ? (
-                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                <CheckCircle className="w-4 h-4 text-icon-success" />
                               ) : (
-                                <Circle className="h-4 w-4 text-muted-foreground" />
+                                <Circle className="w-4 h-4 text-icon-secondary" />
                               )}
                             </div>
                             
-                            <div className={cn(
-                              "w-2 h-2 rounded-full flex-shrink-0",
-                              getTypeColor(lesson.type)
-                            )} />
+                            <div 
+                              className="w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: getTypeColor(lesson.type) }}
+                            />
 
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate">{lesson.title}</div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Icon className="h-3 w-3" />
+                              <div className="font-[var(--font-weight-medium)] text-primary truncate">
+                                {lesson.title}
+                              </div>
+                              <div className="flex items-center gap-[var(--spacing-component-sm)] text-[var(--font-size-xs)] text-secondary">
+                                <Icon className="w-3 h-3" />
                                 <span className="capitalize">{lesson.type}</span>
                                 <span>•</span>
-                                <Clock className="h-3 w-3" />
+                                <Clock className="w-3 h-3" />
                                 <span>{lesson.duration}</span>
                               </div>
                             </div>
 
                             {!lesson.locked && !lesson.completed && (
-                              <Play className="h-4 w-4 text-cosmic-purple" />
+                              <Play className="w-4 h-4 text-icon-brand opacity-0 group-hover:opacity-100 transition-opacity duration-[var(--duration-fast)]" />
+                            )}
+
+                            {/* Breathing animation for active lesson */}
+                            {!lesson.locked && !lesson.completed && (
+                              <div className="absolute inset-0 bg-interactive-primary-default opacity-0 group-hover:opacity-[0.05] transition-opacity duration-[var(--duration-normal)]" />
                             )}
                           </button>
                         )

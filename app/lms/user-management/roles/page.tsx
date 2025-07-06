@@ -8,7 +8,7 @@ import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { Badge } from '@/components/badge'
-import { Checkbox } from '@/components/checkbox'
+import { Checkbox } from '@/components/atomic/checkbox'
 import {
   Select,
   SelectContent,
@@ -186,7 +186,7 @@ export default function RolesPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-vergil-off-black">Organization Roles</h2>
+              <h2 className="text-2xl font-semibold text-primary">Organization Roles</h2> {/* #1D1D1F */}
               <p className="text-vergil-off-black/60 mt-1">Define roles and their privileges</p>
             </div>
             <Button 
@@ -286,7 +286,7 @@ export default function RolesPage() {
                   </div>
 
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     size="sm" 
                     className="w-full mt-4"
                     onClick={() => handleOpenPrivileges(role)}
@@ -303,7 +303,7 @@ export default function RolesPage() {
         {/* Create Role Modal */}
         {showCreateModal && (
           <div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50" /* rgba(0, 0, 0, 0.5), 16px */
             onClick={() => setShowCreateModal(false)}
           >
             <Card 
@@ -396,7 +396,7 @@ export default function RolesPage() {
 
                 <div className="flex gap-3 mt-6">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => setShowCreateModal(false)}
                     className="flex-1"
                   >
@@ -404,7 +404,8 @@ export default function RolesPage() {
                   </Button>
                   <Button
                     onClick={handleCreateRole}
-                    className="flex-1 bg-vergil-purple hover:bg-vergil-purple-lighter"
+                    variant="primary"
+                    className="flex-1"
                     disabled={!newRole.name}
                   >
                     Create Role
@@ -418,7 +419,7 @@ export default function RolesPage() {
         {/* Edit Role Modal */}
         {showEditModal && editingRole && (
           <div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50" /* rgba(0, 0, 0, 0.5), 16px */
             onClick={() => {
               setShowEditModal(false)
               setEditingRole(null)
@@ -517,7 +518,7 @@ export default function RolesPage() {
 
                 <div className="flex gap-3 mt-6">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => {
                       setShowEditModal(false)
                       setEditingRole(null)
@@ -528,7 +529,8 @@ export default function RolesPage() {
                   </Button>
                   <Button
                     onClick={handleSaveEditedRole}
-                    className="flex-1 bg-vergil-purple hover:bg-vergil-purple-lighter"
+                    variant="primary"
+                    className="flex-1"
                     disabled={!editingRole.name}
                   >
                     Save Changes
@@ -542,7 +544,7 @@ export default function RolesPage() {
         {/* Manage Privileges Modal */}
         {showPrivilegesModal && selectedRoleForPrivileges && (
           <div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50" /* rgba(0, 0, 0, 0.5), 16px */
             onClick={() => {
               setShowPrivilegesModal(false)
               setSelectedRoleForPrivileges(null)
@@ -596,7 +598,7 @@ export default function RolesPage() {
                               <p className="font-medium text-vergil-off-black text-sm">
                                 {privilege.name}
                               </p>
-                              <p className="text-sm text-vergil-off-black/60">
+                              <p className="text-sm text-secondary"> {/* #6C6C6D */}
                                 {privilege.description}
                               </p>
                             </div>
@@ -609,8 +611,8 @@ export default function RolesPage() {
 
                 {/* Special handling for Super Admin */}
                 {selectedRoleForPrivileges.id === '1' && (
-                  <div className="mt-6 p-4 bg-vergil-purple/5 rounded-lg border border-vergil-purple/20">
-                    <p className="text-sm text-vergil-purple flex items-center gap-2">
+                  <div className="mt-spacing-lg p-spacing-md bg-brandLight rounded-lg border border-brand"> {/* 24px, 16px, #F3E6FF, #A64DFF */}
+                    <p className="text-sm text-brand flex items-center gap-spacing-xs"> {/* #A64DFF, 4px */}
                       <Shield className="w-4 h-4" />
                       Super Admin has all privileges by default and cannot be modified
                     </p>
@@ -618,7 +620,7 @@ export default function RolesPage() {
                 )}
               </div>
 
-              <div className="p-6 border-t border-gray-200">
+              <div className="p-spacing-lg border-t border-subtle"> {/* 24px, rgba(0,0,0,0.05) */}
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-vergil-off-black/60">
                     {selectedPrivileges.includes('all') 
@@ -627,7 +629,7 @@ export default function RolesPage() {
                   </p>
                   <div className="flex gap-3">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => {
                         setShowPrivilegesModal(false)
                         setSelectedRoleForPrivileges(null)

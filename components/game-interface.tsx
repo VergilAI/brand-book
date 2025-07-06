@@ -12,13 +12,14 @@ import {
   Pause,
   Volume2,
   VolumeX,
-  Home,
   CheckCircle,
   XCircle,
   Sparkles,
-  Brain
+  Brain,
+  Timer,
+  TrendingUp
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
 import { Progress } from '@/components/progress'
@@ -27,90 +28,38 @@ import { cn } from '@/lib/utils'
 interface GameInterfaceProps {
   courseId: string
   gameId: string
+  gameType?: 'matching' | 'quiz' | 'puzzle' | 'drag-drop'
+  title?: string
+  description?: string
+  difficulty?: 'easy' | 'medium' | 'hard'
+  onExit?: () => void
 }
 
-// Type definitions for different game types
-type GameType = 'drag-drop' | 'matching' | 'quiz' | 'puzzle'
-
-interface DragItem {
-  id: string
-  content: string
-  category: string
-}
-
-interface MatchingPair {
-  id: string
-  left: string
-  right: string
-  matched?: boolean
-}
-
-interface Game {
-  id: string
-  title: string
-  type: GameType
-  description: string
-  instructions: string
-  courseTitle: string
-  points: number
-  timeLimit?: number
-  lives: number
-  difficulty: 'easy' | 'medium' | 'hard'
-}
-
-export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
-  const [game] = useState<Game>({
-    id: gameId,
-    title: 'AI Concepts Matching Game',
-    type: 'matching',
-    description: 'Match AI concepts with their definitions',
-    instructions: 'Click on cards to reveal them. Match each concept with its correct definition.',
-    courseTitle: 'AI Fundamentals',
-    points: 100,
-    lives: 3,
-    difficulty: 'medium'
-  })
-
+export function GameInterface({ 
+  courseId, 
+  gameId, 
+  gameType = 'matching',
+  title = 'AI Concepts Matching Game',
+  description = 'Match AI concepts with their definitions',
+  difficulty = 'medium',
+  onExit
+}: GameInterfaceProps) {
   const [score, setScore] = useState(0)
-  const [lives, setLives] = useState(game.lives)
-  const [gameState, setGameState] = useState<'ready' | 'playing' | 'paused' | 'completed'>('ready')
+  const [lives, setLives] = useState(3)
+  const [gameState, setGameState] = useState<'loading' | 'ready' | 'playing' | 'paused' | 'completed'>('loading')
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [timeElapsed, setTimeElapsed] = useState(0)
   const [showInstructions, setShowInstructions] = useState(true)
+  const [accuracy, setAccuracy] = useState(100)
+  const [streak, setStreak] = useState(0)
 
-  // Matching game specific state
-  const [matchingPairs] = useState<MatchingPair[]>([
-    { id: '1', left: 'Machine Learning', right: 'Systems that learn from data' },
-    { id: '2', left: 'Neural Network', right: 'Computing system inspired by the brain' },
-    { id: '3', left: 'Deep Learning', right: 'ML using multi-layered neural networks' },
-    { id: '4', left: 'NLP', right: 'Processing and analyzing human language' },
-    { id: '5', left: 'Computer Vision', right: 'Interpreting visual information' },
-    { id: '6', left: 'Reinforcement Learning', right: 'Learning through rewards and penalties' }
-  ])
-  
-  const [cards, setCards] = useState<Array<{
-    id: string
-    content: string
-    type: 'left' | 'right'
-    pairId: string
-    revealed: boolean
-    matched: boolean
-  }>>([])
-  
-  const [selectedCards, setSelectedCards] = useState<string[]>([])
-  const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set())
-
-  // Initialize matching game cards
+  // Simulate loading
   useEffect(() => {
-    if (game.type === 'matching') {
-      const gameCards = matchingPairs.flatMap(pair => [
-        { id: `${pair.id}-left`, content: pair.left, type: 'left' as const, pairId: pair.id, revealed: false, matched: false },
-        { id: `${pair.id}-right`, content: pair.right, type: 'right' as const, pairId: pair.id, revealed: false, matched: false }
-      ])
-      // Shuffle cards
-      setCards(gameCards.sort(() => Math.random() - 0.5))
-    }
-  }, [game.type, matchingPairs])
+    const timer = setTimeout(() => {
+      setGameState('ready')
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Timer effect
   useEffect(() => {
@@ -140,185 +89,156 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
 
   const handleRestartGame = () => {
     setScore(0)
-    setLives(game.lives)
+    setLives(3)
     setTimeElapsed(0)
     setGameState('ready')
     setShowInstructions(true)
-    setSelectedCards([])
-    setMatchedPairs(new Set())
-    
-    // Reset cards
-    if (game.type === 'matching') {
-      setCards(prev => prev.map(card => ({ ...card, revealed: false, matched: false })))
-    }
-  }
-
-  const handleCardClick = (cardId: string) => {
-    if (gameState !== 'playing') return
-    
-    const card = cards.find(c => c.id === cardId)
-    if (!card || card.revealed || card.matched) return
-
-    const newSelectedCards = [...selectedCards, cardId]
-    setSelectedCards(newSelectedCards)
-    
-    // Reveal the card
-    setCards(prev => prev.map(c => 
-      c.id === cardId ? { ...c, revealed: true } : c
-    ))
-
-    // Check for match when 2 cards are selected
-    if (newSelectedCards.length === 2) {
-      const [firstId, secondId] = newSelectedCards
-      const firstCard = cards.find(c => c.id === firstId)!
-      const secondCard = cards.find(c => c.id === secondId)!
-
-      if (firstCard.pairId === secondCard.pairId && firstCard.type !== secondCard.type) {
-        // Match found!
-        setTimeout(() => {
-          setCards(prev => prev.map(c => 
-            c.pairId === firstCard.pairId ? { ...c, matched: true } : c
-          ))
-          setMatchedPairs(prev => new Set([...prev, firstCard.pairId]))
-          setScore(prev => prev + 20)
-          setSelectedCards([])
-          
-          // Check if game is complete
-          if (matchedPairs.size + 1 === matchingPairs.length) {
-            setGameState('completed')
-            setScore(prev => prev + 50) // Bonus points for completion
-          }
-        }, 500)
-      } else {
-        // No match
-        setTimeout(() => {
-          setCards(prev => prev.map(c => 
-            (c.id === firstId || c.id === secondId) ? { ...c, revealed: false } : c
-          ))
-          setSelectedCards([])
-          setLives(prev => Math.max(0, prev - 1))
-          
-          if (lives <= 1) {
-            setGameState('completed')
-          }
-        }, 1000)
-      }
-    }
+    setAccuracy(100)
+    setStreak(0)
   }
 
   const handleExitGame = () => {
-    if (confirm('Are you sure you want to exit? Your progress will be saved.')) {
+    if (onExit) {
+      onExit()
+    } else {
       window.location.href = `/lms/course/${courseId}`
     }
   }
 
-  // Game completed screen
+  // Difficulty settings
+  const getDifficultySettings = () => {
+    switch (difficulty) {
+      case 'easy':
+        return { points: 50, timeBonus: 100, lives: 5 }
+      case 'hard':
+        return { points: 200, timeBonus: 300, lives: 1 }
+      default:
+        return { points: 100, timeBonus: 200, lives: 3 }
+    }
+  }
+
+  const settings = getDifficultySettings()
+
+  // Loading state
+  if (gameState === 'loading') {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="card-neural p-2xl text-center">
+          <div className="animate-pulse">
+            <Sparkles className="w-16 h-16 text-text-brand mx-auto mb-lg" />
+          </div>
+          <h2 className="text-xl font-bold text-text-primary mb-sm">
+            Loading Game
+          </h2>
+          <p className="text-text-secondary">Preparing your learning experience...</p>
+        </Card>
+      </div>
+    )
+  }
+
+  // Completed state
   if (gameState === 'completed') {
-    const success = matchedPairs.size === matchingPairs.length
+    const finalScore = score + Math.max(0, settings.timeBonus - timeElapsed)
+    const stars = finalScore >= 400 ? 3 : finalScore >= 250 ? 2 : 1
     
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-        <div className="min-h-full flex items-center justify-center p-4">
-          <Card className="p-8 max-w-3xl w-full border-vergil-off-black/10 bg-gradient-to-br from-vergil-off-white to-white my-auto max-h-[90vh] overflow-y-auto">
-            <div className="space-y-6">
-              {/* Header Section */}
-              <div className="text-center space-y-4">
-                {success ? (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-vergil-purple to-vergil-purple-lighter mx-auto flex items-center justify-center animate-pulse">
-                    <Trophy className="w-10 h-10 text-white" />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500 to-red-600 mx-auto flex items-center justify-center animate-pulse">
-                    <XCircle className="w-10 h-10 text-white" />
-                  </div>
-                )}
-                <h2 className="text-3xl font-display font-bold text-vergil-off-black">
-                  {success ? 'Congratulations!' : 'Game Over'}
-                </h2>
-                <p className="text-base text-vergil-off-black/70 max-w-md mx-auto">
-                  {success ? 'You completed the game!' : 'Better luck next time!'}
-                </p>
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-lg">
+          <Card className="card-neural max-w-3xl w-full my-auto max-h-[90vh] overflow-y-auto">
+            <CardContent className="p-2xl space-y-xl">
+              {/* Header */}
+              <div className="text-center space-y-lg">
+                <div className="w-20 h-20 rounded-full bg-bg-brand flex items-center justify-center mx-auto animate-pulse shadow-brand-md">
+                  <Trophy className="w-10 h-10 text-text-inverse" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-text-primary mb-sm">
+                    Game Complete!
+                  </h2>
+                  <p className="text-text-secondary">
+                    You've finished {title}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stars */}
+              <div className="flex justify-center gap-sm">
+                {[1, 2, 3].map((star) => (
+                  <Star
+                    key={star}
+                    className={cn(
+                      "w-12 h-12 transition-all duration-slow",
+                      star <= stars 
+                        ? "fill-yellow-400 text-yellow-400 animate-pulse" 
+                        : "text-text-disabled"
+                    )}
+                  />
+                ))}
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-4">
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
-                    {score}
-                  </div>
-                  <div className="text-sm text-vergil-off-black/60">Final Score</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+                <Card className="card-outlined text-center">
+                  <CardContent className="p-lg">
+                    <TrendingUp className="w-8 h-8 text-text-brand mx-auto mb-sm" />
+                    <div className="text-xl font-bold text-text-primary">
+                      {finalScore}
+                    </div>
+                    <div className="text-sm text-text-secondary">Total Score</div>
+                  </CardContent>
                 </Card>
-                
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
-                    {formatTime(timeElapsed)}
-                  </div>
-                  <div className="text-sm text-vergil-off-black/60">Time</div>
+
+                <Card className="card-outlined text-center">
+                  <CardContent className="p-lg">
+                    <Timer className="w-8 h-8 text-text-info mx-auto mb-sm" />
+                    <div className="text-xl font-bold text-text-primary">
+                      {formatTime(timeElapsed)}
+                    </div>
+                    <div className="text-sm text-text-secondary">Time</div>
+                  </CardContent>
                 </Card>
-                
-                <Card variant="outlined" className="p-4 text-center border-vergil-off-black/10">
-                  <div className="text-2xl font-bold text-vergil-purple mb-1">
-                    {Math.round((matchedPairs.size / matchingPairs.length) * 100)}%
-                  </div>
-                  <div className="text-sm text-vergil-off-black/60">Accuracy</div>
+
+                <Card className="card-outlined text-center">
+                  <CardContent className="p-lg">
+                    <Zap className="w-8 h-8 text-text-warning mx-auto mb-sm" />
+                    <div className="text-xl font-bold text-text-primary">
+                      {accuracy}%
+                    </div>
+                    <div className="text-sm text-text-secondary">Accuracy</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="card-outlined text-center">
+                  <CardContent className="p-lg">
+                    <Brain className="w-8 h-8 text-text-success mx-auto mb-sm" />
+                    <div className="text-xl font-bold text-text-primary">
+                      +{Math.round(accuracy)}%
+                    </div>
+                    <div className="text-sm text-text-secondary">Knowledge</div>
+                  </CardContent>
                 </Card>
               </div>
 
-              {/* Star Rating */}
-              {success && (
-                <div className="flex justify-center gap-2">
-                  {[1, 2, 3].map((star) => (
-                    <Star
-                      key={star}
-                      className={cn(
-                        "h-10 w-10",
-                        star <= (score >= 150 ? 3 : score >= 100 ? 2 : 1)
-                          ? "fill-vergil-purple text-vergil-purple"
-                          : "text-vergil-off-black/20"
-                      )}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Knowledge Impact */}
-              <Card variant="outlined" className="p-4 border-vergil-purple/20 bg-vergil-purple/5">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-vergil-purple/10 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5 text-vergil-purple" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-vergil-off-black mb-1">
-                      Knowledge Point Impact
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-vergil-off-black/60">Estimated improvement</span>
-                      <span className="text-lg font-bold text-vergil-purple">
-                        +{Math.round((matchedPairs.size / matchingPairs.length) * 100)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <div className="flex gap-4">
+              {/* Actions */}
+              <div className="flex gap-md">
                 <Button
                   size="lg"
-                  variant="outline"
+                  variant="secondary"
                   onClick={handleExitGame}
+                  className="flex-1"
                 >
                   Exit Game
                 </Button>
                 <Button
                   size="lg"
-                  className="bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
                   onClick={handleRestartGame}
+                  className="flex-1 btn-primary"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Play Again
                 </Button>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </div>
       </div>
@@ -328,59 +248,63 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
   // Instructions screen
   if (showInstructions) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-        <Card className="max-w-lg w-full">
-          <CardContent className="p-8">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-vergil-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-vergil-purple" />
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center p-lg">
+        <Card className="card-default max-w-lg w-full">
+          <CardContent className="p-2xl">
+            <div className="text-center mb-xl">
+              <div className="w-16 h-16 bg-bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-lg animate-pulse">
+                <Sparkles className="h-8 w-8 text-text-brand" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">{game.title}</h2>
+              <h2 className="text-xl font-bold mb-sm">{title}</h2>
               <Badge className={cn(
-                "mb-4",
-                game.difficulty === 'easy' && "bg-green-100 text-green-800",
-                game.difficulty === 'medium' && "bg-yellow-100 text-yellow-800",
-                game.difficulty === 'hard' && "bg-red-100 text-red-800"
+                "mb-md",
+                difficulty === 'easy' && "bg-bg-success/10 text-text-success border-border-success",
+                difficulty === 'medium' && "bg-bg-warning/10 text-text-warning border-border-warning",
+                difficulty === 'hard' && "bg-bg-error/10 text-text-error border-border-error"
               )}>
-                {game.difficulty.toUpperCase()}
+                {difficulty.toUpperCase()}
               </Badge>
-              <p className="text-muted-foreground">{game.description}</p>
+              <p className="text-text-secondary">{description}</p>
             </div>
 
-            <div className="space-y-4 mb-6">
-              <div className="p-4 bg-gray-100 rounded-lg">
-                <h3 className="font-semibold mb-2">How to Play</h3>
-                <p className="text-sm text-muted-foreground">{game.instructions}</p>
-              </div>
+            <Card className="card-outlined mb-xl">
+              <CardContent className="p-lg">
+                <h3 className="font-semibold mb-sm">How to Play</h3>
+                <p className="text-sm text-text-secondary mb-lg">
+                  Match concepts with their correct definitions. Click cards to reveal them and find matching pairs.
+                </p>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-vergil-purple">{game.points}</div>
-                  <div className="text-xs text-muted-foreground">Max Points</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-500">{game.lives}</div>
-                  <div className="text-xs text-muted-foreground">Lives</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-500">
-                    {game.timeLimit ? `${game.timeLimit}s` : '∞'}
+                <div className="grid grid-cols-3 gap-md text-center">
+                  <div>
+                    <div className="text-xl font-bold text-text-brand">{settings.points}</div>
+                    <div className="text-xs text-text-tertiary">Points per Match</div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Time Limit</div>
+                  <div>
+                    <div className="flex justify-center gap-1 mb-1">
+                      {Array.from({ length: settings.lives }).map((_, i) => (
+                        <Heart key={i} className="w-4 h-4 fill-red-500 text-red-500" />
+                      ))}
+                    </div>
+                    <div className="text-xs text-text-tertiary">Lives</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-text-info">∞</div>
+                    <div className="text-xs text-text-tertiary">Time Limit</div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="flex gap-4">
+            <div className="flex gap-md">
               <Button
-                variant="outline"
+                variant="secondary"
                 className="flex-1"
                 onClick={handleExitGame}
               >
                 Back to Course
               </Button>
               <Button
-                className="flex-1 bg-vergil-purple text-white hover:bg-vergil-purple-lighter"
+                className="flex-1 btn-primary"
                 onClick={handleStartGame}
               >
                 <Play className="h-4 w-4 mr-2" />
@@ -395,82 +319,99 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
 
   // Main game interface
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-vergil-purple/20 to-vergil-purple-lighter/20">
+    <div className="fixed inset-0 z-modal bg-bg-secondary">
       {/* Game header */}
-      <header className="bg-white/95 backdrop-blur border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl font-bold">{game.title}</h1>
-            
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-500" />
-                <span className="font-bold text-lg">{score}</span>
-              </div>
+      <header className="bg-bg-primary border-b border-border-default">
+        <div className="max-w-7xl mx-auto px-lg py-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-xl">
+              <h1 className="text-lg font-bold">{title}</h1>
               
-              <div className="flex items-center gap-1">
-                {Array.from({ length: game.lives }, (_, i) => (
-                  <Heart
-                    key={i}
-                    className={cn(
-                      "h-5 w-5",
-                      i < lives ? "fill-red-500 text-red-500" : "text-gray-300"
-                    )}
-                  />
-                ))}
-              </div>
-              
-              <Badge variant="outline">
-                {formatTime(timeElapsed)}
-              </Badge>
-            </div>
-          </div>
+              <div className="flex items-center gap-lg">
+                <div className="flex items-center gap-sm animate-pulse">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <span className="font-bold text-lg">{score}</span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: settings.lives }, (_, i) => (
+                    <Heart
+                      key={i}
+                      className={cn(
+                        "h-5 w-5 transition-all duration-normal",
+                        i < lives 
+                          ? "fill-red-500 text-red-500" 
+                          : "text-text-disabled"
+                      )}
+                    />
+                  ))}
+                </div>
+                
+                <Badge variant="default" className="bg-bg-elevated">
+                  <Timer className="w-3 h-3 mr-1" />
+                  {formatTime(timeElapsed)}
+                </Badge>
 
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSoundEnabled(!soundEnabled)}
-            >
-              {soundEnabled ? (
-                <Volume2 className="h-5 w-5" />
-              ) : (
-                <VolumeX className="h-5 w-5" />
-              )}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePauseGame}
-            >
-              {gameState === 'paused' ? (
-                <Play className="h-5 w-5" />
-              ) : (
-                <Pause className="h-5 w-5" />
-              )}
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExitGame}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Exit
-            </Button>
+                {streak > 0 && (
+                  <Badge variant="default" className="bg-bg-brand/10 text-text-brand animate-pulse">
+                    <Zap className="w-3 h-3 mr-1" />
+                    {streak}x Streak
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="hover:bg-bg-elevated"
+              >
+                {soundEnabled ? (
+                  <Volume2 className="h-5 w-5" />
+                ) : (
+                  <VolumeX className="h-5 w-5" />
+                )}
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePauseGame}
+                className="hover:bg-bg-elevated"
+              >
+                {gameState === 'paused' ? (
+                  <Play className="h-5 w-5" />
+                ) : (
+                  <Pause className="h-5 w-5" />
+                )}
+              </Button>
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleExitGame}
+                className="hover:bg-bg-error/10 hover:text-text-error hover:border-border-error"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Exit
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Game content */}
-      <div className="h-[calc(100vh-80px)] overflow-auto p-8">
+      <div className="h-[calc(100vh-64px)] overflow-auto p-2xl">
         {gameState === 'paused' && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-4">Game Paused</h2>
+          <div className="absolute inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center z-dropdown">
+            <Card className="card-default p-2xl">
+              <h2 className="text-xl font-bold mb-lg">
+                Game Paused
+              </h2>
               <Button
-                className="w-full bg-cosmic-purple hover:bg-cosmic-purple/90"
+                className="w-full btn-primary"
                 onClick={handlePauseGame}
               >
                 <Play className="h-4 w-4 mr-2" />
@@ -480,51 +421,30 @@ export function GameInterface({ courseId, gameId }: GameInterfaceProps) {
           </div>
         )}
 
-        {/* Matching game grid */}
-        {game.type === 'matching' && (
-          <div className="max-w-5xl mx-auto">
-            <div className="mb-6 text-center">
-              <Progress 
-                value={(matchedPairs.size / matchingPairs.length) * 100} 
-                className="h-3 max-w-md mx-auto"
-              />
-              <p className="text-sm text-muted-foreground mt-2">
-                {matchedPairs.size} of {matchingPairs.length} pairs matched
-              </p>
-            </div>
-
-            <div className="grid grid-cols-4 gap-4">
-              {cards.map((card) => (
-                <button
-                  key={card.id}
-                  onClick={() => handleCardClick(card.id)}
-                  disabled={card.matched || gameState !== 'playing'}
-                  className={cn(
-                    "aspect-square rounded-lg p-4 transition-all duration-300 transform hover:scale-105",
-                    card.revealed || card.matched
-                      ? card.matched
-                        ? "bg-green-100 border-2 border-green-500"
-                        : card.type === 'left'
-                          ? "bg-cosmic-purple text-white"
-                          : "bg-electric-violet text-white"
-                      : "bg-white border-2 border-gray-200 hover:border-gray-300",
-                    card.matched && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {card.revealed || card.matched ? (
-                    <div className="h-full flex items-center justify-center text-center">
-                      <p className="text-sm font-medium">{card.content}</p>
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center">
-                      <Zap className="h-8 w-8 text-gray-400" />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+        {/* Game content placeholder */}
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-xl text-center">
+            <Progress 
+              value={30} 
+              className="h-3 max-w-md mx-auto mb-sm"
+            />
+            <p className="text-sm text-text-secondary">
+              3 of 10 matches completed
+            </p>
           </div>
-        )}
+
+          {/* Demo complete button */}
+          <div className="text-center mt-3xl">
+            <Button
+              size="lg"
+              onClick={() => setGameState('completed')}
+              className="btn-primary shadow-brand-lg"
+            >
+              <CheckCircle className="w-5 h-5 mr-2" />
+              Complete Game (Demo)
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )

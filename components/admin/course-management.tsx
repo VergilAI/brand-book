@@ -376,14 +376,14 @@ export function CourseManagement() {
 
             <div className="flex items-center gap-2">
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                variant={viewMode === 'grid' ? 'primary' : 'secondary'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
               >
                 <Grid className="h-4 w-4" />
               </Button>
               <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
+                variant={viewMode === 'list' ? 'primary' : 'secondary'}
                 size="sm"
                 onClick={() => setViewMode('list')}
               >
@@ -403,9 +403,9 @@ export function CourseManagement() {
               {bulkActions.map((action, index) => (
                 <Button
                   key={index}
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
-                  onClick={() => action.onClick(Array.from(selectedCourses))}
+                  onClick={action.onClick}
                 >
                   {action.icon}
                   {action.label}
@@ -490,7 +490,13 @@ export function CourseManagement() {
                     <span>{course.totalLessons} lessons</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getDifficultyColor(course.difficulty)}>
+                    <Badge 
+                      variant={
+                        course.difficulty === 'advanced' ? 'error' :
+                        course.difficulty === 'intermediate' ? 'warning' :
+                        'success'
+                      }
+                    >
                       {course.difficulty}
                     </Badge>
                   </div>
@@ -510,7 +516,7 @@ export function CourseManagement() {
                     Modified {course.lastModified}
                   </div>
                   <Link href={`/lms/admin/courses/${course.id}/edit`}>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="secondary">
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>

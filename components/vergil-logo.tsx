@@ -1,91 +1,86 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
-/**
- * @component VergilLogo
- * @description Official Vergil logo component with multiple variants
- * 
- * @example
- * // Basic usage
- * <VergilLogo />
- * 
- * // Different variants
- * <VergilLogo variant="mark" size="lg" animated={true} />
- * 
- * @props
- * - variant: 'logo' | 'mark' | 'wordmark' | 'white' | 'dark' - Logo variation
- * - size: 'sm' | 'md' | 'lg' | 'xl' - Size of the logo
- * - animated: boolean - Enable breathing animation
- * - className: string - Additional CSS classes
- * 
- * @accessibility
- * - Proper alt text for each variant
- * - Respects reduced motion preferences
- * 
- * @vergil-semantic brand-logo-component
- */
-
 interface VergilLogoProps {
-  variant?: 'logo' | 'mark' | 'wordmark' | 'white' | 'dark' | 'mark-black'
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  variant?: 'logo' | 'mark' | 'wordmark' | 'inverse' | 'dark' | 'colored'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   animated?: boolean
   className?: string
+  color?: 'brand' | 'primary' | 'secondary' | 'inverse'
 }
 
 const sizeConfig = {
-  sm: { width: 80, height: 24 },
-  md: { width: 120, height: 36 },
-  lg: { width: 200, height: 60 },
-  xl: { width: 300, height: 90 }
-}
-
-const markSizeConfig = {
-  sm: { width: 24, height: 24 },
-  md: { width: 32, height: 32 },
-  lg: { width: 48, height: 48 },
-  xl: { width: 64, height: 64 }
+  xs: { logo: { width: 60, height: 18 }, mark: { width: 18, height: 18 } },
+  sm: { logo: { width: 80, height: 24 }, mark: { width: 24, height: 24 } },
+  md: { logo: { width: 120, height: 36 }, mark: { width: 32, height: 32 } },
+  lg: { logo: { width: 160, height: 48 }, mark: { width: 48, height: 48 } },
+  xl: { logo: { width: 200, height: 60 }, mark: { width: 64, height: 64 } }
 }
 
 export function VergilLogo({ 
   variant = 'logo',
   size = 'md',
   animated = false,
-  className 
+  className,
+  color = 'primary'
 }: VergilLogoProps) {
-  const logoSrc = {
-    logo: '/logos/vergil-logo.svg',
-    mark: '/logos/vergil-mark.svg',
-    wordmark: '/logos/vergil-wordmark.svg',
-    white: '/logos/vergil-logo.svg', // Using default logo for white variant
-    dark: '/logos/vergil-logo-black.svg', // Using black logo for dark variant
-    'mark-black': '/logos/vergil-mark-black.svg'
+  const isMarkOnly = variant === 'mark' || variant === 'colored'
+  const dimensions = isMarkOnly ? sizeConfig[size].mark : sizeConfig[size].logo
+  
+  // Logo selection based on variant and color
+  const getLogoSrc = () => {
+    if (variant === 'inverse') {
+      return isMarkOnly ? '/logos/vergil-mark.svg' : '/logos/vergil-logo.svg'
+    }
+    if (variant === 'dark' || color === 'primary') {
+      return isMarkOnly ? '/logos/vergil-mark-black.svg' : '/logos/vergil-logo-black.svg'
+    }
+    if (variant === 'colored') {
+      return '/logos/vergil-mark.svg' // Always use colored mark
+    }
+    return isMarkOnly ? '/logos/vergil-mark.svg' : '/logos/vergil-logo.svg'
   }
 
-  const altText = {
-    logo: 'Vergil Logo',
-    mark: 'Vergil Mark',
-    wordmark: 'Vergil Wordmark',
-    white: 'Vergil Logo (White)',
-    dark: 'Vergil Logo (Dark)',
-    'mark-black': 'Vergil Mark (Black)'
+  const getAltText = () => {
+    const base = isMarkOnly ? 'Vergil Mark' : 'Vergil Logo'
+    if (variant === 'inverse') return `${base} (Inverse)`
+    if (variant === 'dark') return `${base} (Dark)`
+    if (variant === 'colored') return 'Vergil Mark (Colored)'
+    return base
   }
 
-  const isMarkOnly = variant === 'mark' || variant === 'mark-black'
-  const dimensions = isMarkOnly ? markSizeConfig[size] : sizeConfig[size]
+  // Color filter classes using semantic tokens
+  const colorClasses = {
+    brand: 'brightness-0 saturate-100 [filter:invert(14%)_sepia(94%)_saturate(7496%)_hue-rotate(268deg)_brightness(99%)_contrast(125%)]',
+    primary: '', // Default color
+    secondary: 'opacity-60',
+    inverse: 'brightness-0 invert'
+  }
 
   return (
-    <Image
-      src={logoSrc[variant]}
-      alt={altText[variant]}
-      width={dimensions.width}
-      height={dimensions.height}
+    <div 
       className={cn(
-        "max-w-full h-auto",
-        animated && "breathing",
+        "inline-flex items-center justify-center transition-all duration-normal",
+        animated && "animate-breathing",
         className
       )}
-      priority={variant === 'logo' && size === 'lg'} // Prioritize main logo
-    />
+    >
+      <Image
+        src={getLogoSrc()}
+        alt={getAltText()}
+        width={dimensions.width}
+        height={dimensions.height}
+        className={cn(
+          "max-w-full h-auto transition-all duration-fast",
+          variant !== 'colored' && colorClasses[color],
+          "select-none"
+        )}
+        priority={size === 'lg' || size === 'xl'}
+        draggable={false}
+      />
+    </div>
   )
 }

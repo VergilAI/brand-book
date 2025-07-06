@@ -272,7 +272,7 @@ export function TestInterface() {
           <div className="flex justify-center gap-4">
             <Button
               onClick={() => setShowExplanations(!showExplanations)}
-              variant="outline"
+              variant="secondary"
               className="flex items-center gap-2"
             >
               {showExplanations ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -466,7 +466,7 @@ export function TestInterface() {
             {/* Navigation */}
             <div className="flex items-center justify-between mt-8">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
                 disabled={currentQuestion === 0}
                 className="flex items-center gap-2"
@@ -558,7 +558,7 @@ export function TestInterface() {
             </p>
             <div className="flex gap-3">
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowExitConfirm(false)}
                 className="flex-1"
               >

@@ -35,24 +35,110 @@ import { cn } from "@/lib/utils"
  */
 
 const cardVariants = cva(
-  "rounded-lg border bg-card text-card-foreground",
+  "relative overflow-hidden",
   {
     variants: {
       variant: {
-        default: "border-border shadow-sm",
-        interactive: "border-border shadow-sm transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer breathing",
-        neural: "shadow-md bg-gradient-to-br from-cosmic-purple/10 to-electric-violet/10 border-cosmic-purple/20",
-        feature: "border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300",
-        metric: "border-border hover:shadow-lg transition-shadow",
-        problem: "border-border h-full",
-        destructive: "border-destructive/20",
-        gradient: "border-0 consciousness-gradient text-white",
-        outlined: "border-2 border-primary",
+        default: [
+          "bg-bg-elevated",
+          "border border-border-subtle",
+          "rounded-[var(--radius-lg)]",
+          "shadow-card",
+          "transition-shadow duration-[var(--duration-normal)]",
+        ].join(" "),
+        
+        interactive: [
+          "bg-bg-elevated",
+          "border border-border-subtle",
+          "rounded-[var(--radius-lg)]",
+          "shadow-card",
+          "cursor-pointer",
+          "transition-all duration-[var(--duration-normal)] ease-out",
+          "hover:shadow-card-hover",
+          "hover:scale-[1.01]",
+          "hover:border-border-default",
+          "active:scale-[0.99]",
+          "focus-visible:outline-none",
+          "focus-visible:ring-2",
+          "focus-visible:ring-[var(--border-focus)]",
+          "focus-visible:ring-offset-2",
+          "breathing",
+        ].join(" "),
+        
+        neural: [
+          "bg-gradient-to-br from-[var(--color-purple-50)] to-[var(--color-purple-100)]",
+          "border border-border-emphasis",
+          "rounded-[var(--radius-xl)]",
+          "shadow-brand-sm",
+          "backdrop-blur-sm",
+          "transition-all duration-[var(--duration-slow)]",
+          "hover:shadow-brand-md",
+        ].join(" "),
+        
+        feature: [
+          "bg-bg-elevated",
+          "border border-border-subtle",
+          "rounded-[var(--radius-lg)]",
+          "shadow-card",
+          "transition-all duration-[var(--duration-slow)] ease-out",
+          "hover:shadow-dropdown",
+          "hover:-translate-y-1",
+          "hover:border-border-emphasis",
+          "focus-visible:outline-none",
+          "focus-visible:ring-2",
+          "focus-visible:ring-[var(--border-focus)]",
+          "focus-visible:ring-offset-2",
+        ].join(" "),
+        
+        metric: [
+          "bg-bg-secondary",
+          "border border-border-subtle",
+          "rounded-[var(--radius-md)]",
+          "shadow-sm",
+          "transition-all duration-[var(--duration-normal)]",
+          "hover:shadow-card",
+          "hover:bg-bg-emphasis",
+        ].join(" "),
+        
+        problem: [
+          "bg-bg-elevated",
+          "border border-border-default",
+          "rounded-[var(--radius-lg)]",
+          "shadow-card",
+          "h-full",
+          "transition-colors duration-[var(--duration-normal)]",
+          "hover:border-border-emphasis",
+        ].join(" "),
+        
+        gradient: [
+          "bg-[var(--gradient-consciousness)]",
+          "border-0",
+          "rounded-[var(--radius-xl)]",
+          "shadow-brand-md",
+          "text-text-inverse",
+          "transition-all duration-[var(--duration-slow)]",
+          "hover:shadow-brand-lg",
+          "hover:scale-[1.02]",
+          "focus-visible:outline-none",
+          "focus-visible:ring-2",
+          "focus-visible:ring-[var(--border-focus)]",
+          "focus-visible:ring-offset-2",
+        ].join(" "),
+        
+        outlined: [
+          "bg-transparent",
+          "border-2 border-border-brand",
+          "rounded-[var(--radius-lg)]",
+          "shadow-none",
+          "transition-all duration-[var(--duration-normal)]",
+          "hover:bg-bg-brandLight",
+          "hover:shadow-brand-sm",
+        ].join(" "),
       },
       size: {
         default: "",
-        sm: "p-4",
-        lg: "p-8",
+        sm: "p-[var(--spacing-md)]",
+        lg: "p-[var(--spacing-xl)]",
       },
     },
     defaultVariants: {
@@ -67,13 +153,19 @@ export interface CardProps
     VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(cardVariants({ variant, className }))}
-      {...props}
-    />
-  )
+  ({ className, variant, size, ...props }, ref) => {
+    const isInteractive = variant === "interactive" || variant === "feature" || variant === "gradient"
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(cardVariants({ variant, size, className }))}
+        tabIndex={isInteractive ? 0 : undefined}
+        role={isInteractive ? "button" : undefined}
+        {...props}
+      />
+    )
+  }
 )
 Card.displayName = "Card"
 
@@ -83,7 +175,10 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn(
+      "flex flex-col gap-[var(--spacing-sm)] p-[var(--spacing-lg)]",
+      className
+    )}
     {...props}
   />
 ))
@@ -95,7 +190,10 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn(
+      "text-[var(--font-size-lg)] font-[var(--font-weight-semibold)] leading-[var(--line-height-tight)] tracking-[var(--letter-spacing-tight)] text-text-primary",
+      className
+    )}
     {...props}
   />
 ))
@@ -107,7 +205,10 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-gray-600", className)}
+    className={cn(
+      "text-[var(--font-size-sm)] text-text-secondary leading-[var(--line-height-normal)]",
+      className
+    )}
     {...props}
   />
 ))
@@ -117,7 +218,14 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  <div 
+    ref={ref} 
+    className={cn(
+      "px-[var(--spacing-lg)] pb-[var(--spacing-lg)]",
+      className
+    )} 
+    {...props} 
+  />
 ))
 CardContent.displayName = "CardContent"
 
@@ -127,7 +235,10 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn(
+      "flex items-center gap-[var(--spacing-md)] px-[var(--spacing-lg)] pb-[var(--spacing-lg)]",
+      className
+    )}
     {...props}
   />
 ))

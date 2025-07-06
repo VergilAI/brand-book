@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, BookOpen, Target, Clock } from 'lucide-react'
+import { ChevronDown, ChevronRight, BookOpen, Target, Clock, CheckCircle, Play } from 'lucide-react'
+import { Card, CardContent } from '@/components/card'
 import { Button } from '@/components/button'
 import { Progress } from '@/components/progress'
 import { Badge } from '@/components/badge'
@@ -50,55 +51,63 @@ export function CourseSection({
     }
   }
 
+  const isCompleted = sectionProgress === 100
+  const isInProgress = sectionProgress > 0 && sectionProgress < 100
+
   return (
-    <div className={cn("bg-white rounded-xl border border-mist-gray/30 overflow-hidden", className)}>
+    <Card 
+      variant={isCompleted ? "outlined" : isInProgress ? "feature" : "default"} 
+      className={cn("overflow-hidden transition-all duration-[var(--duration-normal)]", className)}
+    >
       {/* Section Header */}
-      <div 
-        className="p-6 cursor-pointer hover:bg-mist-gray/5 transition-colors"
+      <button
+        className="w-full p-[var(--spacing-lg)] cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors duration-[var(--duration-normal)]"
         onClick={handleToggle}
       >
-        <div className="flex items-start gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mt-1"
-          >
+        <div className="flex items-start gap-[var(--spacing-md)]">
+          <div className="mt-1">
             {expanded ? (
-              <ChevronDown className="w-5 h-5" />
+              <ChevronDown className="w-5 h-5 text-[var(--text-tertiary)]" />
             ) : (
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-5 h-5 text-[var(--text-tertiary)]" />
             )}
-          </Button>
+          </div>
 
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <Badge variant="outline">Section {sectionNumber}</Badge>
-              {sectionProgress === 100 && (
-                <Badge className="bg-phosphor-cyan text-white">
+            <div className="flex items-center gap-[var(--spacing-sm)] mb-[var(--spacing-sm)]">
+              <Badge variant="default">Section {sectionNumber}</Badge>
+              {isCompleted && (
+                <Badge className="bg-[var(--text-success)] text-[var(--text-inverse)]">
+                  <CheckCircle className="w-3 h-3 mr-[var(--spacing-xs)]" />
                   Completed
+                </Badge>
+              )}
+              {isInProgress && (
+                <Badge variant="info">
+                  In Progress
                 </Badge>
               )}
             </div>
             
-            <h3 className="text-2xl font-display font-bold text-deep-space mb-2">
+            <h3 className="text-[var(--font-size-xl)] font-[var(--font-weight-bold)] text-[var(--text-primary)] mb-[var(--spacing-sm)] text-left">
               {section.title}
             </h3>
             
-            <p className="text-stone-gray mb-4">
+            <p className="text-[var(--text-secondary)] mb-[var(--spacing-md)] text-left">
               {section.description}
             </p>
 
             {/* Section Stats */}
-            <div className="flex items-center gap-6 text-sm text-stone-gray mb-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-[var(--spacing-lg)] text-[var(--font-size-sm)] text-[var(--text-tertiary)] mb-[var(--spacing-md)]">
+              <div className="flex items-center gap-[var(--spacing-sm)]">
                 <BookOpen className="w-4 h-4" />
                 <span>{section.lessons.length} lessons</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-[var(--spacing-sm)]">
                 <Target className="w-4 h-4" />
                 <span>{totalPoints} knowledge points</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-[var(--spacing-sm)]">
                 <Clock className="w-4 h-4" />
                 <span>{totalTime} min total</span>
               </div>
@@ -106,24 +115,39 @@ export function CourseSection({
 
             {/* Progress Bar */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-stone-gray">
+              <div className="flex items-center justify-between mb-[var(--spacing-sm)]">
+                <span className="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-[var(--text-secondary)]">
                   Section Progress
                 </span>
-                <span className="text-sm font-bold text-cosmic-purple">
+                <span className="text-[var(--font-size-sm)] font-[var(--font-weight-bold)] text-[var(--text-brand)]">
                   {Math.round(sectionProgress)}%
                 </span>
               </div>
               <Progress value={sectionProgress} className="h-2" />
             </div>
           </div>
+
+          {/* Action Button for collapsed state */}
+          {!expanded && sectionProgress < 100 && (
+            <Button
+              size="sm"
+              variant={sectionProgress > 0 ? "secondary" : "primary"}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleToggle()
+              }}
+            >
+              <Play className="w-4 h-4 mr-[var(--spacing-sm)]" />
+              {sectionProgress > 0 ? 'Continue' : 'Start'}
+            </Button>
+          )}
         </div>
-      </div>
+      </button>
 
       {/* Lessons */}
       {expanded && (
-        <div className="border-t border-mist-gray/20 p-6 bg-mist-gray/5">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="border-t border-[var(--border-subtle)] p-[var(--spacing-lg)] bg-[var(--bg-secondary)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-md)]">
             {section.lessons.map((lesson, index) => (
               <LessonCard
                 key={lesson.id}
@@ -137,6 +161,6 @@ export function CourseSection({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

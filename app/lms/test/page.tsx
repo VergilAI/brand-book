@@ -6,7 +6,7 @@ import { TestInterface } from '@/components/TestInterface'
 export default function TestPage() {
   return (
     <div className="min-h-screen bg-vergil-off-white">
-      <LMSHeader currentView="test" />
+      <LMSHeader currentView="course" onMenuToggle={() => {}} />
       <main className="w-full">
         <TestInterface />
       </main>

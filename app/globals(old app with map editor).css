@@ -1,0 +1,413 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "../generated/tokens.css";
+
+/* Vergil Brand Design Tokens */
+:root {
+  /* Primary Palette */
+  --cosmic-purple: #6366F1;
+  --electric-violet: #A78BFA;
+  --luminous-indigo: #818CF8;
+
+  /* Accent Colors */
+  --phosphor-cyan: #10B981;
+  --synaptic-blue: #3B82F6;
+  --neural-pink: #F472B6;
+
+  /* Foundation Colors */
+  --pure-light: #FFFFFF;
+  --soft-light: #FAFAFA;
+  --whisper-gray: #F8F9FA;
+  --mist-gray: #E5E7EB;
+  --stone-gray: #9CA3AF;
+  --deep-space: #0F172A;
+
+  /* Legacy tokens for backward compatibility */
+  --vergil-purple-500: #6366F1;
+  --vergil-violet-500: #A78BFA;
+  --vergil-indigo-500: #818CF8;
+  --vergil-cyan-500: #10B981;
+  --vergil-blue-500: #3B82F6;
+  
+  /* Additional colors */
+  --luminous-gold: #F59E0B;
+  --vivid-red: #EF4444;
+  --midnight-black: #1E293B;
+  
+  /* Selection & Hover States */
+  --selection-purple: #8B5CF6; /* Used in drawing tools for hover/selection */
+  --selection-primary: #6366F1; /* Used for primary selection */
+  
+  /* Grays - Tailwind defaults being used locally */
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  
+  /* Tool-specific colors */
+  --map-selection: #8B5CF6; /* Map editor selection state */
+  --drawing-selection: #8B5CF6; /* Drawing tool selection */
+  --bezier-handle: #8B5CF6; /* Bezier curve handles */
+  --territory-player6: #8B5CF6; /* LMS territory game player 6 */
+  --vertex-selected: #1E40AF; /* Selected vertices in editors */
+  --snap-center: #FF6600; /* Center snap indicator */
+  
+  /* One-off colors that need semantic names */
+  --orange-brand: #FF6600;
+  --blue-dark: #1E40AF;
+  --blue-bright: #0066FF;
+  --blue-light: #60A5FA;
+  --blue-gray: #94A3B8;
+  --blue-medium: #2563EB;
+  --cyan-bright: #06B6D4;
+  
+  /* 
+   * Brand Book v2 Colors - Now imported from generated/tokens.css
+   * The following are aliased for backwards compatibility:
+   */
+  --vergil-purple: var(--vergil-colors-brand-purple);
+  --vergil-purple-light: var(--vergil-colors-brand-purple-light);
+  --vergil-purple-lighter: var(--vergil-colors-brand-purple-lighter);
+  --vergil-purple-lightest: var(--vergil-colors-brand-purple-lightest);
+  --cosmic-purple: #6366F1; /* DEPRECATED - Legacy v1 purple, use vergil-purple instead */
+  
+  /* Neutral Palette - Aliased from token system */
+  --vergil-full-black: var(--vergil-colors-neutral-black);
+  --vergil-off-black: var(--vergil-colors-neutral-off-black);
+  --vergil-full-white: var(--vergil-colors-neutral-white);
+  --vergil-off-white: var(--vergil-colors-neutral-off-white);
+  
+  /* Emphasis Colors - Aliased from token system */
+  --vergil-footnote-text: var(--vergil-colors-emphasis-footnote);
+  --vergil-emphasis-bg: var(--vergil-colors-emphasis-bg);
+  --vergil-emphasis-input-bg: var(--vergil-colors-emphasis-input-bg);
+  --vergil-emphasis-text: var(--vergil-colors-emphasis-text);
+  --vergil-emphasis-input-text: var(--vergil-colors-emphasis-input-text);
+  --vergil-emphasis-button-hover: var(--vergil-colors-emphasis-button-hover);
+  
+  /* Functional Colors - Aliased from token system */
+  --vergil-success: var(--vergil-colors-functional-success);
+  --vergil-error: var(--vergil-colors-functional-error);
+  --vergil-warning: var(--vergil-colors-functional-warning);
+  --vergil-info: var(--vergil-colors-functional-info);
+  
+  /* Pure colors for backwards compatibility */
+  --pure-black: #000000;
+  --pure-white: #FFFFFF;
+
+  /* Typography scale */
+  --font-display: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+
+  /* Timing functions */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-natural: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* Vergil Brand → shadcn/ui token mapping */
+  --vergil-primary: var(--cosmic-purple);
+  --vergil-secondary: var(--electric-violet);
+  --vergil-accent: var(--luminous-indigo);
+  --vergil-success: var(--phosphor-cyan);
+  --vergil-info: var(--synaptic-blue);
+  --vergil-warning: var(--neural-pink);
+  --radius: 0.625rem;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 240 100% 70%; /* cosmic-purple */
+  --primary-foreground: 0 0% 100%; /* pure-light */
+  --secondary: 270 100% 84%; /* electric-violet */
+  --secondary-foreground: 226 43% 10%; /* deep-space */
+  --muted: 220 13% 98%; /* whisper-gray */
+  --muted-foreground: 215 14% 65%; /* stone-gray */
+  --accent: 234 89% 74%; /* luminous-indigo */
+  --accent-foreground: 0 0% 100%; /* pure-light */
+  --destructive: 330 91% 71%; /* neural-pink */
+  --border: 0 0% 92%;
+  --input: 0 0% 92%;
+  --ring: 0 0% 71%;
+  --chart-1: 30 67% 61%;
+  --chart-2: 185 48% 50%;
+  --chart-3: 227 39% 35%;
+  --chart-4: 84 79% 75%;
+  --chart-5: 70 60% 70%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 0 0% 9%;
+  --sidebar-primary: 0 0% 13%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 97%;
+  --sidebar-accent-foreground: 0 0% 13%;
+  --sidebar-border: 0 0% 92%;
+  --sidebar-ring: 0 0% 71%;
+}
+
+body {
+  font-family: Inter, system-ui, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Custom Utility Classes */
+.vergil-breathing {
+  animation: breathing 4s ease-in-out infinite;
+}
+
+.vergil-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.vergil-gradient {
+  background: linear-gradient(135deg, var(--cosmic-purple), var(--electric-violet), var(--luminous-indigo));
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Brand Gradient System */
+.consciousness-gradient {
+  background: linear-gradient(135deg, var(--cosmic-purple) 0%, var(--electric-violet) 50%, var(--luminous-indigo) 100%);
+}
+
+.awakening-gradient {
+  background: linear-gradient(90deg, var(--cosmic-purple) 0%, var(--synaptic-blue) 100%);
+}
+
+.synaptic-gradient {
+  background: linear-gradient(135deg, var(--electric-violet) 0%, var(--neural-pink) 100%);
+}
+
+.light-ray-gradient {
+  background: radial-gradient(circle at center, rgba(99,102,241,0.2) 0%, transparent 70%);
+}
+
+
+/* Brand Keyframe Animations */
+@keyframes breathing {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.03); opacity: 1; }
+}
+
+@keyframes energy-flow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes synaptic-pulse {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.3; transform: scale(0.8); }
+}
+
+@keyframes neural-flow {
+  0% { stroke-dashoffset: 100; opacity: 0; }
+  50% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+
+/* Iris Rays Animations */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+
+/* Blob Animation */
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+/* Energy Flow Effect for Graph Relationships */
+.energy-flow {
+  stroke-dasharray: 12 12;
+  animation: energy-flow 1s linear infinite;
+}
+
+/* Card Design System */
+.brand-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 24px rgba(99, 102, 241, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+.brand-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 32px rgba(99, 102, 241, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--cosmic-purple) 0%, var(--electric-violet) 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.3s var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Typography Classes */
+.gradient-text {
+  background: linear-gradient(135deg, var(--cosmic-purple), var(--electric-violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark {
+  --background: 0 0% 9%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 13%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 13%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 240 100% 70%; /* cosmic-purple */
+  --primary-foreground: 0 0% 100%; /* pure-light */
+  --secondary: 0 0% 17%; /* dark surface */
+  --secondary-foreground: 270 100% 84%; /* electric-violet */
+  --muted: 0 0% 17%; /* dark surface */
+  --muted-foreground: 0 0% 71%;
+  --accent: 234 89% 74%; /* luminous-indigo */
+  --accent-foreground: 0 0% 100%; /* pure-light */
+  --destructive: 330 91% 71%; /* neural-pink */
+  --border: 0 0% 100% / 10%;
+  --input: 0 0% 100% / 15%;
+  --ring: 0 0% 56%;
+  --chart-1: 264 84% 60%;
+  --chart-2: 162 52% 65%;
+  --chart-3: 70 60% 70%;
+  --chart-4: 304 89% 67%;
+  --chart-5: 16 96% 61%;
+  --sidebar: 0 0% 13%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 264 84% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 17%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 0 0% 100% / 10%;
+  --sidebar-ring: 0 0% 56%;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Carousel Smooth Scrolling Enhancement */
+body.carousel-active {
+  scroll-behavior: smooth;
+  /* Improves momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth scroll snap for sections */
+[data-carousel-section] {
+  scroll-snap-align: start;
+  scroll-margin-top: 0;
+}
+
+/* Prevent janky scrolling during carousel */
+body.carousel-active::-webkit-scrollbar {
+  width: 12px;
+}
+
+body.carousel-active::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.carousel-active::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+body.carousel-active::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* Smooth transitions for carousel elements */
+@media (prefers-reduced-motion: no-preference) {
+  body.carousel-active * {
+    scroll-behavior: smooth;
+  }
+}

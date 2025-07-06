@@ -53,7 +53,7 @@ export function MillionaireLifelines({
           transition={{ delay: index * 0.05 }}
         >
           <Button
-            variant="outline"
+            variant="secondary"
             size="default"
             onClick={() => onUseLifeline(lifeline.id)}
             disabled={disabled || lifeline.used}

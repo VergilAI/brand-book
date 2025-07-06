@@ -17,13 +17,14 @@ import {
   CheckCircle,
   Circle,
   Lock,
-  Calendar
+  Calendar,
+  BarChart
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
 import { Progress } from '@/components/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/atomic/avatar'
 import { cn } from '@/lib/utils'
 
 interface CourseDetailProps {
@@ -316,29 +317,29 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
     }
   }
 
-  const getTypeColor = (type: Lesson['type']) => {
+  const getTypeBadgeVariant = (type: Lesson['type']) => {
     switch (type) {
       case 'lesson':
-        return 'bg-cosmic-purple text-white'
+        return 'default'
       case 'test':
-        return 'bg-electric-violet text-white'
+        return 'info'
       case 'game':
-        return 'bg-phosphor-cyan text-white'
+        return 'brand'
       case 'material':
-        return 'bg-neural-pink text-white'
+        return 'default'
       default:
-        return 'bg-cosmic-purple text-white'
+        return 'default'
     }
   }
 
-  const getDifficultyColor = (difficulty: Course['difficulty']) => {
+  const getDifficultyBadgeVariant = (difficulty: Course['difficulty']) => {
     switch (difficulty) {
       case 'beginner':
-        return 'bg-green-100 text-green-800'
+        return 'success'
       case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'warning'
       case 'advanced':
-        return 'bg-red-100 text-red-800'
+        return 'error'
     }
   }
 
@@ -348,76 +349,84 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
   )
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-[var(--spacing-xl)]">
       {/* Course header */}
-      <div className="space-y-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="lg:w-96 bg-gradient-to-br from-cosmic-purple/20 to-electric-violet/20 rounded-lg p-8 flex items-center justify-center">
-            <Book className="h-24 w-24 text-cosmic-purple" />
-          </div>
+      <div className="space-y-[var(--spacing-lg)]">
+        <div className="flex flex-col lg:flex-row gap-[var(--spacing-lg)]">
+          <Card variant="gradient" className="lg:w-96 flex items-center justify-center">
+            <Book className="h-24 w-24" />
+          </Card>
           
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-[var(--spacing-md)]">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-3xl font-bold">{course.title}</h1>
-                <p className="text-muted-foreground text-lg">{course.description}</p>
+                <h1 className="text-[var(--font-size-3xl)] font-[var(--font-weight-bold)] tracking-[var(--letter-spacing-tight)]">
+                  {course.title}
+                </h1>
+                <p className="text-[var(--text-secondary)] text-[var(--font-size-lg)] mt-[var(--spacing-sm)]">
+                  {course.description}
+                </p>
               </div>
-              <Badge className={getDifficultyColor(course.difficulty)}>
+              <Badge variant={getDifficultyBadgeVariant(course.difficulty)}>
                 {course.difficulty}
               </Badge>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-[var(--spacing-md)] text-[var(--font-size-sm)]">
+              <div className="flex items-center gap-[var(--spacing-sm)]">
+                <Clock className="h-4 w-4 text-[var(--text-tertiary)]" />
                 <span>{course.estimatedTime}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-[var(--spacing-sm)]">
+                <Users className="h-4 w-4 text-[var(--text-tertiary)]" />
                 <span>{course.enrolledStudents.toLocaleString()}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <div className="flex items-center gap-[var(--spacing-sm)]">
+                <Star className="h-4 w-4 fill-[var(--color-yellow-500)] text-[var(--color-yellow-500)]" />
                 <span>{course.rating}/5</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-[var(--spacing-sm)]">
+                <Award className="h-4 w-4 text-[var(--text-tertiary)]" />
                 <span>Certificate</span>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
+            <div className="space-y-[var(--spacing-sm)]">
+              <div className="flex items-center justify-between text-[var(--font-size-sm)]">
                 <span>Course Progress</span>
-                <span>{course.progress}% ({completedLessons}/{totalLessons} lessons)</span>
+                <span className="font-[var(--font-weight-medium)]">
+                  {course.progress}% ({completedLessons}/{totalLessons} lessons)
+                </span>
               </div>
               <Progress value={course.progress} className="h-3" />
             </div>
 
-            <Button size="lg" className="bg-cosmic-purple hover:bg-cosmic-purple/90">
-              <Play className="h-5 w-5 mr-2" />
+            <Button size="lg" className="bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)]">
+              <Play className="h-5 w-5 mr-[var(--spacing-sm)]" />
               Continue Learning
             </Button>
           </div>
         </div>
 
         {/* Instructor info */}
-        <Card>
+        <Card variant="default">
           <CardHeader>
             <CardTitle>Meet Your Instructor</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-[var(--spacing-md)]">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
-                <AvatarFallback className="bg-gradient-to-br from-cosmic-purple to-electric-violet text-white text-lg">
+                <AvatarFallback className="bg-[var(--gradient-consciousness)] text-[var(--text-inverse)] text-[var(--font-size-lg)]">
                   {course.instructor.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg">{course.instructor.name}</h3>
-                <p className="text-muted-foreground">{course.instructor.title}</p>
-                <p className="text-sm mt-2">{course.instructor.bio}</p>
+                <h3 className="font-[var(--font-weight-semibold)] text-[var(--font-size-lg)]">
+                  {course.instructor.name}
+                </h3>
+                <p className="text-[var(--text-secondary)]">{course.instructor.title}</p>
+                <p className="text-[var(--font-size-sm)] mt-[var(--spacing-sm)]">{course.instructor.bio}</p>
               </div>
             </div>
           </CardContent>
@@ -425,34 +434,40 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
       </div>
 
       {/* Course content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[var(--spacing-xl)]">
+        <div className="lg:col-span-2 space-y-[var(--spacing-lg)]">
           <div>
-            <h2 className="text-2xl font-bold mb-4">Course Content</h2>
-            <div className="space-y-4">
+            <h2 className="text-[var(--font-size-2xl)] font-[var(--font-weight-bold)] mb-[var(--spacing-md)]">
+              Course Content
+            </h2>
+            <div className="space-y-[var(--spacing-md)]">
               {course.sections.map((section, sectionIndex) => (
-                <Card key={section.id} className="overflow-hidden">
+                <Card key={section.id} variant="interactive" className="overflow-hidden">
                   <button
                     onClick={() => toggleSection(section.id)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    className="w-full p-[var(--spacing-lg)] flex items-center justify-between hover:bg-[var(--bg-secondary)] transition-colors duration-[var(--duration-normal)]"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-[var(--spacing-md)]">
                       {section.expanded ? (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        <ChevronDown className="h-5 w-5 text-[var(--text-tertiary)]" />
                       ) : (
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        <ChevronRight className="h-5 w-5 text-[var(--text-tertiary)]" />
                       )}
                       <div className="text-left">
-                        <h3 className="font-semibold">{sectionIndex + 1}. {section.title}</h3>
-                        <p className="text-sm text-muted-foreground">{section.description}</p>
-                        <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                        <h3 className="font-[var(--font-weight-semibold)] text-[var(--font-size-base)]">
+                          {sectionIndex + 1}. {section.title}
+                        </h3>
+                        <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">
+                          {section.description}
+                        </p>
+                        <div className="flex items-center gap-[var(--spacing-md)] mt-[var(--spacing-xs)] text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
                           <span>{section.lessons.length} lessons</span>
                           <span>{section.estimatedTime}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-[var(--spacing-md)]">
+                      <div className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">
                         {section.progress}%
                       </div>
                       <div className="relative w-10 h-10">
@@ -464,7 +479,7 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="3"
-                            className="text-muted-foreground/20"
+                            className="text-[var(--border-subtle)]"
                           />
                           <path
                             d="M18 2.0845
@@ -474,7 +489,7 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
                             stroke="currentColor"
                             strokeWidth="3"
                             strokeDasharray={`${section.progress}, 100`}
-                            className="text-cosmic-purple"
+                            className="text-[var(--text-brand)]"
                           />
                         </svg>
                       </div>
@@ -482,44 +497,42 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
                   </button>
 
                   {section.expanded && (
-                    <div className="border-t">
+                    <div className="border-t border-[var(--border-subtle)]">
                       {section.lessons.map((lesson, lessonIndex) => {
                         const Icon = getIcon(lesson.type)
                         return (
                           <div
                             key={lesson.id}
                             className={cn(
-                              "flex items-center gap-4 p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors",
+                              "flex items-center gap-[var(--spacing-md)] p-[var(--spacing-lg)] border-b border-[var(--border-subtle)] last:border-b-0 hover:bg-[var(--bg-secondary)] transition-colors duration-[var(--duration-normal)]",
                               lesson.locked && "opacity-50"
                             )}
                           >
                             <div className="flex-shrink-0">
                               {lesson.locked ? (
-                                <Lock className="h-5 w-5 text-muted-foreground" />
+                                <Lock className="h-5 w-5 text-[var(--text-tertiary)]" />
                               ) : lesson.completed ? (
-                                <CheckCircle className="h-5 w-5 text-green-600" />
+                                <CheckCircle className="h-5 w-5 text-[var(--text-success)]" />
                               ) : (
-                                <Circle className="h-5 w-5 text-muted-foreground" />
+                                <Circle className="h-5 w-5 text-[var(--text-tertiary)]" />
                               )}
                             </div>
 
-                            <div className={cn(
-                              "flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium",
-                              getTypeColor(lesson.type)
-                            )}>
-                              <Icon className="h-4 w-4" />
+                            <div className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-full)] bg-[var(--bg-emphasis)]">
+                              <Icon className="h-4 w-4 text-[var(--text-brand)]" />
                             </div>
 
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-medium truncate">
+                              <h4 className="font-[var(--font-weight-medium)] truncate">
                                 {sectionIndex + 1}.{lessonIndex + 1} {lesson.title}
                               </h4>
-                              <p className="text-sm text-muted-foreground line-clamp-1">
+                              <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)] line-clamp-1">
                                 {lesson.description}
                               </p>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                                <span className="capitalize">{lesson.type}</span>
-                                <span>•</span>
+                              <div className="flex items-center gap-[var(--spacing-sm)] mt-[var(--spacing-xs)] text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
+                                <Badge variant={getTypeBadgeVariant(lesson.type)} className="text-[var(--font-size-xs)]">
+                                  {lesson.type}
+                                </Badge>
                                 <Clock className="h-3 w-3" />
                                 <span>{lesson.duration}</span>
                               </div>
@@ -527,9 +540,9 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
 
                             {!lesson.locked && (
                               <Button 
-                                variant={lesson.completed ? "outline" : "default"}
+                                variant={lesson.completed ? "secondary" : "primary"}
                                 size="sm"
-                                className={!lesson.completed ? "bg-cosmic-purple hover:bg-cosmic-purple/90" : ""}
+                                className={!lesson.completed ? "bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)]" : ""}
                                 onClick={() => {
                                   if (lesson.type === 'lesson') {
                                     window.location.href = `/lms/course/${courseId}/lesson/${lesson.id}`
@@ -542,12 +555,12 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
                               >
                                 {lesson.completed ? (
                                   <>
-                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    <CheckCircle className="h-4 w-4 mr-[var(--spacing-sm)]" />
                                     Review
                                   </>
                                 ) : (
                                   <>
-                                    <Play className="h-4 w-4 mr-2" />
+                                    <Play className="h-4 w-4 mr-[var(--spacing-sm)]" />
                                     Start
                                   </>
                                 )}
@@ -565,17 +578,17 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-[var(--spacing-lg)]">
           {/* Learning objectives */}
-          <Card>
+          <Card variant="feature">
             <CardHeader>
               <CardTitle>What You'll Learn</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
+              <ul className="space-y-[var(--spacing-sm)]">
                 {course.learningObjectives.map((objective, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <li key={index} className="flex items-start gap-[var(--spacing-sm)] text-[var(--font-size-sm)]">
+                    <CheckCircle className="h-4 w-4 text-[var(--text-success)] mt-0.5 flex-shrink-0" />
                     <span>{objective}</span>
                   </li>
                 ))}
@@ -585,41 +598,41 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
 
           {/* Certificate */}
           {course.certificate.available && (
-            <Card>
+            <Card variant="outlined">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-[var(--spacing-sm)]">
                   <Award className="h-5 w-5" />
                   Certificate
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {course.certificate.earned ? (
-                  <div className="space-y-3">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center gap-2 text-green-800">
+                  <div className="space-y-[var(--spacing-md)]">
+                    <div className="p-[var(--spacing-md)] bg-[var(--bg-successLight)] border border-[var(--border-success)] rounded-[var(--radius-md)]">
+                      <div className="flex items-center gap-[var(--spacing-sm)] text-[var(--text-success)]">
                         <Award className="h-5 w-5" />
-                        <span className="font-medium">Certificate Earned!</span>
+                        <span className="font-[var(--font-weight-medium)]">Certificate Earned!</span>
                       </div>
-                      <p className="text-sm text-green-700 mt-1">
+                      <p className="text-[var(--font-size-sm)] text-[var(--text-success)] mt-[var(--spacing-xs)]">
                         Congratulations on completing {course.title}
                       </p>
                     </div>
                     <Button className="w-full">
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-4 w-4 mr-[var(--spacing-sm)]" />
                       Download Certificate
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground">
+                  <div className="space-y-[var(--spacing-md)]">
+                    <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">
                       Complete all lessons to earn your {course.certificate.title}
                     </p>
-                    <div className="p-4 bg-gray-50 border rounded-lg">
-                      <div className="flex items-center justify-between text-sm">
+                    <div className="p-[var(--spacing-md)] bg-[var(--bg-secondary)] border border-[var(--border-subtle)] rounded-[var(--radius-md)]">
+                      <div className="flex items-center justify-between text-[var(--font-size-sm)]">
                         <span>Progress to certificate</span>
                         <span>{course.progress}%</span>
                       </div>
-                      <Progress value={course.progress} className="mt-2 h-2" />
+                      <Progress value={course.progress} className="mt-[var(--spacing-sm)] h-2" />
                     </div>
                   </div>
                 )}
@@ -628,32 +641,32 @@ export function CourseDetail({ courseId }: CourseDetailProps) {
           )}
 
           {/* Course details */}
-          <Card>
+          <Card variant="default">
             <CardHeader>
               <CardTitle>Course Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+            <CardContent className="space-y-[var(--spacing-md)]">
+              <div className="grid grid-cols-2 gap-[var(--spacing-md)] text-[var(--font-size-sm)]">
                 <div>
-                  <div className="text-muted-foreground">Duration</div>
-                  <div className="font-medium">{course.estimatedTime}</div>
+                  <div className="text-[var(--text-secondary)]">Duration</div>
+                  <div className="font-[var(--font-weight-medium)]">{course.estimatedTime}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Lessons</div>
-                  <div className="font-medium">{totalLessons}</div>
+                  <div className="text-[var(--text-secondary)]">Lessons</div>
+                  <div className="font-[var(--font-weight-medium)]">{totalLessons}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Students</div>
-                  <div className="font-medium">{course.enrolledStudents.toLocaleString()}</div>
+                  <div className="text-[var(--text-secondary)]">Students</div>
+                  <div className="font-[var(--font-weight-medium)]">{course.enrolledStudents.toLocaleString()}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Category</div>
-                  <div className="font-medium">{course.category}</div>
+                  <div className="text-[var(--text-secondary)]">Category</div>
+                  <div className="font-[var(--font-weight-medium)]">{course.category}</div>
                 </div>
               </div>
               
-              <div className="pt-4 border-t">
-                <p className="text-sm text-muted-foreground">
+              <div className="pt-[var(--spacing-md)] border-t border-[var(--border-subtle)]">
+                <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">
                   {course.longDescription}
                 </p>
               </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from '@/components/select'
 import { Badge } from '@/components/badge'
+import { Progress } from '@/components/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs'
 import {
   DropdownMenu,
@@ -45,7 +46,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/dropdown-menu'
-import { mockUsers, getRoleName } from '@/lib/lms/mock-data'
+import { mockUsers, getRoleName, type User } from '@/lib/lms/mock-data'
 import { initialRoles } from '@/lib/lms/roles-data'
 
 
@@ -173,7 +174,7 @@ export default function UserDetailPage() {
     role: getRoleName(user.roleId, initialRoles).toLowerCase(),
     roleId: user.roleId,
     location: 'San Francisco, CA',
-    department: userRole?.department || 'Not assigned',
+    department: 'Not assigned',
     manager: getManager(),
     status: getUserStatus(),
     overallProgress: user.completionRate || user.overallProgress || 0
@@ -256,16 +257,17 @@ export default function UserDetailPage() {
       case 'lesson_completed': return <BookOpen className="w-4 h-4" />
       case 'test_passed': return <TrendingUp className="w-4 h-4" />
       case 'certificate_earned': return <Award className="w-4 h-4" />
+      default: return <BookOpen className="w-4 h-4" />
     }
   }
 
   return (
-    <div className="min-h-screen bg-vergil-off-white">
+    <div className="min-h-screen bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+       
         <UserManagementHeader />
         
-        {/* Back button */}
+       
         <div className="mb-6">
           <Link href="/lms/user-management" className="inline-flex items-center gap-2 text-vergil-off-black/60 hover:text-vergil-off-black transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -273,12 +275,12 @@ export default function UserDetailPage() {
           </Link>
         </div>
         
-        {/* User Card */}
+       
         <div className="mb-8">
-          <div className="bg-white rounded-xl border border-vergil-off-black/10 p-8">
+          <div className="bg-primary rounded-xl border border-subtle p-spacing-xl">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-6">
-                <div className="w-24 h-24 rounded-full bg-vergil-purple flex items-center justify-center text-vergil-off-white text-3xl font-semibold shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-brand flex items-center justify-center text-inverse text-3xl font-semibold shadow-lg">
                   {userData.avatar ? (
                     <Image src={userData.avatar} alt={userData.name} width={96} height={96} className="rounded-full" />
                   ) : (
@@ -286,21 +288,17 @@ export default function UserDetailPage() {
                   )}
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-vergil-off-black mb-2">{userData.name}</h1>
-                  <p className="text-lg font-medium text-vergil-off-black/70 mb-3">{userRole?.name || 'Employee'} • {userData.department}</p>
+                  <h1 className="text-3xl font-bold text-primary mb-spacing-xs">{userData.name}</h1>
+                  <p className="text-lg font-medium text-secondary mb-spacing-sm">{userRole?.name || 'Employee'}</p>
                   <div className="flex items-center gap-4">
                     <Badge 
-                      variant="default" 
-                      className={`text-xs ${
-                        userData.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        userData.status === 'inactive' ? 'bg-orange-100 text-orange-800 border-orange-300' :
-                        'bg-red-100 text-red-700 border-red-200'
-                      }`}
+                      variant={userData.status === 'active' ? 'success' : userData.status === 'inactive' ? 'warning' : 'destructive'}
+                      className="text-xs"
                     >
                       {userData.status}
                     </Badge>
                     {userData.severity === 'high' && (
-                      <Badge variant="default" className="bg-red-100 text-red-700 border-red-200 text-xs">
+                      <Badge variant="destructive" className="text-xs">
                         <AlertTriangle className="w-3 h-3 mr-1" />
                         High Priority
                       </Badge>
@@ -313,7 +311,7 @@ export default function UserDetailPage() {
               <div className="flex gap-2">
                 {isEditing ? (
                   <>
-                    <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                    <Button variant="secondary" onClick={() => setIsEditing(false)}>Cancel</Button>
                     <Button onClick={handleSave} className="bg-vergil-purple hover:bg-vergil-purple/90">
                       <Save className="w-4 h-4 mr-2" />
                       Save Changes
@@ -322,7 +320,7 @@ export default function UserDetailPage() {
                 ) : (
                   <>
                     <Button 
-                      variant="outline" 
+                      variant="secondary" 
                       onClick={() => window.location.href = `mailto:${userData.email}?subject=Training%20Progress%20Update`}
                       className="border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20"
                     >
@@ -330,7 +328,7 @@ export default function UserDetailPage() {
                       Send Email
                     </Button>
                     <Button 
-                      variant="outline" 
+                      variant="secondary" 
                       onClick={() => window.location.href = `slack://user?team=T12345&id=${userData.id}`}
                       className="border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20"
                     >
@@ -339,7 +337,7 @@ export default function UserDetailPage() {
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="border-vergil-off-black/10">
+                        <Button variant="secondary" className="border-vergil-off-black/10">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -370,7 +368,7 @@ export default function UserDetailPage() {
           </div>
         </div>
 
-        {/* Tabs */}
+       
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -381,7 +379,7 @@ export default function UserDetailPage() {
 
           <TabsContent value="overview">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Contact Information */}
+             
               <Card className="border-vergil-off-black/10">
                 <div className="p-6">
                   <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Contact Information</h2>
@@ -422,9 +420,9 @@ export default function UserDetailPage() {
                         <div className="flex-1">
                           <p className="text-xs text-vergil-off-black/60 mb-1">Location</p>
                           {isEditing ? (
-                            <Input value={userData.location || ''} onChange={(e) => setUserData({...userData, location: e.target.value})} className="h-8" />
+                            <Input value={(userData as any).location || ''} onChange={(e) => setUserData({...userData, location: e.target.value} as any)} className="h-8" />
                           ) : (
-                            <p className="text-sm font-medium text-vergil-off-black">{userData.location || 'Not provided'}</p>
+                            <p className="text-sm font-medium text-vergil-off-black">{(userData as any).location || 'Not provided'}</p>
                           )}
                         </div>
                       </div>
@@ -436,9 +434,9 @@ export default function UserDetailPage() {
                         <div className="flex-1">
                           <p className="text-xs text-vergil-off-black/60 mb-1">Manager</p>
                           {isEditing ? (
-                            <Input value={userData.manager || ''} onChange={(e) => setUserData({...userData, manager: e.target.value})} className="h-8" />
+                            <Input value={(userData as any).manager || ''} onChange={(e) => setUserData({...userData, manager: e.target.value} as any)} className="h-8" />
                           ) : (
-                            <p className="text-sm font-medium text-vergil-off-black">{userData.manager || 'Not assigned'}</p>
+                            <p className="text-sm font-medium text-vergil-off-black">{(userData as any).manager || 'Not assigned'}</p>
                           )}
                         </div>
                       </div>
@@ -446,12 +444,12 @@ export default function UserDetailPage() {
                   </div>
                 </Card>
               
-              {/* Progress Overview */}
+             
               <Card className="border-vergil-off-black/10">
                 <div className="p-6">
                   <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Progress Overview</h2>
                     
-                    {/* Overall Progress */}
+                   
                     <div className="mb-6">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium text-vergil-off-black">Overall Progress</span>
@@ -462,37 +460,28 @@ export default function UserDetailPage() {
                           {userData.overallProgress}%
                         </span>
                       </div>
-                      <div className="w-full bg-vergil-off-black/10 rounded-full h-3">
-                        <div 
-                          className="h-3 rounded-full transition-all duration-500"
-                          style={{ 
-                            width: `${userData.overallProgress}%`,
-                            backgroundColor: userData.overallProgress >= 80 ? '#10B981' : 
-                                            userData.overallProgress >= 60 ? '#F59E0B' : '#EF4444'
-                          }}
-                        />
-                      </div>
+                      <Progress value={userData.overallProgress} className="h-3" />
                     </div>
                     
-                    {/* Course Stats */}
+                   
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-vergil-purple">{userData.coursesCompleted}</p>
-                        <p className="text-xs text-vergil-off-black/60">Completed</p>
+                      <div className="bg-emphasis rounded-lg p-spacing-sm text-center">
+                        <p className="text-2xl font-bold text-brand">{userData.coursesCompleted}</p>
+                        <p className="text-xs text-secondary">Completed</p>
                       </div>
-                      <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-blue-600">{userData.coursesEnrolled - userData.coursesCompleted}</p>
-                        <p className="text-xs text-vergil-off-black/60">In Progress</p>
+                      <div className="bg-emphasis rounded-lg p-spacing-sm text-center">
+                        <p className="text-2xl font-bold text-info">{userData.coursesEnrolled - userData.coursesCompleted}</p>
+                        <p className="text-xs text-secondary">In Progress</p>
                       </div>
-                      <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
-                        <p className="text-2xl font-bold text-vergil-off-black/40">{Math.max(0, 10 - userData.coursesEnrolled)}</p>
-                        <p className="text-xs text-vergil-off-black/60">Not Started</p>
+                      <div className="bg-emphasis rounded-lg p-spacing-sm text-center">
+                        <p className="text-2xl font-bold text-tertiary">{Math.max(0, 10 - userData.coursesEnrolled)}</p>
+                        <p className="text-xs text-secondary">Not Started</p>
                       </div>
                     </div>
                   </div>
                 </Card>
 
-              {/* Role & Status */}
+             
               <Card className="border-vergil-off-black/10">
                 <div className="p-6">
                   <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Role & Status</h2>
@@ -500,10 +489,15 @@ export default function UserDetailPage() {
                       <div>
                         <p className="text-xs text-vergil-off-black/60 mb-2">Role</p>
                         {isEditing ? (
-                          <Select value={userData.roleId} onValueChange={(value) => setUserData({...userData, roleId: value})} className="w-full">
-                            {initialRoles.map(role => (
-                              <option key={role.id} value={role.id}>{role.name}</option>
-                            ))}
+                          <Select value={userData.roleId} onValueChange={(value) => setUserData({...userData, roleId: value})}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {initialRoles.map(role => (
+                                <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                              ))}
+                            </SelectContent>
                           </Select>
                         ) : (
                           <p className="text-sm font-medium text-vergil-off-black">{userRole?.name || 'Employee'}</p>
@@ -513,10 +507,15 @@ export default function UserDetailPage() {
                       <div>
                         <p className="text-xs text-vergil-off-black/60 mb-2">Status</p>
                         {isEditing ? (
-                          <Select value={userData.status} onValueChange={(value) => setUserData({...userData, status: value as User['status']})} className="w-full">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="suspended">Suspended</option>
+                          <Select value={(userData as any).status} onValueChange={(value) => setUserData({...userData, status: value} as any)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="inactive">Inactive</SelectItem>
+                              <SelectItem value="suspended">Suspended</SelectItem>
+                            </SelectContent>
                           </Select>
                         ) : (
                           <Badge 
@@ -535,10 +534,15 @@ export default function UserDetailPage() {
                       <div>
                         <p className="text-xs text-vergil-off-black/60 mb-2">Training Priority</p>
                         {isEditing ? (
-                          <Select value={userData.severity} onValueChange={(value) => setUserData({...userData, severity: value as User['severity']})} className="w-full">
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
+                          <Select value={userData.severity} onValueChange={(value) => setUserData({...userData, severity: value} as any)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
                           </Select>
                         ) : (
                           <Badge 
@@ -559,25 +563,25 @@ export default function UserDetailPage() {
                 </Card>
             </div>
             
-            {/* Team Structure */}
+           
             <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Manager */}
+             
               <Card className="border-vergil-off-black/10">
                 <div className="p-6">
                   <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Manager</h2>
-                  {userData.manager ? (
+                  {(userData as any).manager ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-vergil-purple flex items-center justify-center text-vergil-off-white font-semibold">
-                          {userData.manager.split(' ').map(n => n[0]).join('')}
+                          {(userData as any).manager.split(' ').map((n: string) => n[0]).join('')}
                         </div>
                         <div>
-                          <p className="font-medium text-vergil-off-black">{userData.manager}</p>
+                          <p className="font-medium text-vergil-off-black">{(userData as any).manager}</p>
                           <p className="text-sm text-vergil-off-black/60">Manager</p>
                         </div>
                       </div>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => setShowAssignManagerModal(true)}
                         className="w-full"
@@ -590,7 +594,7 @@ export default function UserDetailPage() {
                     <div className="text-center py-8">
                       <p className="text-sm text-vergil-off-black/60 mb-4">No manager assigned</p>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => setShowAssignManagerModal(true)}
                         className="w-full"
@@ -603,13 +607,13 @@ export default function UserDetailPage() {
                 </div>
               </Card>
 
-              {/* Subordinates */}
+             
               <Card className="border-vergil-off-black/10">
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-vergil-off-black">Subordinates</h2>
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
                       onClick={() => setShowAssignSubordinateModal(true)}
                     >
@@ -685,22 +689,15 @@ export default function UserDetailPage() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <div className="flex-1 bg-vergil-off-black/10 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full transition-all ${
-                                course.status === 'completed' ? 'bg-emerald-500' : 'bg-vergil-purple'
-                              }`}
-                              style={{ width: `${course.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-semibold text-vergil-off-black min-w-[3ch]">
+                          <Progress value={course.progress} className="flex-1" />
+                          <span className="text-sm font-semibold text-primary min-w-[3ch]">
                             {course.progress}%
                           </span>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-vergil-off-black/60">
+                        <div className="flex items-center gap-4 text-xs text-secondary">
                           <span>Last accessed: {formatDateTime(course.lastAccessed)}</span>
                           {course.dueDate && (
-                            <span className="text-orange-600 font-medium">Due: {formatDate(course.dueDate)}</span>
+                            <span className="text-warning font-medium">Due: {formatDate(course.dueDate)}</span>
                           )}
                         </div>
                       </div>
@@ -712,16 +709,16 @@ export default function UserDetailPage() {
           </TabsContent>
 
           <TabsContent value="activity">
-            <Card className="border-vergil-off-black/10">
+            <Card className="border-subtle">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Recent Activity</h2>
+                <h2 className="text-lg font-semibold text-primary mb-spacing-md">Recent Activity</h2>
                 <div className="space-y-3">
                   {mockActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 p-4 bg-vergil-off-white/50 rounded-lg">
+                    <div key={activity.id} className="flex items-start gap-spacing-sm p-spacing-md bg-emphasis rounded-lg">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        activity.type === 'certificate_earned' ? 'bg-vergil-purple/10' :
-                        activity.type === 'test_passed' ? 'bg-emerald-100' :
-                        'bg-blue-100'
+                        activity.type === 'certificate_earned' ? 'bg-brandLight' :
+                        activity.type === 'test_passed' ? 'bg-successLight' :
+                        'bg-infoLight'
                       }`}>
                         <div className={`${
                           activity.type === 'certificate_earned' ? 'text-vergil-purple' :
@@ -755,13 +752,17 @@ export default function UserDetailPage() {
                       <p className="text-sm font-medium text-vergil-off-black mb-2">Account Status</p>
                       <div className="flex items-center gap-3">
                         <Select 
-                          value={userData.status} 
-                          onValueChange={(value) => setUserData({...userData, status: value as User['status']})}
-                          className="w-full"
+                          value={(userData as any).status} 
+                          onValueChange={(value) => setUserData({...userData, status: value} as any)}
                         >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="suspended">Suspended</option>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                            <SelectItem value="suspended">Suspended</SelectItem>
+                          </SelectContent>
                         </Select>
                       </div>
                     </div>
@@ -769,7 +770,7 @@ export default function UserDetailPage() {
                     <div className="pt-4 border-t border-vergil-off-black/10">
                       <p className="text-sm font-medium text-vergil-off-black mb-3">Security Actions</p>
                       <Button 
-                        variant="outline" 
+                        variant="secondary" 
                         className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20"
                       >
                         <Lock className="w-4 h-4 mr-2" />
@@ -787,7 +788,7 @@ export default function UserDetailPage() {
                     Deleting a user account is permanent and cannot be undone. All associated data will be lost.
                   </p>
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     className="text-red-600 border-red-300 hover:bg-red-100"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
@@ -799,7 +800,7 @@ export default function UserDetailPage() {
           </TabsContent>
         </Tabs>
         
-        {/* Assign Manager Modal */}
+       
         {showAssignManagerModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <Card className="w-full max-w-md">
@@ -876,7 +877,7 @@ export default function UserDetailPage() {
                 
                 <div className="flex gap-3 mt-6">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => {
                       setShowAssignManagerModal(false)
                       setSelectedManager('')
@@ -907,7 +908,7 @@ export default function UserDetailPage() {
           </div>
         )}
         
-        {/* Assign Subordinate Modal */}
+       
         {showAssignSubordinateModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <Card className="w-full max-w-md">
@@ -1007,7 +1008,7 @@ export default function UserDetailPage() {
                 
                 <div className="flex gap-3 mt-6">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => {
                       setShowAssignSubordinateModal(false)
                       setSelectedSubordinates([])

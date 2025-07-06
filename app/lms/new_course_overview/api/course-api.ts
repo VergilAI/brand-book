@@ -79,6 +79,12 @@ export const courseAPI = {
     
     // Load base course data
     const course = await loadJSON<Course>(`${DATA_BASE_PATH}/courses/${courseId}.json`)
+    
+    if (!course) {
+      console.error(`❌ Failed to load course ${courseId}`)
+      throw new Error(`Course ${courseId} not found`)
+    }
+    
     console.log(`📚 Base course data loaded for ${courseId}`)
     
     // Log the base proficiencies before merge

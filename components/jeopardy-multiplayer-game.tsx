@@ -256,7 +256,7 @@ export function JeopardyMultiplayerGame({
             {currentPlayer?.name}'s turn to choose
           </div>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={resetGame}
             className="text-stone-gray hover:text-deep-space"

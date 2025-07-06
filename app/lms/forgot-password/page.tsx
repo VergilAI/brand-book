@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
                     setIsSuccess(false)
                     setEmail('')
                   }}
-                  variant="outline"
+                  variant="secondary"
                   className="w-full"
                 >
                   Try different email
@@ -123,7 +123,7 @@ export default function ForgotPasswordPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="error">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}

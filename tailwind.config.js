@@ -167,6 +167,9 @@ module.exports = {
         'synaptic-pulse': 'synaptic-pulse 3s ease-in-out infinite',
         'neural-flow': 'neural-flow 2s linear infinite',
         'iris-pulse': 'iris-pulse 6s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+        'collapse-down': 'collapse-down 0.2s ease-out',
+        'collapse-up': 'collapse-up 0.2s ease-out',
       },
       keyframes: {
         breathing: {
@@ -196,6 +199,18 @@ module.exports = {
           '0%, 100%': { transform: 'scale(1)', opacity: '0.6' },
           '33%': { transform: 'scale(1.05)', opacity: '0.8' },
           '66%': { transform: 'scale(1.02)', opacity: '1' },
+        },
+        'shimmer': {
+          '0%': { transform: 'translateX(-200%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
+        'collapse-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-collapsible-content-height)' },
+        },
+        'collapse-up': {
+          from: { height: 'var(--radix-collapsible-content-height)' },
+          to: { height: '0' },
         },
       },
       transitionTimingFunction: {

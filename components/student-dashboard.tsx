@@ -1,451 +1,498 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Book, 
-  Play, 
+  Trophy, 
   Clock, 
   Award, 
   TrendingUp, 
-  Grid, 
-  List, 
-  Search, 
-  Filter,
+  Calendar,
+  CheckCircle,
+  AlertCircle,
+  Zap,
+  Target,
   Star,
+  ChevronRight,
   Users,
-  Calendar
+  BarChart,
+  Brain,
+  Sparkles
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/button'
-import { Input } from '@/components/input'
-import { Badge } from '@/components/badge'
 import { Progress } from '@/components/progress'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/select'
+import { Badge } from '@/components/badge'
 import { cn } from '@/lib/utils'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Course {
   id: string
   title: string
-  description: string
-  thumbnail: string
   progress: number
-  status: 'not-started' | 'in-progress' | 'completed'
-  lastAccessed: string
-  estimatedTime: string
-  instructor: string
-  rating: number
-  enrolledStudents: number
-  category: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  nextLesson: string
+  dueDate?: string
+  thumbnail?: string
+}
+
+interface Achievement {
+  id: string
+  title: string
+  description: string
+  icon: string
+  unlocked: boolean
+  progress?: number
+  total?: number
+}
+
+interface Activity {
+  id: string
+  type: 'lesson' | 'test' | 'achievement'
+  title: string
+  course: string
+  timestamp: string
+  score?: number
 }
 
 export function StudentDashboard() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterStatus, setFilterStatus] = useState<'all' | 'not-started' | 'in-progress' | 'completed'>('all')
-  const [sortBy, setSortBy] = useState<'last-accessed' | 'progress' | 'alphabetical'>('last-accessed')
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'week' | 'month' | 'all'>('week')
 
-  // Mock user data
+  // Simulate data loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Mock user data with semantic tokens
   const user = {
     name: "Alex Chen",
+    level: 12,
+    xp: 2340,
+    xpToNextLevel: 3000,
+    streak: 7,
     totalCourses: 12,
     completedCourses: 4,
-    inProgressCourses: 5,
-    overallProgress: 68,
-    totalHours: 145,
-    certificatesEarned: 4
+    hoursThisWeek: 8.5,
+    rank: 23,
+    totalStudents: 145
   }
 
-  // Mock courses data
-  const courses: Course[] = [
+  // Mock courses in progress
+  const coursesInProgress: Course[] = [
     {
       id: '1',
       title: 'Cybersecurity Awareness Training',
-      description: 'Comprehensive employee cybersecurity education program covering phishing, social engineering, and security best practices.',
-      thumbnail: '/course-thumbnails/cybersecurity-awareness.jpg',
       progress: 65,
-      status: 'in-progress',
-      lastAccessed: '2 hours ago',
-      estimatedTime: '3 hours',
-      instructor: 'CISO Jennifer Martinez',
-      rating: 4.8,
-      enrolledStudents: 3947,
-      category: 'Cybersecurity',
-      difficulty: 'beginner'
+      nextLesson: 'Module 4: Social Engineering',
+      dueDate: '2025-01-15'
     },
     {
       id: '2',
       title: 'AI Security & Governance',
-      description: 'Responsible AI use in higher education - ethics, risk assessment, procurement, and compliance with emerging regulations.',
-      thumbnail: '/course-thumbnails/ai-security.jpg',
       progress: 30,
-      status: 'in-progress',
-      lastAccessed: '1 day ago',
-      estimatedTime: '2.5 hours',
-      instructor: 'Dr. Sarah Chen',
-      rating: 4.9,
-      enrolledStudents: 1892,
-      category: 'AI Compliance',
-      difficulty: 'intermediate'
+      nextLesson: 'Ethics in AI Development'
     },
     {
       id: '3',
-      title: 'ISO 27001 Implementation',
-      description: 'Master information security management systems, risk assessment, and ISO 27001 compliance requirements.',
-      thumbnail: '/course-thumbnails/iso27001.jpg',
-      progress: 100,
-      status: 'completed',
-      lastAccessed: '3 days ago',
-      estimatedTime: '4 hours',
-      instructor: 'Michael Harrison, CISSP',
-      rating: 4.7,
-      enrolledStudents: 2456,
-      category: 'Compliance',
-      difficulty: 'advanced'
-    },
-    {
-      id: '4',
-      title: 'SOC 2 Compliance Training',
-      description: 'Understanding SOC 2 Type II requirements, controls implementation, and audit preparation for service organizations.',
-      thumbnail: '/course-thumbnails/soc2.jpg',
-      progress: 0,
-      status: 'not-started',
-      lastAccessed: 'Never',
-      estimatedTime: '3.5 hours',
-      instructor: 'Lisa Rodriguez, CPA',
-      rating: 4.6,
-      enrolledStudents: 1234,
-      category: 'Compliance',
-      difficulty: 'intermediate'
-    },
-    {
-      id: '5',
       title: 'Phishing Detection & Response',
-      description: 'Advanced phishing recognition, incident response procedures, and building a security-aware culture.',
-      thumbnail: '/course-thumbnails/phishing.jpg',
       progress: 85,
-      status: 'in-progress',
-      lastAccessed: '5 hours ago',
-      estimatedTime: '2 hours',
-      instructor: 'David Kim, Security Analyst',
-      rating: 4.5,
-      enrolledStudents: 2834,
-      category: 'Cybersecurity',
-      difficulty: 'beginner'
-    },
-    {
-      id: '6',
-      title: 'Data Privacy & GDPR',
-      description: 'Comprehensive data protection training covering GDPR, CCPA, and privacy-by-design principles.',
-      thumbnail: '/course-thumbnails/privacy.jpg',
-      progress: 100,
-      status: 'completed',
-      lastAccessed: '1 week ago',
-      estimatedTime: '3 hours',
-      instructor: 'Dr. Amanda Foster, Privacy Officer',
-      rating: 4.4,
-      enrolledStudents: 3156,
-      category: 'Privacy',
-      difficulty: 'intermediate'
+      nextLesson: 'Final Assessment',
+      dueDate: '2025-01-10'
     }
   ]
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterStatus === 'all' || course.status === filterStatus
-    return matchesSearch && matchesFilter
-  })
-
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    switch (sortBy) {
-      case 'progress':
-        return b.progress - a.progress
-      case 'alphabetical':
-        return a.title.localeCompare(b.title)
-      case 'last-accessed':
-      default:
-        return a.lastAccessed === 'Never' ? 1 : -1
+  // Mock achievements
+  const achievements: Achievement[] = [
+    {
+      id: '1',
+      title: 'Quick Learner',
+      description: 'Complete 5 lessons in one day',
+      icon: 'zap',
+      unlocked: true
+    },
+    {
+      id: '2',
+      title: 'Perfect Score',
+      description: 'Score 100% on any test',
+      icon: 'star',
+      unlocked: true
+    },
+    {
+      id: '3',
+      title: 'Consistency King',
+      description: 'Maintain a 30-day streak',
+      icon: 'fire',
+      unlocked: false,
+      progress: 7,
+      total: 30
+    },
+    {
+      id: '4',
+      title: 'Knowledge Master',
+      description: 'Complete 10 courses',
+      icon: 'brain',
+      unlocked: false,
+      progress: 4,
+      total: 10
     }
-  })
+  ]
 
-  const getStatusColor = (status: Course['status']) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'not-started':
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+  // Mock recent activity
+  const recentActivity: Activity[] = [
+    {
+      id: '1',
+      type: 'lesson',
+      title: 'Completed Password Security Best Practices',
+      course: 'Cybersecurity Awareness',
+      timestamp: '2 hours ago'
+    },
+    {
+      id: '2',
+      type: 'test',
+      title: 'Passed Module 3 Quiz',
+      course: 'Cybersecurity Awareness',
+      timestamp: '3 hours ago',
+      score: 92
+    },
+    {
+      id: '3',
+      type: 'achievement',
+      title: 'Unlocked "Quick Learner" badge',
+      course: 'General',
+      timestamp: '1 day ago'
     }
-  }
+  ]
 
-  const getDifficultyColor = (difficulty: Course['difficulty']) => {
-    switch (difficulty) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800'
-      case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'advanced':
-        return 'bg-red-100 text-red-800'
+  const getActivityIcon = (type: Activity['type']) => {
+    switch (type) {
+      case 'lesson':
+        return <CheckCircle className="h-5 w-5 text-text-success" />
+      case 'test':
+        return <BarChart className="h-5 w-5 text-text-info" />
+      case 'achievement':
+        return <Trophy className="h-5 w-5 text-text-warning" />
     }
   }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome section */}
-      <div className="space-y-4">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome back, {user.name}!</h1>
-          <p className="text-muted-foreground">Continue your learning journey</p>
-        </div>
-
-        {/* Stats overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Overall Progress</p>
-                  <p className="text-2xl font-bold">{user.overallProgress}%</p>
-                </div>
-                <div className="relative w-12 h-12">
-                  <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
-                    <path
-                      d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="text-muted-foreground/20"
-                    />
-                    <path
-                      d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeDasharray={`${user.overallProgress}, 100`}
-                      className="text-cosmic-purple"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-cosmic-purple" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Courses Completed</p>
-                  <p className="text-2xl font-bold">{user.completedCourses}</p>
-                </div>
-                <Award className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
-                  <p className="text-2xl font-bold">{user.inProgressCourses}</p>
-                </div>
-                <Book className="h-8 w-8 text-electric-violet" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Hours Learned</p>
-                  <p className="text-2xl font-bold">{user.totalHours}</p>
-                </div>
-                <Clock className="h-8 w-8 text-phosphor-cyan" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Course filters and controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-1 gap-4 max-w-lg">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+    <div className="min-h-screen bg-bg-secondary">
+      <div className="container mx-auto p-spacing-lg space-y-spacing-xl">
+        {/* Header Section */}
+        <motion.div 
+          className="space-y-spacing-md"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-text-primary">
+                Welcome back, {user.name}!
+              </h1>
+              <p className="text-text-secondary mt-spacing-xs">
+                You're on a {user.streak}-day learning streak 🔥
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-text-tertiary text-sm">Rank</p>
+              <p className="text-2xl font-bold text-text-brand">
+                #{user.rank} <span className="text-text-secondary text-base font-normal">/ {user.totalStudents}</span>
+              </p>
+            </div>
           </div>
-          <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
-            <SelectTrigger className="w-40">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
-              <SelectItem value="in-progress">In Progress</SelectItem>
-              <SelectItem value="not-started">Not Started</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="last-accessed">Last Accessed</SelectItem>
-              <SelectItem value="progress">Progress</SelectItem>
-              <SelectItem value="alphabetical">Alphabetical</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('list')}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Course grid/list */}
-      <div className={cn(
-        "grid gap-6",
-        viewMode === 'grid' 
-          ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-          : "grid-cols-1"
-      )}>
-        {sortedCourses.map((course) => (
-          <Card key={course.id} className={cn(
-            "overflow-hidden hover:shadow-lg transition-shadow",
-            viewMode === 'list' && "flex flex-row"
-          )}>
-            <div className={cn(
-              "bg-gradient-to-br from-cosmic-purple/20 to-electric-violet/20 p-6 flex items-center justify-center",
-              viewMode === 'list' ? "w-48 flex-shrink-0" : "h-32"
-            )}>
-              <Book className="h-12 w-12 text-cosmic-purple" />
+          {/* Level Progress */}
+          <Card variant="neural" className="p-spacing-md">
+            <div className="flex items-center justify-between mb-spacing-sm">
+              <div className="flex items-center gap-spacing-sm">
+                <div className="w-12 h-12 rounded-full bg-bg-brand flex items-center justify-center">
+                  <span className="text-text-inverse font-bold">{user.level}</span>
+                </div>
+                <div>
+                  <p className="text-text-primary font-medium">Level {user.level} Scholar</p>
+                  <p className="text-text-secondary text-sm">{user.xp} / {user.xpToNextLevel} XP</p>
+                </div>
+              </div>
+              <Sparkles className="h-6 w-6 text-text-brand" />
             </div>
-            
-            <div className="flex-1">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="text-lg">{course.title}</CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{course.enrolledStudents.toLocaleString()} students</span>
-                      <span>•</span>
-                      <Clock className="h-4 w-4" />
-                      <span>{course.estimatedTime}</span>
-                    </div>
-                  </div>
-                  <Badge className={getStatusColor(course.status)}>
-                    {course.status.replace('-', ' ')}
-                  </Badge>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {course.description}
-                </p>
-
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{course.rating}</span>
-                    <span className="text-muted-foreground">({course.enrolledStudents})</span>
-                  </div>
-                  <Badge variant="outline" className={getDifficultyColor(course.difficulty)}>
-                    {course.difficulty}
-                  </Badge>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Progress</span>
-                    <span>{course.progress}%</span>
-                  </div>
-                  <Progress value={course.progress} className="h-2" />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {course.lastAccessed !== 'Never' ? `Last accessed ${course.lastAccessed}` : 'Not started'}
-                  </div>
-                  <Button 
-                    size="sm"
-                    className={cn(
-                      course.status === 'not-started' && "bg-cosmic-purple hover:bg-cosmic-purple/90",
-                      course.status === 'in-progress' && "bg-electric-violet hover:bg-electric-violet/90",
-                      course.status === 'completed' && "bg-green-600 hover:bg-green-700"
-                    )}
-                    onClick={() => window.location.href = `/lms/course/${course.id}`}
-                  >
-                    {course.status === 'not-started' && (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Course
-                      </>
-                    )}
-                    {course.status === 'in-progress' && (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Continue
-                      </>
-                    )}
-                    {course.status === 'completed' && (
-                      <>
-                        <Award className="h-4 w-4 mr-2" />
-                        Review
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </div>
+            <Progress 
+              value={(user.xp / user.xpToNextLevel) * 100} 
+              className="h-3 bg-bg-emphasis"
+            />
           </Card>
-        ))}
-      </div>
+        </motion.div>
 
-      {filteredCourses.length === 0 && (
-        <div className="text-center py-12">
-          <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">No courses found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+        {/* Stats Overview */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-spacing-md"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <AnimatePresence>
+            {[
+              {
+                title: 'Courses Completed',
+                value: user.completedCourses,
+                total: user.totalCourses,
+                icon: <Award className="h-6 w-6" />,
+                color: 'text-text-success'
+              },
+              {
+                title: 'Hours This Week',
+                value: user.hoursThisWeek,
+                unit: 'hrs',
+                icon: <Clock className="h-6 w-6" />,
+                color: 'text-text-info'
+              },
+              {
+                title: 'Learning Streak',
+                value: user.streak,
+                unit: 'days',
+                icon: <Zap className="h-6 w-6" />,
+                color: 'text-text-warning'
+              },
+              {
+                title: 'Active Courses',
+                value: coursesInProgress.length,
+                icon: <Book className="h-6 w-6" />,
+                color: 'text-text-brand'
+              }
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card variant="metric" className="h-full">
+                  <CardContent className="p-spacing-md">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-spacing-xs">
+                        <p className="text-text-secondary text-sm">{stat.title}</p>
+                        <div className="flex items-baseline gap-spacing-xs">
+                          <p className="text-3xl font-bold text-text-primary">
+                            {isLoading ? (
+                              <span className="inline-block w-12 h-8 bg-bg-emphasis animate-pulse rounded" />
+                            ) : (
+                              stat.value
+                            )}
+                          </p>
+                          {stat.unit && (
+                            <span className="text-text-secondary text-sm">{stat.unit}</span>
+                          )}
+                          {stat.total && (
+                            <span className="text-text-tertiary text-sm">/ {stat.total}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className={cn("p-2 rounded-lg bg-bg-emphasis", stat.color)}>
+                        {stat.icon}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-spacing-lg">
+          {/* Course Progress Section */}
+          <motion.div 
+            className="lg:col-span-2 space-y-spacing-md"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-text-primary">Continue Learning</h2>
+              <Button variant="ghost" size="sm">
+                View All <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+
+            <div className="space-y-spacing-sm">
+              {coursesInProgress.map((course, index) => (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <Card variant="interactive" className="group">
+                    <CardContent className="p-spacing-md">
+                      <div className="flex items-center gap-spacing-md">
+                        <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-bg-brand to-[var(--color-purple-500)] flex items-center justify-center flex-shrink-0">
+                          <Book className="h-8 w-8 text-text-inverse" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-spacing-xs">
+                            <div className="flex-1 mr-spacing-sm">
+                              <h3 className="font-medium text-text-primary truncate">
+                                {course.title}
+                              </h3>
+                              <p className="text-text-secondary text-sm">
+                                Next: {course.nextLesson}
+                              </p>
+                            </div>
+                            {course.dueDate && (
+                              <Badge variant="secondary" className="text-text-warning border-border-warning bg-bg-warningLight">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                Due {new Date(course.dueDate).toLocaleDateString()}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="space-y-spacing-xs">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-text-tertiary">Progress</span>
+                              <span className="text-text-primary font-medium">{course.progress}%</span>
+                            </div>
+                            <Progress value={course.progress} className="h-2" />
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-fast"
+                        >
+                          Continue
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Upcoming Deadlines */}
+            <Card variant="outlined" className="mt-spacing-lg">
+              <CardHeader className="pb-spacing-sm">
+                <CardTitle className="text-lg flex items-center gap-spacing-sm">
+                  <AlertCircle className="h-5 w-5 text-text-warning" />
+                  Upcoming Deadlines
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-spacing-sm">
+                {coursesInProgress
+                  .filter(course => course.dueDate)
+                  .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
+                  .map(course => (
+                    <div key={course.id} className="flex items-center justify-between py-spacing-xs">
+                      <div>
+                        <p className="text-text-primary text-sm font-medium">{course.title}</p>
+                        <p className="text-text-tertiary text-xs">{course.nextLesson}</p>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {new Date(course.dueDate!).toLocaleDateString()}
+                      </Badge>
+                    </div>
+                  ))}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Right Column */}
+          <motion.div 
+            className="space-y-spacing-lg"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            {/* Achievements Section */}
+            <Card variant="default">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-spacing-sm">
+                  <Trophy className="h-5 w-5 text-text-warning" />
+                  Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-spacing-sm">
+                {achievements.map((achievement, index) => (
+                  <motion.div
+                    key={achievement.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={cn(
+                      "p-spacing-sm rounded-lg border transition-all duration-normal",
+                      achievement.unlocked 
+                        ? "bg-bg-successLight border-border-success" 
+                        : "bg-bg-secondary border-border-subtle opacity-60"
+                    )}
+                  >
+                    <div className="flex items-start gap-spacing-sm">
+                      <div className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                        achievement.unlocked ? "bg-bg-brand" : "bg-bg-emphasis"
+                      )}>
+                        {achievement.icon === 'zap' && <Zap className="h-5 w-5 text-text-inverse" />}
+                        {achievement.icon === 'star' && <Star className="h-5 w-5 text-text-inverse" />}
+                        {achievement.icon === 'fire' && <Zap className="h-5 w-5 text-text-inverse" />}
+                        {achievement.icon === 'brain' && <Brain className="h-5 w-5 text-text-inverse" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(
+                          "font-medium text-sm",
+                          achievement.unlocked ? "text-text-primary" : "text-text-tertiary"
+                        )}>
+                          {achievement.title}
+                        </p>
+                        <p className="text-text-tertiary text-xs">{achievement.description}</p>
+                        {!achievement.unlocked && achievement.progress && (
+                          <div className="mt-spacing-xs">
+                            <Progress 
+                              value={(achievement.progress / achievement.total!) * 100} 
+                              className="h-1.5"
+                            />
+                            <p className="text-text-tertiary text-xs mt-1">
+                              {achievement.progress} / {achievement.total}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card variant="default">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-spacing-sm">
+                  <TrendingUp className="h-5 w-5 text-text-info" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-spacing-sm">
+                {recentActivity.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="flex items-start gap-spacing-sm py-spacing-xs"
+                  >
+                    <div className="mt-1">{getActivityIcon(activity.type)}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-text-primary text-sm">{activity.title}</p>
+                      {activity.score && (
+                        <Badge variant="secondary" className="text-xs mt-1 inline-flex">
+                          Score: {activity.score}%
+                        </Badge>
+                      )}
+                      <p className="text-text-tertiary text-xs mt-1">
+                        {activity.course} • {activity.timestamp}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
