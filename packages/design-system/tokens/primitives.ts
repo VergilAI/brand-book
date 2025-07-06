@@ -256,6 +256,13 @@ export const gradients = {
   lightRay: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%)',
 } as const;
 
+// Stroke patterns - SVG strokeDasharray values
+export const strokePattern = {
+  none: 'none',              // Solid stroke
+  dashed: '3 3',             // Evenly spaced dashes: - - - -
+  dotted: '0.1 3',           // True dots (requires stroke-linecap="round"): • • • •
+} as const;
+
 // Type exports
 export type SpacingToken = keyof typeof spacing;
 export type ColorToken = keyof typeof colors;
@@ -273,3 +280,4 @@ export type ZIndexToken = keyof typeof zIndex;
 export type OpacityToken = keyof typeof opacity;
 export type DurationToken = keyof typeof duration;
 export type GradientToken = keyof typeof gradients;
+export type StrokePatternToken = keyof typeof strokePattern;

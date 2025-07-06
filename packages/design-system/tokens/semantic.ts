@@ -3,7 +3,7 @@
  * Purpose-based tokens that reference primitive values
  */
 
-import { colors, spacing, shadows, borderRadius, borderWidth, borderColor, opacity, duration, easing, fontFamily, fontSize, fontWeight, lineHeight, letterSpacing } from './primitives';
+import { colors, spacing, shadows, borderRadius, borderWidth, borderColor, opacity, duration, easing, fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, strokePattern } from './primitives';
 
 // Semantic Colors
 export const semanticColors = {
@@ -357,6 +357,13 @@ export const layout = {
   },
 } as const;
 
+// Semantic stroke patterns
+export const semanticStrokePattern = {
+  solid: strokePattern.none,               // Default solid stroke
+  dashed: strokePattern.dashed,            // Dashed pattern (3 3)
+  dotted: strokePattern.dotted,            // True dotted pattern (0.1 3)
+} as const;
+
 // Type exports
 export type TextColor = keyof typeof semanticColors.text;
 export type BackgroundColor = keyof typeof semanticColors.background;
@@ -369,3 +376,4 @@ export type SemanticShadow = keyof typeof semanticShadows;
 export type AnimationPreset = keyof typeof animations;
 export type ContainerSize = keyof typeof layout.container;
 export type Breakpoint = keyof typeof layout.breakpoint;
+export type SemanticStrokePattern = keyof typeof semanticStrokePattern;

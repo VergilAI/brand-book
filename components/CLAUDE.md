@@ -22,6 +22,17 @@
    - `/molecular` - Combinations of atomic (SearchBar, FormField)
    - `/organism` - Complex UI sections (Header, StudentDashboard)
 
+4. **Stroke Patterns (SVG)**: 
+   - Use Tailwind utilities: `stroke-solid`, `stroke-dashed`, `stroke-dotted`
+   - For dotted pattern, remember to also set `strokeLinecap="round"` on the SVG element
+   ```tsx
+   // Dashed stroke (3px dash, 3px gap)
+   <path className="stroke-dashed" d={path} />
+   
+   // True dotted stroke (requires strokeLinecap)
+   <path className="stroke-dotted" strokeLinecap="round" d={path} />
+   ```
+
 ## Accessibility Checklist
 
 - [ ] Keyboard navigable
@@ -233,6 +244,11 @@
       "pressed": 0.1,
       "backdrop": 0.5,
       "loading": 0.6
+    },
+    "strokePattern": {
+      "none": "none",
+      "dashed": "3 3",
+      "dotted": "0.1 3"
     }
   },
   "semantic": {
@@ -403,6 +419,11 @@
         "duration": "100ms",
         "easing": "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
       }
+    },
+    "strokePattern": {
+      "solid": "none",
+      "dashed": "3 3",
+      "dotted": "0.1 3"
     },
     "layout": {
       "container": {

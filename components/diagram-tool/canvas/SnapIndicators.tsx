@@ -16,8 +16,8 @@ export function SnapIndicators({ indicators, zoom }: SnapIndicatorsProps) {
           case 'point':
             const point = indicator.geometry as { x: number; y: number }
             
-            // Check if this is a center point (orange color)
-            const isCenter = indicator.style.color === '#FF6600'
+            // Check if this is a center point (orange/yellow color)
+            const isCenter = indicator.style.color === 'var(--color-yellow-600)'
             
             if (isCenter) {
               // Render center with crosshair icon

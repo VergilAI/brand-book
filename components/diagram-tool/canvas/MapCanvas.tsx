@@ -28,6 +28,11 @@ import {
   Square
 } from 'lucide-react'
 
+// import styles from './MapCanvas.module.css' // Temporarily disabled due to build error
+import type { Territory, Point } from '@/lib/lms/optimized-map-data'
+import type { BezierPoint } from '@/app/map-editor/types/editor'
+import type { SnapIndicator } from '@/app/map-editor/types/snapping'
+
 // Create icon aliases for consistency
 const BringToFrontIcon = Layers
 const BringForwardIcon = Layers
@@ -37,10 +42,6 @@ const CopyIcon = Copy
 const DuplicateIcon = Copy
 const PasteIcon = Clipboard
 const SelectAllIcon = Square
-import styles from './MapCanvas.module.css'
-import type { Territory, Point } from '@/lib/lms/optimized-map-data'
-import type { BezierPoint } from '@/app/map-editor/types/editor'
-import type { SnapIndicator } from '@/app/map-editor/types/snapping'
 
 // Helper function to move SVG path (needed for shape placement)
 function moveSvgPath(path: string, deltaX: number, deltaY: number): string {
@@ -258,6 +259,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
     y: number
     territoryId: string | null
   }>({ show: false, x: 0, y: 0, territoryId: null })
+  
+  // Hover state for territories
+  const [hoveredTerritoryId, setHoveredTerritoryId] = React.useState<string | null>(null)
   
   // Gesture handling
   const inertiaScroll = useInertiaScroll({
@@ -1167,8 +1171,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
       ref={canvasRef}
       className={cn(
         "relative w-full h-full overflow-hidden bg-primary",
-        styles.canvas,
-        gesture.isGesturing() && styles.gesturing,
+        // styles.canvas,
+        gesture.isGesturing() && 'cursor-grabbing',
         className
       )}
       onWheel={handleWheel}
@@ -1259,20 +1263,24 @@ export function MapCanvas({ className }: MapCanvasProps) {
               <path
                 key={territory.id}
                 d={territory.fillPath}
-                fill="var(--primary)"
-                stroke={isSelected ? "var(--brand-hover)" : wouldBeSelected ? "var(--brand)" : "var(--primary)"}
-                strokeWidth={isSelected ? 3 : wouldBeSelected ? 2.5 : 2}
-                strokeDasharray={wouldBeSelected && !isSelected ? '3 3' : 'none'}
-                className={`cursor-pointer transition-colors ${
+                fill={
+                  wouldBeSelected 
+                    ? 'var(--color-gray-50)' // Would-be-selected: Gray Scale 50
+                    : hoveredTerritoryId === territory.id && isSelected
+                      ? 'var(--color-gray-100)' // Selected Hover: Gray Scale 100
+                      : hoveredTerritoryId === territory.id
+                        ? 'var(--color-gray-50)' // Hover: Gray Scale 50
+                        : 'var(--color-gray-25)' // Default: Gray Scale 25
+                }
+                stroke={
                   isSelected 
-                    ? 'hover:fill-[#E0E7FF]' 
-                    : wouldBeSelected
-                    ? 'fill-[#F3F4F6]'
-                    : 'hover:fill-gray-50'
-                }`}
-                style={{
-                  opacity: store.editing.isEditing && store.editing.editingTerritoryId !== territory.id ? 0.3 : 1
-                }}
+                    ? 'var(--color-purple-300)' // Selected: purple 300
+                    : 'var(--color-gray-800)' // Default: Gray Scale 800
+                }
+                strokeWidth={isSelected ? 3 : 2}
+                strokeDasharray={wouldBeSelected && !isSelected ? '3 3' : undefined}
+                cursor="pointer"
+                opacity={store.editing.isEditing && store.editing.editingTerritoryId !== territory.id ? 0.3 : 1}
                 onClick={(e) => {
                   if (store.tool === 'select' && !hasMoved.current && !store.editing.isEditing) {
                     // Only handle click if we haven't just finished dragging
@@ -1281,6 +1289,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   }
                 }}
                 onDoubleClick={(e) => handleDoubleClick(e, territory.id)}
+                onMouseEnter={() => setHoveredTerritoryId(territory.id)}
+                onMouseLeave={() => setHoveredTerritoryId(null)}
+                className="transition-all duration-200"
               />
             )
           })}
@@ -1300,7 +1311,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 <g key={`preview-${territory.id}`} transform={transform}>
                   <path
                     d={territory.fillPath}
-                    fill="var(--brand-hover)"
+                    fill="var(--color-purple-300)" // purple 300
                     fillOpacity="0.4"
                     style={{ pointerEvents: 'none' }}
                   />
@@ -1315,18 +1326,18 @@ export function MapCanvas({ className }: MapCanvasProps) {
           <g className="shape-placement-preview">
             <path
               d={shapePlacementPreview.path}
-              fill="var(--brand-hover)"
+              fill="var(--color-purple-300)" // purple 300
               fillOpacity="0.2"
-              stroke="var(--brand-hover)"
+              stroke="var(--color-purple-300)" // purple 300
               strokeWidth="2"
-              strokeDasharray="4 2"
-              className="pointer-events-none"
+              strokeDasharray="3 3"
+              className="pointer-events-none stroke-dashed"
             />
             <circle
               cx={shapePlacementPreview.position.x}
               cy={shapePlacementPreview.position.y}
               r="4"
-              fill="var(--brand-hover)"
+              fill="var(--color-purple-300)" // purple 300
               className="pointer-events-none"
             />
           </g>
@@ -1363,17 +1374,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       y1={vertex.y}
                       x2={vertex.controlPoints.in.x}
                       y2={vertex.controlPoints.in.y}
-                      stroke="var(--brand)"
+                      stroke="var(--color-purple-300)" // purple 300
                       strokeWidth="2"
-                      opacity="0.7"
+                      opacity="1"
                       className="pointer-events-none"
                     />
                     <circle
                       cx={vertex.controlPoints.in.x}
                       cy={vertex.controlPoints.in.y}
                       r="6"
-                      fill="var(--brand)"
-                      stroke="var(--primary)"
+                      fill="var(--color-purple-300)" // purple 300
+                      stroke="var(--color-purple-300)" // purple 300
                       strokeWidth="2"
                       className="cursor-move"
                       style={{ cursor: 'move' }}
@@ -1389,17 +1400,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       y1={vertex.y}
                       x2={vertex.controlPoints.out.x}
                       y2={vertex.controlPoints.out.y}
-                      stroke="var(--brand)"
+                      stroke="var(--color-purple-300)" // purple 300
                       strokeWidth="2"
-                      opacity="0.7"
+                      opacity="1"
                       className="pointer-events-none"
                     />
                     <circle
                       cx={vertex.controlPoints.out.x}
                       cy={vertex.controlPoints.out.y}
                       r="6"
-                      fill="var(--brand)"
-                      stroke="var(--primary)"
+                      fill="var(--color-purple-300)" // purple 300
+                      stroke="var(--color-purple-300)" // purple 300
                       strokeWidth="2"
                       className="cursor-move"
                       style={{ cursor: 'move' }}
@@ -1418,8 +1429,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     cx={vertex.x}
                     cy={vertex.y}
                     r="8"
-                    fill={store.editing.selectedVertices.has(index) ? "var(--info)" : "var(--primary)"}
-                    stroke={store.editing.selectedVertices.has(index) ? "var(--info)" : "var(--brand-hover)"}
+                    fill={store.editing.selectedVertices.has(index) ? "var(--color-blue-400)" : "var(--white)"} // blue 400 / full white
+                    stroke={store.editing.selectedVertices.has(index) ? "var(--color-blue-700)" : "var(--color-purple-300)"} // blue 700 / purple 300
                     strokeWidth="3"
                     className="cursor-move"
                     style={{ cursor: 'move' }}
@@ -1430,7 +1441,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       cx={vertex.x}
                       cy={vertex.y}
                       r="3"
-                      fill={store.editing.selectedVertices.has(index) ? "var(--info)" : "var(--brand-hover)"}
+                      fill={store.editing.selectedVertices.has(index) ? "var(--color-blue-400)" : "var(--color-purple-300)"} // blue 400 / purple 300
                       className="pointer-events-none"
                     />
                   )}
@@ -1447,10 +1458,10 @@ export function MapCanvas({ className }: MapCanvasProps) {
             <path
               d={store.drawing.previewPath}
               fill="none"
-              stroke="var(--brand-hover)"
+              stroke="var(--color-purple-300)" // purple 300
               strokeWidth="2"
-              strokeDasharray="5 5"
-              className="pointer-events-none"
+              strokeDasharray="3 3"
+              className="pointer-events-none stroke-dashed"
             />
             
             {/* Live preview line from last point to cursor */}
@@ -1468,11 +1479,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   y1={lastPoint.y}
                   x2={currentPoint.x}
                   y2={currentPoint.y}
-                  stroke="var(--brand-hover)"
+                  stroke="var(--color-purple-300)" // purple 300
                   strokeWidth="2"
                   strokeDasharray="3 3"
-                  opacity="0.7"
-                  className="pointer-events-none"
+                  opacity="1"
+                  className="pointer-events-none stroke-dashed"
                 />
               )
             })()}
@@ -1496,7 +1507,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   cy={firstPoint.y}
                   r="8"
                   fill="none"
-                  stroke="var(--brand-hover)"
+                  stroke="var(--color-purple-300)" // purple 300
                   strokeWidth="2"
                   className="pointer-events-none animate-pulse"
                 />
@@ -1510,8 +1521,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 cx={point.x}
                 cy={point.y}
                 r="4"
-                fill="var(--brand-hover)"
-                stroke="var(--primary)"
+                fill="var(--color-purple-300)" // purple 300
+                stroke="var(--color-purple-300)" // purple 300
                 strokeWidth="2"
                 className="pointer-events-none"
               />
@@ -1536,7 +1547,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     y1={dragStart.y}
                     x2={currentPoint.x}
                     y2={currentPoint.y}
-                    stroke="var(--brand)"
+                    stroke="var(--color-purple-300)" // purple 300
                     strokeWidth="2"
                     className="pointer-events-none"
                   />
@@ -1545,8 +1556,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     cx={currentPoint.x}
                     cy={currentPoint.y}
                     r="4"
-                    fill="var(--brand)"
-                    stroke="var(--primary)"
+                    fill="var(--color-purple-300)" // purple 300
+                    stroke="var(--color-purple-300)" // purple 300
                     strokeWidth="2"
                     className="pointer-events-none"
                   />
@@ -1564,11 +1575,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
             y={Math.min(areaSelectStart.current.y, areaSelectEnd.current.y)}
             width={Math.abs(areaSelectEnd.current.x - areaSelectStart.current.x)}
             height={Math.abs(areaSelectEnd.current.y - areaSelectStart.current.y)}
-            fill="rgba(99, 102, 241, 0.1)"
-            stroke="var(--brand-hover)"
+            fill="var(--color-purple-600)" // purple 600
+            fillOpacity="0.1" // 10% opacity
+            stroke="var(--color-purple-300)" // purple 300
             strokeWidth="1"
             strokeDasharray="3 3"
-            className="pointer-events-none"
+            className="pointer-events-none stroke-dashed"
             style={{ pointerEvents: 'none' }}
           />
         )}
@@ -1589,7 +1601,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
               cx={snappedPoint.x}
               cy={snappedPoint.y}
               r="3"
-              fill="var(--brand-hover)"
+              fill="var(--color-purple-300)" // purple 300
               className="pointer-events-none"
             />
           )

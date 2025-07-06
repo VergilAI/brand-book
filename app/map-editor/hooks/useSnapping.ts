@@ -88,7 +88,7 @@ export function useSnapping() {
           type: 'guide',
           geometry: guide,
           style: {
-            color: '#0066FF',
+            color: 'var(--color-blue-400)', // blue 400
             width: 1,
             pattern: 'dashed'
           }
@@ -103,7 +103,7 @@ export function useSnapping() {
             type: 'point',
             geometry: element.point,
             style: {
-              color: '#0066FF',
+              color: 'var(--color-blue-400)', // blue 400
               width: 2,
               radius: 6
             }
@@ -115,7 +115,7 @@ export function useSnapping() {
             type: 'point',
             geometry: element.point,
             style: {
-              color: '#FF6600',
+              color: 'var(--color-yellow-600)', // yellow 600
               width: 2,
               radius: 8
             }
@@ -150,7 +150,7 @@ export function useSnapping() {
             end: angleSnapped
           },
           style: {
-            color: '#FF6600',
+            color: 'var(--color-yellow-600)', // yellow 600
             width: 1,
             pattern: 'dashed'
           }
@@ -179,17 +179,17 @@ export function useSnapping() {
 function getSnapColor(type: SnapResult['type']): string {
   switch (type) {
     case 'vertex':
-      return '#FF0066'
+      return 'var(--color-red-400)' // red 400
     case 'edge-midpoint':
-      return '#00FF66'
+      return 'var(--color-green-400)' // green 400
     case 'edge':
-      return '#0066FF'
+      return 'var(--color-blue-400)' // blue 400
     case 'center':
-      return '#FF6600'
+      return 'var(--color-yellow-600)' // yellow 600
     case 'grid':
-      return '#666666'
+      return 'var(--color-gray-300)' // gray 300
     default:
-      return '#0066FF'
+      return 'var(--color-blue-400)' // blue 400
   }
 }
 
