@@ -24,9 +24,7 @@ export default function LMSPage() {
         />
         
         <main className="flex-1 lg:pl-0">
-          <div className="p-6">
-            <StudentDashboard />
-          </div>
+          <StudentDashboard />
         </main>
       </div>
     </div>

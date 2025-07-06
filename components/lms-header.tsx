@@ -53,7 +53,7 @@ export function LMSHeader({ onMenuToggle, currentView, breadcrumbs }: LMSHeaderP
         boxShadow: 'var(--shadow-card)'
       }}
     >
-      <div className="flex h-16 items-center" style={{ paddingLeft: 'var(--spacing-lg)', paddingRight: 'var(--spacing-lg)' }}>
+      <div className="flex h-20 items-center" style={{ paddingLeft: 'var(--spacing-2xl)', paddingRight: 'var(--spacing-2xl)' }}>
         {/* Left section with logo and navigation */}
         <div className="flex items-center flex-1" style={{ gap: 'var(--spacing-lg)' }}>
           {/* Mobile menu toggle */}

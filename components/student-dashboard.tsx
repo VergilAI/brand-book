@@ -349,7 +349,7 @@ export function StudentDashboard() {
                               <span className="text-text-tertiary">Progress</span>
                               <span className="text-text-primary font-medium">{course.progress}%</span>
                             </div>
-                            <Progress value={course.progress} className="h-2" />
+                            <Progress value={course.progress} className="h-3" />
                           </div>
                         </div>
                         <Button 
@@ -415,13 +415,13 @@ export function StudentDashboard() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={cn(
-                      "p-spacing-sm rounded-lg border transition-all duration-normal",
+                      "p-spacing-lg rounded-lg border transition-all duration-normal",
                       achievement.unlocked 
                         ? "bg-bg-successLight border-border-success" 
                         : "bg-bg-secondary border-border-subtle opacity-60"
                     )}
                   >
-                    <div className="flex items-start gap-spacing-sm">
+                    <div className="flex items-start gap-spacing-md">
                       <div className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
                         achievement.unlocked ? "bg-bg-brand" : "bg-bg-emphasis"
