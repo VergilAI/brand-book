@@ -162,19 +162,14 @@ export function StudentDashboard() {
                 <p className="text-2xl font-bold text-purple-600">{user.xpToNextLevel - user.xp} XP</p>
               </div>
             </div>
-            <div className="relative">
-              <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                <motion.div 
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(user.xp / user.xpToNextLevel) * 100}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                />
-              </div>
-              <span className="absolute right-0 -top-6 text-sm font-medium text-purple-600">
-                {Math.round((user.xp / user.xpToNextLevel) * 100)}%
-              </span>
-            </div>
+            <Progress 
+              value={user.xp} 
+              max={user.xpToNextLevel}
+              size="lg"
+              showPercentage
+              className="bg-gray-200"
+              indicatorClassName="bg-gradient-to-r from-purple-500 to-purple-600"
+            />
           </motion.div>
         </div>
 
@@ -260,21 +255,18 @@ export function StudentDashboard() {
                           )}
                         </div>
                         <div className="mt-3">
-                          <div className="flex items-center justify-between text-sm mb-2">
-                            <span className="text-gray-600">Progress</span>
-                            <span className="font-medium text-gray-900">{course.progress}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={cn(
-                                "h-2 rounded-full transition-all",
-                                course.color === 'purple' && "bg-purple-600",
-                                course.color === 'blue' && "bg-blue-600",
-                                course.color === 'green' && "bg-green-600"
-                              )}
-                              style={{ width: `${course.progress}%` }}
-                            />
-                          </div>
+                          <Progress 
+                            value={course.progress}
+                            label="Progress"
+                            showPercentage
+                            size="sm"
+                            className="bg-gray-200"
+                            indicatorClassName={cn(
+                              course.color === 'purple' && "bg-purple-600",
+                              course.color === 'blue' && "bg-blue-600",
+                              course.color === 'green' && "bg-green-600"
+                            )}
+                          />
                         </div>
                       </div>
                     </div>
@@ -348,12 +340,13 @@ export function StudentDashboard() {
                               <span className="text-gray-500">Progress</span>
                               <span className="font-medium">{achievement.progress}/{achievement.total}</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                              <div 
-                                className="bg-yellow-500 h-1.5 rounded-full"
-                                style={{ width: `${(achievement.progress / achievement.total) * 100}%` }}
-                              />
-                            </div>
+                            <Progress
+                              value={achievement.progress}
+                              max={achievement.total}
+                              size="sm"
+                              className="h-1.5 bg-gray-200"
+                              indicatorClassName="bg-yellow-500"
+                            />
                           </div>
                         )}
                       </div>
