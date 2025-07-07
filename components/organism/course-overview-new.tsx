@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   BookOpen, 
   Clock, 
@@ -22,16 +23,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/atomic/button'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
+import { LessonModal } from '@/components/lesson-modal'
 import { cn } from '@/lib/utils'
-import type { Course } from '@/lib/lms/new-course-types'
+import type { Course, Lesson } from '@/lib/lms/new-course-types'
 
 interface CourseOverviewNewProps {
   course?: Course
 }
 
 export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
+  const router = useRouter()
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalLesson, setModalLesson] = useState<Lesson | null>(null)
 
   // Calculate course statistics
   const stats = useMemo(() => {
@@ -410,7 +415,8 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                                 className="text-xs px-3 py-1.5 h-auto"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  // TODO: Open lesson modal
+                                  setModalLesson(lesson)
+                                  setIsModalOpen(true)
                                 }}
                               >
                                 {isCompleted ? (
@@ -484,6 +490,22 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
             })}
           </div>
         </div>
+
+        {/* Lesson Modal */}
+        {modalLesson && (
+          <LessonModal
+            lesson={modalLesson}
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false)
+              setModalLesson(null)
+            }}
+            onSelectGame={(gameTypeId) => {
+              // Navigate to the game page with the lesson and game type
+              router.push(`/lms/lesson/${modalLesson.id}/game/${gameTypeId}`)
+            }}
+          />
+        )}
       </div>
     </div>
   )
