@@ -409,6 +409,84 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
     '.shadow-focus-success': {
       boxShadow: '0 0 0 3px rgba(15, 138, 15, 0.2)',
     },
+
+    // Animation duration utilities (custom to avoid conflicts)
+    
+    '.animate-duration-instant': {
+      animationDuration: '0ms',
+    },
+    '.transition-duration-instant': {
+      transitionDuration: '0ms',
+    },
+    '.animate-duration-fast': {
+      animationDuration: '100ms',
+    },
+    '.transition-duration-fast': {
+      transitionDuration: '100ms',
+    },
+    '.animate-duration-normal': {
+      animationDuration: '200ms',
+    },
+    '.transition-duration-normal': {
+      transitionDuration: '200ms',
+    },
+    '.animate-duration-slow': {
+      animationDuration: '300ms',
+    },
+    '.transition-duration-slow': {
+      transitionDuration: '300ms',
+    },
+    '.animate-duration-slower': {
+      animationDuration: '400ms',
+    },
+    '.transition-duration-slower': {
+      transitionDuration: '400ms',
+    },
+    '.animate-duration-slowest': {
+      animationDuration: '500ms',
+    },
+    '.transition-duration-slowest': {
+      transitionDuration: '500ms',
+    },
+
+    // Animation timing utilities (custom to avoid conflicts)
+    
+    '.animate-timing-out': {
+      animationTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    },
+    '.transition-timing-out': {
+      transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    },
+    '.animate-timing-inOut': {
+      animationTimingFunction: 'cubic-bezier(0.42, 0, 0.58, 1)',
+    },
+    '.transition-timing-inOut': {
+      transitionTimingFunction: 'cubic-bezier(0.42, 0, 0.58, 1)',
+    },
+    '.animate-timing-outBack': {
+      animationTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    },
+    '.transition-timing-outBack': {
+      transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    },
+    '.animate-timing-outQuart': {
+      animationTimingFunction: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
+    '.transition-timing-outQuart': {
+      transitionTimingFunction: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
+    '.animate-timing-natural': {
+      animationTimingFunction: 'cubic-bezier(0.4, 0, 0.6, 1)',
+    },
+    '.transition-timing-natural': {
+      transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.6, 1)',
+    },
+    '.animate-timing-linear': {
+      animationTimingFunction: 'linear',
+    },
+    '.transition-timing-linear': {
+      transitionTimingFunction: 'linear',
+    },
   });
 }, {
   theme: {
@@ -631,23 +709,6 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
         'focus': '0 0 0 3px rgba(166, 77, 255, 0.2)',
         'focus-error': '0 0 0 3px rgba(229, 28, 35, 0.2)',
         'focus-success': '0 0 0 3px rgba(15, 138, 15, 0.2)',
-      },
-      
-      transitionDuration: {
-        'instant': '0ms',
-        'fast': '100ms',
-        'normal': '200ms',
-        'slow': '300ms',
-        'slower': '400ms',
-        'slowest': '500ms',
-      },
-      
-      transitionTimingFunction: {
-        'out': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        'inOut': 'cubic-bezier(0.42, 0, 0.58, 1)',
-        'outBack': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-        'outQuart': 'cubic-bezier(0.25, 1, 0.5, 1)',
-        'linear': 'linear',
       },
       
       backgroundImage: {

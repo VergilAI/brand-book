@@ -171,6 +171,7 @@ export const easing = {
   inOut: 'cubic-bezier(0.42, 0, 0.58, 1)',          // longer transitions, page changes
   outBack: 'cubic-bezier(0.34, 1.56, 0.64, 1)',     // playful micro-interactions
   outQuart: 'cubic-bezier(0.25, 1, 0.5, 1)',        // snappy, responsive feel
+  natural: 'cubic-bezier(0.4, 0, 0.6, 1)',          // natural, organic motion
   linear: 'linear',                                   // loading states, progress
 } as const;
 

@@ -93,6 +93,7 @@ export interface PrimitiveTokens {
     inOut: string;
     outBack: string;
     outQuart: string;
+    natural: string;
     linear: string;
   };
   gradients: {

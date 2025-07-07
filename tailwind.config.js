@@ -9,6 +9,10 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./content/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  corePlugins: {
+    transitionDuration: false,
+    transitionTimingFunction: false,
+  },
   theme: {
     extend: {
       colors: {
@@ -213,15 +217,10 @@ module.exports = {
           to: { height: '0' },
         },
       },
-      transitionTimingFunction: {
-        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
-        'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-        'natural': 'cubic-bezier(0.4, 0, 0.6, 1)',
-      },
       backdropBlur: {
         'neural': '10px',
       },
     },
   },
-  plugins: [vergilTokensPlugin, require("tailwindcss-animate")],
+  plugins: [vergilTokensPlugin],
 }

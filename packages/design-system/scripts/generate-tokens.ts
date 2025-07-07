@@ -94,6 +94,12 @@ function generateCSSVariables() {
     css += `  --duration-${key}: ${value};\n`;
   });
   
+  // Easings
+  css += '\n  /* Animation Easings */\n';
+  Object.entries(primitives.easing).forEach(([key, value]) => {
+    css += `  --ease-${key}: ${value};\n`;
+  });
+  
   // Gradients
   css += '\n  /* Gradients */\n';
   Object.entries(primitives.gradients).forEach(([key, value]) => {
@@ -303,6 +309,28 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       boxShadow: '${value}',
     }`)
       .join(',')},
+
+    // Animation duration utilities (custom to avoid conflicts)
+    ${Object.entries(primitives.duration)
+      .map(([key, value]) => `
+    '.animate-duration-${key}': {
+      animationDuration: '${value}',
+    },
+    '.transition-duration-${key}': {
+      transitionDuration: '${value}',
+    }`)
+      .join(',')},
+
+    // Animation timing utilities (custom to avoid conflicts)
+    ${Object.entries(primitives.easing)
+      .map(([key, value]) => `
+    '.animate-timing-${key}': {
+      animationTimingFunction: '${value}',
+    },
+    '.transition-timing-${key}': {
+      transitionTimingFunction: '${value}',
+    }`)
+      .join(',')},
   });
 }, {
   theme: {
@@ -390,18 +418,6 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
           .join(',\n        ')},
         ${Object.entries(semantic.semanticShadows)
           .map(([key, value]) => `'${toKebabCase(key)}': '${value}'`)
-          .join(',\n        ')},
-      },
-      
-      transitionDuration: {
-        ${Object.entries(primitives.duration)
-          .map(([key, value]) => `'${key}': '${value}'`)
-          .join(',\n        ')},
-      },
-      
-      transitionTimingFunction: {
-        ${Object.entries(primitives.easing)
-          .map(([key, value]) => `'${key}': '${value}'`)
           .join(',\n        ')},
       },
       
