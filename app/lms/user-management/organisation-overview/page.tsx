@@ -1885,12 +1885,12 @@ export default function OrganisationOverviewPage() {
                                     <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
                                     <span className="text-sm font-bold text-cyan-800">{aheadCount} ({totalCount > 0 ? Math.round(aheadCount / totalCount * 100) : 0}%)</span>
                                   </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div 
-                                      className="bg-cyan-600 h-2 rounded-full transition-all"
-                                      style={{ width: totalCount > 0 ? `${(aheadCount / totalCount) * 100}%` : '0%' }}
-                                    />
-                                  </div>
+                                  <Progress
+                                    value={totalCount > 0 ? (aheadCount / totalCount) * 100 : 0}
+                                    size="sm"
+                                    className="bg-gray-200"
+                                    indicatorClassName="bg-cyan-600"
+                                  />
                                 </div>
                                 
                                 <div className="bg-white border border-gray-200 rounded-lg p-3">
@@ -1898,12 +1898,12 @@ export default function OrganisationOverviewPage() {
                                     <span className="text-sm font-medium text-vergil-off-black">On Track</span>
                                     <span className="text-sm font-bold text-emerald-700">{onTrackCount} ({totalCount > 0 ? Math.round(onTrackCount / totalCount * 100) : 0}%)</span>
                                   </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div 
-                                      className="bg-emerald-600 h-2 rounded-full transition-all"
-                                      style={{ width: totalCount > 0 ? `${(onTrackCount / totalCount) * 100}%` : '0%' }}
-                                    />
-                                  </div>
+                                  <Progress
+                                    value={totalCount > 0 ? (onTrackCount / totalCount) * 100 : 0}
+                                    size="sm"
+                                    className="bg-gray-200"
+                                    indicatorClassName="bg-emerald-600"
+                                  />
                                 </div>
                                 
                                 <div className="bg-white border border-gray-200 rounded-lg p-3">
@@ -1911,12 +1911,12 @@ export default function OrganisationOverviewPage() {
                                     <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
                                     <span className="text-sm font-bold text-orange-800">{atRiskCount} ({totalCount > 0 ? Math.round(atRiskCount / totalCount * 100) : 0}%)</span>
                                   </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div 
-                                      className="bg-orange-600 h-2 rounded-full transition-all"
-                                      style={{ width: totalCount > 0 ? `${(atRiskCount / totalCount) * 100}%` : '0%' }}
-                                    />
-                                  </div>
+                                  <Progress
+                                    value={totalCount > 0 ? (atRiskCount / totalCount) * 100 : 0}
+                                    size="sm"
+                                    className="bg-gray-200"
+                                    indicatorClassName="bg-orange-600"
+                                  />
                                 </div>
                                 
                                 <div className="bg-white border border-gray-200 rounded-lg p-3">
@@ -1924,12 +1924,12 @@ export default function OrganisationOverviewPage() {
                                     <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
                                     <span className="text-sm font-bold text-red-700">{behindCount} ({totalCount > 0 ? Math.round(behindCount / totalCount * 100) : 0}%)</span>
                                   </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div 
-                                      className="bg-red-600 h-2 rounded-full transition-all"
-                                      style={{ width: totalCount > 0 ? `${(behindCount / totalCount) * 100}%` : '0%' }}
-                                    />
-                                  </div>
+                                  <Progress
+                                    value={totalCount > 0 ? (behindCount / totalCount) * 100 : 0}
+                                    size="sm"
+                                    className="bg-gray-200"
+                                    indicatorClassName="bg-red-600"
+                                  />
                                 </div>
                               </>
                             )
@@ -2122,69 +2122,53 @@ export default function OrganisationOverviewPage() {
                       <div>
                         <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Status Distribution</h5>
                         <div className="space-y-3">
-                          <div className="relative">
-                            <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3"
-                            >
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
-                                <span className="text-sm font-bold text-cyan-800">{aheadUsers} ({Math.round(aheadUsers / totalUsers * 100)}%)</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-cyan-600 h-2 rounded-full transition-all"
-                                  style={{ width: `${(aheadUsers / totalUsers) * 100}%` }}
-                                />
-                              </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
+                              <span className="text-sm font-bold text-cyan-800">{aheadUsers} ({Math.round(aheadUsers / totalUsers * 100)}%)</span>
                             </div>
+                            <Progress
+                              value={(aheadUsers / totalUsers) * 100}
+                              size="sm"
+                              className="bg-gray-200"
+                              indicatorClassName="bg-cyan-600"
+                            />
                           </div>
-                          <div className="relative">
-                            <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3"
-                            >
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-vergil-off-black">On Track</span>
-                                <span className="text-sm font-bold text-emerald-700">{onTrackUsers} ({Math.round(onTrackUsers / totalUsers * 100)}%)</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-emerald-600 h-2 rounded-full transition-all"
-                                  style={{ width: `${(onTrackUsers / totalUsers) * 100}%` }}
-                                />
-                              </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium text-vergil-off-black">On Track</span>
+                              <span className="text-sm font-bold text-emerald-700">{onTrackUsers} ({Math.round(onTrackUsers / totalUsers * 100)}%)</span>
                             </div>
+                            <Progress
+                              value={(onTrackUsers / totalUsers) * 100}
+                              size="sm"
+                              className="bg-gray-200"
+                              indicatorClassName="bg-emerald-600"
+                            />
                           </div>
-                          <div className="relative">
-                            <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3"
-                            >
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
-                                <span className="text-sm font-bold text-orange-800">{fallingBehindUsers} ({Math.round(fallingBehindUsers / totalUsers * 100)}%)</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-orange-600 h-2 rounded-full transition-all"
-                                  style={{ width: `${(fallingBehindUsers / totalUsers) * 100}%` }}
-                                />
-                              </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
+                              <span className="text-sm font-bold text-orange-800">{fallingBehindUsers} ({Math.round(fallingBehindUsers / totalUsers * 100)}%)</span>
                             </div>
+                            <Progress
+                              value={(fallingBehindUsers / totalUsers) * 100}
+                              size="sm"
+                              className="bg-gray-200"
+                              indicatorClassName="bg-orange-600"
+                            />
                           </div>
-                          <div className="relative">
-                            <div 
-                              className="bg-white border border-gray-200 rounded-lg p-3"
-                            >
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
-                                <span className="text-sm font-bold text-red-700">{drasticallyBehindUsers} ({Math.round(drasticallyBehindUsers / totalUsers * 100)}%)</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-red-600 h-2 rounded-full transition-all"
-                                  style={{ width: `${(drasticallyBehindUsers / totalUsers) * 100}%` }}
-                                />
-                              </div>
+                          <div className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
+                              <span className="text-sm font-bold text-red-700">{drasticallyBehindUsers} ({Math.round(drasticallyBehindUsers / totalUsers * 100)}%)</span>
                             </div>
+                            <Progress
+                              value={(drasticallyBehindUsers / totalUsers) * 100}
+                              size="sm"
+                              className="bg-gray-200"
+                              indicatorClassName="bg-red-600"
+                            />
                           </div>
                         </div>
                       </div>
