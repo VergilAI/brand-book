@@ -41,13 +41,13 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen bg-gradient-to-br from-cosmic-purple/5 via-white to-electric-violet/5 flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="flex items-center justify-center">
-            <div className="flex items-center gap-3">
+            <Link href="/lms" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <VergilLogo variant="mark" size="lg" animated={true} />
               <div>
                 <div className="text-2xl font-bold">Vergil Learn</div>
                 <div className="text-sm text-muted-foreground">Learning Management System</div>
               </div>
-            </div>
+            </Link>
           </div>
 
           <Card className="border shadow-xl">
@@ -104,13 +104,13 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="flex items-center justify-center">
-          <div className="flex items-center gap-3">
+          <Link href="/lms" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <VergilLogo variant="mark" size="lg" animated={true} />
             <div>
               <div className="text-2xl font-bold">Vergil Learn</div>
               <div className="text-sm text-muted-foreground">Learning Management System</div>
             </div>
-          </div>
+          </Link>
         </div>
 
         <Card className="border shadow-xl">

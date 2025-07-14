@@ -391,13 +391,13 @@ export default function UserManagementPage() {
               {/* Search */}
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vergil-off-black/40 w-5 h-5" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-vergil-off-black/40 w-5 h-5 z-10" />
                   <Input
                     type="text"
                     placeholder="Search users by name or email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    style={{ paddingLeft: '3rem' }}
                   />
                 </div>
               </div>
@@ -698,12 +698,59 @@ export default function UserManagementPage() {
                             View
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="sm" className="text-brand hover:text-brandLight"> {/* #A64DFF, #9933FF */}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-brand hover:text-brandLight"
+                          onClick={() => window.location.href = `mailto:${user.email}?subject=Training%20Update`}
+                        >
                           <Mail className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-secondary hover:text-primary"> {/* #6C6C6D, #1D1D1F */}
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-secondary hover:text-primary">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => window.location.href = `/lms/user-management/${user.id}`}>
+                              Edit Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.location.href = `mailto:${user.email}?subject=Training%20Update`}>
+                              Send Email
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.location.href = `slack://user?team=T12345&id=${user.id}`}>
+                              Send Message
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => {
+                              // Toggle user status
+                              const newStatus = user.status === 'active' ? 'inactive' : 'active'
+                              console.log(`Toggling user ${user.name} status to ${newStatus}`)
+                              // In a real app, this would update the user's status
+                            }}>
+                              {user.status === 'active' ? 'Deactivate User' : 'Activate User'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              console.log(`Resetting password for ${user.name}`)
+                              // In a real app, this would trigger password reset
+                            }}>
+                              Reset Password
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                if (window.confirm(`Are you sure you want to remove ${user.name}? This action cannot be undone.`)) {
+                                  console.log(`Removing user ${user.name}`)
+                                  // In a real app, this would remove the user
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              Remove User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
@@ -730,13 +777,24 @@ export default function UserManagementPage() {
 
         {/* Import Modal */}
         {showImportModal && (
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50"> {/* rgba(0, 0, 0, 0.5), 16px */}
-            <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col">
-              <div className="p-spacing-lg border-b border-subtle"> {/* 24px, rgba(0,0,0,0.05) */}
-                <div className="flex items-center justify-between">
-                  <div>
+          <div 
+            className="fixed inset-0 bg-overlay flex items-center justify-center p-4 z-50" 
+            onClick={() => {
+              setShowImportModal(false)
+              setImportFile(null)
+              setImportPreview([])
+              setImportErrors([])
+            }}
+          > {/* rgba(0, 0, 0, 0.5), 16px */}
+            <div 
+              className="w-full max-w-2xl max-h-[80vh] flex flex-col bg-white rounded-lg shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-spacing-md border-b border-subtle"> {/* 16px, rgba(0,0,0,0.05) */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
                     <h3 className="text-lg font-semibold text-primary">Import Users</h3> {/* #1D1D1F */}
-                    <p className="text-sm text-secondary mt-spacing-xs"> {/* #6C6C6D, 4px */}
+                    <p className="text-sm text-secondary mt-1"> {/* #6C6C6D */}
                       Upload a CSV file to import multiple users at once
                     </p>
                   </div>
@@ -749,13 +807,14 @@ export default function UserManagementPage() {
                       setImportPreview([])
                       setImportErrors([])
                     }}
+                    className="ml-spacing-md flex-shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 will-change-scroll" style={{ transform: 'translateZ(0)', WebkitOverflowScrolling: 'touch' }}>
+              <div className="flex-1 overflow-y-auto p-spacing-md will-change-scroll" style={{ transform: 'translateZ(0)', WebkitOverflowScrolling: 'touch' }}>
                 {!importFile ? (
                   <div className="space-y-4">
                     {/* File Upload */}
@@ -909,16 +968,17 @@ export default function UserManagementPage() {
                 )}
               </div>
 
-              <div className="p-6 border-t border-gray-200">
+              <div className="p-spacing-md border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-vergil-off-black/60">
                     {importFile && importErrors.length === 0 && importPreview.length > 0
                       ? `Ready to import ${importPreview.length} users`
                       : 'Select a file to continue'}
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex gap-spacing-sm">
                     <Button
                       variant="secondary"
+                      size="sm"
                       onClick={() => {
                         setShowImportModal(false)
                         setImportFile(null)
@@ -931,6 +991,7 @@ export default function UserManagementPage() {
                     <Button
                       onClick={handleImport}
                       disabled={!importFile || importErrors.length > 0 || importPreview.length === 0}
+                      size="sm"
                       className="bg-vergil-purple hover:bg-vergil-purple-lighter"
                     >
                       Import Users
@@ -938,7 +999,7 @@ export default function UserManagementPage() {
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </div>

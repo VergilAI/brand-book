@@ -85,7 +85,7 @@ export function StudentDashboard() {
       title: 'Cybersecurity Awareness Training',
       progress: 65,
       nextLesson: 'Module 4: Social Engineering',
-      dueDate: '2025-01-15'
+      dueDate: '2025-08-15'
     },
     {
       id: '2',
@@ -98,7 +98,7 @@ export function StudentDashboard() {
       title: 'Phishing Detection & Response',
       progress: 85,
       nextLesson: 'Final Assessment',
-      dueDate: '2025-01-10'
+      dueDate: '2025-07-25'
     }
   ]
 
@@ -344,7 +344,7 @@ export function StudentDashboard() {
                               </Badge>
                             )}
                           </div>
-                          <div className="space-y-spacing-xs">
+                          <div className="space-y-spacing-md">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-text-tertiary">Progress</span>
                               <span className="text-text-primary font-medium">{course.progress}%</span>

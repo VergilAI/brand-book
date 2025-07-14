@@ -71,6 +71,10 @@ export interface ProgressProps
    */
   showPercentage?: boolean
   /**
+   * Whether to show the percentage inside the progress bar
+   */
+  showInlinePercentage?: boolean
+  /**
    * Custom class name for the indicator
    */
   indicatorClassName?: string
@@ -89,6 +93,7 @@ const Progress = React.forwardRef<
       size,
       label,
       showPercentage,
+      showInlinePercentage,
       indicatorClassName,
       ...props
     },
@@ -97,15 +102,15 @@ const Progress = React.forwardRef<
     const percentage = Math.min(100, Math.max(0, Math.round((value / max) * 100)))
 
     return (
-      <div className="w-full space-y-spacing-xs">
-        {(label || showPercentage) && (
-          <div className="flex items-center justify-between">
+      <div className="w-full">
+        {(label || (showPercentage && !showInlinePercentage)) && (
+          <div className="flex items-center justify-between mb-2">
             {label && (
               <span className="text-sm font-medium text-secondary">
                 {label}
               </span>
             )}
-            {showPercentage && (
+            {showPercentage && !showInlinePercentage && (
               <span
                 className={cn(
                   "text-sm font-semibold transition-colors duration-normal",
@@ -122,7 +127,7 @@ const Progress = React.forwardRef<
         )}
         <ProgressPrimitive.Root
           ref={ref}
-          className={cn(progressVariants({ variant, size }), className)}
+          className={cn(progressVariants({ variant, size }), className, "relative")}
           aria-label={label || "Progress"}
           aria-valuenow={value}
           aria-valuemin={0}
@@ -139,6 +144,13 @@ const Progress = React.forwardRef<
               transform: `translateX(-${100 - percentage}%)`,
             }}
           />
+          {showInlinePercentage && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <span className="text-white text-sm font-bold drop-shadow-md" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)' }}>
+                {percentage}%
+              </span>
+            </div>
+          )}
         </ProgressPrimitive.Root>
       </div>
     )

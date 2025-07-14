@@ -21,7 +21,7 @@ export const initialRoles: Role[] = [
     description: 'Full system access and control',
     usersCount: 0, // Will be calculated from mock data
     privileges: ['all'],
-    createdAt: '2023-01-01',
+    createdAt: '2025-01-01',
     position: { x: 400, y: 50 },
     completionRate: 100,
     status: 'on_track'
@@ -34,7 +34,7 @@ export const initialRoles: Role[] = [
     usersCount: 0, // Will be calculated from mock data
     parentRole: '1',
     privileges: ['user_view', 'user_create', 'user_edit', 'course_view', 'course_create', 'course_edit', 'analytics_view'],
-    createdAt: '2023-01-15',
+    createdAt: '2025-01-15',
     position: { x: 400, y: 220 },
     completionRate: 95,
     status: 'on_track'
@@ -47,7 +47,7 @@ export const initialRoles: Role[] = [
     usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
     privileges: ['user_view', 'course_view', 'course_assign', 'analytics_view', 'reports_generate'],
-    createdAt: '2023-02-01',
+    createdAt: '2025-02-01',
     position: { x: 275, y: 390 },
     completionRate: 88,
     status: 'at_risk'
@@ -60,7 +60,7 @@ export const initialRoles: Role[] = [
     usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
     privileges: ['course_view', 'course_create', 'course_edit', 'user_view', 'content_upload'],
-    createdAt: '2023-02-15',
+    createdAt: '2025-02-15',
     position: { x: 525, y: 390 },
     completionRate: 82,
     status: 'behind'

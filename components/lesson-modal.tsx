@@ -55,9 +55,15 @@ export function LessonModal({
   const proficiencyLevel = getProficiencyLevel(overallProficiency)
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--bg-overlay)] animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-[var(--bg-overlay)] animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div className="min-h-full flex items-center justify-center p-[var(--spacing-md)]">
-        <div className="bg-[var(--bg-primary)] rounded-[var(--radius-xl)] shadow-modal max-w-6xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300">
+        <div 
+          className="bg-[var(--bg-primary)] rounded-[var(--radius-xl)] shadow-modal max-w-6xl w-full max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300"
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
           <div className="bg-[var(--gradient-consciousness)] p-[var(--spacing-lg)] text-[var(--text-inverse)]">
             <div className="flex items-start justify-between mb-[var(--spacing-md)]">

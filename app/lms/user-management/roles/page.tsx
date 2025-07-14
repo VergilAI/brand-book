@@ -553,7 +553,7 @@ export default function RolesPage() {
             }}
           >
             <Card 
-              className="w-full max-w-3xl max-h-[80vh] flex flex-col"
+              className="w-full max-w-4xl max-h-[85vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6 border-b border-gray-200">
@@ -620,16 +620,17 @@ export default function RolesPage() {
                 )}
               </div>
 
-              <div className="p-spacing-lg border-t border-subtle"> {/* 24px, rgba(0,0,0,0.05) */}
+              <div className="p-spacing-2xl border-t border-subtle mx-spacing-lg"> {/* 64px padding, 32px margin */}
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-vergil-off-black/60">
                     {selectedPrivileges.includes('all') 
                       ? 'All privileges selected' 
                       : `${selectedPrivileges.length} privileges selected`}
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex gap-spacing-lg mr-spacing-lg"> {/* 32px gap, 32px right margin */}
                     <Button
                       variant="secondary"
+                      size="lg"
                       onClick={() => {
                         setShowPrivilegesModal(false)
                         setSelectedRoleForPrivileges(null)
@@ -640,6 +641,7 @@ export default function RolesPage() {
                       Cancel
                     </Button>
                     <Button
+                      size="lg"
                       onClick={handleSavePrivileges}
                       className={privilegesSaved ? "bg-gray-400 cursor-not-allowed" : "bg-vergil-purple hover:bg-vergil-purple-lighter"}
                       disabled={selectedRoleForPrivileges.id === '1' || privilegesSaved}

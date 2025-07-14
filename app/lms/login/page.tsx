@@ -64,13 +64,13 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center justify-center">
-          <div className="flex items-center gap-3">
+          <Link href="/lms" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <VergilLogo variant="mark" size="lg" animated={true} />
             <div>
               <div className="text-2xl font-bold">Vergil Learn</div>
               <div className="text-sm text-muted-foreground">Learning Management System</div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Login form */}

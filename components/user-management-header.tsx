@@ -47,9 +47,18 @@ export function UserManagementHeader({
 
   const isActive = (item: NavItem) => {
     if (Array.isArray(item.pattern)) {
-      return item.pattern.some(p => pathname.includes(p))
+      // For Users tab: exact match or user profile paths
+      return item.pattern.some(p => {
+        if (p === '/lms/user-management') {
+          // Only match exact path, not subpaths like organisation-overview
+          return pathname === p
+        }
+        // For user profile paths
+        return pathname.startsWith(p)
+      })
     }
-    return pathname === item.pattern
+    // For single pattern items: exact match or subpaths
+    return pathname === item.pattern || pathname.startsWith(item.pattern + '/')
   }
 
   const getBreadcrumb = () => {
@@ -69,10 +78,16 @@ export function UserManagementHeader({
       {showBreadcrumb && (
         <div className="px-6 py-3 border-b border-subtle">
           <div className="flex items-center gap-2 text-sm">
-            <VergilLogo variant="mark" size="xs" color="primary" />
-            <span className="text-secondary">Vergil LMS</span>
+            <Link href="/lms" className="hover:opacity-80 transition-opacity">
+              <VergilLogo variant="mark" size="xs" color="primary" />
+            </Link>
+            <Link href="/lms" className="text-secondary hover:text-brand transition-colors">
+              Vergil LMS
+            </Link>
             <ChevronRight className="w-3 h-3 text-tertiary" />
-            <span className="text-secondary">Admin</span>
+            <Link href="/lms/user-management" className="text-secondary hover:text-brand transition-colors">
+              Admin
+            </Link>
             <ChevronRight className="w-3 h-3 text-tertiary" />
             <span className="text-primary font-medium">{getBreadcrumb()}</span>
           </div>

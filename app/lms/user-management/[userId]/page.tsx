@@ -75,7 +75,7 @@ const mockCourses: Course[] = [
     title: 'AI Safety Fundamentals',
     progress: 100,
     status: 'completed',
-    lastAccessed: '2024-01-10T14:30:00',
+    lastAccessed: '2025-07-12T14:30:00',
     timeSpent: 12.5
   },
   {
@@ -83,8 +83,8 @@ const mockCourses: Course[] = [
     title: 'Advanced Machine Learning',
     progress: 65,
     status: 'in_progress',
-    dueDate: '2024-02-01',
-    lastAccessed: '2024-01-15T10:30:00',
+    dueDate: '2025-08-01',
+    lastAccessed: '2025-07-13T10:30:00',
     timeSpent: 8.3
   },
   {
@@ -92,8 +92,8 @@ const mockCourses: Course[] = [
     title: 'Data Privacy and Security',
     progress: 30,
     status: 'in_progress',
-    dueDate: '2024-01-25',
-    lastAccessed: '2024-01-12T16:20:00',
+    dueDate: '2025-08-25',
+    lastAccessed: '2025-07-11T16:20:00',
     timeSpent: 3.2
   }
 ]
@@ -103,21 +103,21 @@ const mockActivities: Activity[] = [
     id: '1',
     type: 'lesson_completed',
     title: 'Completed lesson: Neural Networks Basics',
-    timestamp: '2024-01-15T10:30:00',
+    timestamp: '2025-07-13T10:30:00',
     details: 'Advanced Machine Learning - Module 3'
   },
   {
     id: '2',
     type: 'test_passed',
     title: 'Passed assessment with 92%',
-    timestamp: '2024-01-14T15:45:00',
+    timestamp: '2025-07-12T15:45:00',
     details: 'AI Safety Fundamentals - Final Exam'
   },
   {
     id: '3',
     type: 'certificate_earned',
     title: 'Earned certificate',
-    timestamp: '2024-01-14T16:00:00',
+    timestamp: '2025-07-12T16:00:00',
     details: 'AI Safety Fundamentals'
   }
 ]
@@ -308,12 +308,12 @@ export default function UserDetailPage() {
                 </div>
               </div>
             
-              <div className="flex gap-2">
+              <div className="flex gap-1 pr-4">
                 {isEditing ? (
                   <>
-                    <Button variant="secondary" onClick={() => setIsEditing(false)}>Cancel</Button>
-                    <Button onClick={handleSave} className="bg-vergil-purple hover:bg-vergil-purple/90">
-                      <Save className="w-4 h-4 mr-2" />
+                    <Button variant="secondary" size="sm" className="text-xs px-2 py-1" onClick={() => setIsEditing(false)}>Cancel</Button>
+                    <Button onClick={handleSave} size="sm" className="bg-vergil-purple hover:bg-vergil-purple/90 text-xs px-2 py-1">
+                      <Save className="w-3 h-3 mr-1" />
                       Save Changes
                     </Button>
                   </>
@@ -321,24 +321,26 @@ export default function UserDetailPage() {
                   <>
                     <Button 
                       variant="secondary" 
+                      size="sm"
                       onClick={() => window.location.href = `mailto:${userData.email}?subject=Training%20Progress%20Update`}
-                      className="border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20"
+                      className="border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 text-xs px-2 py-1"
                     >
-                      <Mail className="w-4 h-4 mr-2" />
+                      <Mail className="w-3 h-3 mr-1" />
                       Send Email
                     </Button>
                     <Button 
                       variant="secondary" 
+                      size="sm"
                       onClick={() => window.location.href = `slack://user?team=T12345&id=${userData.id}`}
-                      className="border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20"
+                      className="border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 text-xs px-2 py-1"
                     >
-                      <MessageSquare className="w-4 h-4 mr-2" />
+                      <MessageSquare className="w-3 h-3 mr-1" />
                       Slack Message
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="secondary" className="border-vergil-off-black/10">
-                          <MoreVertical className="w-4 h-4" />
+                        <Button variant="secondary" size="sm" className="border-vergil-off-black/10 text-xs px-2 py-1">
+                          <MoreVertical className="w-3 h-3" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -910,8 +912,17 @@ export default function UserDetailPage() {
         
        
         {showAssignSubordinateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
+          <div 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => {
+              setShowAssignSubordinateModal(false)
+              setSelectedSubordinates([])
+            }}
+          >
+            <Card 
+              className="w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-vergil-off-black">Assign Subordinate</h3>

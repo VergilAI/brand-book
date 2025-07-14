@@ -40,6 +40,8 @@ export default function OrganisationOverviewPage() {
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 })
   const [showZoomIndicator, setShowZoomIndicator] = useState(false)
   const zoomIndicatorTimeout = useRef<NodeJS.Timeout | null>(null)
+  const lastMousePosRef = useRef({ x: 0, y: 0 })
+  const isPanningRef = useRef(false)
 
 
   // Calculate SVG viewBox to show all content
@@ -67,62 +69,32 @@ export default function OrganisationOverviewPage() {
     return { x: svgP.x, y: svgP.y }
   }, [])
 
-  // Handle mouse down
+  // Handle mouse down - only start panning on empty areas
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Don't handle if the target is the rect element (already handled by onClick)
-    if ((e.target as SVGElement).tagName === 'rect') {
-      return
-    }
+    console.log('Mouse down - target:', (e.target as SVGElement).tagName)
     
-    const point = getSVGPoint(e.clientX, e.clientY)
-    
-    // Check if clicking on a role node
-    let clickedRole: Role | null = null
-    const cardWidth = 180
-    const cardHeight = 95
-    
-    for (const role of roles) {
-      if (!role.position) continue
+    // Only start panning if clicking on the SVG background (not on role cards)
+    if ((e.target as SVGElement).tagName === 'svg' || 
+        (e.target as SVGElement).tagName === 'rect' && 
+        (e.target as SVGElement).getAttribute('fill') === '#FAFAFA') {
       
-      // Calculate if this role has subordinates for accurate height
-      const getAllSubs = (roleId: string): User[] => {
-        const directUsers = users.filter(u => u.roleId === roleId)
-        const childRoles = roles.filter(r => r.parentRole === roleId)
-        const indirectUsers = childRoles.flatMap(childRole => getAllSubs(childRole.id))
-        return [...directUsers, ...indirectUsers]
-      }
-      const hasSubordinates = getAllSubs(role.id).length > 0
-      const actualHeight = hasSubordinates ? 95 : 75
-      
-      // Check if click is within card bounds
-      if (point.x >= role.position.x && 
-          point.x <= role.position.x + cardWidth &&
-          point.y >= role.position.y && 
-          point.y <= role.position.y + actualHeight) {
-        clickedRole = role
-        break
-      }
-    }
-    
-    if (clickedRole) {
-      // Select the clicked role
-      setSelectedRole(clickedRole.id)
-      setSelectedUser(null) // Clear user selection when role is selected
-    } else {
-      // Only start panning if we didn't click on a role
+      e.preventDefault()
+      isPanningRef.current = true
       setIsPanning(true)
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
       setLastMousePos({ x: e.clientX, y: e.clientY })
-      // Clear selections when clicking on empty space
-      setSelectedRole(null)
-      setSelectedUser(null)
+      
+      console.log('Starting panning at:', { x: e.clientX, y: e.clientY })
     }
   }
 
+
   // Handle mouse move
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isPanning) {
-      const dx = e.clientX - lastMousePos.x
-      const dy = e.clientY - lastMousePos.y
+    if (isPanningRef.current) {
+      console.log('Mouse move during panning')
+      const dx = e.clientX - lastMousePosRef.current.x
+      const dy = e.clientY - lastMousePosRef.current.y
       
       setViewState(prev => ({
         ...prev,
@@ -132,12 +104,15 @@ export default function OrganisationOverviewPage() {
         }
       }))
       
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
       setLastMousePos({ x: e.clientX, y: e.clientY })
     }
-  }, [isPanning, lastMousePos, viewState.zoom])
+  }, [])
 
   const handleMouseUp = useCallback(() => {
+    isPanningRef.current = false
     setIsPanning(false)
+    console.log('Mouse up - stopping panning')
   }, [])
 
   // Add event listeners
@@ -276,8 +251,8 @@ export default function OrganisationOverviewPage() {
 
   // Render connection lines
   const renderConnections = () => {
-    const cardWidth = 160
-    const cardHeight = 80
+    const cardWidth = 200
+    const cardHeight = 90
     
     return roles.map(role => {
       if (!role.parentRole || !role.position) return null
@@ -299,38 +274,89 @@ export default function OrganisationOverviewPage() {
           key={`connection-${role.id}`}
           d={path}
           fill="none"
-          stroke="#E5E7EB"
-          strokeWidth="2"
-          strokeDasharray={undefined}
+          stroke="#6366F1"
+          strokeWidth="2.5"
+          strokeDasharray="8,4"
+          opacity="0.8"
           className=""
         />
       )
     })
   }
 
-  // Render grid
+  // Render detailed grid background with comprehensive coverage
   const renderGrid = () => {
     if (!viewState.showGrid) return null
     
-    const gridSize = 50
+    const gridSize = 10 // Very detailed squares for 50x50 mapping
     const viewBox = calculateViewBox().split(' ').map(Number)
-    const startX = Math.floor(viewBox[0] / gridSize) * gridSize - gridSize
-    const startY = Math.floor(viewBox[1] / gridSize) * gridSize - gridSize
-    const endX = Math.ceil((viewBox[0] + viewBox[2]) / gridSize) * gridSize + gridSize
-    const endY = Math.ceil((viewBox[1] + viewBox[3]) / gridSize) * gridSize + gridSize
+    
+    // Extend grid coverage well beyond the visible area
+    const padding = 1000 // Extra padding to ensure full coverage
+    const startX = Math.floor((viewBox[0] - padding) / gridSize) * gridSize
+    const startY = Math.floor((viewBox[1] - padding) / gridSize) * gridSize
+    const endX = Math.ceil((viewBox[0] + viewBox[2] + padding) / gridSize) * gridSize
+    const endY = Math.ceil((viewBox[1] + viewBox[3] + padding) / gridSize) * gridSize
     
     const lines = []
     
+    // Add comprehensive background rectangle
+    lines.push(
+      <rect
+        key="grid-background"
+        x={startX}
+        y={startY}
+        width={endX - startX}
+        height={endY - startY}
+        fill="#FAFAFA"
+        stroke="none"
+      />
+    )
+    
+    // Major grid lines (every 50px) - main sections for 50x50 mapping
+    const majorGridSize = 50
+    for (let x = Math.floor(startX / majorGridSize) * majorGridSize; x <= endX; x += majorGridSize) {
+      lines.push(
+        <line
+          key={`grid-major-v-${x}`}
+          x1={x}
+          y1={startY}
+          x2={x}
+          y2={endY}
+          stroke="#D1D5DB"
+          strokeWidth="1"
+          opacity="0.7"
+        />
+      )
+    }
+    
+    for (let y = Math.floor(startY / majorGridSize) * majorGridSize; y <= endY; y += majorGridSize) {
+      lines.push(
+        <line
+          key={`grid-major-h-${y}`}
+          x1={startX}
+          y1={y}
+          x2={endX}
+          y2={y}
+          stroke="#D1D5DB"
+          strokeWidth="1"
+          opacity="0.7"
+        />
+      )
+    }
+    
+    // Minor grid lines (every 10px) - detailed squares
     for (let x = startX; x <= endX; x += gridSize) {
       lines.push(
         <line
-          key={`grid-v-${x}`}
+          key={`grid-minor-v-${x}`}
           x1={x}
           y1={startY}
           x2={x}
           y2={endY}
           stroke="#F3F4F6"
-          strokeWidth="1"
+          strokeWidth="0.5"
+          opacity="0.4"
         />
       )
     }
@@ -338,13 +364,14 @@ export default function OrganisationOverviewPage() {
     for (let y = startY; y <= endY; y += gridSize) {
       lines.push(
         <line
-          key={`grid-h-${y}`}
+          key={`grid-minor-h-${y}`}
           x1={startX}
           y1={y}
           x2={endX}
           y2={y}
           stroke="#F3F4F6"
-          strokeWidth="1"
+          strokeWidth="0.5"
+          opacity="0.4"
         />
       )
     }
@@ -412,6 +439,7 @@ export default function OrganisationOverviewPage() {
 
   // Handle role click
   const handleRoleClick = useCallback((roleId: string) => {
+    console.log('Role clicked:', roleId)
     // Set the selected role
     setSelectedRole(roleId)
     setSelectedUser(null) // Clear any selected user
@@ -454,9 +482,9 @@ export default function OrganisationOverviewPage() {
       ? Math.round(allSubordinates.reduce((sum, u) => sum + (u.completionRate || 0), 0) / allSubordinates.length)
       : 0
     
-    // Card dimensions
-    const cardWidth = 180
-    const cardHeight = allSubordinates.length > 0 ? 95 : 75
+    // Card dimensions - made larger for better layout
+    const cardWidth = 200
+    const cardHeight = allSubordinates.length > 0 ? 110 : 85
     
     return (
       <g
@@ -549,75 +577,88 @@ export default function OrganisationOverviewPage() {
         </g>
         
         
-        {/* Subordinate Progress Bar */}
+        {/* Subordinate Progress Section */}
         {allSubordinates.length > 0 && (
-          <g transform={`translate(12, ${cardHeight - 30})`}>
-            {/* Progress label with info icon */}
-            <g>
+          <g transform={`translate(12, ${cardHeight - 45})`}>
+            {/* Progress label */}
+            <text
+              x="0"
+              y="0"
+              fontSize="10"
+              fill="#6B7280"
+              fontWeight="500"
+            >
+              Team Progress
+            </text>
+            
+            {/* Info icon */}
+            <g 
+              transform={`translate(${cardWidth - 40}, -6)`}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={(e) => {
+                e.stopPropagation()
+                // Show tooltip
+                const tooltip = document.getElementById(`tooltip-${role.id}`)
+                if (tooltip) tooltip.style.display = 'block'
+              }}
+              onMouseLeave={(e) => {
+                e.stopPropagation()
+                // Hide tooltip
+                const tooltip = document.getElementById(`tooltip-${role.id}`)
+                if (tooltip) tooltip.style.display = 'none'
+              }}
+            >
+              <circle cx="5" cy="5" r="7" fill="#E5E7EB" />
               <text
-                x="0"
-                y="0"
-                fontSize="11"
+                x="5"
+                y="8"
+                textAnchor="middle"
+                fontSize="9"
                 fill="#6B7280"
-                fontWeight="500"
+                fontWeight="bold"
               >
-                Team Progress: {avgSubordinateProgress}%
+                i
               </text>
-              
-              {/* Info icon */}
-              <g 
-                transform={`translate(${cardWidth - 40}, -6)`}
-                style={{ cursor: 'pointer' }}
-                onMouseEnter={(e) => {
-                  e.stopPropagation()
-                  // Show tooltip
-                  const tooltip = document.getElementById(`tooltip-${role.id}`)
-                  if (tooltip) tooltip.style.display = 'block'
-                }}
-                onMouseLeave={(e) => {
-                  e.stopPropagation()
-                  // Hide tooltip
-                  const tooltip = document.getElementById(`tooltip-${role.id}`)
-                  if (tooltip) tooltip.style.display = 'none'
-                }}
-              >
-                <circle cx="5" cy="5" r="7" fill="#E5E7EB" />
-                <text
-                  x="5"
-                  y="8"
-                  textAnchor="middle"
-                  fontSize="9"
-                  fill="#6B7280"
-                  fontWeight="bold"
-                >
-                  i
-                </text>
-              </g>
             </g>
             
-            {/* Progress bar background */}
-            <rect
-              x="0"
-              y="8"
-              width={cardWidth - 24}
-              height="4"
-              rx="2"
-              fill="#E5E7EB"
-            />
-            
-            {/* Progress bar fill */}
-            <rect
-              x="0"
-              y="8"
-              width={(cardWidth - 24) * (avgSubordinateProgress / 100)}
-              height="4"
-              rx="2"
-              fill={
-                avgSubordinateProgress >= 80 ? '#10B981' :
-                avgSubordinateProgress >= 60 ? '#F59E0B' :
-                '#EF4444'
-              }
-            />
+            {/* Progress bar and percentage row */}
+            <g transform="translate(0, 35)">
+              {/* Percentage text positioned well above progress bar */}
+              <text
+                x="0"
+                y="-20"
+                fontSize="12"
+                fill="#374151"
+                fontWeight="600"
+                textAnchor="start"
+              >
+                {avgSubordinateProgress}%
+              </text>
+              
+              {/* Progress bar background */}
+              <rect
+                x="0"
+                y="0"
+                width={cardWidth - 48}
+                height="12"
+                rx="6"
+                fill="#E5E7EB"
+              />
+              
+              {/* Progress bar fill */}
+              <rect
+                x="0"
+                y="0"
+                width={(cardWidth - 48) * (avgSubordinateProgress / 100)}
+                height="12"
+                rx="6"
+                fill={
+                  avgSubordinateProgress >= 80 ? '#10B981' :
+                  avgSubordinateProgress >= 60 ? '#F59E0B' :
+                  '#EF4444'
+                }
+              />
+            </g>
           </g>
         )}
         
@@ -914,8 +955,8 @@ export default function OrganisationOverviewPage() {
     const positions: Record<string, { x: number; y: number }> = {}
     const { topLevelEmployees, getDirectReports } = buildEmployeeHierarchy()
     
-    const levelHeight = 100
-    const nodeWidth = 180
+    const levelHeight = 120
+    const nodeWidth = 200
     const nodeHeight = 100
     const minHorizontalSpacing = 20
     
@@ -1004,8 +1045,8 @@ export default function OrganisationOverviewPage() {
   const renderEmployeeConnections = () => {
     const { getDirectReports } = buildEmployeeHierarchy()
     const positions = calculateEmployeePositions()
-    const cardWidth = 180
-    const cardHeight = 80
+    const cardWidth = 200
+    const cardHeight = 90
     
     return users.flatMap(manager => {
       const directReports = getDirectReports(manager.id)
@@ -1032,10 +1073,11 @@ export default function OrganisationOverviewPage() {
           <path
             key={`${manager.id}-${report.id}`}
             d={path}
-            stroke="#D1D5DB"
-            strokeWidth="1.5"
+            stroke="#6366F1"
+            strokeWidth="2.5"
             fill="none"
-            strokeDasharray="3,3"
+            strokeDasharray="8,4"
+            opacity="0.8"
           />
         )
       }).filter(Boolean)
@@ -1049,8 +1091,8 @@ export default function OrganisationOverviewPage() {
     if (!position) return null
     
     const role = roles.find(r => r.id === employee.roleId)
-    const cardWidth = 180
-    const cardHeight = 80
+    const cardWidth = 200
+    const cardHeight = 90
     
     return (
       <g
@@ -1237,7 +1279,11 @@ export default function OrganisationOverviewPage() {
               onMouseDown={handleMouseDown}
               style={{ 
                 cursor: isPanning ? 'grabbing' : 'grab',
-                transition: 'none'
+                transition: 'none',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none'
               }}
             >
               {/* Grid */}
@@ -1608,7 +1654,7 @@ export default function OrganisationOverviewPage() {
                         
                         {/* Overall Progress */}
                         <div className="bg-vergil-off-white/50 rounded-lg p-4 mb-4">
-                          <div className="flex justify-between items-center mb-2">
+                          <div className="flex justify-between items-center mb-3">
                             <span className="text-sm font-medium text-vergil-off-black">Overall Progress</span>
                             <span className="text-2xl font-bold" style={{ 
                               color: user.completionRate >= 80 ? '#10B981' : 
@@ -1617,15 +1663,19 @@ export default function OrganisationOverviewPage() {
                               {user.completionRate}%
                             </span>
                           </div>
-                          <div className="w-full bg-vergil-off-black/10 rounded-full h-3">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 shadow-inner">
                             <div 
-                              className="h-3 rounded-full transition-all duration-500"
+                              className="h-2.5 rounded-full transition-all duration-500 shadow-sm"
                               style={{ 
                                 width: `${user.completionRate}%`,
                                 backgroundColor: user.completionRate >= 80 ? '#10B981' : 
                                                 user.completionRate >= 60 ? '#F59E0B' : '#EF4444'
                               }}
                             />
+                          </div>
+                          <div className="flex justify-between text-xs text-vergil-off-black/60 mt-1">
+                            <span>0%</span>
+                            <span>100%</span>
                           </div>
                         </div>
                         
@@ -1654,12 +1704,12 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Actions */}
                       <div className="border-t border-vergil-off-black/10 pt-6">
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Quick Actions</h5>
-                        <div className="space-y-2">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Quick Actions</h5>
+                        <div className="flex flex-col">
                           <Button 
                             variant="secondary" 
                             size="sm"
-                            className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
+                            className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors mb-3"
                             onClick={() => {
                               window.location.href = `slack://user?team=T12345&id=${user.id}`
                             }}
@@ -1672,7 +1722,7 @@ export default function OrganisationOverviewPage() {
                           <Button 
                             variant="secondary" 
                             size="sm"
-                            className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors"
+                            className="w-full justify-start border-vergil-off-black/10 hover:bg-vergil-purple/5 hover:border-vergil-purple/20 transition-colors mb-3"
                             onClick={() => {
                               window.location.href = `mailto:${user.email}?subject=Training%20Progress%20Update`
                             }}
@@ -1682,7 +1732,7 @@ export default function OrganisationOverviewPage() {
                             </div>
                             <span className="text-vergil-off-black">Send Email</span>
                           </Button>
-                          <Link href={`/lms/user-management/${user.id}`}>
+                          <Link href={`/lms/user-management/${user.id}`} className="block">
                             <Button 
                               variant="secondary" 
                               size="sm" 

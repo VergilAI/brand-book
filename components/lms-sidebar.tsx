@@ -295,13 +295,7 @@ export function LMSSidebar({ isOpen, onClose, currentView }: LMSSidebarProps) {
                             disabled={lesson.locked}
                             onClick={() => {
                               if (!lesson.locked) {
-                                if (lesson.type === 'lesson') {
-                                  window.location.href = `/lms/course/${course.id}/lesson/${lesson.id}`
-                                } else if (lesson.type === 'test') {
-                                  window.location.href = `/lms/course/${course.id}/test/${lesson.id}`
-                                } else if (lesson.type === 'game') {
-                                  window.location.href = `/lms/course/${course.id}/game/${lesson.id}`
-                                }
+                                window.location.href = '/lms/new_course_overview'
                               }
                             }}
                           >

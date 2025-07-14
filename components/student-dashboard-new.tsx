@@ -24,6 +24,21 @@ import { Badge } from '@/components/badge'
 import { cn } from '@/lib/utils'
 
 export function StudentDashboard() {
+  const handleViewAllCourses = () => {
+    window.location.href = '/lms/new_course_overview'
+  }
+
+  const handleCourseClick = (courseId: number) => {
+    window.location.href = '/lms/new_course_overview'
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear().toString().slice(-2)
+    return `${day}/${month}/${year}`
+  }
   // Mock data
   const user = {
     name: 'Alex Chen',
@@ -83,7 +98,7 @@ export function StudentDashboard() {
       title: 'Cybersecurity Awareness Training',
       nextLesson: 'Module 4: Social Engineering',
       progress: 65,
-      dueDate: '2025-01-15',
+      dueDate: '2025-08-15',
       color: 'purple'
     },
     {
@@ -91,7 +106,7 @@ export function StudentDashboard() {
       title: 'AI Security & Governance',
       nextLesson: 'Ethics in AI Development',
       progress: 30,
-      dueDate: null,
+      dueDate: '2025-08-20',
       color: 'blue'
     },
     {
@@ -99,7 +114,7 @@ export function StudentDashboard() {
       title: 'Phishing Detection & Response',
       nextLesson: 'Final Assessment',
       progress: 85,
-      dueDate: '2025-01-10',
+      dueDate: '2025-07-25',
       color: 'green'
     }
   ]
@@ -128,7 +143,7 @@ export function StudentDashboard() {
                 Welcome back, {user.name}!
               </h1>
               <p className="text-gray-600 mt-2">
-                You're on a {user.streak}-day learning streak 🔥
+                You're on a {user.streak}-day learning streak
               </p>
             </div>
             <div className="flex items-center gap-8">
@@ -210,7 +225,12 @@ export function StudentDashboard() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Continue Learning</h2>
-                <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-purple-600 hover:text-purple-700"
+                  onClick={handleViewAllCourses}
+                >
                   View All
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
@@ -224,6 +244,7 @@ export function StudentDashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
+                    onClick={() => handleCourseClick(course.id)}
                   >
                     <div className="flex items-start gap-4">
                       <div className={cn(
@@ -250,7 +271,7 @@ export function StudentDashboard() {
                           {course.dueDate && (
                             <Badge variant="secondary" className="ml-2">
                               <Calendar className="h-3 w-3 mr-1" />
-                              Due {new Date(course.dueDate).toLocaleDateString()}
+                              Due {formatDate(course.dueDate)}
                             </Badge>
                           )}
                         </div>
@@ -288,7 +309,7 @@ export function StudentDashboard() {
                         <p className="text-sm text-gray-600 mt-1">{course.nextLesson}</p>
                       </div>
                       <Badge variant="destructive">
-                        {new Date(course.dueDate!).toLocaleDateString()}
+                        {formatDate(course.dueDate!)}
                       </Badge>
                     </div>
                   ))}
