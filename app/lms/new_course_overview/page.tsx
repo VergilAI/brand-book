@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react'
 
 export default function NewCourseOverviewPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { course, loading, error } = useCourseData('course-1')
+  const { course, loading, error } = useCourseData('ai-fundamentals')
 
   return (
     <div className="min-h-screen bg-bg-primary"> {/* #FFFFFF */}

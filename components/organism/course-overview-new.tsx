@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
 import { Button } from '@/components/atomic/button'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
-import { LessonModal } from '@/components/lesson-modal'
+import { LearningActivitiesModal } from '@/components/learning-activities-modal'
 import { cn } from '@/lib/utils'
 import type { Course, Lesson } from '@/lib/lms/new-course-types'
 
@@ -33,7 +33,7 @@ interface CourseOverviewNewProps {
 
 export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
   const router = useRouter()
-  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set())
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set(['chapter-1']))
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalLesson, setModalLesson] = useState<Lesson | null>(null)
@@ -69,10 +69,8 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
   }, [course])
 
   const toggleChapter = (chapterId: string) => {
-    const newExpanded = new Set(expandedChapters)
-    if (newExpanded.has(chapterId)) {
-      newExpanded.delete(chapterId)
-    } else {
+    const newExpanded = new Set<string>()
+    if (!expandedChapters.has(chapterId)) {
       newExpanded.add(chapterId)
     }
     setExpandedChapters(newExpanded)
@@ -119,16 +117,16 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm mb-6 text-text-secondary"> {/* #6C6C6D */}
             <a href="/lms" className="hover:text-text-primary transition-colors"> {/* #1D1D1F */}
-              All Courses
+              Courses
             </a>
-            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-text-secondary">/</span> {/* #6C6C6D */}
             <span className="text-text-primary font-medium"> {/* #1D1D1F */}
               {course.title}
             </span>
           </nav>
 
           {/* Hero Section */}
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 justify-between">
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-text-primary mb-3"> {/* #1D1D1F */}
                 {course.title}
@@ -136,150 +134,82 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
               <p className="text-base text-text-secondary leading-relaxed mb-4 max-w-3xl"> {/* #6C6C6D */}
                 {course.description}
               </p>
-              
-              {/* Course Meta */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary"> {/* #6C6C6D */}
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>~3 hours</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <BookOpen className="h-4 w-4" />
-                  <span>{stats.totalLessons} lessons</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>2,341 enrolled</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Award className="h-4 w-4" />
-                  <span>Certificate included</span>
-                </div>
-              </div>
             </div>
             
-            {/* Action Card */}
-            <div className="lg:w-72">
-              <Card className="p-6 bg-gray-25 border border-border-subtle"> {/* #FAFAFC, rgba(0,0,0,0.05) */}
-                <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-text-primary mb-1"> {/* #1D1D1F */}
-                    {stats.overallProgress}%
-                  </div>
-                  <p className="text-sm text-text-secondary">Course Mastery</p> {/* #6C6C6D */}
-                </div>
-                
-                <Button 
-                  size="md" 
-                  variant="primary"
-                  className="w-full"
-                >
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Take Final Assessment
-                </Button>
-                
-                <div className="mt-3 text-center">
-                  {stats.overallProgress >= 80 ? (
-                    <span className="text-sm text-text-success font-medium">Ready</span> /* #0F8A0F */
-                  ) : (
-                    <span className="text-sm text-text-tertiary">Not Ready</span> /* #71717A */
-                  )}
-                </div>
-              </Card>
+            {/* Action Button */}
+            <div className="flex flex-col items-end gap-2">
+              <Button 
+                size="md" 
+                variant="primary"
+                className="px-6"
+              >
+                Take Final Assessment
+              </Button>
+              
+              <div className="text-center">
+                {stats.overallProgress >= 80 ? (
+                  <span className="text-sm text-text-success font-medium">Ready</span> /* #0F8A0F */
+                ) : (
+                  <span className="text-sm text-text-error font-medium">Not Ready ({stats.overallProgress}%)</span> /* #E51C23 */
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Progress Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           
           {/* Lessons Progress */}
-          <Card className="p-5 border border-border-subtle hover:border-border-default transition-all duration-200"> {/* rgba(0,0,0,0.05), rgba(0,0,0,0.1) */}
+          <Card className="p-6 border border-border-subtle hover:border-border-default transition-all duration-200"> {/* rgba(0,0,0,0.05), rgba(0,0,0,0.1) */}
             <CardContent className="p-0">
               <div className="flex items-center gap-2 mb-3">
-                <BookOpen className="h-4 w-4 text-text-brand" /> {/* #A64DFF */}
+                <BookOpen className="h-5 w-5 text-text-brand" /> {/* #7B00FF */}
                 <p className="text-sm font-medium text-text-secondary"> {/* #6C6C6D */}
                   Lessons
                 </p>
               </div>
-              <p className="text-xl font-bold text-text-primary mb-3"> {/* #1D1D1F */}
-                {stats.completedLessons}
-                <span className="text-base text-text-tertiary font-normal">/{stats.totalLessons}</span> {/* #71717A */}
+              <p className="text-2xl font-bold text-text-primary mb-2"> {/* #1D1D1F */}
+                {stats.inProgressLessons}
               </p>
-              <Progress 
-                value={(stats.completedLessons / stats.totalLessons) * 100} 
-                className="h-1.5 mb-2"
-              />
-              <p className="text-xs text-text-tertiary"> {/* #71717A */}
-                {stats.inProgressLessons} in progress
+              <p className="text-sm text-text-secondary mb-1"> {/* #6C6C6D */}
+                In Progress
               </p>
             </CardContent>
           </Card>
 
           {/* Knowledge Points */}
-          <Card className="p-5 border border-border-subtle hover:border-border-default transition-all duration-200">
+          <Card className="p-6 border border-border-subtle hover:border-border-default transition-all duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-2 mb-3">
-                <Brain className="h-4 w-4 text-text-success" /> {/* #0F8A0F */}
+                <Brain className="h-5 w-5 text-text-success" /> {/* #0F8A0F */}
                 <p className="text-sm font-medium text-text-secondary">
                   Knowledge Points
                 </p>
               </div>
-              <p className="text-xl font-bold text-text-primary mb-3">
-                {stats.masteredKnowledgePoints}
-                <span className="text-base text-text-tertiary font-normal">/{stats.totalKnowledgePoints}</span>
+              <p className="text-2xl font-bold text-text-primary mb-2">
+                {stats.masteredKnowledgePoints}/{stats.totalKnowledgePoints}
               </p>
-              <Progress 
-                value={(stats.masteredKnowledgePoints / stats.totalKnowledgePoints) * 100} 
-                className="h-1.5 mb-2"
-              />
-              <p className="text-xs text-text-tertiary">
-                Mastered (≥80%)
+              <p className="text-sm text-text-secondary mb-1">
+                Mastered
               </p>
             </CardContent>
           </Card>
 
           {/* Chapter Tests */}
-          <Card className="p-5 border border-border-subtle hover:border-border-default transition-all duration-200">
+          <Card className="p-6 border border-border-subtle hover:border-border-default transition-all duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-2 mb-3">
-                <Target className="h-4 w-4 text-text-info" /> {/* #0087FF */}
+                <Target className="h-5 w-5 text-text-info" /> {/* #0087FF */}
                 <p className="text-sm font-medium text-text-secondary">
                   Chapter Tests
                 </p>
               </div>
-              <p className="text-xl font-bold text-text-primary mb-3">
-                {stats.completedChapterTests}
-                <span className="text-base text-text-tertiary font-normal">/{stats.totalChapters}</span>
+              <p className="text-2xl font-bold text-text-primary mb-2">
+                {stats.completedChapterTests}/{stats.totalChapters}
               </p>
-              <Progress 
-                value={(stats.completedChapterTests / stats.totalChapters) * 100} 
-                className="h-1.5 mb-2"
-              />
-              <p className="text-xs text-text-tertiary">
-                {stats.averageTestScore > 0 ? `Avg: ${stats.averageTestScore}%` : 'No tests taken'}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Overall Progress */}
-          <Card className="p-5 border border-border-subtle hover:border-border-default transition-all duration-200">
-            <CardContent className="p-0">
-              <div className="flex items-center gap-2 mb-3">
-                <BarChart3 className="h-4 w-4 text-text-warning" /> {/* #FFC700 */}
-                <p className="text-sm font-medium text-text-secondary">
-                  Overall Progress
-                </p>
-              </div>
-              <p className="text-xl font-bold text-text-primary mb-3">
-                {stats.overallProgress}
-                <span className="text-base text-text-tertiary font-normal">%</span>
-              </p>
-              <Progress 
-                value={stats.overallProgress} 
-                className="h-1.5 mb-2"
-              />
-              <p className="text-xs text-text-tertiary">
-                Course completion
+              <p className="text-sm text-text-secondary mb-1">
+                Completed (Avg: {stats.averageTestScore > 0 ? `${stats.averageTestScore}%` : '0%'})
               </p>
             </CardContent>
           </Card>
@@ -310,29 +240,37 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <ChevronRight className={cn(
+                        <ChevronDown className={cn(
                           "h-4 w-4 text-text-tertiary transition-transform duration-200", /* #71717A */
-                          isExpanded && "rotate-90"
+                          !isExpanded && "-rotate-90"
                         )} />
                         <div>
                           <h3 className="text-base font-semibold text-text-primary"> {/* #1D1D1F */}
                             Chapter {chapterIndex + 1}: {chapter.title}
                           </h3>
                           <p className="text-sm text-text-secondary mt-0.5"> {/* #6C6C6D */}
-                            {chapter.lessons.length} lessons • {chapterKPs.length} knowledge points
+                            {chapter.description}
                           </p>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-4">
-                        {chapterProgress >= 80 && (
-                          <Badge variant="success" className="text-xs">Ready</Badge>
+                        {chapterProgress >= 80 ? (
+                          <Badge variant="success" className="text-xs">Completed</Badge>
+                        ) : chapterProgress > 0 ? (
+                          <Badge variant="info" className="text-xs">In Progress</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">Not Started</Badge>
                         )}
-                        {chapter.testScore !== null && chapter.testScore !== undefined && (
-                          <span className="text-sm text-text-secondary">
-                            Test: {chapter.testScore}%
-                          </span>
+                        
+                        {chapter.testScore !== null ? (
+                          <Badge variant="success" className="text-xs">Test: {chapter.testScore}%</Badge>
+                        ) : chapterProgress >= 60 ? (
+                          <Badge variant="warning" className="text-xs">Test: Ready</Badge>
+                        ) : (
+                          <Badge variant="warning" className="text-xs">Test: Keep Learning ({chapterProgress}%)</Badge>
                         )}
+                        
                         <div className="text-right min-w-[45px]">
                           <div className="text-sm font-medium text-text-primary">
                             {chapterProgress}%
@@ -340,10 +278,40 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Progress bar */}
+                    <div className="mt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-text-secondary">📖 {chapter.lessons.length} lessons</span>
+                        <span className="text-xs text-text-secondary">⭕ {chapter.lessons.filter(l => l.completed).length} completed</span>
+                        <span className="text-xs text-text-secondary">🕐 {chapter.estimatedTime}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-text-success h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${chapterProgress}%` }}
+                        />
+                      </div>
+                    </div>
                   </CardHeader>
 
-                  {isExpanded && (
+                  <div 
+                    className={`overflow-hidden transition-all duration-300 ease-out ${
+                      isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
                     <CardContent className="border-t border-border-subtle bg-bg-primary px-6 py-4"> {/* rgba(0,0,0,0.05), #FFFFFF */}
+                      {/* Lesson Table Header */}
+                      <div className="mb-4">
+                        <div className="grid grid-cols-12 gap-4 py-2 px-4 bg-bg-secondary rounded-lg text-sm font-medium text-text-secondary"> {/* #F5F5F7, #6C6C6D */}
+                          <div className="col-span-5">LESSON</div>
+                          <div className="col-span-3">KNOWLEDGE POINTS</div>
+                          <div className="col-span-2">STATUS</div>
+                          <div className="col-span-2">ACTIONS</div>
+                        </div>
+                      </div>
+                      
+                      {/* Lesson Rows */}
                       <div className="space-y-2">
                         {chapter.lessons.map((lesson, lessonIndex) => {
                           const lessonProgress = lesson.knowledgePoints.length > 0
@@ -351,149 +319,94 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                             : 0
                           const isCompleted = lesson.knowledgePoints.every(kp => kp.proficiency >= 80)
                           const hasProgress = lesson.knowledgePoints.some(kp => kp.proficiency > 0)
+                          
+                          // Status determination
+                          const getStatusBadge = () => {
+                            if (lesson.status === 'in-progress') {
+                              return <Badge variant="info" className="text-xs">In Progress</Badge>
+                            } else if (lesson.status === 'not-started') {
+                              return <Badge variant="secondary" className="text-xs">Not Started</Badge>
+                            } else {
+                              return <Badge variant="success" className="text-xs">Completed</Badge>
+                            }
+                          }
+                          
+                          const getKnowledgePointsBadge = () => {
+                            const masteredCount = lesson.knowledgePoints.filter(kp => kp.proficiency >= 80).length
+                            const totalCount = lesson.knowledgePoints.length
+                            
+                            if (masteredCount === totalCount && totalCount > 0) {
+                              return <Badge variant="success" className="text-xs">Mastered ({masteredCount * 100 / totalCount}%)</Badge>
+                            } else if (masteredCount > 0) {
+                              return <Badge variant="warning" className="text-xs">Learning ({Math.round(masteredCount * 100 / totalCount)}%)</Badge>
+                            } else {
+                              return <Badge variant="secondary" className="text-xs">Not Started (0%)</Badge>
+                            }
+                          }
 
                           return (
                             <div
                               key={lesson.id}
-                              className={cn(
-                                "flex items-center gap-4 p-4 rounded-lg bg-bg-primary border transition-all cursor-pointer", /* #FFFFFF */
-                                selectedLesson === lesson.id 
-                                  ? "border-border-brand" /* #A64DFF */
-                                  : "border-border-subtle hover:border-border-default hover:bg-bg-primary" /* rgba(0,0,0,0.05), rgba(0,0,0,0.1), #FFFFFF */
-                              )}
+                              className="grid grid-cols-12 gap-4 py-3 px-4 border border-border-subtle rounded-lg hover:bg-bg-secondary transition-all cursor-pointer" /* rgba(0,0,0,0.05), #F5F5F7 */
                               onClick={() => setSelectedLesson(lesson.id)}
                             >
-                              {/* Progress Indicator */}
-                              <div className="flex-shrink-0">
-                                {isCompleted ? (
-                                  <CheckCircle className="h-5 w-5 text-text-success" /> /* #0F8A0F */
-                                ) : hasProgress ? (
-                                  <div className="relative w-5 h-5">
-                                    <Circle className="h-5 w-5 text-text-tertiary" /> /* #71717A */
-                                    <svg className="absolute inset-0 w-5 h-5 -rotate-90">
-                                      <circle
-                                        cx="10"
-                                        cy="10"
-                                        r="8"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        fill="none"
-                                        className="text-text-warning" /* #FFC700 */
-                                        strokeDasharray={`${lessonProgress * 0.5} 50`}
-                                      />
-                                    </svg>
-                                  </div>
-                                ) : (
-                                  <Circle className="h-5 w-5 text-text-tertiary" /> /* #71717A */
-                                )}
-                              </div>
-
                               {/* Lesson Info */}
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium text-text-primary"> {/* #1D1D1F */}
+                              <div className="col-span-5">
+                                <h4 className="text-sm font-medium text-text-primary mb-1"> {/* #1D1D1F */}
                                   {chapterIndex + 1}.{lessonIndex + 1} {lesson.title}
                                 </h4>
-                                <div className="flex items-center gap-3 mt-1 text-xs">
-                                  <span className="text-text-secondary flex items-center gap-1"> {/* #6C6C6D */}
-                                    <Brain className="h-3 w-3" />
-                                    {lesson.knowledgePoints.length} knowledge points
-                                  </span>
-                                  <span className={cn(
-                                    isCompleted ? "text-text-success" : 
-                                    hasProgress ? "text-text-warning" : 
-                                    "text-text-tertiary"
-                                  )}>
-                                    {isCompleted ? "Completed" : hasProgress ? `${lessonProgress}%` : "Not Started"}
-                                  </span>
+                                <p className="text-xs text-text-secondary">
+                                  {lesson.description}
+                                </p>
+                              </div>
+                              
+                              {/* Knowledge Points */}
+                              <div className="col-span-3 flex items-center">
+                                <div className="flex items-center gap-2">
+                                  <Brain className="h-3 w-3 text-text-secondary" />
+                                  <span className="text-xs text-text-secondary">{lesson.knowledgePoints.length} points</span>
+                                </div>
+                                <div className="ml-2">
+                                  {getKnowledgePointsBadge()}
                                 </div>
                               </div>
-
-                              {/* Action Button */}
-                              <Button 
-                                size="sm"
-                                variant={isCompleted ? "secondary" : "primary"}
-                                className="text-xs px-3 py-1.5 h-auto"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setModalLesson(lesson)
-                                  setIsModalOpen(true)
-                                }}
-                              >
-                                {isCompleted ? (
-                                  <>
-                                    <FileText className="mr-1 h-3.5 w-3.5" />
-                                    Review
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="mr-1 h-3.5 w-3.5" />
-                                    {hasProgress ? 'Continue' : 'Start'}
-                                  </>
-                                )}
-                              </Button>
+                              
+                              {/* Status */}
+                              <div className="col-span-2 flex items-center">
+                                {getStatusBadge()}
+                              </div>
+                              
+                              {/* Actions */}
+                              <div className="col-span-2 flex items-center">
+                                <Button 
+                                  size="sm"
+                                  variant="primary"
+                                  className="text-xs px-3 py-1.5 h-auto"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setModalLesson(lesson)
+                                    setIsModalOpen(true)
+                                  }}
+                                >
+                                  <Play className="mr-1 h-3.5 w-3.5" />
+                                  Learn
+                                </Button>
+                              </div>
                             </div>
                           )
                         })}
                       </div>
-
-                      {/* Chapter Test Button */}
-                      <div className="mt-4 pt-4 border-t border-border-subtle">
-                        <div className="flex items-center justify-between px-4">
-                          <div className="flex items-center gap-2">
-                            <Trophy className="h-4 w-4 text-text-brand" /> {/* #A64DFF */}
-                            <div>
-                              <h4 className="text-sm font-medium text-text-primary"> {/* #1D1D1F */}
-                                Chapter Assessment
-                              </h4>
-                              <p className="text-xs text-text-secondary"> {/* #6C6C6D */}
-                                {chapterProgress < 60 
-                                  ? `Complete at least 60% (currently ${chapterProgress}%)`
-                                  : chapter.testScore !== null 
-                                    ? `Last score: ${chapter.testScore}%`
-                                    : "Ready to test your knowledge"
-                                }
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant={chapterProgress < 60 ? "secondary" : chapter.testScore !== null ? "secondary" : "primary"}
-                            disabled={chapterProgress < 60}
-                            className="min-w-[100px]"
-                            onClick={() => {
-                              // TODO: Start chapter test
-                            }}
-                          >
-                            {chapter.testScore !== null ? (
-                              <>
-                                <Award className="mr-1 h-3.5 w-3.5" />
-                                Retake
-                              </>
-                            ) : chapterProgress < 60 ? (
-                              <>
-                                <Lock className="mr-1 h-3.5 w-3.5" />
-                                Locked
-                              </>
-                            ) : (
-                              <>
-                                <Target className="mr-1 h-3.5 w-3.5" />
-                                Take Test
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
                     </CardContent>
-                  )}
+                  </div>
                 </Card>
               )
             })}
           </div>
         </div>
 
-        {/* Lesson Modal */}
+        {/* Learning Activities Modal */}
         {modalLesson && (
-          <LessonModal
+          <LearningActivitiesModal
             lesson={modalLesson}
             isOpen={isModalOpen}
             onClose={() => {

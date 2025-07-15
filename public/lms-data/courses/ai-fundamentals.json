@@ -1,0 +1,304 @@
+{
+  "id": "ai-fundamentals",
+  "title": "AI Fundamentals",
+  "description": "Comprehensive introduction to artificial intelligence covering core concepts, algorithms, and real-world applications.",
+  "totalLessons": 9,
+  "completedLessons": 0,
+  "progress": 25,
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "Introduction to Artificial Intelligence",
+      "description": "Core AI concepts and foundational principles",
+      "order": 1,
+      "progress": 85,
+      "estimatedTime": "2 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-1-1",
+          "title": "What is Artificial Intelligence?",
+          "description": "Overview of AI concepts, history, and applications",
+          "knowledgePoints": [
+            {
+              "id": "kp-1",
+              "title": "AI Definition and Scope",
+              "description": "Understanding what constitutes artificial intelligence and its various domains",
+              "proficiency": 85
+            },
+            {
+              "id": "kp-2",
+              "title": "History of AI",
+              "description": "Evolution of AI from early concepts to modern applications",
+              "proficiency": 90
+            },
+            {
+              "id": "kp-3",
+              "title": "AI Applications",
+              "description": "Current and emerging applications of AI in various industries",
+              "proficiency": 75
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 45,
+          "completed": false,
+          "status": "in-progress"
+        },
+        {
+          "id": "lesson-1-2",
+          "title": "Search and Problem Solving",
+          "description": "AI search algorithms and problem-solving techniques",
+          "knowledgePoints": [
+            {
+              "id": "kp-4",
+              "title": "Search Algorithms",
+              "description": "Breadth-first, depth-first, and heuristic search methods",
+              "proficiency": 65
+            },
+            {
+              "id": "kp-5",
+              "title": "Optimization",
+              "description": "Finding optimal solutions in complex problem spaces",
+              "proficiency": 45
+            },
+            {
+              "id": "kp-6",
+              "title": "Constraint Satisfaction",
+              "description": "Solving problems with constraints and limitations",
+              "proficiency": 60
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 60,
+          "completed": false,
+          "status": "in-progress"
+        },
+        {
+          "id": "lesson-1-3",
+          "title": "Knowledge Representation",
+          "description": "How AI systems represent and reason with knowledge",
+          "knowledgePoints": [
+            {
+              "id": "kp-7",
+              "title": "Logic Systems",
+              "description": "Propositional and predicate logic for AI reasoning",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-8",
+              "title": "Semantic Networks",
+              "description": "Graph-based knowledge representation methods",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-9",
+              "title": "Ontologies",
+              "description": "Formal representation of knowledge domains",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 75,
+          "completed": false,
+          "status": "not-started"
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "title": "Machine Learning Fundamentals",
+      "description": "Core machine learning concepts and algorithms",
+      "order": 2,
+      "progress": 15,
+      "estimatedTime": "3 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-2-1",
+          "title": "Introduction to Machine Learning",
+          "description": "Overview of machine learning types and applications",
+          "knowledgePoints": [
+            {
+              "id": "kp-10",
+              "title": "Supervised Learning",
+              "description": "Learning from labeled data to make predictions",
+              "proficiency": 25
+            },
+            {
+              "id": "kp-11",
+              "title": "Unsupervised Learning",
+              "description": "Finding patterns in unlabeled data",
+              "proficiency": 30
+            },
+            {
+              "id": "kp-12",
+              "title": "Reinforcement Learning",
+              "description": "Learning through interaction with an environment",
+              "proficiency": 10
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 60,
+          "completed": false,
+          "status": "in-progress"
+        },
+        {
+          "id": "lesson-2-2",
+          "title": "Regression and Classification",
+          "description": "Fundamental machine learning problem types",
+          "knowledgePoints": [
+            {
+              "id": "kp-13",
+              "title": "Linear Regression",
+              "description": "Predicting continuous values using linear relationships",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-14",
+              "title": "Logistic Regression",
+              "description": "Binary classification using logistic functions",
+              "proficiency": 15
+            },
+            {
+              "id": "kp-15",
+              "title": "Decision Trees",
+              "description": "Tree-based models for classification and regression",
+              "proficiency": 5
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 75,
+          "completed": false,
+          "status": "in-progress"
+        },
+        {
+          "id": "lesson-2-3",
+          "title": "Model Evaluation and Validation",
+          "description": "Assessing machine learning model performance",
+          "knowledgePoints": [
+            {
+              "id": "kp-16",
+              "title": "Cross-Validation",
+              "description": "Techniques for robust model evaluation",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-17",
+              "title": "Performance Metrics",
+              "description": "Accuracy, precision, recall, and F1-score",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-18",
+              "title": "Overfitting and Underfitting",
+              "description": "Understanding model complexity and generalization",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 90,
+          "completed": false,
+          "status": "not-started"
+        }
+      ]
+    },
+    {
+      "id": "chapter-3",
+      "title": "Neural Networks and Deep Learning",
+      "description": "Introduction to neural networks and deep learning concepts",
+      "order": 3,
+      "progress": 0,
+      "estimatedTime": "4 hours",
+      "testScore": null,
+      "lessons": [
+        {
+          "id": "lesson-3-1",
+          "title": "Neural Network Basics",
+          "description": "Fundamentals of artificial neural networks",
+          "knowledgePoints": [
+            {
+              "id": "kp-19",
+              "title": "Perceptrons",
+              "description": "Basic building blocks of neural networks",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-20",
+              "title": "Multilayer Perceptrons",
+              "description": "Networks with hidden layers",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-21",
+              "title": "Activation Functions",
+              "description": "Sigmoid, ReLU, and other activation functions",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 80,
+          "completed": false,
+          "status": "not-started"
+        },
+        {
+          "id": "lesson-3-2",
+          "title": "Training Neural Networks",
+          "description": "Backpropagation and optimization techniques",
+          "knowledgePoints": [
+            {
+              "id": "kp-22",
+              "title": "Backpropagation",
+              "description": "Algorithm for training neural networks",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-23",
+              "title": "Gradient Descent",
+              "description": "Optimization algorithm for finding minimum loss",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-24",
+              "title": "Learning Rate",
+              "description": "Hyperparameter controlling training speed",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 95,
+          "completed": false,
+          "status": "not-started"
+        },
+        {
+          "id": "lesson-3-3",
+          "title": "Deep Learning Applications",
+          "description": "Convolutional and recurrent neural networks",
+          "knowledgePoints": [
+            {
+              "id": "kp-25",
+              "title": "Convolutional Neural Networks",
+              "description": "CNNs for image processing and computer vision",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-26",
+              "title": "Recurrent Neural Networks",
+              "description": "RNNs for sequential data and time series",
+              "proficiency": 0
+            },
+            {
+              "id": "kp-27",
+              "title": "Transfer Learning",
+              "description": "Using pre-trained models for new tasks",
+              "proficiency": 0
+            }
+          ],
+          "availableGameTypes": ["written-material", "video", "audio-material", "flashcards", "millionaire", "jeopardy", "connect-cards"],
+          "estimatedTime": 105,
+          "completed": false,
+          "status": "not-started"
+        }
+      ]
+    }
+  ]
+}
