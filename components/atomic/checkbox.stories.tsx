@@ -82,7 +82,7 @@ export const Controlled: Story = {
           <div className="flex items-center gap-spacing-md">
             <Checkbox
               checked={checked}
-              onCheckedChange={setChecked}
+              onCheckedChange={(checked) => setChecked(checked === true)}
             />
             <span className="text-text-primary">
               Controlled checkbox (checked: {checked ? 'true' : 'false'})

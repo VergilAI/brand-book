@@ -126,6 +126,10 @@ export function JeopardyGame({ lessonId, onClose, onComplete }: JeopardyGameProp
     return questions.filter(q => q.category === category).sort((a, b) => a.value - b.value)
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   if (selectedQuestion) {
     return (
       <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-8 z-modal">
@@ -286,6 +290,7 @@ export function JeopardyGame({ lessonId, onClose, onComplete }: JeopardyGameProp
           </div>
         </div>
       </div>
+      
     </div>
   )
 }

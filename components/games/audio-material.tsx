@@ -258,6 +258,10 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
     onComplete(finalScore)
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   const audioProgressPercentage = (currentTime / currentAudio.duration) * 100
 
   return (
@@ -289,7 +293,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
               </Button>
             )}
             
-            <Button variant="ghost" size="sm" onClick={onClose} className="p-2 h-8 w-8">
+            <Button variant="ghost" size="sm" onClick={handleCloseAttempt} className="p-2 h-8 w-8">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -535,7 +539,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
             <Button 
               variant="secondary" 
               size="md"
-              onClick={onClose}
+              onClick={handleCloseAttempt}
             >
               Close
             </Button>
@@ -551,6 +555,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
           </div>
         </div>
       </div>
+
     </div>
   )
 }

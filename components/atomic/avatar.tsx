@@ -71,7 +71,7 @@ const Avatar = React.forwardRef<
 Avatar.displayName = AvatarPrimitive.Root.displayName
 
 interface AvatarImageProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image> {
-  onLoadingStatusChange?: (status: "loading" | "loaded" | "error") => void
+  onLoadingStatusChange?: (status: "idle" | "loading" | "loaded" | "error") => void
 }
 
 const AvatarImage = React.forwardRef<

@@ -72,10 +72,10 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
 
   // Get all knowledge points from all lessons with lesson context
   const getAllKnowledgePoints = () => {
-    const allKnowledgePoints = []
+    const allKnowledgePoints: any[] = []
     
-    allLessons.forEach(lesson => {
-      lesson.knowledgePoints.forEach(kp => {
+    allLessons.forEach((lesson: any) => {
+      lesson.knowledgePoints.forEach((kp: any) => {
         allKnowledgePoints.push({
           ...kp,
           lessonTitle: lesson.title,
@@ -362,13 +362,13 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
     // Get lessons that need work (those with knowledge points < 80% proficiency)
     const lessonsNeedingWork = allLessons.filter(lesson => {
       const avgProficiency = lesson.knowledgePoints.length > 0
-        ? lesson.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length
+        ? lesson.knowledgePoints.reduce((acc: number, kp: any) => acc + kp.proficiency, 0) / lesson.knowledgePoints.length
         : 0
       return avgProficiency < 80
     }).sort((a, b) => {
       // Sort by priority: lowest proficiency first
-      const avgA = a.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / a.knowledgePoints.length
-      const avgB = b.knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / b.knowledgePoints.length
+      const avgA = a.knowledgePoints.reduce((acc: number, kp: any) => acc + kp.proficiency, 0) / a.knowledgePoints.length
+      const avgB = b.knowledgePoints.reduce((acc: number, kp: any) => acc + kp.proficiency, 0) / b.knowledgePoints.length
       return avgA - avgB
     })
     
@@ -792,7 +792,7 @@ export function KnowledgePointAnalytics({ lesson, allLessons = [], onNavigateToL
               <Button
                 onClick={() => onLearnClick(selectedLesson)}
                 className="w-full bg-vergil-purple hover:bg-vergil-purple-lighter text-white"
-                size="default"
+                size="md"
               >
                 <Play className="w-4 h-4 mr-2" />
                 Learn

@@ -113,7 +113,7 @@ export function LessonRow({
       <td className="px-4 py-3">
         <div className="flex items-center justify-end gap-1">
           <Button
-            variant={lesson.completed ? "outline" : "default"}
+            variant={lesson.completed ? "secondary" : "primary"}
             size="sm"
             onClick={(e) => {
               e.stopPropagation()

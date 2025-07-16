@@ -236,6 +236,10 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
     onComplete(finalScore)
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   const totalPairs = 3
   const progressPercentage = Math.round((matchedPairs.size / totalPairs) * 100)
 
@@ -465,6 +469,7 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
           )}
         </div>
       </div>
+      
     </div>
   )
 }

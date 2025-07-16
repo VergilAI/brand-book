@@ -135,7 +135,7 @@ export function TTSUsagePanel() {
   const getStatusBadge = (stats: UsageStats) => {
     if (stats.isCritical) {
       return (
-        <Badge variant="destructive" className="flex items-center gap-1">
+        <Badge variant="error" className="flex items-center gap-1">
           <AlertTriangle className="h-3 w-3" />
           Critical
         </Badge>
@@ -294,7 +294,7 @@ export function TTSUsagePanel() {
             </Button>
             <Button
               onClick={resetUsage}
-              variant="destructive"
+              variant="secondary"
               size="sm"
               disabled={resetting}
             >

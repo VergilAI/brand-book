@@ -248,6 +248,10 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
     }
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   const remainingCards = totalCards - completedCards.size
 
   return (
@@ -459,6 +463,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
           </div>
         </div>
       </div>
+      
     </div>
   )
 }

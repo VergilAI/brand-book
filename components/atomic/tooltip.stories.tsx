@@ -162,7 +162,7 @@ export const CustomStyles: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="destructive">Warning Style</Button>
+          <Button variant="secondary">Warning Style</Button>
         </TooltipTrigger>
         <TooltipContent className="bg-errorLight text-error border border-error">
           <p>This action cannot be undone</p>

@@ -1,6 +1,9 @@
 // Core types for the map editor
 
 import type { MapData, Territory, Border, Point } from '@/lib/lms/optimized-map-data'
+
+// Re-export Point for external use
+export type { Point }
 import type { SnapState } from './snapping'
 import type { TemplateLibraryState } from './template-library'
 

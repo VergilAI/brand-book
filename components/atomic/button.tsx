@@ -56,6 +56,19 @@ const buttonVariants = cva(
           // No shadow for minimal look
           "shadow-none",
         ].join(" "),
+        
+        destructive: [
+          // Error red background with white text
+          "bg-red-500 text-white", // #E51C23, #FFFFFF
+          // Hover state - darker red
+          "hover:bg-red-600", // #DC2626
+          // Active state - even darker red
+          "active:bg-red-700", // #B91C1C
+          // Shadow for depth
+          "shadow-sm hover:shadow-card-hover",
+          // Active state - subtle scale
+          "active:scale-[0.98]",
+        ].join(" "),
       },
       
       size: {

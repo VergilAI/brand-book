@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   X, 
   Clock, 
@@ -21,6 +22,7 @@ import { Card, CardContent } from '@/components/card'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/lms/new-course-types'
 import { GameRouter } from './games/game-router'
+import { ConfirmationDialog } from './confirmation-dialog'
 
 interface LearningActivitiesModalProps {
   lesson: Lesson
@@ -96,8 +98,10 @@ const gameTypes: GameType[] = [
 ]
 
 export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame }: LearningActivitiesModalProps) {
+  const router = useRouter()
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null)
   const [gameStarted, setGameStarted] = useState(false)
+  const [showConfirmClose, setShowConfirmClose] = useState(false)
 
   // Handle body scroll lock when modal is open (but not when game is started)
   useEffect(() => {
@@ -160,6 +164,36 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
     onClose()
   }
 
+  const handleCloseAttempt = () => {
+    if (gameStarted) {
+      setShowConfirmClose(true)
+    } else {
+      restoreScrollAndClose()
+    }
+  }
+
+  const handleConfirmClose = () => {
+    setGameStarted(false)
+    setSelectedGameType(null)
+    
+    // Ensure scroll is fully restored
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
+    
+    // Close the modal first
+    onClose()
+    
+    // Navigate to new course overview
+    router.push('/lms/new_course_overview')
+    
+    // Scroll to top smoothly after navigation
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 200)
+  }
+
   const handleGameComplete = (score: number) => {
     setGameStarted(false)
     setSelectedGameType(null)
@@ -171,33 +205,38 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
   }
 
   const handleGameClose = () => {
-    setGameStarted(false)
-    
-    // Ensure scroll is restored when returning to modal
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${window.scrollY}px`
-    document.body.style.width = '100%'
-    
-    // Don't reset selectedGameType so user can continue where they left off
+    setShowConfirmClose(true)
   }
 
   // If game is started, show the game component
   if (gameStarted && selectedGameType) {
     return (
-      <GameRouter
-        gameType={selectedGameType}
-        lessonId={lesson.id}
-        onClose={handleGameClose}
-        onComplete={handleGameComplete}
-      />
+      <>
+        <GameRouter
+          gameType={selectedGameType}
+          lessonId={lesson.id}
+          onClose={handleGameClose}
+          onComplete={handleGameComplete}
+        />
+        {/* Confirmation Dialog */}
+        <ConfirmationDialog
+          isOpen={showConfirmClose}
+          onClose={() => setShowConfirmClose(false)}
+          onConfirm={handleConfirmClose}
+          title="Leave Learning Activity?"
+          description="Are you sure you want to leave this learning activity? Any unsaved progress will be lost."
+          confirmText="Leave Activity"
+          cancelText="Stay"
+          variant="warning"
+        />
+      </>
     )
   }
 
   return (
     <div 
       className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal" /* rgba(0, 0, 0, 0.5) */
-      onClick={restoreScrollAndClose}
+      onClick={handleCloseAttempt}
     >
       <Card 
         className="w-full max-w-5xl max-h-[90vh] overflow-hidden bg-bg-primary flex flex-col" /* #FFFFFF */
@@ -233,7 +272,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={restoreScrollAndClose}
+            onClick={handleCloseAttempt}
             className="p-2 h-8 w-8"
           >
             <X className="h-4 w-4" />
@@ -372,7 +411,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
             <Button 
               variant="secondary" 
               size="md"
-              onClick={restoreScrollAndClose}
+              onClick={handleCloseAttempt}
             >
               Cancel
             </Button>
@@ -387,6 +426,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
           </div>
         </div>
       </Card>
+
     </div>
   )
 }

@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
-import { FlashcardGame } from '@/components/flashcard-game'
-import { MillionaireGame } from '@/components/millionaire-game'
-import { JeopardyGame } from '@/components/jeopardy-game'
-import { ConnectCardsGame } from '@/components/connect-cards-game'
+import { FlashcardGame } from '@/components/games/flashcard-game'
+import { MillionaireGame } from '@/components/games/millionaire-game'
+import { JeopardyGame } from '@/components/games/jeopardy-game'
+import { ConnectCardsGame } from '@/components/games/connect-cards-game'
 import { gameTypes } from '@/lib/lms/game-types'
 import { useCourseData } from '../../../../new_course_overview/hooks/useCourseData'
 import type { Lesson } from '@/lib/lms/new-course-types'
@@ -71,9 +71,8 @@ export default function GamePage() {
         return (
           <FlashcardGame
             lessonId={lessonId}
-            lessonTitle={lesson.title}
+            onClose={handleGameQuit}
             onComplete={handleGameComplete}
-            onQuit={handleGameQuit}
           />
         )
       
@@ -81,9 +80,8 @@ export default function GamePage() {
         return (
           <MillionaireGame
             lessonId={lessonId}
-            lessonTitle={lesson.title}
+            onClose={handleGameQuit}
             onComplete={handleGameComplete}
-            onQuit={handleGameQuit}
           />
         )
       
@@ -91,9 +89,8 @@ export default function GamePage() {
         return (
           <JeopardyGame
             lessonId={lessonId}
-            lessonTitle={lesson.title}
+            onClose={handleGameQuit}
             onComplete={handleGameComplete}
-            onQuit={handleGameQuit}
           />
         )
       
@@ -101,9 +98,8 @@ export default function GamePage() {
         return (
           <ConnectCardsGame
             lessonId={lessonId}
-            lessonTitle={lesson.title}
+            onClose={handleGameQuit}
             onComplete={handleGameComplete}
-            onQuit={handleGameQuit}
           />
         )
       

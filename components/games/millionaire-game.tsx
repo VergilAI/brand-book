@@ -385,6 +385,10 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
     onClose()
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   const useLifeline = (lifelineId: string) => {
     // Mark lifeline as used
     setLifelines(prev => prev.map(lifeline => 
@@ -510,7 +514,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
               <p className="text-lg font-bold text-text-success">{currentAmount}</p>
             </div>
             
-            <Button variant="ghost" size="sm" onClick={handleGameClose} className="p-2 h-8 w-8">
+            <Button variant="ghost" size="sm" onClick={onClose} className="p-2 h-8 w-8">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -712,6 +716,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
           </div>
         </div>
       </div>
+      
     </div>
   )
 }

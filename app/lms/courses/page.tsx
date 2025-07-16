@@ -180,7 +180,7 @@ export default function CoursesPage() {
                       </h3>
                       {course.dueDate && (
                         <Badge 
-                          variant={new Date(course.dueDate) < new Date() ? "destructive" : "secondary"}
+                          variant={new Date(course.dueDate) < new Date() ? "error" : "default"}
                           className="mb-2"
                         >
                           <Calendar className="h-3 w-3 mr-1" />
@@ -231,7 +231,7 @@ export default function CoursesPage() {
 
                   {/* Continue Button */}
                   <Button 
-                    variant="default" 
+                    variant="primary" 
                     size="sm"
                     className="w-full"
                     onClick={(e) => {

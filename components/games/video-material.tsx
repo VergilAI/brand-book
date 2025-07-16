@@ -237,6 +237,10 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
     onComplete(finalScore)
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   const videoProgressPercentage = (currentTime / currentVideo.duration) * 100
 
   return (
@@ -268,7 +272,7 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
               </Button>
             )}
             
-            <Button variant="ghost" size="sm" onClick={onClose} className="p-2 h-8 w-8">
+            <Button variant="ghost" size="sm" onClick={handleCloseAttempt} className="p-2 h-8 w-8">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -507,7 +511,7 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
             <Button 
               variant="secondary" 
               size="md"
-              onClick={onClose}
+              onClick={handleCloseAttempt}
             >
               Close
             </Button>

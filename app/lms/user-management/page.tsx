@@ -556,7 +556,7 @@ export default function UserManagementPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant={user.status === 'ahead' ? 'info' : user.status === 'on_track' ? 'success' : user.status === 'falling_behind' ? 'warning' : 'destructive'}>
+                      <Badge variant={user.status === 'ahead' ? 'info' : user.status === 'on_track' ? 'success' : user.status === 'falling_behind' ? 'warning' : 'error'}>
                         {getStatusLabel(user.status)}
                       </Badge>
                     </td>
@@ -605,11 +605,11 @@ export default function UserManagementPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => {
                               // Toggle user status
-                              const newStatus = user.status === 'active' ? 'inactive' : 'active'
+                              const newStatus = user.status === 'on_track' ? 'falling_behind' : 'on_track'
                               console.log(`Toggling user ${user.name} status to ${newStatus}`)
                               // In a real app, this would update the user's status
                             }}>
-                              {user.status === 'active' ? 'Deactivate User' : 'Activate User'}
+                              {user.status === 'on_track' ? 'Mark Behind' : 'Mark On Track'}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => {
                               console.log(`Resetting password for ${user.name}`)

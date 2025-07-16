@@ -180,6 +180,10 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
     onComplete(100) // Full score for completing all sections
   }
 
+  const handleCloseAttempt = () => {
+    onClose()
+  }
+
   const currentSectionData = writtenContent.sections[currentSection]
 
   return (
@@ -211,7 +215,7 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
               </Button>
             )}
             
-            <Button variant="ghost" size="sm" onClick={onClose} className="p-2 h-8 w-8">
+            <Button variant="ghost" size="sm" onClick={handleCloseAttempt} className="p-2 h-8 w-8">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -309,6 +313,7 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
           </div>
         </div>
       </div>
+
     </div>
   )
 }

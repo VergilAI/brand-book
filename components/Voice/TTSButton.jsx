@@ -50,24 +50,44 @@ const TTSButton = ({
   
   // Cleanup function
   const cleanup = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.removeEventListener('loadedmetadata', () => {})
-      audioRef.current.removeEventListener('timeupdate', () => {})
-      audioRef.current.removeEventListener('ended', () => {})
-      audioRef.current.removeEventListener('error', () => {})
-      audioRef.current.src = ''
-      audioRef.current = null
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        
+        // Remove all event listeners safely using stored references
+        if (audioRef.current._eventHandlers) {
+          const handlers = audioRef.current._eventHandlers
+          audioRef.current.removeEventListener('loadedmetadata', handlers.loadedmetadata)
+          audioRef.current.removeEventListener('timeupdate', handlers.timeupdate)
+          audioRef.current.removeEventListener('ended', handlers.ended)
+          audioRef.current.removeEventListener('error', handlers.error)
+          audioRef.current.removeEventListener('play', handlers.play)
+          audioRef.current.removeEventListener('pause', handlers.pause)
+        }
+        
+        audioRef.current.src = ''
+        audioRef.current = null
+      }
+    } catch (error) {
+      console.warn('Error during audio cleanup:', error)
     }
     
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current)
-      audioUrlRef.current = null
+    try {
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current)
+        audioUrlRef.current = null
+      }
+    } catch (error) {
+      console.warn('Error revoking object URL:', error)
     }
     
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current)
-      progressIntervalRef.current = null
+    try {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+        progressIntervalRef.current = null
+      }
+    } catch (error) {
+      console.warn('Error clearing progress interval:', error)
     }
   }, [])
   
@@ -169,6 +189,11 @@ const TTSButton = ({
   // Convert base64 to audio blob and create audio element
   const createAudioFromBase64 = (base64Audio) => {
     try {
+      // Validate base64 input
+      if (!base64Audio || typeof base64Audio !== 'string') {
+        throw new Error('Invalid base64 audio data')
+      }
+      
       // Convert base64 to binary
       const binaryString = atob(base64Audio)
       const bytes = new Uint8Array(binaryString.length)
@@ -190,47 +215,75 @@ const TTSButton = ({
       
       return audio
     } catch (error) {
-      throw new Error('Failed to create audio from base64 data')
+      console.error('Failed to create audio from base64:', error)
+      throw new Error('Failed to create audio from base64 data: ' + error.message)
     }
   }
   
   // Setup audio event listeners
   const setupAudioEvents = (audio) => {
-    audio.addEventListener('loadedmetadata', () => {
+    const handleLoadedMetadata = () => {
       setDuration(audio.duration)
       setCurrentTime(0)
-    })
+    }
     
-    audio.addEventListener('timeupdate', () => {
+    const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime)
       if (audio.duration > 0) {
         setProgress((audio.currentTime / audio.duration) * 100)
       }
-    })
+    }
     
-    audio.addEventListener('ended', () => {
+    const handleEnded = () => {
       setState('idle')
       setProgress(0)
       setCurrentTime(0)
       onPlayEnd?.()
-    })
+    }
     
-    audio.addEventListener('error', (e) => {
-      console.error('Audio playback error:', e)
-      setState('error')
-      setProgress(0)
-      setCurrentTime(0)
-      showErrorToast('Audio playback failed')
-    })
+    const handleError = (e) => {
+      try {
+        const errorMsg = e.target?.error?.message || e.message || 'Unknown audio error'
+        console.error('Audio playback error:', errorMsg)
+        setState('error')
+        setProgress(0)
+        setCurrentTime(0)
+        showErrorToast('Audio playback failed')
+      } catch (logError) {
+        console.warn('Error in audio error handler:', logError)
+        setState('error')
+        setProgress(0)
+        setCurrentTime(0)
+        showErrorToast('Audio playback failed')
+      }
+    }
     
-    audio.addEventListener('play', () => {
+    const handlePlay = () => {
       setState('playing')
       onPlayStart?.()
-    })
+    }
     
-    audio.addEventListener('pause', () => {
+    const handlePause = () => {
       setState('paused')
-    })
+    }
+    
+    // Add event listeners
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+    audio.addEventListener('timeupdate', handleTimeUpdate)
+    audio.addEventListener('ended', handleEnded)
+    audio.addEventListener('error', handleError)
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
+    
+    // Store references for cleanup
+    audio._eventHandlers = {
+      loadedmetadata: handleLoadedMetadata,
+      timeupdate: handleTimeUpdate,
+      ended: handleEnded,
+      error: handleError,
+      play: handlePlay,
+      pause: handlePause
+    }
   }
   
   // Handle play/pause functionality
@@ -271,7 +324,12 @@ const TTSButton = ({
       audioRef.current = audio
       
       // Start playback
-      await audio.play()
+      try {
+        await audio.play()
+      } catch (playError) {
+        console.error('Audio play error:', playError)
+        throw new Error('Failed to start audio playback: ' + playError.message)
+      }
       
     } catch (err) {
       console.error('TTS Error:', err)

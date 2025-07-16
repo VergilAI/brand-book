@@ -395,7 +395,7 @@ export function TestInterface() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="default" className="text-xs">
                     {currentQ.knowledgePoint}
                   </Badge>
                   <Badge 

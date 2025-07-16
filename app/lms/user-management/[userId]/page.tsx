@@ -292,13 +292,13 @@ export default function UserDetailPage() {
                   <p className="text-lg font-medium text-secondary mb-spacing-sm">{userRole?.name || 'Employee'}</p>
                   <div className="flex items-center gap-4">
                     <Badge 
-                      variant={userData.status === 'active' ? 'success' : userData.status === 'inactive' ? 'warning' : 'destructive'}
+                      variant={userData.status === 'active' ? 'success' : userData.status === 'inactive' ? 'warning' : 'error'}
                       className="text-xs"
                     >
                       {userData.status}
                     </Badge>
                     {userData.severity === 'high' && (
-                      <Badge variant="destructive" className="text-xs">
+                      <Badge variant="error" className="text-xs">
                         <AlertTriangle className="w-3 h-3 mr-1" />
                         High Priority
                       </Badge>
@@ -806,7 +806,7 @@ export default function UserDetailPage() {
         <AssignManagerModal
           open={showAssignManagerModal}
           onOpenChange={setShowAssignManagerModal}
-          currentManagerId={userData.managerId}
+          currentManagerId={(userData as any).managerId || undefined}
           availableManagers={(() => {
             // Define role hierarchy (1=Super Admin, 2=Admin, 3=Manager, 4=Instructor)
             const roleHierarchy: Record<string, number> = {
@@ -840,7 +840,7 @@ export default function UserDetailPage() {
           onAssign={(managerId) => {
             const manager = mockUsers.find(u => u.id === managerId)
             if (manager) {
-              setUserData({...userData, manager: manager.name, managerId})
+              setUserData({...userData, manager: manager.name, managerId} as any)
             }
           }}
         />

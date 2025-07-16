@@ -506,7 +506,7 @@ export default function OrganisationOverviewPage() {
             color: role.color,
             usersCount: role.usersCount,
             teamProgress: avgSubordinateProgress,
-            isSelected: isDirectlySelected || isSubordinateSelected,
+            isSelected: Boolean(isDirectlySelected || isSubordinateSelected),
             onClick: () => handleRoleClick(role.id),
             // tooltip removed to prevent overlap with user count badge
           }}
@@ -1669,9 +1669,9 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Key Metrics */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Key Metrics</h5>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-gray-50 rounded-lg p-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Key Metrics</h5>
+                        <div className="grid grid-cols-2 gap-1">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
                             <p className="text-2xl font-bold" style={{ 
                               color: currentAvgProgress >= 80 ? '#10B981' : 
@@ -1680,23 +1680,23 @@ export default function OrganisationOverviewPage() {
                               {currentAvgProgress}%
                             </p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Total Members</p>
                             <p className="text-2xl font-bold text-vergil-off-black">{currentViewUsers.length}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Ahead of Time</p>
                             <p className="text-2xl font-bold text-cyan-800">{currentViewUsers.filter(u => u.status === 'ahead').length}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">On Track</p>
                             <p className="text-2xl font-bold text-emerald-700">{currentViewUsers.filter(u => u.status === 'on_track').length}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Falling Behind</p>
-                            <p className="text-2xl font-bold text-orange-800">{currentViewUsers.filter(u => u.status === 'at_risk').length}</p>
+                            <p className="text-2xl font-bold text-orange-600">{currentViewUsers.filter(u => u.status === 'at_risk').length}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Drastically Behind</p>
                             <p className="text-2xl font-bold text-red-700">{currentViewUsers.filter(u => u.status === 'behind').length}</p>
                           </div>
@@ -1746,7 +1746,7 @@ export default function OrganisationOverviewPage() {
                                 <div className="bg-white border border-gray-200 rounded-lg p-3">
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
-                                    <span className="text-sm font-bold text-orange-800">{atRiskCount} ({totalCount > 0 ? Math.round(atRiskCount / totalCount * 100) : 0}%)</span>
+                                    <span className="text-sm font-bold text-orange-600">{atRiskCount} ({totalCount > 0 ? Math.round(atRiskCount / totalCount * 100) : 0}%)</span>
                                   </div>
                                   <Progress
                                     value={totalCount > 0 ? (atRiskCount / totalCount) * 100 : 0}
@@ -1921,9 +1921,9 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Key Metrics */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Key Metrics</h5>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-gray-50 rounded-lg p-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Key Metrics</h5>
+                        <div className="grid grid-cols-2 gap-1">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
                             <p className="text-2xl font-bold" style={{ 
                               color: overallCompletion >= 80 ? '#10B981' : 
@@ -1932,23 +1932,23 @@ export default function OrganisationOverviewPage() {
                               {overallCompletion}%
                             </p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Total Members</p>
                             <p className="text-2xl font-bold text-vergil-off-black">{totalUsers}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Ahead of Time</p>
                             <p className="text-2xl font-bold text-cyan-800">{aheadUsers}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">On Track</p>
                             <p className="text-2xl font-bold text-emerald-700">{onTrackUsers}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Falling Behind</p>
-                            <p className="text-2xl font-bold text-orange-800">{fallingBehindUsers}</p>
+                            <p className="text-2xl font-bold text-orange-600">{fallingBehindUsers}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Drastically Behind</p>
                             <p className="text-2xl font-bold text-red-700">{drasticallyBehindUsers}</p>
                           </div>
@@ -1986,7 +1986,7 @@ export default function OrganisationOverviewPage() {
                           <div className="bg-white border border-gray-200 rounded-lg p-3">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
-                              <span className="text-sm font-bold text-orange-800">{fallingBehindUsers} ({Math.round(fallingBehindUsers / totalUsers * 100)}%)</span>
+                              <span className="text-sm font-bold text-orange-600">{fallingBehindUsers} ({Math.round(fallingBehindUsers / totalUsers * 100)}%)</span>
                             </div>
                             <Progress
                               value={(fallingBehindUsers / totalUsers) * 100}
