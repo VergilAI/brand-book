@@ -99,9 +99,9 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null)
   const [gameStarted, setGameStarted] = useState(false)
 
-  // Handle body scroll lock when modal is open
+  // Handle body scroll lock when modal is open (but not when game is started)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !gameStarted) {
       // Store original body styles
       const originalOverflow = document.body.style.overflow
       const originalPosition = document.body.style.position
@@ -128,7 +128,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
         window.scrollTo(0, scrollY)
       }
     }
-  }, [isOpen])
+  }, [isOpen, gameStarted])
 
   if (!isOpen) return null
 
@@ -147,16 +147,38 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
     }
   }
 
+  const restoreScrollAndClose = () => {
+    // Ensure scroll is fully restored
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
+    
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    
+    onClose()
+  }
+
   const handleGameComplete = (score: number) => {
     setGameStarted(false)
     setSelectedGameType(null)
-    onClose()
+    
     // Here you could update the lesson progress based on the score
     console.log(`Game completed with score: ${score}`)
+    
+    restoreScrollAndClose()
   }
 
   const handleGameClose = () => {
     setGameStarted(false)
+    
+    // Ensure scroll is restored when returning to modal
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${window.scrollY}px`
+    document.body.style.width = '100%'
+    
     // Don't reset selectedGameType so user can continue where they left off
   }
 
@@ -175,7 +197,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
   return (
     <div 
       className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal" /* rgba(0, 0, 0, 0.5) */
-      onClick={onClose}
+      onClick={restoreScrollAndClose}
     >
       <Card 
         className="w-full max-w-5xl max-h-[90vh] overflow-hidden bg-bg-primary flex flex-col" /* #FFFFFF */
@@ -211,7 +233,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={onClose}
+            onClick={restoreScrollAndClose}
             className="p-2 h-8 w-8"
           >
             <X className="h-4 w-4" />
@@ -350,7 +372,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
             <Button 
               variant="secondary" 
               size="md"
-              onClick={onClose}
+              onClick={restoreScrollAndClose}
             >
               Cancel
             </Button>

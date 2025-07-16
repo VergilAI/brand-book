@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Plus, X, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Save, Plus, X, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
@@ -68,6 +68,7 @@ export default function NewUserPage() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   // Auto-select mandatory courses when component loads (if auto-enroll is enabled by default)
   useEffect(() => {
@@ -208,13 +209,13 @@ export default function NewUserPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
-                    Email Address <span className="text-vergil-error">*</span>
+                    Email Address <span className="text-error">*</span>
                   </label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className={errors.email ? 'border-vergil-error' : ''}
+                    className={errors.email ? 'border-error' : ''}
                     placeholder="john.smith@company.com"
                   />
                   {errors.email && (
@@ -250,12 +251,12 @@ export default function NewUserPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
-                    Department <span className="text-vergil-error">*</span>
+                    Department <span className="text-error">*</span>
                   </label>
                   <Input
                     value={formData.department}
                     onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                    className={errors.department ? 'border-vergil-error' : ''}
+                    className={errors.department ? 'border-error' : ''}
                     placeholder="Engineering"
                   />
                   {errors.department && (
@@ -283,12 +284,12 @@ export default function NewUserPage() {
           {/* Role and Access */}
           <Card className="mb-6">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Role and Access</h2>
+              <h2 className="text-lg font-semibold text-primary mb-4">Role and Access</h2> {/* #1D1D1F */}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
-                    User Role <span className="text-vergil-error">*</span>
+                    User Role <span className="text-error">*</span>
                   </label>
                   <Select
                     value={formData.role}
@@ -316,7 +317,7 @@ export default function NewUserPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
-                    Training Severity <span className="text-vergil-error">*</span>
+                    Training Severity <span className="text-error">*</span>
                   </label>
                   <Select
                     value={formData.severity}
@@ -340,14 +341,14 @@ export default function NewUserPage() {
               </div>
               
               <div className="mt-6">
-                <label className="block text-sm font-medium text-vergil-off-black mb-1">
-                  Reports To {formData.role !== 'super_admin' && <span className="text-vergil-error">*</span>}
+                <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
+                  Reports To {formData.role !== 'super_admin' && <span className="text-error">*</span>}
                 </label>
                 <Select
                   value={formData.reportsTo}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, reportsTo: value }))}
                 >
-                  <SelectTrigger className={`w-full ${errors.reportsTo ? 'border-vergil-error' : ''}`}>
+                  <SelectTrigger className={`w-full ${errors.reportsTo ? 'border-error' : ''}`}>
                     <SelectValue placeholder={formData.role === 'super_admin' ? "Select reporting manager (optional)" : "Select reporting manager"} />
                   </SelectTrigger>
                   <SelectContent>
@@ -365,12 +366,12 @@ export default function NewUserPage() {
                   </SelectContent>
                 </Select>
                 {errors.reportsTo && (
-                  <p className="mt-1 text-sm text-vergil-error flex items-center gap-1">
+                  <p className="mt-1 text-sm text-error flex items-center gap-1"> {/* #E51C23 */}
                     <AlertCircle className="w-3 h-3" />
                     {errors.reportsTo}
                   </p>
                 )}
-                <p className="mt-1 text-sm text-vergil-off-black/60">
+                <p className="mt-1 text-sm text-secondary"> {/* #6C6C6D */}
                   {formData.role === 'super_admin' 
                     ? 'Super Admins can optionally report to another user or be at the top level'
                     : 'Select which user this person will report to in the organization hierarchy'
@@ -379,28 +380,43 @@ export default function NewUserPage() {
               </div>
               
               <div className="mt-6">
-                <label className="block text-sm font-medium text-vergil-off-black mb-1">
-                  Temporary Password <span className="text-vergil-error">*</span>
+                <label className="block text-sm font-medium text-primary mb-1"> {/* #1D1D1F */}
+                  Temporary Password <span className="text-error">*</span>
                 </label>
                 <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={formData.tempPassword}
-                    onChange={(e) => setFormData(prev => ({ ...prev, tempPassword: e.target.value }))}
-                    className={errors.tempPassword ? 'border-vergil-error' : ''}
-                    placeholder="Enter temporary password"
-                  />
+                  <div className="relative flex-1">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={formData.tempPassword}
+                      onChange={(e) => setFormData(prev => ({ ...prev, tempPassword: e.target.value }))}
+                      className={errors.tempPassword ? 'border-error pr-10' : 'pr-10'}
+                      placeholder="Enter temporary password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-0 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-secondary" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-secondary" />
+                      )}
+                    </Button>
+                  </div>
                   <Button type="button" variant="secondary" onClick={generatePassword}>
                     Generate
                   </Button>
                 </div>
                 {errors.tempPassword && (
-                  <p className="mt-1 text-sm text-vergil-error flex items-center gap-1">
+                  <p className="mt-1 text-sm text-error flex items-center gap-1"> {/* #E51C23 */}
                     <AlertCircle className="w-3 h-3" />
                     {errors.tempPassword}
                   </p>
                 )}
-                <p className="mt-1 text-sm text-vergil-off-black/60">
+                <p className="mt-1 text-sm text-secondary"> {/* #6C6C6D */}
                   User will be required to change this on first login
                 </p>
               </div>
@@ -411,7 +427,7 @@ export default function NewUserPage() {
             <Card className="mb-6">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-vergil-off-black">Course Enrollment</h2>
+                  <h2 className="text-lg font-semibold text-primary">Course Enrollment</h2> {/* #1D1D1F */}
                   <div className="flex items-center gap-2">
                     <Checkbox
                       id="auto-enroll"
@@ -422,7 +438,7 @@ export default function NewUserPage() {
                         }
                       }}
                     />
-                    <label htmlFor="auto-enroll" className="text-sm text-vergil-off-black cursor-pointer">
+                    <label htmlFor="auto-enroll" className="text-sm text-primary cursor-pointer"> {/* #1D1D1F */}
                       Auto-enroll in mandatory courses
                     </label>
                   </div>
@@ -485,7 +501,7 @@ export default function NewUserPage() {
                   })}
                 </div>
                 
-                <p className="mt-4 text-sm text-vergil-off-black/60">
+                <p className="mt-4 text-sm text-secondary"> {/* #6C6C6D */}
                   {selectedCourses.length} course{selectedCourses.length !== 1 ? 's' : ''} selected
                 </p>
               </div>
@@ -494,7 +510,7 @@ export default function NewUserPage() {
           {/* Notifications */}
           <Card className="mb-6">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-vergil-off-black mb-4">Notifications</h2>
+              <h2 className="text-lg font-semibold text-primary mb-4">Notifications</h2> {/* #1D1D1F */}
               
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -511,7 +527,7 @@ export default function NewUserPage() {
                     <label htmlFor="welcome-email" className="text-primary cursor-pointer"> {/* #1D1D1F */}
                       Send welcome email
                     </label>
-                    <p className="text-sm text-vergil-off-black/60">
+                    <p className="text-sm text-secondary"> {/* #6C6C6D */}
                       User will receive login credentials and onboarding instructions
                     </p>
                   </div>

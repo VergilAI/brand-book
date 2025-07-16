@@ -78,7 +78,7 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
 
   const getTestReadinessColor = (score: number) => {
     if (score >= 80) return 'text-text-success' // #0F8A0F
-    if (score >= 60) return 'text-text-warning' // #FFC700
+    if (score >= 60) return 'text-text-success' // #0F8A0F
     return 'text-text-error' // #E51C23
   }
 
@@ -87,7 +87,7 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
     const avg = knowledgePoints.reduce((acc, kp) => acc + kp.proficiency, 0) / knowledgePoints.length
     
     if (avg >= 80) return <Badge variant="success">Ready</Badge>
-    if (avg >= 60) return <Badge variant="warning">Almost Ready</Badge>
+    if (avg >= 60) return <Badge variant="success">Almost Ready</Badge>
     return <Badge variant="destructive">Not Ready</Badge>
   }
 
@@ -266,9 +266,9 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                         {chapter.testScore !== null ? (
                           <Badge variant="success" className="text-xs">Test: {chapter.testScore}%</Badge>
                         ) : chapterProgress >= 60 ? (
-                          <Badge variant="warning" className="text-xs">Test: Ready</Badge>
+                          <Badge variant="success" className="text-xs">Test: Ready</Badge>
                         ) : (
-                          <Badge variant="warning" className="text-xs">Test: Keep Learning ({chapterProgress}%)</Badge>
+                          <Badge variant="success" className="text-xs">Test: Keep Learning ({chapterProgress}%)</Badge>
                         )}
                         
                         <div className="text-right min-w-[45px]">
@@ -337,7 +337,7 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                             if (masteredCount === totalCount && totalCount > 0) {
                               return <Badge variant="success" className="text-xs">Mastered ({masteredCount * 100 / totalCount}%)</Badge>
                             } else if (masteredCount > 0) {
-                              return <Badge variant="warning" className="text-xs">Learning ({Math.round(masteredCount * 100 / totalCount)}%)</Badge>
+                              return <Badge variant="success" className="text-xs">Learning ({Math.round(masteredCount * 100 / totalCount)}%)</Badge>
                             } else {
                               return <Badge variant="secondary" className="text-xs">Not Started (0%)</Badge>
                             }
@@ -346,7 +346,7 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                           return (
                             <div
                               key={lesson.id}
-                              className="grid grid-cols-12 gap-4 py-3 px-4 border border-border-subtle rounded-lg hover:bg-bg-secondary transition-all cursor-pointer" /* rgba(0,0,0,0.05), #F5F5F7 */
+                              className="grid grid-cols-12 gap-4 py-3 px-4 border border-border-subtle rounded-lg hover:bg-bg-secondary transition-all cursor-default" /* rgba(0,0,0,0.05), #F5F5F7 */
                               onClick={() => setSelectedLesson(lesson.id)}
                             >
                               {/* Lesson Info */}

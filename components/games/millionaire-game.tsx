@@ -225,6 +225,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
   const [showResult, setShowResult] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
   const [gameOver, setGameOver] = useState(false)
+  const [walkedAway, setWalkedAway] = useState(false)
   const [currentWinnings, setCurrentWinnings] = useState(0)
   const [hiddenAnswers, setHiddenAnswers] = useState<Set<string>>(new Set())
   const [audienceResults, setAudienceResults] = useState<{[key: string]: number} | null>(null)
@@ -344,20 +345,44 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
         // Game over (either wrong answer or completed all questions)
         setGameOver(true)
         const finalScore = isAnswerCorrect ? Math.round((currentLevel / aiQuestions.length) * 100) : 0
-        setTimeout(() => onComplete(finalScore), 2000)
+        setTimeout(() => {
+          restoreScrolling()
+          onComplete(finalScore)
+        }, 2000)
       }
     }, 2000)
   }
 
   const walkAway = () => {
-    setGameOver(true)
     // Calculate winnings based on walk away amount
     const walkAwayAmount = getWalkAwayAmount()
     const winnings = parseInt(walkAwayAmount.replace(/[$,]/g, ''))
     
     setCurrentWinnings(winnings)
+    setWalkedAway(true)
+    setGameOver(true)
+  }
+  
+  const restoreScrolling = () => {
+    // Ensure scroll is restored
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
+    
+    // Scroll to top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleWalkAwayComplete = () => {
+    restoreScrolling()
     const finalScore = Math.round((currentQuestionIndex / aiQuestions.length) * 100)
     onComplete(finalScore)
+  }
+
+  const handleGameClose = () => {
+    restoreScrolling()
+    onClose()
   }
 
   const useLifeline = (lifelineId: string) => {
@@ -428,23 +453,41 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
   }
 
   if (gameOver) {
+    const winningsAmount = walkedAway ? getWalkAwayAmount() : currentAmount
+    const questionsAnswered = currentQuestionIndex + (isCorrect ? 1 : 0)
+    
     return (
       <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
         <Card className="w-full max-w-md p-6 text-center">
           <CardContent>
             <DollarSign className="h-16 w-16 text-text-success mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-text-primary mb-2">
-              Game Over!
+              {walkedAway ? 'Congratulations!' : 'Game Over!'}
             </h2>
             <p className="text-text-secondary mb-4">
-              You won: <span className="font-bold text-text-success">{currentAmount}</span>
+              {walkedAway ? 'You successfully walked away with:' : 'You won:'}
+            </p>
+            <p className="text-3xl font-bold text-text-success mb-4">
+              {winningsAmount}
             </p>
             <p className="text-text-secondary mb-6">
-              Answered {currentQuestionIndex + (isCorrect ? 1 : 0)} out of {aiQuestions.length} questions correctly
+              {walkedAway 
+                ? `You answered ${questionsAnswered} out of ${aiQuestions.length} questions correctly before walking away safely.`
+                : `You answered ${questionsAnswered} out of ${aiQuestions.length} questions correctly.`
+              }
             </p>
-            <Button onClick={onClose} variant="primary" size="lg">
-              Continue Learning
-            </Button>
+            <div className="flex gap-3 justify-center">
+              {walkedAway && (
+                <Button onClick={handleWalkAwayComplete} variant="primary" size="lg">
+                  Continue Learning
+                </Button>
+              )}
+              {!walkedAway && (
+                <Button onClick={handleGameClose} variant="primary" size="lg">
+                  Continue Learning
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -467,7 +510,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
               <p className="text-lg font-bold text-text-success">{currentAmount}</p>
             </div>
             
-            <Button variant="ghost" size="sm" onClick={onClose} className="p-2 h-8 w-8">
+            <Button variant="ghost" size="sm" onClick={handleGameClose} className="p-2 h-8 w-8">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -604,9 +647,9 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                 variant="secondary"
                 size="lg"
                 onClick={walkAway}
-                disabled={isAnswerLocked}
+                disabled={isAnswerLocked || getWalkAwayAmount() === '$0'}
               >
-                Walk Away with {getWalkAwayAmount()}
+                {getWalkAwayAmount() === '$0' ? 'Cannot Walk Away' : `Walk Away with ${getWalkAwayAmount()}`}
               </Button>
               
               <Button

@@ -8,7 +8,7 @@ import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
 import { Progress } from '@/components/progress'
-import { OrganizationCardSVG } from '@/components/organization-card-svg'
+import { OrganizationCardSVGSimple } from '@/components/organization-card-svg-simple'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
 import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
@@ -493,7 +493,7 @@ export default function OrganisationOverviewPage() {
         transform={`translate(${role.position.x}, ${role.position.y})`}
         className={`${isDragging ? 'opacity-50' : ''}`}
       >
-        <OrganizationCardSVG
+        <OrganizationCardSVGSimple
           x={0}
           y={0}
           width={cardWidth}
@@ -508,7 +508,7 @@ export default function OrganisationOverviewPage() {
             teamProgress: avgSubordinateProgress,
             isSelected: isDirectlySelected || isSubordinateSelected,
             onClick: () => handleRoleClick(role.id),
-            tooltip: allSubordinates.length > 0 ? 'Average completion of all subordinates' : undefined
+            // tooltip removed to prevent overlap with user count badge
           }}
         />
         
@@ -782,14 +782,23 @@ export default function OrganisationOverviewPage() {
     // For demo, create a mapping of who reports to whom
     const reportingStructure: Record<string, string[]> = {
       'u1': ['u3', 'u4'], // Sarah Johnson (Super Admin) manages Emily and David (Admins)
-      'u2': ['u5', 'u6'], // Michael Chen (Super Admin) manages Lisa and Robert (Admins)
+      'u2': ['u5', 'u6', 'u7'], // Michael Chen (Super Admin) manages Lisa, Robert, and Thomas (Admins)
       'u3': ['u8', 'u9'], // Emily (Admin) manages Jennifer and William (Managers)
       'u4': ['u10', 'u11'], // David (Admin) manages Jessica and Christopher (Managers)
       'u5': ['u12'], // Lisa (Admin) manages Amanda (Manager)
+      'u6': ['u17'], // Rachel (Admin) manages one Manager
+      'u7': ['u18'], // Thomas (Admin) manages one Manager
       'u8': ['u13', 'u14'], // Jennifer (Manager) manages Daniel and Michelle (Instructors)
       'u9': ['u15', 'u16'], // William (Manager) manages Brian and Stephanie (Instructors)
-      'u13': ['u19', 'u20', 'u21'], // Daniel (Instructor) manages some Employees
-      'u14': ['u22', 'u23'], // Michelle (Instructor) manages some Employees
+      'u10': ['u17'], // Patricia (Manager) manages one Instructor
+      'u11': ['u18'], // Robert (Manager) manages one Instructor
+      'u12': ['u24'], // Amanda (Manager) manages one Instructor
+      'u13': ['u19', 'u20'], // Daniel (Instructor) manages some Employees
+      'u14': ['u21', 'u22'], // Michelle (Instructor) manages some Employees
+      'u15': ['u23'], // Brian (Instructor) manages one Employee
+      'u16': ['u25'], // Stephanie (Instructor) manages one Employee
+      'u17': ['u26'], // Manager manages one Employee
+      'u18': ['u27'], // Manager manages one Employee
     }
     
     const getDirectReports = (managerId: string): User[] => {
@@ -805,10 +814,11 @@ export default function OrganisationOverviewPage() {
     const positions: Record<string, { x: number; y: number }> = {}
     const { topLevelEmployees, getDirectReports } = buildEmployeeHierarchy()
     
-    const levelHeight = 120
-    const nodeWidth = 200
-    const nodeHeight = 100
-    const minHorizontalSpacing = 20
+    
+    const levelHeight = 180 // Increased from 120 for more vertical space
+    const nodeWidth = 220 // Match card width
+    const nodeHeight = 120 // Match card height  
+    const minHorizontalSpacing = 60 // Increased from 20 for more horizontal space
     
     // Track occupied spaces to prevent overlap
     const levelOccupancy: Record<number, Array<{start: number, end: number}>> = {}
@@ -877,26 +887,44 @@ export default function OrganisationOverviewPage() {
     
     // Position all top-level employees
     const totalTopLevelWidth = topLevelEmployees.reduce((sum, emp, index) => {
-      return sum + calculateSubtreeWidth(emp) + (index > 0 ? minHorizontalSpacing * 2 : 0)
+      return sum + calculateSubtreeWidth(emp) + (index > 0 ? minHorizontalSpacing * 3 : 0)
     }, 0)
     
-    let startX = 400 - totalTopLevelWidth / 2 // Center the tree
+    let startX = 500 - totalTopLevelWidth / 2 // Center the tree with more space
     
     topLevelEmployees.forEach((employee, index) => {
       const treeWidth = calculateSubtreeWidth(employee)
-      positionEmployee(employee, startX + treeWidth / 2 - nodeWidth / 2, 50)
-      startX += treeWidth + minHorizontalSpacing * 2
+      positionEmployee(employee, startX + treeWidth / 2 - nodeWidth / 2, 80) // Start lower
+      startX += treeWidth + minHorizontalSpacing * 3 // More spacing between trees
     })
+    
     
     return positions
   }
   
   // Render employee connections
-  const renderEmployeeConnections = () => {
+  const renderEmployeeConnections = (positions: Record<string, { x: number; y: number }>) => {
     const { getDirectReports } = buildEmployeeHierarchy()
-    const positions = calculateEmployeePositions()
-    const cardWidth = 200
-    const cardHeight = 90
+    const cardWidth = 220 // Match actual card width
+    const cardHeight = 120 // Match actual card height
+    
+    // Define different colors for connection lines based on hierarchy
+    const connectionColors = [
+      '#94A3B8', // Slate-400 - Default
+      '#6366F1', // Indigo-500
+      '#10B981', // Emerald-500  
+      '#F59E0B', // Amber-500
+      '#EF4444', // Red-500
+      '#8B5CF6', // Violet-500
+      '#06B6D4', // Cyan-500
+      '#F97316', // Orange-500
+    ]
+    
+    const getConnectionColor = (managerId: string) => {
+      // Use a simple hash of the manager ID to consistently assign colors
+      const hash = managerId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return connectionColors[hash % connectionColors.length]
+    }
     
     return users.flatMap(manager => {
       const directReports = getDirectReports(manager.id)
@@ -915,19 +943,20 @@ export default function OrganisationOverviewPage() {
         const endX = reportPos.x + cardWidth / 2
         const endY = reportPos.y
         
-        // Create curved path with shorter curves for compact design
-        const midY = startY + (endY - startY) * 0.4
-        const path = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`
+        // Create curved path that avoids overlapping with cards
+        const midY = startY + (endY - startY) * 0.5
+        const controlPointOffset = 30 // Curve outward to avoid cards
+        const path = `M ${startX} ${startY} C ${startX} ${midY + controlPointOffset}, ${endX} ${midY + controlPointOffset}, ${endX} ${endY}`
         
         return (
           <path
             key={`${manager.id}-${report.id}`}
             d={path}
-            stroke="#6366F1"
-            strokeWidth="2.5"
+            stroke={getConnectionColor(manager.id)}
+            strokeWidth="1.5"
             fill="none"
-            strokeDasharray="8,4"
-            opacity="0.8"
+            strokeDasharray="5,3"
+            opacity="0.7"
           />
         )
       }).filter(Boolean)
@@ -935,8 +964,7 @@ export default function OrganisationOverviewPage() {
   }
   
   // Render employee node
-  const renderEmployeeNode = (employee: User) => {
-    const positions = calculateEmployeePositions()
+  const renderEmployeeNode = (employee: User, positions: Record<string, { x: number; y: number }>) => {
     const position = positions[employee.id]
     if (!position) return null
     
@@ -956,7 +984,7 @@ export default function OrganisationOverviewPage() {
         key={employee.id}
         transform={`translate(${position.x}, ${position.y})`}
       >
-        <OrganizationCardSVG
+        <OrganizationCardSVGSimple
           x={0}
           y={0}
           width={cardWidth}
@@ -1091,23 +1119,27 @@ export default function OrganisationOverviewPage() {
                 </g>
               )}
               
-              {/* Employee connections (only show in employees view) */}
-              {viewState.viewMode === 'employees' && (
-                <g>
-                  {renderEmployeeConnections()}
-                </g>
-              )}
-              
-              {/* Employees (only show in employees view) */}
-              {viewState.viewMode === 'employees' && (
-                <g>
-                  {users.length > 0 ? users.map(renderEmployeeNode) : (
-                    <text x="400" y="200" textAnchor="middle" fontSize="16" fill="#6B7280">
-                      No employees found
-                    </text>
-                  )}
-                </g>
-              )}
+              {/* Employee view (connections and nodes) */}
+              {viewState.viewMode === 'employees' && (() => {
+                const employeePositions = calculateEmployeePositions()
+                return (
+                  <>
+                    {/* Employee connections */}
+                    <g>
+                      {renderEmployeeConnections(employeePositions)}
+                    </g>
+                    
+                    {/* Employee nodes */}
+                    <g>
+                      {users.length > 0 ? users.map(user => renderEmployeeNode(user, employeePositions)) : (
+                        <text x="400" y="200" textAnchor="middle" fontSize="16" fill="#6B7280">
+                          No employees found
+                        </text>
+                      )}
+                    </g>
+                  </>
+                )
+              })()}
             </svg>
             
             {/* Users List View */}

@@ -78,11 +78,11 @@ export function UserManagementHeader({
       {showBreadcrumb && (
         <div className="px-6 py-3 border-b border-subtle">
           <div className="flex items-center gap-2 text-sm">
-            <Link href="/lms" className="hover:opacity-80 transition-opacity">
-              <VergilLogo variant="mark" size="xs" color="primary" />
-            </Link>
-            <Link href="/lms" className="text-secondary hover:text-brand transition-colors">
-              Vergil LMS
+            <Link href="/lms" className="flex items-center gap-2 text-secondary hover:text-brand transition-colors group">
+              <span className="group-hover:opacity-80 transition-opacity">
+                <VergilLogo variant="mark" size="xs" color="primary" />
+              </span>
+              <span>Vergil LMS</span>
             </Link>
             <ChevronRight className="w-3 h-3 text-tertiary" />
             <Link href="/lms/user-management" className="text-secondary hover:text-brand transition-colors">

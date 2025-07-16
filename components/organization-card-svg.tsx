@@ -27,6 +27,7 @@ export function OrganizationCardSVG({
       const div = document.createElement('div')
       div.style.width = '100%'
       div.style.height = '100%'
+      div.style.overflow = 'hidden'
       foreignObjectRef.current.appendChild(div)
       setPortal(div)
       
@@ -59,7 +60,7 @@ export function OrganizationCardSVG({
         height={height}
       >
         {portal && createPortal(
-          <div style={{ width: '100%', height: '100%' }}>
+          <div style={{ width: '100%', height: '100%', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
             <OrganizationCard {...cardProps} className="h-full" />
           </div>,
           portal
