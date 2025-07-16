@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Volume2, Play, Pause, RotateCcw, CheckCircle, Clock } from 'lucide-react'
+import { X, Volume2, Play, Pause, RotateCcw, CheckCircle, Clock, Mic } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
+import TTSButton from '@/components/Voice/TTSButton'
 import { cn } from '@/lib/utils'
 
 interface AudioMaterialProps {
@@ -391,6 +392,17 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
                           >
                             {showTranscript ? 'Hide' : 'Show'} Transcript
                           </Button>
+                          
+                          <TTSButton
+                            text={currentAudio.transcript}
+                            className="text-sm"
+                            onPlayStart={() => {
+                              // Pause simulated audio when TTS starts
+                              if (isPlaying) {
+                                setIsPlaying(false)
+                              }
+                            }}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -399,7 +411,25 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
                     {showTranscript && (
                       <Card className="p-4 bg-bg-secondary">
                         <CardContent className="p-0">
-                          <h3 className="font-semibold text-text-primary mb-2">Transcript</h3>
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-text-primary">Transcript</h3>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="info" className="text-xs">
+                                <Mic className="h-3 w-3 mr-1" />
+                                Text-to-Speech
+                              </Badge>
+                              <TTSButton
+                                text={currentAudio.transcript}
+                                className="text-sm"
+                                onPlayStart={() => {
+                                  // Pause simulated audio when TTS starts
+                                  if (isPlaying) {
+                                    setIsPlaying(false)
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
                           <div className="text-text-secondary text-sm leading-relaxed whitespace-pre-line">
                             {currentAudio.transcript}
                           </div>

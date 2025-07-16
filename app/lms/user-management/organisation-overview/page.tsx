@@ -276,9 +276,9 @@ export default function OrganisationOverviewPage() {
           d={path}
           fill="none"
           stroke="#6366F1"
-          strokeWidth="2.5"
-          strokeDasharray="8,4"
-          opacity="0.8"
+          strokeWidth="1.5"
+          strokeDasharray="5,3"
+          opacity="0.7"
           className=""
         />
       )

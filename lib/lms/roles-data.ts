@@ -55,7 +55,7 @@ export const initialRoles: Role[] = [
   {
     id: '4',
     name: 'Instructor',
-    color: '#FFC700',
+    color: '#FFB300',
     description: 'Course creation and student management',
     usersCount: 0, // Will be calculated from mock data
     parentRole: '2',
