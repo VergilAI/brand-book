@@ -38,6 +38,38 @@ CLAUDE.md files are prompt engineering tools that provide context to Claude AI:
   - Border radius (use `rounded-md`, `rounded-lg`, etc.)
   - Animations (use `duration-normal`, `ease-out`, etc.)
 
+### 2a. Spacing Token Usage - CRITICAL
+
+The Tailwind configuration supports TWO spacing conventions. **You MUST be consistent**:
+
+**Option 1 - With prefix (PREFERRED in this codebase):**
+```tsx
+// ✅ CORRECT - Uses spacing- prefix
+<div className="p-spacing-lg space-y-spacing-md gap-spacing-sm">
+```
+
+**Option 2 - Without prefix:**
+```tsx
+// ⚠️ ALSO WORKS but check existing patterns first
+<div className="p-4 space-y-6 gap-2">
+```
+
+**BEFORE creating any component:**
+1. Check neighboring components for the pattern they use
+2. Test your spacing utilities in the browser DevTools
+3. If a spacing class produces no CSS, you're using the wrong convention
+
+**Available spacing tokens:**
+- `spacing-xs` (4px) 
+- `spacing-sm` (8px)
+- `spacing-md` (16px) 
+- `spacing-lg` (24px)
+- `spacing-xl` (32px)
+- `spacing-2xl` (48px)
+- `spacing-3xl` (64px)
+
+**Common mistake:** Using `space-y-spacing-md` when the config only supports `space-y-4`. Always verify which convention is active by checking an existing working component.
+
 ### 3. Tailwind Version
 - **ONLY Tailwind CSS v3 is allowed**
 - **NO Tailwind CSS v4** - The project is configured for v3 and must remain compatible
