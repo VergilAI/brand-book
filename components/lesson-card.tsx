@@ -87,10 +87,13 @@ export function LessonCard({
         )}
       >
         {/* Progress Indicator */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--bg-secondary)] rounded-t-[var(--radius-lg)]">
-          <div 
-            className="h-full bg-[var(--gradient-consciousness)] rounded-t-[var(--radius-lg)] transition-all duration-[var(--duration-slower)]"
-            style={{ width: `${overallProficiency}%` }}
+        <div className="absolute top-0 left-0 right-0 h-1">
+          <Progress 
+            value={overallProficiency} 
+            variant="default"
+            size="sm"
+            className="h-1 rounded-none rounded-t-lg"
+            indicatorClassName="bg-gradient-consciousness rounded-t-lg"
           />
         </div>
 

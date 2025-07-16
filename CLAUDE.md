@@ -239,3 +239,6 @@ export function CourseCard() {
 - **Badges**: Generous padding (px-3 py-1)
 
 Remember: **Desktop = professional app sizing, Mobile = touch-friendly sizing**
+```
+
+Whenever using a progress bar make sure to use our preexisting progress bar component.

@@ -12,6 +12,7 @@ import { Select } from '@/components/select'
 import { Badge } from '@/components/badge'
 import { Checkbox } from '@/components/atomic/checkbox'
 import { Progress } from '@/components/progress'
+import { ImportUsersModal } from '@/components/import-users-modal'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,9 +60,6 @@ export default function UserManagementPage() {
   const [showBulkActions, setShowBulkActions] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [importPreview, setImportPreview] = useState<any[]>([])
-  const [importErrors, setImportErrors] = useState<string[]>([])
   const [filters, setFilters] = useState<FilterState>({
     roles: [],
     statuses: [],
@@ -194,134 +192,6 @@ export default function UserManagementPage() {
     }
   }
 
-  const handleDownloadTemplate = () => {
-    const templateContent = [
-      'Name,Email,Role,Phone,Location,Department,Manager',
-      'John Doe,john.doe@example.com,Manager,+1 (555) 123-4567,New York,Engineering,Jane Smith',
-      'Jane Smith,jane.smith@example.com,Admin,,San Francisco,HR,',
-      'Bob Johnson,bob.j@example.com,Instructor,+1 (555) 987-6543,Chicago,Training,John Doe'
-    ].join('\n')
-
-    const blob = new Blob([templateContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'user_import_template.csv'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
-  }
-
-  const parseCSV = (text: string): any[] => {
-    const lines = text.split('\n').filter(line => line.trim())
-    if (lines.length < 2) return []
-    
-    const headers = lines[0].split(',').map(h => h.trim())
-    const users = []
-    
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim())
-      const user: any = {}
-      headers.forEach((header, index) => {
-        user[header.toLowerCase()] = values[index] || ''
-      })
-      users.push(user)
-    }
-    
-    return users
-  }
-
-  const validateImportData = (importedUsers: any[]): string[] => {
-    const errors: string[] = []
-    const existingEmails = users.map(u => u.email.toLowerCase())
-    const importEmails = new Set<string>()
-    const validRoles = initialRoles.map(r => r.name.toLowerCase())
-
-    importedUsers.forEach((user, index) => {
-      const rowNum = index + 2 // +2 because row 1 is headers, and index starts at 0
-      
-      // Check required fields
-      if (!user.name || !user.name.trim()) {
-        errors.push(`Row ${rowNum}: Name is required`)
-      }
-      
-      if (!user.email || !user.email.trim()) {
-        errors.push(`Row ${rowNum}: Email is required`)
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-        errors.push(`Row ${rowNum}: Invalid email format`)
-      } else if (existingEmails.includes(user.email.toLowerCase())) {
-        errors.push(`Row ${rowNum}: Email already exists in the system`)
-      } else if (importEmails.has(user.email.toLowerCase())) {
-        errors.push(`Row ${rowNum}: Duplicate email in import file`)
-      } else {
-        importEmails.add(user.email.toLowerCase())
-      }
-      
-      if (!user.role || !user.role.trim()) {
-        errors.push(`Row ${rowNum}: Role is required`)
-      } else if (!validRoles.includes(user.role.toLowerCase())) {
-        errors.push(`Row ${rowNum}: Invalid role. Must be one of: ${initialRoles.map(r => r.name).join(', ')}`)
-      }
-    })
-    
-    return errors
-  }
-
-  const handleFileUpload = (file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      setImportErrors(['File size exceeds 5MB limit'])
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const text = e.target?.result as string
-      const users = parseCSV(text)
-      
-      if (users.length === 0) {
-        setImportErrors(['No valid data found in file'])
-        return
-      }
-      
-      const errors = validateImportData(users)
-      setImportErrors(errors)
-      
-      if (errors.length === 0) {
-        // Transform data to match our format
-        const transformedUsers = users.map(user => ({
-          name: user.name,
-          email: user.email,
-          role: initialRoles.find(r => r.name.toLowerCase() === user.role.toLowerCase())?.name || user.role,
-          phone: user.phone || '',
-          location: user.location || '',
-          department: user.department || '',
-          manager: user.manager || ''
-        }))
-        setImportPreview(transformedUsers)
-      }
-      
-      setImportFile(file)
-    }
-    
-    reader.readAsText(file)
-  }
-
-  const handleImport = () => {
-    // In a real application, this would make an API call
-    // Process import - would send to API in production
-    
-    // Simulate successful import
-    alert(`Successfully imported ${importPreview.length} users`)
-    
-    // Reset modal
-    setShowImportModal(false)
-    setImportFile(null)
-    setImportPreview([])
-    setImportErrors([])
-    
-    // In a real app, you would refresh the user list here
-  }
 
   const handleExport = () => {
     // Helper to escape CSV values
@@ -776,232 +646,18 @@ export default function UserManagementPage() {
         </Card>
 
         {/* Import Modal */}
-        {showImportModal && (
-          <div 
-            className="fixed inset-0 bg-overlay flex items-center justify-center p-4 z-50" 
-            onClick={() => {
-              setShowImportModal(false)
-              setImportFile(null)
-              setImportPreview([])
-              setImportErrors([])
-            }}
-          > {/* rgba(0, 0, 0, 0.5), 16px */}
-            <div 
-              className="w-full max-w-2xl max-h-[80vh] flex flex-col bg-white rounded-lg shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-spacing-md border-b border-subtle"> {/* 16px, rgba(0,0,0,0.05) */}
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-primary">Import Users</h3> {/* #1D1D1F */}
-                    <p className="text-sm text-secondary mt-1"> {/* #6C6C6D */}
-                      Upload a CSV file to import multiple users at once
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowImportModal(false)
-                      setImportFile(null)
-                      setImportPreview([])
-                      setImportErrors([])
-                    }}
-                    className="ml-spacing-md flex-shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-spacing-md will-change-scroll" style={{ transform: 'translateZ(0)', WebkitOverflowScrolling: 'touch' }}>
-                {!importFile ? (
-                  <div className="space-y-4">
-                    {/* File Upload */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-vergil-off-black mb-2">
-                        Drag and drop your CSV file here, or click to browse
-                      </p>
-                      <p className="text-sm text-vergil-off-black/60 mb-4">
-                        Maximum file size: 5MB
-                      </p>
-                      <input
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            handleFileUpload(file)
-                          }
-                        }}
-                        className="hidden"
-                        id="file-upload"
-                      />
-                      <label htmlFor="file-upload" className="inline-block">
-                        <span className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 cursor-pointer">
-                          Select File
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* Template Download */}
-                    <Card variant="outlined" className="p-4">
-                      <div className="flex items-start gap-3">
-                        <FileText className="w-5 h-5 text-brand mt-0.5" /> {/* #A64DFF */}
-                        <div className="flex-1">
-                          <h4 className="font-medium text-primary mb-1"> {/* #1D1D1F */}
-                            Need a template?
-                          </h4>
-                          <p className="text-sm text-secondary mb-3"> {/* #6C6C6D */}
-                            Download our CSV template with the correct format and example data
-                          </p>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={handleDownloadTemplate}
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Download Template
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-
-                    {/* Format Requirements */}
-                    <div className="bg-secondary rounded-lg p-4"> {/* #F5F5F7 */}
-                      <h4 className="font-medium text-primary mb-2"> {/* #1D1D1F */}
-                        CSV Format Requirements
-                      </h4>
-                      <ul className="space-y-1 text-sm text-secondary"> {/* #6C6C6D */}
-                        <li>• Required columns: Name, Email, Role</li>
-                        <li>• Optional columns: Phone, Location, Department, Manager</li>
-                        <li>• Roles must be one of: {initialRoles.map(r => r.name).join(', ')}</li>
-                        <li>• Dates should be in YYYY-MM-DD format</li>
-                        <li>• Email addresses must be unique</li>
-                      </ul>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* File Info */}
-                    <div className="bg-vergil-off-white rounded-lg p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-vergil-purple" />
-                        <div>
-                          <p className="font-medium text-vergil-off-black">{importFile.name}</p>
-                          <p className="text-sm text-vergil-off-black/60">
-                            {(importFile.size / 1024).toFixed(2)} KB
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setImportFile(null)
-                          setImportPreview([])
-                          setImportErrors([])
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-
-                    {/* Errors */}
-                    {importErrors.length > 0 && (
-                      <div className="bg-errorLight border border-error rounded-lg p-4"> {/* #FEF2F2, #FCA5A5 */}
-                        <div className="flex items-start gap-2">
-                          <AlertCircle className="w-5 h-5 text-error mt-0.5" /> {/* #E51C23 */}
-                          <div className="flex-1">
-                            <h4 className="font-medium text-error mb-1"> {/* #E51C23 */}
-                              Validation Errors
-                            </h4>
-                            <ul className="space-y-1 text-sm text-error"> {/* #E51C23 */}
-                              {importErrors.map((error, index) => (
-                                <li key={index}>• {error}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Preview */}
-                    {importPreview.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-primary mb-2"> {/* #1D1D1F */}
-                          Preview ({importPreview.length} users)
-                        </h4>
-                        <div className="border border-subtle rounded-lg overflow-x-auto"> {/* rgba(0,0,0,0.05) */}
-                          <table className="w-full text-sm">
-                            <thead className="bg-secondary border-b border-subtle"> {/* #F5F5F7, rgba(0,0,0,0.05) */}
-                              <tr>
-                                <th className="px-4 py-2 text-left font-medium text-primary">Name</th> {/* #1D1D1F */}
-                                <th className="px-4 py-2 text-left font-medium text-primary">Email</th>
-                                <th className="px-4 py-2 text-left font-medium text-primary">Role</th>
-                                <th className="px-4 py-2 text-left font-medium text-primary">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border-subtle"> {/* rgba(0,0,0,0.05) */}
-                              {importPreview.slice(0, 5).map((user, index) => (
-                                <tr key={index}>
-                                  <td className="px-4 py-2">{user.name}</td>
-                                  <td className="px-4 py-2">{user.email}</td>
-                                  <td className="px-4 py-2">{user.role}</td>
-                                  <td className="px-4 py-2">
-                                    <Badge variant="success" className="text-xs">Valid</Badge>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                          {importPreview.length > 5 && (
-                            <div className="px-4 py-2 bg-secondary text-sm text-secondary"> {/* #F5F5F7, #6C6C6D */}
-                              And {importPreview.length - 5} more users...
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-spacing-md border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-vergil-off-black/60">
-                    {importFile && importErrors.length === 0 && importPreview.length > 0
-                      ? `Ready to import ${importPreview.length} users`
-                      : 'Select a file to continue'}
-                  </p>
-                  <div className="flex gap-spacing-sm">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setShowImportModal(false)
-                        setImportFile(null)
-                        setImportPreview([])
-                        setImportErrors([])
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleImport}
-                      disabled={!importFile || importErrors.length > 0 || importPreview.length === 0}
-                      size="sm"
-                      className="bg-vergil-purple hover:bg-vergil-purple-lighter"
-                    >
-                      Import Users
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ImportUsersModal
+          open={showImportModal}
+          onOpenChange={setShowImportModal}
+          onImport={(users) => {
+            // In a real application, this would make an API call
+            alert(`Successfully imported ${users.length} users`)
+            
+            // In a real app, you would refresh the user list here
+          }}
+          existingEmails={users.map(u => u.email)}
+          validRoles={initialRoles.map(r => r.name)}
+        />
       </div>
     </div>
   )

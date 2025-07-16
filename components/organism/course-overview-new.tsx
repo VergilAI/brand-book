@@ -286,12 +286,11 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                         <span className="text-xs text-text-secondary">⭕ {chapter.lessons.filter(l => l.completed).length} completed</span>
                         <span className="text-xs text-text-secondary">🕐 {chapter.estimatedTime}</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-text-success h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${chapterProgress}%` }}
-                        />
-                      </div>
+                      <Progress 
+                        value={chapterProgress} 
+                        variant="default"
+                        size="sm"
+                      />
                     </div>
                   </CardHeader>
 

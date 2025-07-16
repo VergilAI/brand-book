@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card } from '@/components/card'
 import { Button } from '@/components/button'
+import { Progress } from '@/components/progress'
 import { cn } from '@/lib/utils'
 import { ProgressAPI } from '@/app/lms/new_course_overview/api/progress-api'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -427,12 +428,11 @@ export function ConnectCardsGame({
                   {Math.round(progress)}% Complete
                 </span>
               </div>
-              <div className="w-full h-2 bg-bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-bg-brand transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+              <Progress 
+                value={progress} 
+                variant="default"
+                size="sm"
+              />
             </Card>
 
             <div className="grid grid-cols-2 gap-space-lg">

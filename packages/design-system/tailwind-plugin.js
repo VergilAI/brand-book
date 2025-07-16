@@ -642,6 +642,13 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
         'xl': '32px',
         '2xl': '48px',
         '3xl': '64px',
+        'spacing-xs': '4px',
+        'spacing-sm': '8px',
+        'spacing-md': '16px',
+        'spacing-lg': '24px',
+        'spacing-xl': '32px',
+        'spacing-2xl': '48px',
+        'spacing-3xl': '64px',
       },
       
       fontSize: {

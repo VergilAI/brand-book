@@ -8,6 +8,7 @@ import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
 import { Progress } from '@/components/progress'
+import { OrganizationCardSVG } from '@/components/organization-card-svg'
 import { Role, initialRoles } from '@/lib/lms/roles-data'
 import { User, mockUsers, updateRoleUserCounts } from '@/lib/lms/mock-data'
 
@@ -482,185 +483,34 @@ export default function OrganisationOverviewPage() {
       ? Math.round(allSubordinates.reduce((sum, u) => sum + (u.completionRate || 0), 0) / allSubordinates.length)
       : 0
     
-    // Card dimensions - made larger for better layout
-    const cardWidth = 200
-    const cardHeight = allSubordinates.length > 0 ? 110 : 85
+    // Card dimensions
+    const cardWidth = 220
+    const cardHeight = 120
     
     return (
       <g
         key={role.id}
         transform={`translate(${role.position.x}, ${role.position.y})`}
         className={`${isDragging ? 'opacity-50' : ''}`}
-        style={{ cursor: 'pointer' }}
       >
-        {/* Shadow */}
-        <rect
-          x="1"
-          y="1"
+        <OrganizationCardSVG
+          x={0}
+          y={0}
           width={cardWidth}
           height={cardHeight}
-          rx="6"
-          fill="rgba(0,0,0,0.08)"
+          cardProps={{
+            id: role.id,
+            type: 'role',
+            title: role.name,
+            subtitle: `${role.usersCount} ${role.usersCount === 1 ? 'user' : 'users'}`,
+            color: role.color,
+            usersCount: role.usersCount,
+            teamProgress: avgSubordinateProgress,
+            isSelected: isDirectlySelected || isSubordinateSelected,
+            onClick: () => handleRoleClick(role.id),
+            tooltip: allSubordinates.length > 0 ? 'Average completion of all subordinates' : undefined
+          }}
         />
-        
-        {/* Card background */}
-        <rect
-          x="0"
-          y="0"
-          width={cardWidth}
-          height={cardHeight}
-          rx="6"
-          fill={isSubordinateSelected ? `${role.color}08` : "white"}
-          stroke={isDirectlySelected ? role.color : isSubordinateSelected ? role.color : '#E5E7EB'}
-          strokeWidth={isDirectlySelected ? "2" : isSubordinateSelected ? "1.5" : "1"}
-          strokeDasharray={isSubordinateSelected ? "4,2" : "none"}
-        />
-        
-        {/* Color accent bar */}
-        <rect
-          x="0"
-          y="0"
-          width={cardWidth}
-          height="4"
-          rx="6"
-          fill={role.color}
-        />
-        <rect
-          x="0"
-          y="2"
-          width={cardWidth}
-          height="2"
-          fill={role.color}
-        />
-        
-        {/* Content area */}
-        <g transform="translate(12, 16)">
-          {/* Role icon */}
-          <circle
-            cx="14"
-            cy="14"
-            r="14"
-            fill={role.color}
-            opacity="0.15"
-          />
-          <text
-            x="14"
-            y="18"
-            textAnchor="middle"
-            fontSize="11"
-            fontWeight="bold"
-            fill={role.color}
-          >
-            {role.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-          </text>
-          
-          {/* Role name */}
-          <text
-            x="36"
-            y="14"
-            fontSize="14"
-            fontWeight="600"
-            fill="#1D1D1F"
-          >
-            {role.name.length > 16 ? role.name.slice(0, 14) + '...' : role.name}
-          </text>
-          
-          {/* User count */}
-          <text
-            x="36"
-            y="30"
-            fontSize="12"
-            fill="#6B7280"
-          >
-            {role.usersCount} {role.usersCount === 1 ? 'user' : 'users'}
-          </text>
-        </g>
-        
-        
-        {/* Subordinate Progress Section */}
-        {allSubordinates.length > 0 && (
-          <g transform={`translate(12, ${cardHeight - 45})`}>
-            {/* Progress label */}
-            <text
-              x="0"
-              y="0"
-              fontSize="10"
-              fill="#6B7280"
-              fontWeight="500"
-            >
-              Team Progress
-            </text>
-            
-            {/* Info icon */}
-            <g 
-              transform={`translate(${cardWidth - 40}, -6)`}
-              style={{ cursor: 'pointer' }}
-              onMouseEnter={(e) => {
-                e.stopPropagation()
-                // Show tooltip
-                const tooltip = document.getElementById(`tooltip-${role.id}`)
-                if (tooltip) tooltip.style.display = 'block'
-              }}
-              onMouseLeave={(e) => {
-                e.stopPropagation()
-                // Hide tooltip
-                const tooltip = document.getElementById(`tooltip-${role.id}`)
-                if (tooltip) tooltip.style.display = 'none'
-              }}
-            >
-              <circle cx="5" cy="5" r="7" fill="#E5E7EB" />
-              <text
-                x="5"
-                y="8"
-                textAnchor="middle"
-                fontSize="9"
-                fill="#6B7280"
-                fontWeight="bold"
-              >
-                i
-              </text>
-            </g>
-            
-            {/* Progress bar and percentage row */}
-            <g transform="translate(0, 35)">
-              {/* Percentage text positioned well above progress bar */}
-              <text
-                x="0"
-                y="-20"
-                fontSize="12"
-                fill="#374151"
-                fontWeight="600"
-                textAnchor="start"
-              >
-                {avgSubordinateProgress}%
-              </text>
-              
-              {/* Progress bar background */}
-              <rect
-                x="0"
-                y="0"
-                width={cardWidth - 48}
-                height="12"
-                rx="6"
-                fill="#E5E7EB"
-              />
-              
-              {/* Progress bar fill */}
-              <rect
-                x="0"
-                y="0"
-                width={(cardWidth - 48) * (avgSubordinateProgress / 100)}
-                height="12"
-                rx="6"
-                fill={
-                  avgSubordinateProgress >= 80 ? '#10B981' :
-                  avgSubordinateProgress >= 60 ? '#F59E0B' :
-                  '#EF4444'
-                }
-              />
-            </g>
-          </g>
-        )}
         
         
         
@@ -1091,135 +941,40 @@ export default function OrganisationOverviewPage() {
     if (!position) return null
     
     const role = roles.find(r => r.id === employee.roleId)
-    const cardWidth = 200
-    const cardHeight = 90
+    const cardWidth = 220
+    const cardHeight = 120
+    
+    // Determine status from employee.status
+    const getEmployeeStatus = () => {
+      if (employee.status === 'ahead' || employee.status === 'on_track') return 'on_track'
+      if (employee.status === 'at_risk') return 'at_risk'
+      return 'behind'
+    }
     
     return (
       <g
         key={employee.id}
         transform={`translate(${position.x}, ${position.y})`}
       >
-        {/* Card shadow */}
-        <rect
-          x="2"
-          y="2"
+        <OrganizationCardSVG
+          x={0}
+          y={0}
           width={cardWidth}
           height={cardHeight}
-          rx="6"
-          fill="#00000010"
-        />
-        
-        {/* Card background */}
-        <rect
-          x="0"
-          y="0"
-          width={cardWidth}
-          height={cardHeight}
-          rx="6"
-          fill="white"
-          stroke={selectedUser === employee.id ? '#7B00FF' : '#E5E7EB'}
-          strokeWidth={selectedUser === employee.id ? '2' : '1'}
-        />
-        
-        {/* Employee info */}
-        <g transform="translate(10, 10)">
-          {/* Avatar */}
-          <circle
-            cx="15"
-            cy="20"
-            r="15"
-            fill={role?.color || '#7B00FF'}
-            opacity="0.15"
-          />
-          <text
-            x="15"
-            y="25"
-            textAnchor="middle"
-            fontSize="12"
-            fontWeight="bold"
-            fill={role?.color || '#7B00FF'}
-          >
-            {employee.name.split(' ').map(n => n[0]).join('')}
-          </text>
-          
-          {/* Name and role */}
-          <text
-            x="38"
-            y="16"
-            fontSize="13"
-            fontWeight="600"
-            fill="#1D1D1F"
-          >
-            {employee.name.length > 18 ? employee.name.slice(0, 16) + '...' : employee.name}
-          </text>
-          <text
-            x="38"
-            y="30"
-            fontSize="11"
-            fill="#6B7280"
-          >
-            {role?.name || 'Unknown Role'}
-          </text>
-        </g>
-        
-        {/* Compact progress indicator */}
-        <g transform={`translate(10, ${cardHeight - 22})`}>
-          <rect
-            x="0"
-            y="0"
-            width={cardWidth - 20}
-            height="3"
-            rx="1.5"
-            fill="#E5E7EB"
-          />
-          <rect
-            x="0"
-            y="0"
-            width={(cardWidth - 20) * ((employee.completionRate || 0) / 100)}
-            height="3"
-            rx="1.5"
-            fill={
-              (employee.completionRate || 0) >= 80 ? '#10B981' :
-              (employee.completionRate || 0) >= 60 ? '#F59E0B' :
-              '#EF4444'
+          cardProps={{
+            id: employee.id,
+            type: 'employee',
+            title: employee.name,
+            subtitle: role?.name || 'Unknown Role',
+            color: role?.color || '#7B00FF',
+            progress: employee.completionRate || 0,
+            initials: employee.name.split(' ').map(n => n[0]).join(''),
+            status: getEmployeeStatus(),
+            isSelected: selectedUser === employee.id,
+            onClick: () => {
+              setSelectedUser(employee.id)
+              setSelectedRole(null)
             }
-          />
-          <text
-            x={cardWidth - 20}
-            y="2"
-            fontSize="10"
-            fill="#6B7280"
-            textAnchor="end"
-            alignmentBaseline="middle"
-          >
-            {employee.completionRate || 0}%
-          </text>
-        </g>
-        
-        {/* Status indicator dot */}
-        <circle
-          cx={cardWidth - 10}
-          cy="10"
-          r="4"
-          fill={
-            employee.status === 'ahead' || employee.status === 'on_track' ? '#10B981' :
-            employee.status === 'at_risk' ? '#F59E0B' :
-            '#EF4444'
-          }
-        />
-        
-        {/* Click overlay */}
-        <rect
-          x="0"
-          y="0"
-          width={cardWidth}
-          height={cardHeight}
-          fill="transparent"
-          style={{ cursor: 'pointer' }}
-          onClick={(e) => {
-            e.stopPropagation()
-            setSelectedUser(employee.id)
-            setSelectedRole(null)
           }}
         />
       </g>

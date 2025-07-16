@@ -5,6 +5,7 @@ import { Clock, CheckCircle, Circle, AlertCircle, ArrowLeft, ArrowRight, Flag, E
 import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
+import { Progress } from '@/components/progress'
 import { cn } from '@/lib/utils'
 
 interface Question {
@@ -380,12 +381,11 @@ export function TestInterface() {
             {Object.keys(answers).length} answered • {flaggedQuestions.size} flagged
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-vergil-purple h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / mockTest.totalQuestions) * 100}%` }}
-          />
-        </div>
+        <Progress 
+          value={((currentQuestion + 1) / mockTest.totalQuestions) * 100} 
+          variant="default"
+          size="sm"
+        />
       </div>
 
       <div className="flex gap-6">
