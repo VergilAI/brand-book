@@ -1,3 +1,6 @@
+/* Import design system tokens FIRST so CSS variables are available */
+@import "../packages/design-system/generated/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

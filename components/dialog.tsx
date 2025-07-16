@@ -37,7 +37,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 const dialogContentVariants = cva(
   [
     "fixed z-50 grid w-full gap-[var(--spacing-md)]",
-    "bg-elevated border border-default rounded-[var(--radius-lg)]",
+    "bg-elevated border border-default rounded-[var(--radius-xl)]",
     "p-[var(--spacing-lg)] shadow-modal",
     "transition-all duration-normal",
     "data-[state=open]:animate-in data-[state=closed]:animate-out",

@@ -42,7 +42,7 @@ const cardVariants = cva(
         default: [
           "bg-bg-elevated",
           "border border-border-subtle",
-          "rounded-[var(--radius-lg)]",
+          "rounded-lg",
           "shadow-card",
           "transition-shadow duration-[var(--duration-normal)]",
         ].join(" "),
@@ -50,7 +50,7 @@ const cardVariants = cva(
         interactive: [
           "bg-bg-elevated",
           "border border-border-subtle",
-          "rounded-[var(--radius-lg)]",
+          "rounded-lg",
           "shadow-card",
           "cursor-pointer",
           "transition-all duration-[var(--duration-normal)] ease-out",
@@ -68,7 +68,7 @@ const cardVariants = cva(
         neural: [
           "bg-gradient-to-br from-[var(--color-purple-50)] to-[var(--color-purple-100)]",
           "border border-border-emphasis",
-          "rounded-[var(--radius-xl)]",
+          "rounded-xl",
           "shadow-brand-sm",
           "backdrop-blur-sm",
           "transition-all duration-[var(--duration-slow)]",
@@ -78,7 +78,7 @@ const cardVariants = cva(
         feature: [
           "bg-bg-elevated",
           "border border-border-subtle",
-          "rounded-[var(--radius-lg)]",
+          "rounded-lg",
           "shadow-card",
           "transition-all duration-[var(--duration-slow)] ease-out",
           "hover:shadow-dropdown",
@@ -93,7 +93,7 @@ const cardVariants = cva(
         metric: [
           "bg-bg-secondary",
           "border border-border-subtle",
-          "rounded-[var(--radius-md)]",
+          "rounded-md",
           "shadow-sm",
           "transition-all duration-[var(--duration-normal)]",
           "hover:shadow-card",
@@ -103,7 +103,7 @@ const cardVariants = cva(
         problem: [
           "bg-bg-elevated",
           "border border-border-default",
-          "rounded-[var(--radius-lg)]",
+          "rounded-lg",
           "shadow-card",
           "h-full",
           "transition-colors duration-[var(--duration-normal)]",
@@ -113,7 +113,7 @@ const cardVariants = cva(
         gradient: [
           "bg-[var(--gradient-consciousness)]",
           "border-0",
-          "rounded-[var(--radius-xl)]",
+          "rounded-xl",
           "shadow-brand-md",
           "text-text-inverse",
           "transition-all duration-[var(--duration-slow)]",
@@ -128,7 +128,7 @@ const cardVariants = cva(
         outlined: [
           "bg-transparent",
           "border-2 border-border-brand",
-          "rounded-[var(--radius-lg)]",
+          "rounded-lg",
           "shadow-none",
           "transition-all duration-[var(--duration-normal)]",
           "hover:bg-bg-brandLight",
