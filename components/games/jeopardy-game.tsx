@@ -128,122 +128,134 @@ export function JeopardyGame({ lessonId, onClose, onComplete }: JeopardyGameProp
 
   if (selectedQuestion) {
     return (
-      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-        <Card className="w-full max-w-4xl p-8">
-          <CardContent>
-            <div className="text-center mb-6">
-              <Badge variant="primary" className="mb-2">
-                {selectedQuestion.category} - ${selectedQuestion.value}
-              </Badge>
-              <h2 className="text-2xl font-bold text-text-primary mb-4">
-                {selectedQuestion.question}
-              </h2>
+      <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-8 z-modal">
+        <div className="w-full max-w-5xl bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900 rounded-2xl border-4 border-yellow-400 p-12">
+          <div className="text-center mb-8">
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-6 py-2 rounded-lg font-black text-lg mb-4 inline-block">
+              {selectedQuestion.category} - ${selectedQuestion.value}
             </div>
+            <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
+              {selectedQuestion.question}
+            </h2>
+          </div>
 
-            {!showAnswer ? (
-              <div className="space-y-4">
+          {!showAnswer ? (
+            <div className="space-y-6">
+              <div className="max-w-2xl mx-auto">
                 <Input
                   type="text"
                   placeholder="What is...? / Who is...?"
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  className="text-center text-lg"
+                  className="text-center text-xl h-16 bg-white/10 border-white/30 text-white placeholder-white/50 focus:bg-white/20"
                   onKeyDown={(e) => e.key === 'Enter' && submitAnswer()}
                 />
-                
-                <div className="flex justify-center gap-4">
-                  <Button onClick={submitAnswer} disabled={!userAnswer.trim()}>
-                    Submit Answer
-                  </Button>
-                  <Button variant="secondary" onClick={closeQuestion}>
-                    Pass
-                  </Button>
-                </div>
               </div>
-            ) : (
-              <div className="text-center space-y-4">
-                <div className={cn(
-                  "p-4 rounded-lg",
-                  isCorrect ? "bg-bg-success-light text-text-success" : "bg-bg-error-light text-text-error"
-                )}>
-                  <p className="font-semibold mb-2">
-                    {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
-                  </p>
-                  <p className="text-text-primary">
-                    <strong>Answer:</strong> {selectedQuestion.answer}
-                  </p>
-                  {isCorrect && (
-                    <p className="text-text-success">
-                      +${selectedQuestion.value} points!
-                    </p>
-                  )}
-                </div>
-                
-                <Button onClick={closeQuestion}>
-                  Continue
+              
+              <div className="flex justify-center gap-6">
+                <Button 
+                  size="lg"
+                  onClick={submitAnswer} 
+                  disabled={!userAnswer.trim()}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold px-8 py-4 text-lg"
+                >
+                  Submit Answer
+                </Button>
+                <Button 
+                  size="lg"
+                  variant="secondary" 
+                  onClick={closeQuestion}
+                  className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-bold px-8 py-4 text-lg"
+                >
+                  Pass
                 </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          ) : (
+            <div className="text-center space-y-6">
+              <div className={cn(
+                "p-8 rounded-xl border-4",
+                isCorrect ? "bg-green-900/50 border-green-400 text-green-300" : "bg-red-900/50 border-red-400 text-red-300"
+              )}>
+                <p className="font-black text-3xl mb-4">
+                  {isCorrect ? '✓ CORRECT!' : '✗ INCORRECT'}
+                </p>
+                <p className="text-white text-xl mb-4">
+                  <strong>Answer:</strong> {selectedQuestion.answer}
+                </p>
+                {isCorrect && (
+                  <p className="text-yellow-400 font-bold text-2xl">
+                    +${selectedQuestion.value} points!
+                  </p>
+                )}
+              </div>
+              
+              <Button 
+                size="lg"
+                onClick={closeQuestion}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-400 hover:to-purple-500 text-white font-bold px-8 py-4 text-lg"
+              >
+                Continue
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-      <div className="w-full max-w-7xl max-h-[90vh] bg-bg-primary rounded-lg shadow-modal overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black z-modal overflow-hidden">
+      <div className="w-full h-full bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-text-warning" />
-            <h2 className="text-xl font-semibold text-text-primary">AI Fundamentals Jeopardy</h2>
+        <div className="px-8 py-6 border-b border-white/20 flex items-center justify-between bg-gradient-to-r from-purple-800 to-blue-800">
+          <div className="flex items-center gap-3">
+            <Trophy className="h-8 w-8 text-yellow-400" />
+            <h1 className="text-3xl font-bold text-white tracking-wide">AI FUNDAMENTALS JEOPARDY!</h1>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-sm text-text-secondary">Current Score</p>
-              <p className="text-lg font-bold text-text-success">${score}</p>
+          <div className="flex items-center gap-6">
+            <div className="text-center bg-white/10 rounded-lg px-4 py-2">
+              <p className="text-sm text-white/70">Current Score</p>
+              <p className="text-2xl font-bold text-yellow-400">${score}</p>
             </div>
             
-            <Button variant="ghost" size="sm" onClick={onClose} className="p-2 h-8 w-8">
-              <X className="h-4 w-4" />
+            <Button variant="ghost" size="lg" onClick={onClose} className="p-3 h-12 w-12 text-white hover:bg-white/20">
+              <X className="h-6 w-6" />
             </Button>
           </div>
         </div>
 
         {/* Game Board */}
-        <div className="flex-1 p-6">
-          <div className="grid grid-cols-5 gap-2 h-full">
+        <div className="flex-1 p-8">
+          <div className="grid grid-cols-5 gap-4 h-full max-h-[calc(100vh-200px)]">
             {jeopardyCategories.map((category, categoryIndex) => (
-              <div key={category} className="flex flex-col gap-2">
-                {/* Category Header */}
-                <Card className="bg-text-brand text-white p-3 text-center">
-                  <CardContent className="p-0">
-                    <h3 className="font-bold text-sm">{category}</h3>
-                  </CardContent>
-                </Card>
+              <div key={category} className="flex flex-col gap-3">
+                {/* Category Header - Redesigned */}
+                <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 p-4 rounded-t-lg border-4 border-yellow-400 shadow-lg">
+                  <h3 className="font-black text-white text-center text-sm uppercase tracking-widest leading-tight">
+                    {category}
+                  </h3>
+                </div>
 
-                {/* Questions */}
+                {/* Questions - Redesigned */}
                 {getQuestionsByCategory(category).map((question) => (
-                  <Card
+                  <div
                     key={question.id}
                     className={cn(
-                      "flex-1 cursor-pointer transition-all duration-200",
+                      "flex-1 min-h-[80px] cursor-pointer transition-all duration-300 rounded-lg border-2 flex items-center justify-center",
                       question.completed 
-                        ? "bg-bg-secondary text-text-disabled cursor-not-allowed" 
-                        : "bg-text-brand text-white hover:bg-text-brand-light hover:scale-105"
+                        ? "bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed" 
+                        : "bg-gradient-to-br from-blue-500 to-blue-700 border-blue-300 text-white hover:from-blue-400 hover:to-blue-600 hover:scale-105 hover:shadow-xl transform"
                     )}
                     onClick={() => selectQuestion(question)}
                   >
-                    <CardContent className="p-0 h-full flex items-center justify-center">
-                      {question.completed ? (
-                        <CheckCircle className="h-6 w-6" />
-                      ) : (
-                        <p className="font-bold text-lg">${question.value}</p>
-                      )}
-                    </CardContent>
-                  </Card>
+                    {question.completed ? (
+                      <CheckCircle className="h-8 w-8" />
+                    ) : (
+                      <p className="font-black text-2xl text-yellow-300 drop-shadow-lg">${question.value}</p>
+                    )}
+                  </div>
                 ))}
               </div>
             ))}
@@ -251,20 +263,21 @@ export function JeopardyGame({ lessonId, onClose, onComplete }: JeopardyGameProp
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border-subtle flex items-center justify-between">
-          <div className="text-sm text-text-secondary">
-            Questions answered: {questionsAnswered} / {questions.length}
+        <div className="px-8 py-6 border-t border-white/20 flex items-center justify-between bg-gradient-to-r from-gray-800 to-gray-900">
+          <div className="text-white/80">
+            Questions answered: <span className="font-bold text-white">{questionsAnswered}</span> / <span className="font-bold text-white">{questions.length}</span>
           </div>
           
-          <div className="flex items-center gap-4">
-            <Badge variant="success" className="text-sm">
-              <Star className="h-3 w-3 mr-1" />
+          <div className="flex items-center gap-6">
+            <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-black px-4 py-2 rounded-lg font-bold text-lg flex items-center gap-2">
+              <Star className="h-5 w-5" />
               Total Score: ${score}
-            </Badge>
+            </div>
             
             {questionsAnswered === questions.length && (
               <Button 
-                variant="primary" 
+                size="lg"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-bold px-8 py-3 text-lg"
                 onClick={() => onComplete(Math.round((score / 15000) * 100))}
               >
                 Finish Game

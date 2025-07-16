@@ -6,6 +6,7 @@ import { JeopardyGame } from './jeopardy-game'
 import { WrittenMaterial } from './written-material'
 import { AudioMaterial } from './audio-material'
 import { VideoMaterial } from './video-material'
+import { ConnectCardsGame } from './connect-cards-game'
 
 interface GameRouterProps {
   gameType: string
@@ -72,33 +73,26 @@ export function GameRouter({ gameType, lessonId, onClose, onComplete }: GameRout
     
     case 'connect-cards':
       return (
-        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-          <div className="bg-bg-primary p-8 rounded-lg max-w-2xl">
-            <h2 className="text-2xl font-bold text-text-primary mb-4">Connect Cards</h2>
-            <p className="text-text-secondary mb-6">
-              This would be a Duolingo-style card matching game where you connect AI concepts with their definitions.
-            </p>
-            <button 
-              onClick={onClose}
-              className="bg-text-brand text-white px-6 py-2 rounded-lg hover:bg-text-brand-light transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <ConnectCardsGame
+          lessonId={lessonId}
+          onClose={onClose}
+          onComplete={onComplete}
+        />
       )
     
     default:
       return (
-        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-          <div className="bg-bg-primary p-8 rounded-lg max-w-2xl">
-            <h2 className="text-2xl font-bold text-text-primary mb-4">Game Not Found</h2>
-            <p className="text-text-secondary mb-6">
+        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal"> {/* rgba(0, 0, 0, 0.5) */}
+          <div className="bg-bg-primary p-8 rounded-lg max-w-2xl"> {/* #FFFFFF */}
+            <h2 className="text-2xl font-bold text-text-primary mb-4"> {/* #1D1D1F */}
+              Game Not Found
+            </h2>
+            <p className="text-text-secondary mb-6"> {/* #6C6C6D */}
               The selected learning activity is not yet implemented.
             </p>
             <button 
               onClick={onClose}
-              className="bg-text-brand text-white px-6 py-2 rounded-lg hover:bg-text-brand-light transition-colors"
+              className="bg-text-brand text-white px-6 py-2 rounded-lg hover:bg-text-brand-light transition-colors" /* #7B00FF, #9933FF */
             >
               Close
             </button>

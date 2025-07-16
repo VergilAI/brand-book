@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, BookOpen, CheckCircle, Clock, Brain } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
@@ -118,6 +118,35 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
   const [completedSections, setCompletedSections] = useState<Set<number>>(new Set())
   const [isCompleted, setIsCompleted] = useState(false)
 
+  // Handle body scroll lock
+  useEffect(() => {
+    // Store original body styles
+    const originalOverflow = document.body.style.overflow
+    const originalPosition = document.body.style.position
+    const originalTop = document.body.style.top
+    const originalWidth = document.body.style.width
+    
+    // Get current scroll position
+    const scrollY = window.scrollY
+    
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    
+    return () => {
+      // Restore original styles
+      document.body.style.overflow = originalOverflow
+      document.body.style.position = originalPosition
+      document.body.style.top = originalTop
+      document.body.style.width = originalWidth
+      
+      // Restore scroll position
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
+
   const totalSections = writtenContent.sections.length
   const progressPercentage = Math.round((completedSections.size / totalSections) * 100)
 
@@ -154,8 +183,8 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
   const currentSectionData = writtenContent.sections[currentSection]
 
   return (
-    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-      <div className="w-full max-w-6xl max-h-[90vh] bg-bg-primary rounded-lg shadow-modal overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal"> {/* rgba(0, 0, 0, 0.5) */}
+      <div className="w-full h-full bg-bg-primary overflow-hidden flex flex-col"> {/* #FFFFFF */}
         {/* Header */}
         <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-4">

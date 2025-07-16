@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, DollarSign, Phone, Users, Zap, TrendingUp, Star } from 'lucide-react'
+import { X, DollarSign, Phone, Users, Zap, TrendingUp, Star, Shield } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
 import { Badge } from '@/components/atomic/badge'
@@ -105,6 +105,116 @@ const aiQuestions: Question[] = [
       { id: 'd', text: 'To create faster computers', correct: false }
     ],
     difficulty: 'hard'
+  },
+  {
+    id: '6',
+    question: 'What is overfitting in machine learning?',
+    options: [
+      { id: 'a', text: 'When a model performs well on training data but poorly on new data', correct: true },
+      { id: 'b', text: 'When a model is too simple to capture patterns', correct: false },
+      { id: 'c', text: 'When training takes too long', correct: false },
+      { id: 'd', text: 'When the dataset is too large', correct: false }
+    ],
+    difficulty: 'easy'
+  },
+  {
+    id: '7',
+    question: 'Which of the following is a popular deep learning framework?',
+    options: [
+      { id: 'a', text: 'MySQL', correct: false },
+      { id: 'b', text: 'TensorFlow', correct: true },
+      { id: 'c', text: 'Apache', correct: false },
+      { id: 'd', text: 'WordPress', correct: false }
+    ],
+    difficulty: 'easy'
+  },
+  {
+    id: '8',
+    question: 'What is the purpose of an activation function in neural networks?',
+    options: [
+      { id: 'a', text: 'To introduce non-linearity', correct: true },
+      { id: 'b', text: 'To speed up training', correct: false },
+      { id: 'c', text: 'To reduce memory usage', correct: false },
+      { id: 'd', text: 'To prevent overfitting', correct: false }
+    ],
+    difficulty: 'medium'
+  },
+  {
+    id: '9',
+    question: 'What does GPU stand for in AI computing?',
+    options: [
+      { id: 'a', text: 'General Purpose Unit', correct: false },
+      { id: 'b', text: 'Graphics Processing Unit', correct: true },
+      { id: 'c', text: 'Graphical Programming Unit', correct: false },
+      { id: 'd', text: 'Global Processing Unit', correct: false }
+    ],
+    difficulty: 'easy'
+  },
+  {
+    id: '10',
+    question: 'Which technique is used to prevent overfitting?',
+    options: [
+      { id: 'a', text: 'Dropout', correct: true },
+      { id: 'b', text: 'Speedup', correct: false },
+      { id: 'c', text: 'Overflow', correct: false },
+      { id: 'd', text: 'Underflow', correct: false }
+    ],
+    difficulty: 'medium'
+  },
+  {
+    id: '11',
+    question: 'What is the Turing Test designed to measure?',
+    options: [
+      { id: 'a', text: 'Computer processing speed', correct: false },
+      { id: 'b', text: 'Machine intelligence indistinguishable from human intelligence', correct: true },
+      { id: 'c', text: 'Network bandwidth', correct: false },
+      { id: 'd', text: 'Memory capacity', correct: false }
+    ],
+    difficulty: 'medium'
+  },
+  {
+    id: '12',
+    question: 'What is gradient descent used for?',
+    options: [
+      { id: 'a', text: 'Data visualization', correct: false },
+      { id: 'b', text: 'Optimizing model parameters', correct: true },
+      { id: 'c', text: 'Data preprocessing', correct: false },
+      { id: 'd', text: 'Feature selection', correct: false }
+    ],
+    difficulty: 'medium'
+  },
+  {
+    id: '13',
+    question: 'What does NLP stand for in AI?',
+    options: [
+      { id: 'a', text: 'Neural Learning Process', correct: false },
+      { id: 'b', text: 'Natural Language Processing', correct: true },
+      { id: 'c', text: 'Network Layer Protocol', correct: false },
+      { id: 'd', text: 'Numerical Logic Programming', correct: false }
+    ],
+    difficulty: 'hard'
+  },
+  {
+    id: '14',
+    question: 'Which company developed the GPT (Generative Pre-trained Transformer) models?',
+    options: [
+      { id: 'a', text: 'Google', correct: false },
+      { id: 'b', text: 'OpenAI', correct: true },
+      { id: 'c', text: 'Microsoft', correct: false },
+      { id: 'd', text: 'Meta', correct: false }
+    ],
+    difficulty: 'hard'
+  },
+  {
+    id: '15',
+    question: 'What is the singularity in AI context?',
+    options: [
+      { id: 'a', text: 'A point where AI surpasses human intelligence', correct: true },
+      { id: 'b', text: 'The first AI computer', correct: false },
+      { id: 'c', text: 'A type of neural network', correct: false },
+      { id: 'd', text: 'A programming language', correct: false }
+    ],
+    difficulty: 'hard'
   }
 ]
 
@@ -116,6 +226,38 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
   const [isCorrect, setIsCorrect] = useState(false)
   const [gameOver, setGameOver] = useState(false)
   const [currentWinnings, setCurrentWinnings] = useState(0)
+  const [hiddenAnswers, setHiddenAnswers] = useState<Set<string>>(new Set())
+  const [audienceResults, setAudienceResults] = useState<{[key: string]: number} | null>(null)
+  const [friendAdvice, setFriendAdvice] = useState<string | null>(null)
+
+  // Handle body scroll lock
+  useEffect(() => {
+    // Store original body styles
+    const originalOverflow = document.body.style.overflow
+    const originalPosition = document.body.style.position
+    const originalTop = document.body.style.top
+    const originalWidth = document.body.style.width
+    
+    // Get current scroll position
+    const scrollY = window.scrollY
+    
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    
+    return () => {
+      // Restore original styles
+      document.body.style.overflow = originalOverflow
+      document.body.style.position = originalPosition
+      document.body.style.top = originalTop
+      document.body.style.width = originalWidth
+      
+      // Restore scroll position
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
   const [lifelines, setLifelines] = useState<Lifeline[]>([
     {
       id: 'fifty-fifty',
@@ -143,6 +285,31 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
   const currentQuestion = aiQuestions[currentQuestionIndex]
   const currentLevel = currentQuestionIndex + 1
   const currentAmount = moneyLadder.find(m => m.level === currentLevel)?.amount || '$100'
+  
+  // Calculate walk away amount based on guaranteed amounts
+  const getWalkAwayAmount = () => {
+    if (currentQuestionIndex === 0) return '$0'
+    
+    let amount = '$100' // Base amount for question 1
+    if (currentQuestionIndex >= 5) {
+      amount = '$1,000' // Guaranteed amount for reaching question 5
+    }
+    if (currentQuestionIndex >= 10) {
+      amount = '$32,000' // Guaranteed amount for reaching question 10
+    }
+    
+    // If current question winnings are higher than guaranteed, use current
+    const currentLevelAmount = moneyLadder.find(m => m.level === currentQuestionIndex)?.amount
+    if (currentLevelAmount) {
+      const currentValue = parseInt(currentLevelAmount.replace(/[$,]/g, ''))
+      const guaranteedValue = parseInt(amount.replace(/[$,]/g, ''))
+      if (currentValue > guaranteedValue) {
+        amount = currentLevelAmount
+      }
+    }
+    
+    return amount
+  }
 
   const selectAnswer = (optionId: string) => {
     if (isAnswerLocked) return
@@ -170,6 +337,9 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
         setSelectedAnswer(null)
         setIsAnswerLocked(false)
         setShowResult(false)
+        setHiddenAnswers(new Set())
+        setAudienceResults(null)
+        setFriendAdvice(null)
       } else {
         // Game over (either wrong answer or completed all questions)
         setGameOver(true)
@@ -181,16 +351,80 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
 
   const walkAway = () => {
     setGameOver(true)
+    // Calculate winnings based on walk away amount
+    const walkAwayAmount = getWalkAwayAmount()
+    const winnings = parseInt(walkAwayAmount.replace(/[$,]/g, ''))
+    
+    setCurrentWinnings(winnings)
     const finalScore = Math.round((currentQuestionIndex / aiQuestions.length) * 100)
     onComplete(finalScore)
   }
 
   const useLifeline = (lifelineId: string) => {
-    // Simple lifeline implementation
+    // Mark lifeline as used
     setLifelines(prev => prev.map(lifeline => 
       lifeline.id === lifelineId ? { ...lifeline, used: true } : lifeline
     ))
-    // TODO: Implement actual lifeline logic
+    
+    const currentQuestion = aiQuestions[currentQuestionIndex]
+    const correctAnswer = currentQuestion.options.find(opt => opt.correct)
+    const incorrectAnswers = currentQuestion.options.filter(opt => !opt.correct)
+    
+    switch (lifelineId) {
+      case 'fifty-fifty':
+        // Remove 2 incorrect answers randomly
+        const answersToHide = incorrectAnswers
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 2)
+          .map(opt => opt.id)
+        setHiddenAnswers(new Set(answersToHide))
+        break
+        
+      case 'audience':
+        // Generate audience poll with correct answer getting higher percentage
+        const results: {[key: string]: number} = {}
+        let remaining = 100
+        
+        // Give correct answer 40-70% of votes
+        const correctPercentage = Math.floor(Math.random() * 30) + 40
+        results[correctAnswer!.id] = correctPercentage
+        remaining -= correctPercentage
+        
+        // Distribute remaining votes among incorrect answers
+        const visibleIncorrect = incorrectAnswers.filter(opt => !hiddenAnswers.has(opt.id))
+        visibleIncorrect.forEach((opt, index) => {
+          if (index === visibleIncorrect.length - 1) {
+            results[opt.id] = remaining
+          } else {
+            const percentage = Math.floor(Math.random() * (remaining / 2))
+            results[opt.id] = percentage
+            remaining -= percentage
+          }
+        })
+        
+        setAudienceResults(results)
+        break
+        
+      case 'phone':
+        // Simulate friend advice
+        const friendNames = ['Alex', 'Sarah', 'Mike', 'Emma', 'David']
+        const friendName = friendNames[Math.floor(Math.random() * friendNames.length)]
+        
+        // Friend gives correct answer 80% of the time
+        const giveCorrectAnswer = Math.random() < 0.8
+        const suggestedAnswer = giveCorrectAnswer 
+          ? correctAnswer 
+          : incorrectAnswers[Math.floor(Math.random() * incorrectAnswers.length)]
+        
+        const confidence = giveCorrectAnswer ? 'pretty confident' : 'not entirely sure'
+        const advice = `Hi! I'm ${confidence} the answer is ${suggestedAnswer?.text}. That's option ${suggestedAnswer?.id.toUpperCase()}. Good luck!`
+        
+        setFriendAdvice(advice)
+        
+        // Auto-hide after 8 seconds
+        setTimeout(() => setFriendAdvice(null), 8000)
+        break
+    }
   }
 
   if (gameOver) {
@@ -199,7 +433,9 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
         <Card className="w-full max-w-md p-6 text-center">
           <CardContent>
             <DollarSign className="h-16 w-16 text-text-success mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-text-primary mb-2">Game Over!</h2>
+            <h2 className="text-2xl font-bold text-text-primary mb-2">
+              Game Over!
+            </h2>
             <p className="text-text-secondary mb-4">
               You won: <span className="font-bold text-text-success">{currentAmount}</span>
             </p>
@@ -216,8 +452,8 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
   }
 
   return (
-    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-      <div className="w-full max-w-7xl max-h-[90vh] bg-bg-primary rounded-lg shadow-modal overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal">
+      <div className="w-full h-full bg-bg-primary overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -283,29 +519,84 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
 
             {/* Answer Options */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {currentQuestion.options.map((option) => (
-                <Card
-                  key={option.id}
-                  className={cn(
-                    "cursor-pointer transition-all duration-200",
-                    selectedAnswer === option.id && !showResult && "ring-2 ring-text-brand border-text-brand",
-                    showResult && option.correct && "ring-2 ring-text-success border-text-success bg-bg-success-light",
-                    showResult && selectedAnswer === option.id && !option.correct && "ring-2 ring-text-error border-text-error bg-bg-error-light",
-                    !isAnswerLocked && "hover:border-border-default"
-                  )}
-                  onClick={() => selectAnswer(option.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-text-brand text-white flex items-center justify-center font-semibold">
-                        {option.id.toUpperCase()}
+              {currentQuestion.options.map((option) => {
+                const isHidden = hiddenAnswers.has(option.id)
+                return (
+                  <Card
+                    key={option.id}
+                    className={cn(
+                      "cursor-pointer transition-all duration-200",
+                      selectedAnswer === option.id && !showResult && "ring-2 ring-text-brand border-text-brand",
+                      showResult && option.correct && "ring-2 ring-text-success border-text-success bg-bg-success-light",
+                      showResult && selectedAnswer === option.id && !option.correct && "ring-2 ring-text-error border-text-error bg-bg-error-light",
+                      !isAnswerLocked && !isHidden && "hover:border-border-default",
+                      isHidden && "opacity-30 cursor-not-allowed bg-bg-disabled"
+                    )}
+                    onClick={() => !isHidden && selectAnswer(option.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-text-brand text-white flex items-center justify-center font-semibold">
+                          {option.id.toUpperCase()}
+                        </div>
+                        <p className="text-text-primary font-medium">{option.text}</p>
                       </div>
-                      <p className="text-text-primary font-medium">{option.text}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
+
+            {/* Audience Poll Results */}
+            {audienceResults && (
+              <Card className="mb-6 bg-bg-info-light border-border-info"> {/* #EFF6FF, #93C5FD */}
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-text-info" />
+                    Audience Poll Results
+                  </h3>
+                  <div className="space-y-3">
+                    {currentQuestion.options.map((option) => {
+                      const percentage = audienceResults[option.id] || 0
+                      return (
+                        <div key={option.id} className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-text-info text-white flex items-center justify-center font-semibold text-sm">
+                            {option.id.toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm text-text-primary">{option.text}</span>
+                              <span className="text-sm font-semibold text-text-info">{percentage}%</span>
+                            </div>
+                            <div className="w-full bg-bg-secondary rounded-full h-2">
+                              <div 
+                                className="bg-text-info h-2 rounded-full transition-all duration-1000"
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Friend Advice */}
+            {friendAdvice && (
+              <Card className="mb-6 bg-bg-success-light border-border-success"> {/* #F0FDF4, #86EFAC */}
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-text-success" />
+                    Friend's Advice
+                  </h3>
+                  <div className="bg-bg-primary p-3 rounded-lg border border-border-success">
+                    <p className="text-text-secondary italic">"{friendAdvice}"</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             <div className="flex items-center justify-between">
@@ -315,7 +606,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                 onClick={walkAway}
                 disabled={isAnswerLocked}
               >
-                Walk Away with {currentQuestionIndex > 0 ? moneyLadder.find(m => m.level === currentQuestionIndex)?.amount : '$0'}
+                Walk Away with {getWalkAwayAmount()}
               </Button>
               
               <Button
@@ -345,22 +636,34 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                     "flex items-center justify-between p-2 rounded text-sm",
                     item.level === currentLevel && "bg-text-brand text-white",
                     item.level < currentLevel && "bg-bg-success-light text-text-success",
-                    item.level > currentLevel && "text-text-secondary"
+                    item.level > currentLevel && "text-text-secondary",
+                    (item.level === 5 || item.level === 10) && "ring-2 ring-text-warning bg-bg-warning-light"
                   )}
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{item.level}</span>
                     {item.level === 15 && <Star className="h-3 w-3" />}
+                    {(item.level === 5 || item.level === 10) && <Shield className="h-3 w-3 text-text-warning" />}
                   </div>
-                  <span className="font-semibold">{item.amount}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{item.amount}</span>
+                    {(item.level === 5 || item.level === 10) && (
+                      <span className="text-xs text-text-warning font-medium">SAFE</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
             <div className="mt-4 pt-4 border-t border-border-subtle">
-              <div className="flex items-center gap-1 text-xs text-text-secondary">
-                <span className="w-3 h-3 rounded-full bg-text-tertiary"></span>
-                <span>Guaranteed amounts</span>
+              <div className="space-y-1 text-xs text-text-secondary">
+                <div className="flex items-center gap-1">
+                  <Shield className="h-3 w-3 text-text-warning" />
+                  <span>Guaranteed safe amounts</span>
+                </div>
+                <div className="text-xs text-text-tertiary">
+                  Questions 5 & 10 lock in minimum winnings
+                </div>
               </div>
             </div>
           </div>

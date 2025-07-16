@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import generated tokens */
-@import '../packages/design-system/generated/tokens.css';
-
 /* Vergil Brand Design Tokens */
 :root {
   /* Primary Palette */

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   X, 
   Clock, 
@@ -39,19 +39,13 @@ interface GameType {
 }
 
 const gameTypes: GameType[] = [
+  // Content Activities
   {
     id: 'written-material',
     title: 'Written Material',
     description: 'Read comprehensive text content',
     icon: <BookOpen className="h-4 w-4" />,
     category: 'Content'
-  },
-  {
-    id: 'audio-material',
-    title: 'Audio Material',
-    description: 'Have content read out loud',
-    icon: <Volume2 className="h-4 w-4" />,
-    category: 'Interactive'
   },
   {
     id: 'video',
@@ -61,19 +55,20 @@ const gameTypes: GameType[] = [
     category: 'Content'
   },
   {
-    id: 'flashcards',
-    title: 'Flashcards',
-    description: 'Classic flashcard learning',
-    icon: <Layers className="h-4 w-4" />,
-    category: 'Quiz'
+    id: 'audio-material',
+    title: 'Audio Material',
+    description: 'Have content read out loud',
+    icon: <Volume2 className="h-4 w-4" />,
+    category: 'Content'
   },
+  
+  // Interactive Activities
   {
     id: 'millionaire',
     title: 'Who Wants to Be a Millionaire',
     description: 'Win in-game currency with progressive questions',
     icon: <DollarSign className="h-4 w-4" />,
-    category: 'Interactive',
-    recommended: true
+    category: 'Interactive'
   },
   {
     id: 'jeopardy',
@@ -82,10 +77,19 @@ const gameTypes: GameType[] = [
     icon: <Trophy className="h-4 w-4" />,
     category: 'Interactive'
   },
+  
+  // Quiz Activities
+  {
+    id: 'flashcards',
+    title: 'Flashcards',
+    description: 'Classic flashcard learning',
+    icon: <Layers className="h-4 w-4" />,
+    category: 'Quiz'
+  },
   {
     id: 'connect-cards',
     title: 'Connect Cards',
-    description: 'Duolingo-style card matching game',
+    description: 'Match related concepts and terms by connecting cards',
     icon: <Shuffle className="h-4 w-4" />,
     category: 'Quiz'
   }
@@ -94,6 +98,37 @@ const gameTypes: GameType[] = [
 export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame }: LearningActivitiesModalProps) {
   const [selectedGameType, setSelectedGameType] = useState<string | null>(null)
   const [gameStarted, setGameStarted] = useState(false)
+
+  // Handle body scroll lock when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Store original body styles
+      const originalOverflow = document.body.style.overflow
+      const originalPosition = document.body.style.position
+      const originalTop = document.body.style.top
+      const originalWidth = document.body.style.width
+      
+      // Get current scroll position
+      const scrollY = window.scrollY
+      
+      // Prevent background scrolling
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      
+      return () => {
+        // Restore original styles
+        document.body.style.overflow = originalOverflow
+        document.body.style.position = originalPosition
+        document.body.style.top = originalTop
+        document.body.style.width = originalWidth
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollY)
+      }
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -138,8 +173,14 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
   }
 
   return (
-    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-      <Card className="w-full max-w-5xl max-h-[90vh] overflow-hidden bg-bg-primary flex flex-col">
+    <div 
+      className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal" /* rgba(0, 0, 0, 0.5) */
+      onClick={onClose}
+    >
+      <Card 
+        className="w-full max-w-5xl max-h-[90vh] overflow-hidden bg-bg-primary flex flex-col" /* #FFFFFF */
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
           <div className="flex-1">
@@ -244,7 +285,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
           </div>
 
           {/* Right Side - Lesson Progress */}
-          <div className="w-64 border-l border-border-subtle bg-bg-secondary p-4 overflow-y-auto">
+          <div className="w-64 border-l border-border-subtle bg-bg-secondary p-4 overflow-y-auto"> {/* rgba(0,0,0,0.05), #F5F5F7 */}
             <h3 className="text-lg font-semibold text-text-primary mb-4">
               Lesson Progress
             </h3>

@@ -128,6 +128,35 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
   const [quizResults, setQuizResults] = useState<{ [key: string]: boolean }>({})
   const [showQuizResult, setShowQuizResult] = useState(false)
 
+  // Handle body scroll lock
+  useEffect(() => {
+    // Store original body styles
+    const originalOverflow = document.body.style.overflow
+    const originalPosition = document.body.style.position
+    const originalTop = document.body.style.top
+    const originalWidth = document.body.style.width
+    
+    // Get current scroll position
+    const scrollY = window.scrollY
+    
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    
+    return () => {
+      // Restore original styles
+      document.body.style.overflow = originalOverflow
+      document.body.style.position = originalPosition
+      document.body.style.top = originalTop
+      document.body.style.width = originalWidth
+      
+      // Restore scroll position
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
+
   const currentVideo = videoFiles[currentVideoIndex]
   const totalVideos = videoFiles.length
   const progressPercentage = Math.round((completedVideos.size / totalVideos) * 100)
@@ -211,8 +240,8 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
   const videoProgressPercentage = (currentTime / currentVideo.duration) * 100
 
   return (
-    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm flex items-center justify-center p-4 z-modal">
-      <div className="w-full max-w-6xl max-h-[90vh] bg-bg-primary rounded-lg shadow-modal overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal"> {/* rgba(0, 0, 0, 0.5) */}
+      <div className="w-full h-full bg-bg-primary overflow-hidden flex flex-col"> {/* #FFFFFF */}
         {/* Header */}
         <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -465,6 +494,32 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-border-subtle bg-bg-secondary flex items-center justify-between"> {/* rgba(0,0,0,0.05), #F5F5F7 */}
+          <div className="flex items-center gap-4 text-sm text-text-secondary">
+            <span>Progress: {completedVideos.size}/{totalVideos} videos completed</span>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="secondary" 
+              size="md"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+            <Button 
+              variant="primary" 
+              size="md"
+              onClick={() => onComplete(Math.round((completedVideos.size / totalVideos) * 100))}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="h-4 w-4" />
+              Mark as Completed
+            </Button>
           </div>
         </div>
       </div>
