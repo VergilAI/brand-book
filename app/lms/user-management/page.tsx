@@ -13,6 +13,7 @@ import { Badge } from '@/components/badge'
 import { Checkbox } from '@/components/atomic/checkbox'
 import { Progress } from '@/components/progress'
 import { ImportUsersModal } from '@/components/import-users-modal'
+import { ConfirmationModal } from '@/components/confirmation-modal'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,6 +66,15 @@ export default function UserManagementPage() {
     statuses: [],
     progressRanges: []
   })
+  
+  // Confirmation modal states
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+    variant?: 'danger' | 'warning' | 'info'
+  }>({ open: false, title: '', description: '', onConfirm: () => {} })
 
   // Define progress ranges
   const progressRanges = [
@@ -610,10 +620,16 @@ export default function UserManagementPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               onClick={() => {
-                                if (window.confirm(`Are you sure you want to remove ${user.name}? This action cannot be undone.`)) {
-                                  console.log(`Removing user ${user.name}`)
-                                  // In a real app, this would remove the user
-                                }
+                                setConfirmModal({
+                                  open: true,
+                                  title: `Remove ${user.name}?`,
+                                  description: 'This action cannot be undone.',
+                                  variant: 'danger',
+                                  onConfirm: () => {
+                                    console.log(`Removing user ${user.name}`)
+                                    // In a real app, this would remove the user
+                                  }
+                                })
                               }}
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
@@ -657,6 +673,20 @@ export default function UserManagementPage() {
           }}
           existingEmails={users.map(u => u.email)}
           validRoles={initialRoles.map(r => r.name)}
+        />
+        
+        {/* Confirmation Modal */}
+        <ConfirmationModal
+          open={confirmModal.open}
+          onOpenChange={(open) => {
+            if (!open) {
+              setConfirmModal(prev => ({ ...prev, open: false }))
+            }
+          }}
+          title={confirmModal.title}
+          description={confirmModal.description}
+          variant={confirmModal.variant}
+          onConfirm={confirmModal.onConfirm}
         />
       </div>
     </div>

@@ -48,6 +48,8 @@ import {
 } from '@/components/dropdown-menu'
 import { mockUsers, getRoleName, type User } from '@/lib/lms/mock-data'
 import { initialRoles } from '@/lib/lms/roles-data'
+import { AssignManagerModal } from '@/components/assign-manager-modal'
+import { AssignSubordinatesModal } from '@/components/assign-subordinates-modal'
 
 
 interface Course {
@@ -182,8 +184,6 @@ export default function UserDetailPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [showAssignSubordinateModal, setShowAssignSubordinateModal] = useState(false)
   const [showAssignManagerModal, setShowAssignManagerModal] = useState(false)
-  const [selectedSubordinates, setSelectedSubordinates] = useState<string[]>([])
-  const [selectedManager, setSelectedManager] = useState('')
   const [userSubordinates, setUserSubordinates] = useState<string[]>(() => {
     // Initialize subordinates based on demo data
     if (userData.roleId === '2') return ['u3', 'u4', 'u5'] // Admin has some subordinates
@@ -803,249 +803,91 @@ export default function UserDetailPage() {
         </Tabs>
         
        
-        {showAssignManagerModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-vergil-off-black">Assign Manager</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAssignManagerModal(false)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
+        <AssignManagerModal
+          open={showAssignManagerModal}
+          onOpenChange={setShowAssignManagerModal}
+          currentManagerId={userData.managerId}
+          availableManagers={(() => {
+            // Define role hierarchy (1=Super Admin, 2=Admin, 3=Manager, 4=Instructor)
+            const roleHierarchy: Record<string, number> = {
+              '1': 1, // Super Admin
+              '2': 2, // Admin
+              '3': 3, // Manager
+              '4': 4  // Instructor
+            }
+            
+            const currentUserLevel = roleHierarchy[userData.roleId] || 999
+            
+            // Filter users who can be managers
+            return mockUsers
+              .filter(u => {
+                // Skip current user
+                if (u.id === userId) return false
                 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-vergil-off-black mb-2">
-                      Select Manager
-                    </label>
-                    <Select
-                      value={selectedManager}
-                      onValueChange={setSelectedManager}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a manager..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(() => {
-                          // Get current user's role hierarchy level
-                          const currentUserRole = initialRoles.find(r => r.id === userData.roleId)
-                          if (!currentUserRole) return null
-                          
-                          // Define role hierarchy (1=Super Admin, 2=Admin, 3=Manager, 4=Instructor)
-                          const roleHierarchy: Record<string, number> = {
-                            '1': 1, // Super Admin
-                            '2': 2, // Admin
-                            '3': 3, // Manager
-                            '4': 4  // Instructor
-                          }
-                          
-                          const currentUserLevel = roleHierarchy[userData.roleId] || 999
-                          
-                          // Filter users who can be managers
-                          const availableManagers = mockUsers.filter(u => {
-                            // Skip current user
-                            if (u.id === userId) return false
-                            
-                            // Get potential manager's level
-                            const managerLevel = roleHierarchy[u.roleId] || 999
-                            
-                            // Only show users at higher hierarchy levels (lower number = higher in hierarchy)
-                            return managerLevel < currentUserLevel
-                          })
-                          
-                          if (availableManagers.length === 0) {
-                            return (
-                              <SelectItem value="none" disabled>
-                                No eligible managers available
-                              </SelectItem>
-                            )
-                          }
-                          
-                          return availableManagers.map(manager => (
-                            <SelectItem key={manager.id} value={manager.id}>
-                              {manager.name} - {getRoleName(manager.roleId, initialRoles)}
-                            </SelectItem>
-                          ))
-                        })()}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                // Get potential manager's level
+                const managerLevel = roleHierarchy[u.roleId] || 999
                 
-                <div className="flex gap-3 mt-6">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setShowAssignManagerModal(false)
-                      setSelectedManager('')
-                    }}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      if (selectedManager) {
-                        const manager = mockUsers.find(u => u.id === selectedManager)
-                        if (manager) {
-                          setUserData({...userData, manager: manager.name})
-                        }
-                      }
-                      setShowAssignManagerModal(false)
-                      setSelectedManager('')
-                    }}
-                    className="flex-1 bg-vergil-purple hover:bg-vergil-purple/90"
-                    disabled={!selectedManager}
-                  >
-                    Assign Manager
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-        )}
+                // Only show users at higher hierarchy levels (lower number = higher in hierarchy)
+                return managerLevel < currentUserLevel
+              })
+              .map(manager => ({
+                id: manager.id,
+                name: manager.name,
+                role: getRoleName(manager.roleId, initialRoles),
+                avatar: manager.avatar
+              }))
+          })()}
+          onAssign={(managerId) => {
+            const manager = mockUsers.find(u => u.id === managerId)
+            if (manager) {
+              setUserData({...userData, manager: manager.name, managerId})
+            }
+          }}
+        />
         
        
-        {showAssignSubordinateModal && (
-          <div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => {
-              setShowAssignSubordinateModal(false)
-              setSelectedSubordinates([])
-            }}
-          >
-            <Card 
-              className="w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-vergil-off-black">Assign Subordinate</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAssignSubordinateModal(false)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
+        <AssignSubordinatesModal
+          open={showAssignSubordinateModal}
+          onOpenChange={setShowAssignSubordinateModal}
+          currentSubordinates={userSubordinates}
+          availableTeamMembers={(() => {
+            // Define role hierarchy (1=Super Admin, 2=Admin, 3=Manager, 4=Instructor)
+            const roleHierarchy: Record<string, number> = {
+              '1': 1, // Super Admin
+              '2': 2, // Admin
+              '3': 3, // Manager
+              '4': 4  // Instructor
+            }
+            
+            const currentUserLevel = roleHierarchy[userData.roleId] || 999
+            
+            // Filter users who can be subordinates
+            return mockUsers
+              .filter(u => {
+                // Skip current user
+                if (u.id === userId) return false
                 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-vergil-off-black mb-2">
-                      Select Team Members
-                    </label>
-                    <div className="space-y-2 max-h-64 overflow-y-auto border border-vergil-off-black/10 rounded-lg p-3">
-                      {(() => {
-                        // Get current user's role hierarchy level
-                        const currentUserRole = initialRoles.find(r => r.id === userData.roleId)
-                        if (!currentUserRole) return null
-                        
-                        // Define role hierarchy (1=Super Admin, 2=Admin, 3=Manager, 4=Instructor)
-                        const roleHierarchy: Record<string, number> = {
-                          '1': 1, // Super Admin
-                          '2': 2, // Admin
-                          '3': 3, // Manager
-                          '4': 4  // Instructor
-                        }
-                        
-                        const currentUserLevel = roleHierarchy[userData.roleId] || 999
-                        
-                        // Filter users who can be subordinates
-                        const availableSubordinates = mockUsers.filter(u => {
-                          // Skip current user
-                          if (u.id === userId) return false
-                          
-                          // Skip users already assigned as subordinates
-                          if (userSubordinates.includes(u.id)) return false
-                          
-                          // Get potential subordinate's level
-                          const subLevel = roleHierarchy[u.roleId] || 999
-                          
-                          // Only show users at lower hierarchy levels (higher number = lower in hierarchy)
-                          return subLevel > currentUserLevel
-                        })
-                        
-                        if (availableSubordinates.length === 0) {
-                          return (
-                            <p className="text-sm text-vergil-off-black/60 text-center py-4">
-                              No eligible team members available
-                            </p>
-                          )
-                        }
-                        
-                        return availableSubordinates.map(subordinate => (
-                          <label
-                            key={subordinate.id}
-                            className="flex items-center gap-3 p-2 rounded hover:bg-vergil-off-white cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedSubordinates.includes(subordinate.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedSubordinates(prev => [...prev, subordinate.id])
-                                } else {
-                                  setSelectedSubordinates(prev => prev.filter(id => id !== subordinate.id))
-                                }
-                              }}
-                              className="w-4 h-4 text-vergil-purple focus:ring-vergil-purple/50 rounded"
-                            />
-                            <div className="flex items-center gap-2 flex-1">
-                              <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center text-vergil-purple font-medium text-xs">
-                                {subordinate.name.split(' ').map(n => n[0]).join('')}
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-vergil-off-black">{subordinate.name}</p>
-                                <p className="text-xs text-vergil-off-black/60">{getRoleName(subordinate.roleId, initialRoles)}</p>
-                              </div>
-                            </div>
-                          </label>
-                        ))
-                      })()}
-                    </div>
-                    {selectedSubordinates.length > 0 && (
-                      <p className="text-xs text-vergil-off-black/60 mt-2">
-                        {selectedSubordinates.length} team member{selectedSubordinates.length > 1 ? 's' : ''} selected
-                      </p>
-                    )}
-                  </div>
-                </div>
+                // Skip users already assigned as subordinates
+                if (userSubordinates.includes(u.id)) return false
                 
-                <div className="flex gap-3 mt-6">
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setShowAssignSubordinateModal(false)
-                      setSelectedSubordinates([])
-                    }}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      if (selectedSubordinates.length > 0) {
-                        setUserSubordinates(prev => [...prev, ...selectedSubordinates])
-                      }
-                      setShowAssignSubordinateModal(false)
-                      setSelectedSubordinates([])
-                    }}
-                    className="flex-1 bg-vergil-purple hover:bg-vergil-purple/90"
-                    disabled={selectedSubordinates.length === 0}
-                  >
-                    Assign {selectedSubordinates.length > 0 ? `${selectedSubordinates.length} ` : ''}Subordinate{selectedSubordinates.length > 1 ? 's' : ''}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-        )}
+                // Get potential subordinate's level
+                const subLevel = roleHierarchy[u.roleId] || 999
+                
+                // Only show users at lower hierarchy levels (higher number = lower in hierarchy)
+                return subLevel > currentUserLevel
+              })
+              .map(subordinate => ({
+                id: subordinate.id,
+                name: subordinate.name,
+                role: getRoleName(subordinate.roleId, initialRoles),
+                avatar: subordinate.avatar,
+                initials: subordinate.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+              }))
+          })()}
+          onAssign={(subordinateIds) => {
+            setUserSubordinates(subordinateIds)
+          }}
+        />
       </div>
     </div>
   )
