@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { TextToSpeechClient } from '@google-cloud/text-to-speech'
 import { z } from 'zod'
 
 // Validation schema for TTS request
@@ -17,19 +16,58 @@ const ttsRequestSchema = z.object({
   }).optional(),
 })
 
-// Initialize Google Cloud TTS client
-const getTtsClient = () => {
-  const credentialsPath = process.env.GOOGLE_CLOUD_TTS_CREDENTIALS_PATH
-  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
-  
-  if (!credentialsPath || !projectId) {
-    throw new Error('Missing Google Cloud credentials configuration')
+// Voice mapping for legacy compatibility
+const LEGACY_VOICE_MAP: Record<string, string> = {
+  'en-US-Standard-A': 'Rachel',
+  'en-US-Standard-B': 'Domi',
+  'en-US-Standard-C': 'Bella',
+  'en-US-Standard-D': 'Josh',
+  'en-GB-Standard-A': 'Domi',
+  'en-GB-Standard-B': 'Antoni',
+  'en-GB-Standard-C': 'Rachel',
+  'en-GB-Standard-D': 'Adam'
+}
+
+// ElevenLabs voice ID mapping
+const VOICE_ID_MAP: Record<string, string> = {
+  'Rachel': '21m00Tcm4TlvDq8ikWAM',
+  'Domi': 'AZnzlk1XvdvUeBnXmlld',
+  'Bella': 'EXAVITQu4vr4xnSDxMaL',
+  'Antoni': 'ErXwobaYiN019PkySvjV',
+  'Elli': 'MF3mGyEYCl7XYWbV9V6O',
+  'Josh': 'TxGEqnHWrfWFTfGW9XjX',
+  'Adam': 'pNInz6obpgDQGcFmaJgB',
+  'Sam': 'yoZ06aMxZJJ28mfd3POQ'
+}
+
+// Helper function to get ElevenLabs API key
+const getElevenLabsApiKey = (): string => {
+  const apiKey = process.env.ELEVENLABS_API_KEY
+  if (!apiKey) {
+    throw new Error('ELEVENLABS_API_KEY environment variable is not set')
+  }
+  return apiKey
+}
+
+// Helper function to get voice ID from legacy name
+const getVoiceIdFromLegacy = (legacyVoiceName?: string): string => {
+  if (!legacyVoiceName) {
+    return VOICE_ID_MAP['Rachel'] // Default voice
   }
   
-  return new TextToSpeechClient({
-    projectId,
-    keyFilename: credentialsPath,
-  })
+  const mappedName = LEGACY_VOICE_MAP[legacyVoiceName]
+  if (mappedName) {
+    return VOICE_ID_MAP[mappedName]
+  }
+  
+  // Check if it's already a new voice name
+  const directVoiceId = VOICE_ID_MAP[legacyVoiceName]
+  if (directVoiceId) {
+    return directVoiceId
+  }
+  
+  // Default to Rachel if not found
+  return VOICE_ID_MAP['Rachel']
 }
 
 export async function POST(request: NextRequest) {
@@ -38,28 +76,53 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = ttsRequestSchema.parse(body)
     
-    // Initialize TTS client
-    const client = getTtsClient()
+    // Get ElevenLabs API key
+    const apiKey = getElevenLabsApiKey()
     
-    // Configure TTS request with defaults from environment
-    const ttsRequest = {
-      input: { text: validatedData.text },
-      voice: {
-        languageCode: validatedData.voice?.languageCode || process.env.TTS_VOICE_LANGUAGE_CODE || 'en-US',
-        name: validatedData.voice?.name || process.env.TTS_VOICE_NAME || 'en-US-Standard-D',
-        ssmlGender: validatedData.voice?.ssmlGender || (process.env.TTS_VOICE_SSML_GENDER as any) || 'NEUTRAL',
-      },
-      audioConfig: {
-        audioEncoding: validatedData.audioConfig?.audioEncoding || (process.env.TTS_AUDIO_ENCODING as any) || 'MP3',
-        speakingRate: validatedData.audioConfig?.speakingRate || 1.0,
-        pitch: validatedData.audioConfig?.pitch || 0.0,
-      },
+    // Get voice ID from legacy name
+    const voiceId = getVoiceIdFromLegacy(validatedData.voice?.name)
+    
+    // Configure ElevenLabs request
+    const elevenLabsRequest = {
+      text: validatedData.text,
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75,
+        // Map speaking rate and pitch if provided
+        ...(validatedData.audioConfig?.speakingRate && {
+          stability: Math.max(0, Math.min(1, 0.5 / validatedData.audioConfig.speakingRate))
+        }),
+        ...(validatedData.audioConfig?.pitch && {
+          similarity_boost: Math.max(0, Math.min(1, 0.75 + (validatedData.audioConfig.pitch / 40)))
+        })
+      }
     }
     
-    // Generate speech
-    const [response] = await client.synthesizeSpeech(ttsRequest)
+    // Make request to ElevenLabs API
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(elevenLabsRequest)
+    })
     
-    if (!response.audioContent) {
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error('ElevenLabs API Error:', response.status, errorData)
+      
+      return NextResponse.json(
+        { error: 'Failed to generate audio content' },
+        { status: response.status }
+      )
+    }
+    
+    // Get audio data as array buffer
+    const audioBuffer = await response.arrayBuffer()
+    
+    if (!audioBuffer || audioBuffer.byteLength === 0) {
       return NextResponse.json(
         { error: 'Failed to generate audio content' },
         { status: 500 }
@@ -67,15 +130,23 @@ export async function POST(request: NextRequest) {
     }
     
     // Convert audio content to base64 for transmission
-    const audioBase64 = Buffer.from(response.audioContent).toString('base64')
+    const audioBase64 = Buffer.from(audioBuffer).toString('base64')
     
     return NextResponse.json({
       success: true,
       audioData: audioBase64,
-      audioFormat: ttsRequest.audioConfig.audioEncoding,
+      audioFormat: 'MP3',
       metadata: {
-        voice: ttsRequest.voice,
-        audioConfig: ttsRequest.audioConfig,
+        voice: {
+          languageCode: validatedData.voice?.languageCode || 'en-US',
+          name: validatedData.voice?.name || 'Rachel',
+          ssmlGender: validatedData.voice?.ssmlGender || 'FEMALE'
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: validatedData.audioConfig?.speakingRate || 1.0,
+          pitch: validatedData.audioConfig?.pitch || 0.0,
+        },
         textLength: validatedData.text.length,
       },
     })
@@ -99,11 +170,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'TTS API is running',
+    message: 'TTS API is running (powered by ElevenLabs)',
     availableVoices: {
-      'en-US': ['en-US-Standard-A', 'en-US-Standard-B', 'en-US-Standard-C', 'en-US-Standard-D'],
-      'en-GB': ['en-GB-Standard-A', 'en-GB-Standard-B', 'en-GB-Standard-C', 'en-GB-Standard-D'],
+      'en-US': ['Rachel', 'Bella', 'Josh', 'Sam', 'Elli'],
+      'en-GB': ['Domi', 'Antoni', 'Adam'],
     },
-    supportedFormats: ['MP3', 'LINEAR16', 'OGG_OPUS'],
+    legacyVoiceMapping: LEGACY_VOICE_MAP,
+    supportedFormats: ['MP3'],
+    note: 'This API now uses ElevenLabs instead of Google Cloud TTS'
   })
 }

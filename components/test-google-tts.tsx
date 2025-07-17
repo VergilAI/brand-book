@@ -9,9 +9,9 @@ import { googleTTSClient } from '@/lib/tts/google-tts-client'
 import { Volume2, Play, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 
 export function TestGoogleTTS() {
-  const [text, setText] = useState('Hello, this is a test of Google Cloud Text-to-Speech using Neural2-F voice.')
+  const [text, setText] = useState('Hello, this is a test of ElevenLabs Text-to-Speech using Rachel voice.')
   const [languageCode, setLanguageCode] = useState('en-US')
-  const [voiceName, setVoiceName] = useState('en-US-Neural2-F')
+  const [voiceName, setVoiceName] = useState('Rachel')
   const [isLoading, setIsLoading] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [result, setResult] = useState<any>(null)

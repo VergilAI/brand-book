@@ -1,15 +1,15 @@
 /**
- * Google Cloud TTS Client
- * Handles communication with the /api/tts/google-speak endpoint
+ * ElevenLabs TTS Client
+ * Handles communication with the /api/tts/google-speak endpoint (now using ElevenLabs)
  */
 
-export interface GoogleTTSRequest {
+export interface ElevenLabsTTSRequest {
   text: string
   languageCode?: string
   voiceName?: string
 }
 
-export interface GoogleTTSResponse {
+export interface ElevenLabsTTSResponse {
   success: boolean
   audio?: string // base64 encoded MP3
   format?: string
@@ -17,6 +17,8 @@ export interface GoogleTTSResponse {
     textLength: number
     languageCode: string
     voiceName: string
+    voiceId: string
+    model: string
     audioEncoding: string
     generatedAt: string
   }
@@ -31,24 +33,24 @@ export interface GoogleTTSResponse {
   details?: any
 }
 
-export class GoogleTTSClient {
-  private static instance: GoogleTTSClient
+export class ElevenLabsTTSClient {
+  private static instance: ElevenLabsTTSClient
   private cache: Map<string, string> = new Map()
   private maxCacheSize = 100
 
   private constructor() {}
 
-  static getInstance(): GoogleTTSClient {
-    if (!GoogleTTSClient.instance) {
-      GoogleTTSClient.instance = new GoogleTTSClient()
+  static getInstance(): ElevenLabsTTSClient {
+    if (!ElevenLabsTTSClient.instance) {
+      ElevenLabsTTSClient.instance = new ElevenLabsTTSClient()
     }
-    return GoogleTTSClient.instance
+    return ElevenLabsTTSClient.instance
   }
 
   /**
-   * Convert text to speech using Google Cloud TTS
+   * Convert text to speech using ElevenLabs TTS
    */
-  async synthesizeSpeech(request: GoogleTTSRequest): Promise<GoogleTTSResponse> {
+  async synthesizeSpeech(request: ElevenLabsTTSRequest): Promise<ElevenLabsTTSResponse> {
     // Validate input
     if (!request.text || request.text.trim().length === 0) {
       return {
@@ -85,7 +87,7 @@ export class GoogleTTSClient {
         body: JSON.stringify({
           text: request.text.trim(),
           languageCode: request.languageCode || 'en-US',
-          voiceName: request.voiceName || 'en-US-Neural2-F'
+          voiceName: request.voiceName || 'Rachel'
         }),
       })
 
@@ -98,7 +100,7 @@ export class GoogleTTSClient {
         }
       }
 
-      const result: GoogleTTSResponse = await response.json()
+      const result: ElevenLabsTTSResponse = await response.json()
 
       // Cache successful results
       if (result.success && result.audio) {
@@ -108,7 +110,7 @@ export class GoogleTTSClient {
       return result
 
     } catch (error) {
-      console.error('Google TTS Client Error:', error)
+      console.error('ElevenLabs TTS Client Error:', error)
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Network error occurred'
@@ -181,11 +183,11 @@ export class GoogleTTSClient {
 
   // Private methods
 
-  private createCacheKey(request: GoogleTTSRequest): string {
+  private createCacheKey(request: ElevenLabsTTSRequest): string {
     return JSON.stringify({
       text: request.text.trim(),
       languageCode: request.languageCode || 'en-US',
-      voiceName: request.voiceName || 'en-US-Neural2-F'
+      voiceName: request.voiceName || 'Rachel'
     })
   }
 
@@ -200,5 +202,8 @@ export class GoogleTTSClient {
   }
 }
 
-// Export singleton instance
-export const googleTTSClient = GoogleTTSClient.getInstance()
+// Export singleton instance for backward compatibility
+export const googleTTSClient = ElevenLabsTTSClient.getInstance()
+
+// Export the new name as well
+export const elevenLabsTTSClient = ElevenLabsTTSClient.getInstance()

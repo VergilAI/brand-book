@@ -156,7 +156,7 @@ const TTSButton = ({
       body: JSON.stringify({
         text: textToSpeak.trim(),
         languageCode: 'en-US',
-        voiceName: 'en-US-Neural2-F'
+        voiceName: 'Rachel'
       }),
     })
     

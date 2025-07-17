@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { TextToSpeechClient } from '@google-cloud/text-to-speech'
 import { z } from 'zod'
 import { ttsUsageTracker } from '@/lib/tts/usage-tracker'
 
-// Validation schema for Google TTS request
-const googleTTSRequestSchema = z.object({
+// Validation schema for ElevenLabs TTS request
+const elevenLabsTTSRequestSchema = z.object({
   text: z.string()
     .min(1, 'Text cannot be empty')
     .max(5000, 'Text cannot exceed 5000 characters')
@@ -14,43 +13,45 @@ const googleTTSRequestSchema = z.object({
     .default('en-US'),
   voiceName: z.string()
     .optional()
-    .default('en-US-Neural2-F')
+    .default('Rachel')
 })
 
-// Initialize Google Cloud TTS client
-const initializeGoogleTTSClient = (): TextToSpeechClient => {
-  const credentialsPath = process.env.GOOGLE_CLOUD_TTS_CREDENTIALS_PATH
-  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
-  
-  if (!credentialsPath) {
-    throw new Error('GOOGLE_CLOUD_TTS_CREDENTIALS_PATH environment variable is not set')
-  }
-  
-  if (!projectId) {
-    throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is not set')
-  }
-  
-  try {
-    return new TextToSpeechClient({
-      projectId,
-      keyFilename: credentialsPath,
-    })
-  } catch (error) {
-    throw new Error(`Failed to initialize Google TTS client: ${error instanceof Error ? error.message : 'Unknown error'}`)
-  }
+// ElevenLabs voice ID mapping
+const VOICE_ID_MAP: Record<string, string> = {
+  'Rachel': '21m00Tcm4TlvDq8ikWAM',
+  'Domi': 'AZnzlk1XvdvUeBnXmlld',
+  'Bella': 'EXAVITQu4vr4xnSDxMaL',
+  'Antoni': 'ErXwobaYiN019PkySvjV',
+  'Elli': 'MF3mGyEYCl7XYWbV9V6O',
+  'Josh': 'TxGEqnHWrfWFTfGW9XjX',
+  'Adam': 'pNInz6obpgDQGcFmaJgB',
+  'Sam': 'yoZ06aMxZJJ28mfd3POQ'
 }
 
-// Helper function to validate voice name format
-const validateVoiceName = (voiceName: string, languageCode: string): boolean => {
-  // Voice name should start with language code
-  return voiceName.startsWith(languageCode)
+// Helper function to get ElevenLabs API key
+const getElevenLabsApiKey = (): string => {
+  const apiKey = process.env.ELEVENLABS_API_KEY
+  if (!apiKey) {
+    throw new Error('ELEVENLABS_API_KEY environment variable is not set')
+  }
+  return apiKey
+}
+
+// Helper function to get voice ID from name
+const getVoiceId = (voiceName: string): string => {
+  const voiceId = VOICE_ID_MAP[voiceName]
+  if (!voiceId) {
+    // Default to Rachel if voice not found
+    return VOICE_ID_MAP['Rachel']
+  }
+  return voiceId
 }
 
 export async function POST(request: NextRequest) {
   try {
     // Parse and validate request body
     const body = await request.json()
-    const validatedData = googleTTSRequestSchema.parse(body)
+    const validatedData = elevenLabsTTSRequestSchema.parse(body)
     
     const { text, languageCode, voiceName } = validatedData
     
@@ -66,49 +67,78 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Additional validation for voice name compatibility
-    if (!validateVoiceName(voiceName, languageCode)) {
-      return NextResponse.json(
-        { 
-          error: 'Invalid voice name for the specified language code',
-          details: `Voice name '${voiceName}' does not match language code '${languageCode}'`
-        },
-        { status: 400 }
-      )
-    }
+    // Get ElevenLabs API key and voice ID
+    const apiKey = getElevenLabsApiKey()
+    const voiceId = getVoiceId(voiceName)
     
-    // Initialize Google Cloud TTS client
-    const client = initializeGoogleTTSClient()
-    
-    // Configure TTS request exactly as specified
-    const ttsRequest = {
-      input: { 
-        text: text.trim() 
-      },
-      voice: {
-        languageCode: languageCode,
-        name: voiceName
-      },
-      audioConfig: {
-        audioEncoding: 'MP3' as const
+    // Configure ElevenLabs request
+    const elevenLabsRequest = {
+      text: text.trim(),
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75
       }
     }
     
-    console.log('Google TTS Request:', {
+    console.log('ElevenLabs TTS Request:', {
       textLength: text.length,
-      languageCode,
+      voiceId,
       voiceName,
-      audioEncoding: 'MP3'
+      model: 'eleven_multilingual_v2'
     })
     
-    // Generate speech using Google Cloud TTS
-    const [response] = await client.synthesizeSpeech(ttsRequest)
+    // Make request to ElevenLabs API
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(elevenLabsRequest)
+    })
     
-    if (!response.audioContent) {
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error('ElevenLabs API Error:', response.status, errorData)
+      
+      if (response.status === 401) {
+        return NextResponse.json(
+          { 
+            error: 'Authentication failed',
+            details: 'ElevenLabs API authentication failed. Please check your API key.'
+          },
+          { status: 401 }
+        )
+      }
+      
+      if (response.status === 429) {
+        return NextResponse.json(
+          { 
+            error: 'Rate limit exceeded',
+            details: 'ElevenLabs API rate limit exceeded. Please try again later.'
+          },
+          { status: 429 }
+        )
+      }
+      
+      return NextResponse.json(
+        { 
+          error: 'Text-to-speech generation failed',
+          details: `ElevenLabs API error: ${errorData}`
+        },
+        { status: response.status }
+      )
+    }
+    
+    // Get audio data as array buffer
+    const audioBuffer = await response.arrayBuffer()
+    
+    if (!audioBuffer || audioBuffer.byteLength === 0) {
       return NextResponse.json(
         { 
           error: 'Failed to generate audio content',
-          details: 'Google TTS API returned empty audio content'
+          details: 'ElevenLabs API returned empty audio content'
         },
         { status: 500 }
       )
@@ -118,7 +148,7 @@ export async function POST(request: NextRequest) {
     await ttsUsageTracker.trackRequest(text.length)
     
     // Convert audio content to base64
-    const audioBase64 = Buffer.from(response.audioContent).toString('base64')
+    const audioBase64 = Buffer.from(audioBuffer).toString('base64')
     
     // Get current usage stats for response
     const usageStats = ttsUsageTracker.getUsageStats()
@@ -133,6 +163,8 @@ export async function POST(request: NextRequest) {
         textLength: text.length,
         languageCode,
         voiceName,
+        voiceId,
+        model: 'eleven_multilingual_v2',
         audioEncoding: 'MP3',
         generatedAt: new Date().toISOString()
       },
@@ -146,7 +178,7 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('Google TTS API Error:', error)
+    console.error('ElevenLabs TTS API Error:', error)
     
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
@@ -162,40 +194,8 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Handle Google Cloud TTS errors
+    // Handle other errors
     if (error instanceof Error) {
-      // Check for specific Google Cloud errors
-      if (error.message.includes('INVALID_ARGUMENT')) {
-        return NextResponse.json(
-          { 
-            error: 'Invalid voice or language configuration',
-            details: error.message
-          },
-          { status: 400 }
-        )
-      }
-      
-      if (error.message.includes('PERMISSION_DENIED')) {
-        return NextResponse.json(
-          { 
-            error: 'Authentication failed',
-            details: 'Google Cloud TTS API authentication failed. Please check your credentials.'
-          },
-          { status: 401 }
-        )
-      }
-      
-      if (error.message.includes('QUOTA_EXCEEDED')) {
-        return NextResponse.json(
-          { 
-            error: 'Quota exceeded',
-            details: 'Google Cloud TTS API quota exceeded. Please try again later.'
-          },
-          { status: 429 }
-        )
-      }
-      
-      // Generic error handling
       return NextResponse.json(
         { 
           error: 'Text-to-speech generation failed',
@@ -219,9 +219,9 @@ export async function POST(request: NextRequest) {
 // Handle GET requests to provide API information
 export async function GET() {
   return NextResponse.json({
-    name: 'Google Cloud Text-to-Speech API',
+    name: 'ElevenLabs Text-to-Speech API',
     version: '1.0',
-    description: 'Convert text to speech using Google Cloud TTS',
+    description: 'Convert text to speech using ElevenLabs AI',
     endpoint: '/api/tts/google-speak',
     method: 'POST',
     parameters: {
@@ -236,35 +236,37 @@ export async function GET() {
         type: 'string',
         required: false,
         default: 'en-US',
-        description: 'Language code for the speech'
+        description: 'Language code for the speech (for compatibility)'
       },
       voiceName: {
         type: 'string',
         required: false,
-        default: 'en-US-Neural2-F',
-        description: 'Specific voice name to use'
+        default: 'Rachel',
+        description: 'Voice name to use'
       }
     },
     response: {
       success: 'boolean',
       audio: 'string (base64 encoded MP3)',
       format: 'string',
-      metadata: 'object'
+      metadata: 'object',
+      usage: 'object'
     },
     exampleRequest: {
-      text: 'Hello, this is a test of Google Cloud Text-to-Speech.',
+      text: 'Hello, this is a test of ElevenLabs Text-to-Speech.',
       languageCode: 'en-US',
-      voiceName: 'en-US-Neural2-F'
+      voiceName: 'Rachel'
     },
-    supportedVoices: {
-      'en-US': [
-        'en-US-Neural2-A', 'en-US-Neural2-C', 'en-US-Neural2-D',
-        'en-US-Neural2-E', 'en-US-Neural2-F', 'en-US-Neural2-G',
-        'en-US-Neural2-H', 'en-US-Neural2-I', 'en-US-Neural2-J'
-      ],
-      'en-GB': [
-        'en-GB-Neural2-A', 'en-GB-Neural2-B', 'en-GB-Neural2-C', 'en-GB-Neural2-D'
-      ]
+    supportedVoices: Object.keys(VOICE_ID_MAP),
+    voiceDescriptions: {
+      'Rachel': 'American, Female, Young Adult',
+      'Domi': 'British, Female, Young Adult',
+      'Bella': 'American, Female, Young Adult',
+      'Antoni': 'American, Male, Young Adult',
+      'Elli': 'American, Female, Young Adult',
+      'Josh': 'American, Male, Young Adult',
+      'Adam': 'American, Male, Middle-aged',
+      'Sam': 'American, Male, Young Adult'
     }
   })
 }

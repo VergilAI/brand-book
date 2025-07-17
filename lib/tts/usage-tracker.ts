@@ -1,15 +1,15 @@
 /**
  * TTS Usage Tracker
  * Tracks characters sent to TTS and number of requests
- * Simple file-based storage for Google Cloud TTS free tier monitoring
+ * Simple file-based storage for ElevenLabs free tier monitoring
  */
 
 import fs from 'fs'
 import path from 'path'
 
-// Google Cloud TTS Free Tier Limits
+// ElevenLabs Free Tier Limits
 export const TTS_LIMITS = {
-  CHARACTERS_PER_MONTH: 1_000_000, // 1M characters per month
+  CHARACTERS_PER_MONTH: 10_000, // 10K characters per month (conservative estimate)
   WARNING_THRESHOLD: 0.8, // Warn at 80% usage
   CRITICAL_THRESHOLD: 0.95, // Critical at 95% usage
 }
