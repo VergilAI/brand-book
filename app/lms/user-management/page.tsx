@@ -391,7 +391,7 @@ export default function UserManagementPage() {
                 {activeFiltersCount > 0 && (
                   <div className="mt-4 flex justify-end">
                     <Button
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
                       onClick={() => setFilters({ roles: [], statuses: [], progressRanges: [] })}
                     >
@@ -410,10 +410,9 @@ export default function UserManagementPage() {
                     {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
                   </p>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
                     onClick={() => setSelectedUsers([])}
-                    className="text-vergil-emphasis-text hover:text-vergil-off-black"
                   >
                     Clear selection
                   </Button>

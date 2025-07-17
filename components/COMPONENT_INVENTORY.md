@@ -4,9 +4,9 @@ This document provides a comprehensive list of all components in the LMS system 
 
 ## Component Status Overview
 
-Total Components: **69**  
-Using Semantic Tokens: **31** (45%)  
-Not Using Semantic Tokens: **38** (55%)
+Total Components: **70**  
+Using Semantic Tokens: **32** (46%)  
+Not Using Semantic Tokens: **38** (54%)
 
 ## Component List
 
@@ -29,6 +29,7 @@ Not Using Semantic Tokens: **38** (55%)
 | `popover.tsx` | Popover/floating content | ✅ |
 | `progress.tsx` | Progress bar component | ✅ |
 | `select.tsx` | Select dropdown component | ✅ |
+| `slider.tsx` | Range slider component | ✅ |
 | `switch.tsx` | Toggle switch component | ✅ |
 | `tabs.tsx` | Tab navigation component | ✅ |
 | `textarea.tsx` | Multi-line text input | ✅ |

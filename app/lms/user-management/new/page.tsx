@@ -351,7 +351,7 @@ export default function NewUserPage() {
                   <SelectTrigger className={`w-full ${errors.reportsTo ? 'border-error' : ''}`}>
                     <SelectValue placeholder={formData.role === 'super_admin' ? "Select reporting manager (optional)" : "Select reporting manager"} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[200px] overflow-y-auto">
                     {formData.role === 'super_admin' && (
                       <SelectItem value="none">None (Top Level)</SelectItem>
                     )}

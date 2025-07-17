@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Volume2, Play, Pause, RotateCcw, CheckCircle, Clock, Mic } from 'lucide-react'
+import { X, Volume2, CheckCircle, Clock, Mic, Headphones } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
-import TTSButton from '@/components/Voice/TTSButton'
+import TTSButtonEnhanced from '@/components/Voice/TTSButtonEnhanced'
+import TTSButtonStream from '@/components/Voice/TTSButtonStream'
 import { cn } from '@/lib/utils'
 
 interface AudioMaterialProps {
@@ -148,8 +149,7 @@ const audioFiles: AudioFile[] = [
 
 export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialProps) {
   const [currentAudioIndex, setCurrentAudioIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
+  const [hasListened, setHasListened] = useState(false)
   const [showTranscript, setShowTranscript] = useState(true)
   const [completedAudios, setCompletedAudios] = useState<Set<string>>(new Set())
   const [showQuiz, setShowQuiz] = useState(false)
@@ -190,31 +190,15 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
   const totalAudios = audioFiles.length
   const progressPercentage = Math.round((completedAudios.size / totalAudios) * 100)
 
-  // Simulate audio playback
-  useEffect(() => {
-    let interval: NodeJS.Timeout
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentTime(prev => {
-          if (prev >= currentAudio.duration) {
-            setIsPlaying(false)
-            setShowQuiz(true)
-            return currentAudio.duration
-          }
-          return prev + 1
-        })
-      }, 1000)
-    }
-    return () => clearInterval(interval)
-  }, [isPlaying, currentAudio.duration])
-
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying)
+  const handleAudioEnd = () => {
+    setHasListened(true)
+    setTimeout(() => {
+      setShowQuiz(true)
+    }, 1000)
   }
 
   const restartAudio = () => {
-    setCurrentTime(0)
-    setIsPlaying(false)
+    setHasListened(false)
     setShowQuiz(false)
     setSelectedAnswer(null)
     setShowQuizResult(false)
@@ -228,8 +212,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
 
   const selectAudio = (index: number) => {
     setCurrentAudioIndex(index)
-    setCurrentTime(0)
-    setIsPlaying(false)
+    setHasListened(false)
     setShowQuiz(false)
     setSelectedAnswer(null)
     setShowQuizResult(false)
@@ -262,7 +245,9 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
     onClose()
   }
 
-  const audioProgressPercentage = (currentTime / currentAudio.duration) * 100
+  // Calculate overall progress including current audio listening status
+  const currentProgress = completedAudios.size + (hasListened ? 0.5 : 0)
+  const overallProgressPercentage = Math.round((currentProgress / totalAudios) * 100)
 
   return (
     <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal"> {/* rgba(0, 0, 0, 0.5) */}
@@ -270,7 +255,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
         {/* Header */}
         <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Volume2 className="h-5 w-5 text-text-brand" />
+            <Headphones className="h-5 w-5 text-text-brand" />
             <div>
               <h2 className="text-xl font-semibold text-text-primary">Audio Learning Materials</h2>
               <div className="flex items-center gap-4 mt-1">
@@ -300,12 +285,12 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
         </div>
 
         {/* Progress Bar */}
-        <div className="px-6 py-3 border-b border-border-subtle">
+        <div className="px-6 py-3 border-b border-border-subtle bg-bg-secondary">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-text-secondary">Course Progress</span>
-            <span className="text-sm font-medium text-text-brand">{progressPercentage}%</span>
+            <span className="text-sm font-medium text-text-primary">Overall Progress</span>
+            <span className="text-sm font-medium text-text-brand">{overallProgressPercentage}%</span>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
+          <Progress value={overallProgressPercentage} className="h-2" />
         </div>
 
         <div className="flex flex-1 min-h-0">
@@ -342,104 +327,84 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
             {!showQuiz ? (
               <>
                 {/* Audio Player */}
-                <div className="p-6 border-b border-border-subtle">
+                <div className="p-6">
                   <div className="max-w-4xl mx-auto">
-                    <div className="mb-4">
-                      <Badge variant="primary" className="mb-2">
-                        Audio {currentAudioIndex + 1} of {totalAudios}
-                      </Badge>
-                      <h1 className="text-2xl font-bold text-text-primary mb-2">
-                        {currentAudio.title}
-                      </h1>
-                      <p className="text-text-secondary">{currentAudio.description}</p>
-                    </div>
-
-                    {/* Audio Controls */}
-                    <Card className="p-6 mb-4">
-                      <CardContent className="p-0">
-                        <div className="flex items-center gap-4 mb-4">
-                          <Button
-                            variant="primary"
-                            size="lg"
-                            onClick={togglePlayPause}
-                            className="w-16 h-16 rounded-full"
-                          >
-                            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
-                          </Button>
-                          
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm text-text-secondary">
-                                {formatTime(currentTime)}
-                              </span>
-                              <span className="text-sm text-text-secondary">
-                                {formatTime(currentAudio.duration)}
-                              </span>
-                            </div>
-                            <Progress value={audioProgressPercentage} className="h-2" />
+                    {/* Audio Header */}
+                    <Card className="mb-6">
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-bg-brand-light rounded-lg">
+                            <Volume2 className="h-6 w-6 text-text-brand" />
                           </div>
-                          
-                          <Button
-                            variant="secondary"
-                            size="md"
-                            onClick={restartAudio}
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowTranscript(!showTranscript)}
-                          >
-                            {showTranscript ? 'Hide' : 'Show'} Transcript
-                          </Button>
-                          
-                          <TTSButton
-                            text={currentAudio.transcript}
-                            className="text-sm"
-                            onPlayStart={() => {
-                              // Pause simulated audio when TTS starts
-                              if (isPlaying) {
-                                setIsPlaying(false)
-                              }
-                            }}
-                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h1 className="text-2xl font-bold text-text-primary">
+                                {currentAudio.title}
+                              </h1>
+                              <Badge variant="primary">
+                                Lesson {currentAudioIndex + 1} of {totalAudios}
+                              </Badge>
+                            </div>
+                            <p className="text-text-secondary">{currentAudio.description}</p>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    {/* Transcript */}
-                    {showTranscript && (
-                      <Card className="p-4 bg-bg-secondary">
-                        <CardContent className="p-0">
-                          <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-semibold text-text-primary">Transcript</h3>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="info" className="text-xs">
-                                <Mic className="h-3 w-3 mr-1" />
-                                Text-to-Speech
-                              </Badge>
-                              <TTSButton
-                                text={currentAudio.transcript}
-                                className="text-sm"
-                                onPlayStart={() => {
-                                  // Pause simulated audio when TTS starts
-                                  if (isPlaying) {
-                                    setIsPlaying(false)
-                                  }
-                                }}
-                              />
-                            </div>
+                    {/* Enhanced TTS Audio Player */}
+                    <div className="space-y-4">
+                      {/* Temporarily using streaming version for testing */}
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold">{currentAudio.title}</h3>
+                            <p className="text-sm text-text-secondary">Audio {currentAudioIndex + 1} of {totalAudios}</p>
                           </div>
-                          <div className="text-text-secondary text-sm leading-relaxed whitespace-pre-line">
-                            {currentAudio.transcript}
+                          <TTSButtonStream
+                            key={`audio-${currentAudio.id}`}
+                            text={currentAudio.transcript.trim()}
+                            onPlayEnd={handleAudioEnd}
+                          />
+                        </div>
+                        {showTranscript && (
+                          <div className="mt-4 p-4 bg-bg-secondary rounded-lg">
+                            <h4 className="text-sm font-medium text-text-secondary mb-2">Transcript</h4>
+                            <p className="text-sm text-text-secondary whitespace-pre-line">
+                              {currentAudio.transcript}
+                            </p>
                           </div>
-                        </CardContent>
+                        )}
                       </Card>
-                    )}
+                      
+                      {/* Toggle Transcript Button */}
+                      <div className="flex items-center justify-between">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowTranscript(!showTranscript)}
+                          className="text-text-secondary hover:text-text-primary"
+                        >
+                          {showTranscript ? 'Hide' : 'Show'} Transcript
+                        </Button>
+                        
+                        {hasListened && !showQuiz && (
+                          <div className="flex items-center gap-2 text-sm text-text-success animate-pulse">
+                            <CheckCircle className="h-4 w-4" />
+                            <span>Audio completed! Quiz will appear shortly...</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Learning Tips */}
+                      {!hasListened && (
+                        <div className="p-4 bg-bg-info-light border border-border-info rounded-lg">
+                          <p className="text-sm text-text-info flex items-center gap-2">
+                            <Mic className="h-4 w-4" />
+                            Listen to the full audio to unlock the comprehension quiz
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>
@@ -447,12 +412,26 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
               /* Quiz Section */
               <div className="flex-1 p-6 overflow-y-auto">
                 <div className="max-w-4xl mx-auto">
-                  <div className="mb-6">
-                    <Badge variant="warning" className="mb-2">Quiz Time</Badge>
-                    <h2 className="text-2xl font-bold text-text-primary mb-2">
-                      Question for: {currentAudio.title}
-                    </h2>
-                  </div>
+                  {/* Quiz Header */}
+                  <Card className="mb-6">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-bg-warning-light rounded-lg">
+                          <Badge variant="warning" className="m-0">
+                            Quiz Time
+                          </Badge>
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-text-primary">
+                            Comprehension Check
+                          </h2>
+                          <p className="text-text-secondary">
+                            Test your understanding of: {currentAudio.title}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   <Card className="p-6 mb-6">
                     <CardContent className="p-0">
@@ -462,24 +441,38 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
                       
                       <div className="space-y-3">
                         {currentAudio.question.options.map((option, index) => (
-                          <div
+                          <label
                             key={index}
                             className={cn(
-                              "p-3 rounded-lg border cursor-pointer transition-all",
+                              "block p-4 rounded-lg border cursor-pointer transition-all",
                               selectedAnswer === index && !showQuizResult && "border-text-brand bg-bg-brand-light",
                               showQuizResult && index === currentAudio.question.correctAnswer && "border-text-success bg-bg-success-light",
                               showQuizResult && selectedAnswer === index && index !== currentAudio.question.correctAnswer && "border-text-error bg-bg-error-light",
-                              "border-border-subtle hover:border-border-default"
+                              !showQuizResult && "hover:bg-bg-emphasis",
+                              "border-border-subtle"
                             )}
-                            onClick={() => !showQuizResult && setSelectedAnswer(index)}
                           >
+                            <input
+                              type="radio"
+                              name="answer"
+                              value={index}
+                              checked={selectedAnswer === index}
+                              onChange={() => setSelectedAnswer(index)}
+                              disabled={showQuizResult}
+                              className="sr-only"
+                            />
                             <div className="flex items-center gap-3">
-                              <div className="w-6 h-6 rounded-full bg-text-brand text-white flex items-center justify-center text-sm font-semibold">
+                              <div className={cn(
+                                "w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold transition-colors",
+                                selectedAnswer === index 
+                                  ? "bg-text-brand text-white" 
+                                  : "bg-bg-secondary text-text-secondary"
+                              )}>
                                 {String.fromCharCode(65 + index)}
                               </div>
                               <span className="text-text-primary">{option}</span>
                             </div>
-                          </div>
+                          </label>
                         ))}
                       </div>
 

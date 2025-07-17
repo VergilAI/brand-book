@@ -5,6 +5,7 @@ import { X, DollarSign, Phone, Users, Zap, TrendingUp, Star, Shield } from 'luci
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
 import { Badge } from '@/components/atomic/badge'
+import { Progress } from '@/components/progress'
 import { cn } from '@/lib/utils'
 
 interface MillionaireGameProps {
@@ -361,6 +362,13 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
     setCurrentWinnings(winnings)
     setWalkedAway(true)
     setGameOver(true)
+    
+    // Auto-close after showing results
+    setTimeout(() => {
+      restoreScrolling()
+      const finalScore = Math.round((currentQuestionIndex / aiQuestions.length) * 100)
+      onComplete(finalScore)
+    }, 3000)
   }
   
   const restoreScrolling = () => {
@@ -372,17 +380,6 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
     
     // Scroll to top of the page
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const handleWalkAwayComplete = () => {
-    restoreScrolling()
-    const finalScore = Math.round((currentQuestionIndex / aiQuestions.length) * 100)
-    onComplete(finalScore)
-  }
-
-  const handleGameClose = () => {
-    restoreScrolling()
-    onClose()
   }
 
   const handleCloseAttempt = () => {
@@ -474,24 +471,12 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
             <p className="text-3xl font-bold text-text-success mb-4">
               {winningsAmount}
             </p>
-            <p className="text-text-secondary mb-6">
+            <p className="text-text-secondary">
               {walkedAway 
                 ? `You answered ${questionsAnswered} out of ${aiQuestions.length} questions correctly before walking away safely.`
                 : `You answered ${questionsAnswered} out of ${aiQuestions.length} questions correctly.`
               }
             </p>
-            <div className="flex gap-3 justify-center">
-              {walkedAway && (
-                <Button onClick={handleWalkAwayComplete} variant="primary" size="lg">
-                  Continue Learning
-                </Button>
-              )}
-              {!walkedAway && (
-                <Button onClick={handleGameClose} variant="primary" size="lg">
-                  Continue Learning
-                </Button>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -533,7 +518,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
 
             {/* Question Info */}
             <div className="flex items-center justify-between mb-6">
-              <Badge variant="primary" className="text-sm">
+              <Badge variant="secondary" className="text-sm">
                 Question {currentQuestionIndex + 1} of {aiQuestions.length}
               </Badge>
               
@@ -542,11 +527,15 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                 {lifelines.map((lifeline) => (
                   <Button
                     key={lifeline.id}
-                    variant={lifeline.used ? "secondary" : "primary"}
+                    variant="secondary"
                     size="sm"
                     onClick={() => useLifeline(lifeline.id)}
                     disabled={lifeline.used || isAnswerLocked}
-                    className="px-3"
+                    className={cn(
+                      "px-3 border",
+                      !lifeline.used && "border-border-info hover:bg-bg-info-light hover:border-text-info",
+                      lifeline.used && "opacity-50"
+                    )}
                   >
                     {lifeline.icon}
                     <span className="ml-1 text-xs">{lifeline.name}</span>
@@ -573,17 +562,17 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                     key={option.id}
                     className={cn(
                       "cursor-pointer transition-all duration-200",
-                      selectedAnswer === option.id && !showResult && "ring-2 ring-text-brand border-text-brand",
-                      showResult && option.correct && "ring-2 ring-text-success border-text-success bg-bg-success-light",
-                      showResult && selectedAnswer === option.id && !option.correct && "ring-2 ring-text-error border-text-error bg-bg-error-light",
-                      !isAnswerLocked && !isHidden && "hover:border-border-default",
+                      selectedAnswer === option.id && !showResult && "ring-2 ring-text-info border-text-info bg-bg-info-light",
+                      showResult && option.correct && "ring-2 ring-text-success border-text-success bg-bg-success-light answer-flash-success",
+                      showResult && selectedAnswer === option.id && !option.correct && "ring-2 ring-text-error border-text-error bg-bg-error-light answer-flash-error",
+                      !isAnswerLocked && !isHidden && "hover:border-border-default hover:bg-bg-emphasis",
                       isHidden && "opacity-30 cursor-not-allowed bg-bg-disabled"
                     )}
                     onClick={() => !isHidden && selectAnswer(option.id)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-text-brand text-white flex items-center justify-center font-semibold">
+                        <div className="w-8 h-8 rounded-full bg-bg-emphasis border-2 border-border-default text-text-primary flex items-center justify-center font-semibold">
                           {option.id.toUpperCase()}
                         </div>
                         <p className="text-text-primary font-medium">{option.text}</p>
@@ -596,10 +585,10 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
 
             {/* Audience Poll Results */}
             {audienceResults && (
-              <Card className="mb-6 bg-bg-info-light border-border-info"> {/* #EFF6FF, #93C5FD */}
+              <Card className="mb-6 bg-bg-brand-light border-border-brand"> {/* #F3E6FF, #7B00FF */}
                 <CardContent className="p-4">
                   <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                    <Users className="h-5 w-5 text-text-info" />
+                    <Users className="h-5 w-5 text-text-brand" />
                     Audience Poll Results
                   </h3>
                   <div className="space-y-3">
@@ -607,20 +596,19 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                       const percentage = audienceResults[option.id] || 0
                       return (
                         <div key={option.id} className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-text-info text-white flex items-center justify-center font-semibold text-sm">
+                          <div className="w-8 h-8 rounded-full bg-text-brand text-white flex items-center justify-center font-semibold text-sm">
                             {option.id.toUpperCase()}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-sm text-text-primary">{option.text}</span>
-                              <span className="text-sm font-semibold text-text-info">{percentage}%</span>
+                              <span className="text-sm font-semibold text-text-brand">{percentage}%</span>
                             </div>
-                            <div className="w-full bg-bg-secondary rounded-full h-2">
-                              <div 
-                                className="bg-text-info h-2 rounded-full transition-all duration-1000"
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
+                            <Progress 
+                              value={percentage} 
+                              className="h-2"
+                              indicatorClassName="bg-text-brand"
+                            />
                           </div>
                         </div>
                       )
@@ -680,22 +668,22 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
                 <div
                   key={item.level}
                   className={cn(
-                    "flex items-center justify-between p-2 rounded text-sm",
-                    item.level === currentLevel && "bg-text-brand text-white",
+                    "flex items-center justify-between p-2 rounded text-sm transition-all",
                     item.level < currentLevel && "bg-bg-success-light text-text-success",
                     item.level > currentLevel && "text-text-secondary",
-                    (item.level === 5 || item.level === 10) && "ring-2 ring-text-warning bg-bg-warning-light"
+                    (item.level === 5 || item.level === 10) && item.level !== currentLevel && "ring-2 ring-text-success bg-bg-success-light",
+                    item.level === currentLevel && "ring-4 ring-brand border-2 border-brand bg-brand-light/10 text-text-primary font-bold shadow-lg relative"
                   )}
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{item.level}</span>
                     {item.level === 15 && <Star className="h-3 w-3" />}
-                    {(item.level === 5 || item.level === 10) && <Shield className="h-3 w-3 text-text-warning" />}
+                    {(item.level === 5 || item.level === 10) && <Shield className={cn("h-3 w-3", item.level === currentLevel ? "text-brand" : "text-text-success")} />}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{item.amount}</span>
                     {(item.level === 5 || item.level === 10) && (
-                      <span className="text-xs text-text-warning font-medium">SAFE</span>
+                      <span className="text-xs text-text-success font-medium">SAFE</span>
                     )}
                   </div>
                 </div>
@@ -705,7 +693,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
             <div className="mt-4 pt-4 border-t border-border-subtle">
               <div className="space-y-1 text-xs text-text-secondary">
                 <div className="flex items-center gap-1">
-                  <Shield className="h-3 w-3 text-text-warning" />
+                  <Shield className="h-3 w-3 text-text-success" />
                   <span>Guaranteed safe amounts</span>
                 </div>
                 <div className="text-xs text-text-tertiary">

@@ -142,6 +142,7 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                 size="md" 
                 variant="primary"
                 className="px-6"
+                onClick={() => router.push('/lms/test')}
               >
                 Take Final Assessment
               </Button>

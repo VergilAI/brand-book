@@ -48,9 +48,13 @@ const getVoiceId = (voiceName: string): string => {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('[TTS API] Received POST request')
+  
   try {
     // Parse and validate request body
     const body = await request.json()
+    console.log('[TTS API] Request body:', { textLength: body.text?.length, voiceName: body.voiceName })
+    
     const validatedData = elevenLabsTTSRequestSchema.parse(body)
     
     const { text, languageCode, voiceName } = validatedData

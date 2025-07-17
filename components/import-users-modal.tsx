@@ -208,7 +208,7 @@ Bob Johnson,bob.johnson@example.com,Instructor,+0987654321,Chicago,Sales,John Do
 
             {/* Template Download Section */}
             <div>
-              <Card variant="outlined" className="p-spacing-xl"> {/* 32px - increased padding */}
+              <Card className="bg-transparent border-2 border-border-brand rounded-lg shadow-none p-spacing-xl"> {/* Custom styling without hover effects */}
                 <div className="flex items-start gap-spacing-lg"> {/* 24px - increased gap */}
                   <FileText className="w-5 h-5 text-brand mt-0.5 flex-shrink-0" /> {/* #7B00FF */}
                   <div className="flex-1 space-y-spacing-xs"> {/* 4px - minimal spacing */}

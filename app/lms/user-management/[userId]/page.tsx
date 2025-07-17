@@ -783,20 +783,23 @@ export default function UserDetailPage() {
                 </div>
               </Card>
 
-              <Card className="border-red-200 bg-red-50/30">
-                <div className="p-6">
-                  <h2 className="text-lg font-semibold text-red-800 mb-4">Danger Zone</h2>
-                  <p className="text-sm text-red-700 mb-4">
-                    Deleting a user account is permanent and cannot be undone. All associated data will be lost.
-                  </p>
+              <Card className="border-red-200 bg-red-50 max-w-sm">
+                <CardContent className="p-4 space-y-3">
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-red-900">Delete Account</h3>
+                    <p className="text-xs text-red-700 leading-relaxed">
+                      Deleting this account is permanent. All data will be lost.
+                    </p>
+                  </div>
                   <Button 
-                    variant="secondary" 
-                    className="text-red-600 border-red-300 hover:bg-red-100"
+                    variant="destructive" 
+                    size="sm"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete User Account
+                    <Trash2 className="w-3 h-3 mr-1.5" />
+                    Delete Account
                   </Button>
-                </div>
+                </CardContent>
               </Card>
             </div>
           </TabsContent>

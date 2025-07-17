@@ -93,6 +93,7 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackMessage, setFeedbackMessage] = useState('')
   const [isCorrectMatch, setIsCorrectMatch] = useState(false)
+  const [incorrectPair, setIncorrectPair] = useState<string[]>([])
 
   // Handle body scroll lock
   useEffect(() => {
@@ -166,10 +167,33 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
     setGameCards(shuffledCards)
     setSelectedCards([])
     setShowFeedback(false)
+    setIncorrectPair([])
   }
 
   const handleCardClick = (card: GameCard) => {
-    if (card.isMatched || card.isSelected || selectedCards.length >= 2) return
+    if (card.isMatched || selectedCards.length >= 2) return
+
+    // If clicking on an already selected card, deselect it
+    if (card.isSelected) {
+      setSelectedCards(prev => prev.filter(c => c.id !== card.id))
+      setGameCards(prev => prev.map(c => 
+        c.id === card.id ? { ...c, isSelected: false } : c
+      ))
+      return
+    }
+
+    // Check if user is trying to select a card of the same type as already selected
+    if (selectedCards.length === 1 && selectedCards[0].type === card.type) {
+      // Replace the previous selection with the new one
+      const previousCard = selectedCards[0]
+      setSelectedCards([card])
+      setGameCards(prev => prev.map(c => {
+        if (c.id === previousCard.id) return { ...c, isSelected: false }
+        if (c.id === card.id) return { ...c, isSelected: true }
+        return c
+      }))
+      return
+    }
 
     const newSelectedCards = [...selectedCards, card]
     setSelectedCards(newSelectedCards)
@@ -196,8 +220,9 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
         // Correct match
         setScore(prev => prev + 10)
         setMatchedPairs(prev => new Set([...prev, card1.pairId]))
+        // Keep the cards selected with green styling briefly before marking as matched
         setGameCards(prev => prev.map(c => 
-          c.pairId === card1.pairId ? { ...c, isMatched: true, isSelected: false } : 
+          c.pairId === card1.pairId ? { ...c, isMatched: true, isSelected: true } : 
           { ...c, isSelected: false }
         ))
         setIsCorrectMatch(true)
@@ -209,9 +234,15 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
         }
       } else {
         // Incorrect match
-        setGameCards(prev => prev.map(c => ({ ...c, isSelected: false })))
+        setIncorrectPair([card1.id, card2.id])
         setIsCorrectMatch(false)
         setFeedbackMessage('Not quite right. Try again!')
+        
+        // Clear incorrect styling after a delay
+        setTimeout(() => {
+          setGameCards(prev => prev.map(c => ({ ...c, isSelected: false })))
+          setIncorrectPair([])
+        }, 1000)
       }
       
       setSelectedCards([])
@@ -366,8 +397,9 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
                       key={card.id}
                       className={cn(
                         "cursor-pointer transition-all duration-200 hover:scale-[1.02]",
-                        card.isMatched && "opacity-50 cursor-not-allowed bg-bg-success-light border-2 border-border-success",
-                        card.isSelected && "border-4 border-text-brand shadow-brand-lg ring-4 ring-text-brand ring-opacity-20",
+                        card.isMatched && "opacity-50 cursor-not-allowed bg-bg-success-light border-4 border-text-success ring-4 ring-text-success ring-opacity-20",
+                        card.isSelected && !incorrectPair.includes(card.id) && !card.isMatched && "border-4 border-gray-500 shadow-md ring-4 ring-gray-500 ring-opacity-20",
+                        incorrectPair.includes(card.id) && "border-4 border-text-error shadow-md ring-4 ring-text-error ring-opacity-20",
                         !card.isMatched && !card.isSelected && "hover:shadow-card-hover hover:border-border-emphasis border-2 border-border-subtle"
                       )}
                       onClick={() => handleCardClick(card)}
@@ -416,8 +448,9 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
                       key={card.id}
                       className={cn(
                         "cursor-pointer transition-all duration-200 hover:scale-[1.02]",
-                        card.isMatched && "opacity-50 cursor-not-allowed bg-bg-success-light border-2 border-border-success",
-                        card.isSelected && "border-4 border-text-info shadow-brand-lg ring-4 ring-text-info ring-opacity-20",
+                        card.isMatched && "opacity-50 cursor-not-allowed bg-bg-success-light border-4 border-text-success ring-4 ring-text-success ring-opacity-20",
+                        card.isSelected && !incorrectPair.includes(card.id) && !card.isMatched && "border-4 border-gray-500 shadow-md ring-4 ring-gray-500 ring-opacity-20",
+                        incorrectPair.includes(card.id) && "border-4 border-text-error shadow-md ring-4 ring-text-error ring-opacity-20",
                         !card.isMatched && !card.isSelected && "hover:shadow-card-hover hover:border-border-emphasis border-2 border-border-subtle"
                       )}
                       onClick={() => handleCardClick(card)}
