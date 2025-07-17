@@ -120,6 +120,19 @@ const aiFlashcards: Flashcard[] = [
   }
 ]
 
+// Add custom styles for 3D effects
+const customStyles = {
+  perspective: {
+    perspective: '1000px'
+  },
+  preserve3d: {
+    transformStyle: 'preserve-3d' as const
+  },
+  rotateY: {
+    transform: 'rotateY(6deg)'
+  }
+}
+
 export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGameProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [userAnswer, setUserAnswer] = useState('')
@@ -198,8 +211,10 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
       }
       setCardResults(prev => [...prev, result])
       
-      setIsFlipping(false)
-    }, 300)
+      setTimeout(() => {
+        setIsFlipping(false)
+      }, 200)
+    }, 400)
   }
 
   const nextCard = () => {
@@ -298,35 +313,89 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
           </div>
 
           {/* Flashcard */}
-          <Card className={cn(
-            "flex-1 flex flex-col justify-center items-center p-8 mb-6 transition-transform duration-300",
-            isFlipping && "scale-x-95"
-          )}>
-            <CardContent className="text-center">
-              <div className="mb-8">
-                <Layers className="h-12 w-12 text-text-brand mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-text-primary">
-                  {currentCard.question}
-                </h3>
-                {isAnswerChecked && (
+          <div className="flex-1 flex items-center justify-center mb-6" style={customStyles.perspective}>
+            <Card 
+              className={cn(
+                "relative w-full max-w-2xl transition-all duration-700",
+                isFlipping && "scale-105",
+                isAnswerChecked && isCorrect && "shadow-brandGlow",
+                isAnswerChecked && !isCorrect && "shadow-lg"
+              )}
+              style={{
+                ...customStyles.preserve3d,
+                ...(isFlipping ? customStyles.rotateY : {})
+              }}>
+              <CardContent className="p-8">
+                <div className="text-center">
                   <div className={cn(
-                    "mt-6 p-4 rounded-lg transition-all duration-300",
-                    isCorrect ? "bg-bg-success-light border border-border-success" : "bg-bg-error-light border border-border-error"
+                    "transition-all duration-500",
+                    isAnswerChecked && "transform -translate-y-4"
                   )}>
-                    <p className={cn(
-                      "text-lg font-medium",
-                      isCorrect ? "text-text-success" : "text-text-error"
+                    <Layers className={cn(
+                      "h-12 w-12 mx-auto mb-4 transition-all duration-500",
+                      isAnswerChecked && isCorrect && "text-text-success",
+                      isAnswerChecked && !isCorrect && "text-text-error",
+                      !isAnswerChecked && "text-text-brand"
+                    )} />
+                    <h3 className={cn(
+                      "text-2xl font-semibold text-text-primary transition-all duration-500",
+                      isAnswerChecked && "text-xl opacity-70"
                     )}>
-                      {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
-                    </p>
-                    <p className="text-text-secondary mt-2">
-                      Answer: <span className="font-medium">{currentCard.answer}</span>
-                    </p>
+                      {currentCard.question}
+                    </h3>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  
+                  {/* Answer Reveal */}
+                  <div className={cn(
+                    "overflow-hidden transition-all duration-700",
+                    isAnswerChecked ? "max-h-96 opacity-100 mt-6" : "max-h-0 opacity-0"
+                  )}>
+                    <div className={cn(
+                      "p-6 rounded-xl transition-all duration-500 transform",
+                      isAnswerChecked && "translate-y-0 scale-100",
+                      !isAnswerChecked && "translate-y-8 scale-95",
+                      isCorrect ? "bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200" : "bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200"
+                    )}>
+                      <div className={cn(
+                        "flex items-center justify-center gap-3 mb-3",
+                        "animate-in fade-in slide-in-from-bottom-4 duration-500"
+                      )}>
+                        {isCorrect ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center animate-in zoom-in-50 duration-300">
+                              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <span className="text-xl font-bold text-green-700">Excellent!</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center animate-in zoom-in-50 duration-300">
+                              <X className="w-6 h-6 text-white" />
+                            </div>
+                            <span className="text-xl font-bold text-red-700">Not quite!</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-200">
+                        <p className="text-sm text-gray-600">The correct answer is:</p>
+                        <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                          {currentCard.answer}
+                        </p>
+                        {!isCorrect && userAnswer.trim() && (
+                          <p className="text-sm text-gray-500 mt-2">
+                            You answered: <span className="font-medium text-gray-700">{userAnswer}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Answer Input */}
           <div className="space-y-4">

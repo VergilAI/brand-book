@@ -394,16 +394,6 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
                           </div>
                         )}
                       </div>
-                      
-                      {/* Learning Tips */}
-                      {!hasListened && (
-                        <div className="p-4 bg-bg-info-light border border-border-info rounded-lg">
-                          <p className="text-sm text-text-info flex items-center gap-2">
-                            <Mic className="h-4 w-4" />
-                            Listen to the full audio to unlock the comprehension quiz
-                          </p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

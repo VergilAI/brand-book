@@ -2,7 +2,7 @@
 
 import { FlashcardGame } from './flashcard-game'
 import { MillionaireGame } from './millionaire-game'
-import { JeopardyGame } from './jeopardy-game'
+import { JeopardyGameNew } from './jeopardy-game-new'
 import { WrittenMaterial } from './written-material'
 import { AudioMaterial } from './audio-material'
 import { VideoMaterial } from './video-material'
@@ -37,7 +37,7 @@ export function GameRouter({ gameType, lessonId, onClose, onComplete }: GameRout
     
     case 'jeopardy':
       return (
-        <JeopardyGame
+        <JeopardyGameNew
           lessonId={lessonId}
           onClose={onClose}
           onComplete={onComplete}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users, Plus, Minus, Edit2 } from 'lucide-react'
 import { UserManagementHeader } from '@/components/user-management-header'
@@ -20,6 +20,271 @@ interface ViewState {
   viewMode: 'roles' | 'users' | 'employees'
   focusedRoleId?: string
 }
+
+// Memoized Employee View Component for performance
+const EmployeeView = React.memo(({ users, roles, selectedUser, setSelectedUser, setSelectedRole }: {
+  users: User[]
+  roles: Role[]
+  selectedUser: string | null
+  setSelectedUser: (id: string | null) => void
+  setSelectedRole: (id: string | null) => void
+}) => {
+  // Build employee hierarchy
+  const buildEmployeeHierarchy = () => {
+    // Create a simple hierarchy for demo
+    // Super Admins at top
+    const superAdmins = users.filter(u => u.roleId === '1')
+    
+    // For demo, create a mapping of who reports to whom
+    const reportingStructure: Record<string, string[]> = {
+      'u1': ['u3', 'u4'], // Sarah Johnson (Super Admin) manages Emily and David (Admins)
+      'u2': ['u5', 'u6', 'u7'], // Michael Chen (Super Admin) manages Lisa, Robert, and Thomas (Admins)
+      'u3': ['u8', 'u9'], // Emily (Admin) manages Jennifer and William (Managers)
+      'u4': ['u10', 'u11'], // David (Admin) manages Jessica and Christopher (Managers)
+      'u5': ['u12'], // Lisa (Admin) manages Amanda (Manager)
+      'u6': ['u17'], // Rachel (Admin) manages one Manager
+      'u7': ['u18'], // Thomas (Admin) manages one Manager
+      'u8': ['u13', 'u14'], // Jennifer (Manager) manages Daniel and Michelle (Instructors)
+      'u9': ['u15', 'u16'], // William (Manager) manages Brian and Stephanie (Instructors)
+      'u10': ['u17'], // Patricia (Manager) manages one Instructor
+      'u11': ['u18'], // Robert (Manager) manages one Instructor
+      'u12': ['u24'], // Amanda (Manager) manages one Instructor
+      'u13': ['u19', 'u20'], // Daniel (Instructor) manages some Employees
+      'u14': ['u21', 'u22'], // Michelle (Instructor) manages some Employees
+      'u15': ['u23'], // Brian (Instructor) manages one Employee
+      'u16': ['u25'], // Stephanie (Instructor) manages one Employee
+      'u17': ['u26'], // Manager manages one Employee
+      'u18': ['u27'], // Manager manages one Employee
+    }
+    
+    const getDirectReports = (managerId: string): User[] => {
+      const reportIds = reportingStructure[managerId] || []
+      return users.filter(u => reportIds.includes(u.id))
+    }
+    
+    return { topLevelEmployees: superAdmins, getDirectReports }
+  }
+  
+  // Calculate positions for employee tree
+  const calculateEmployeePositions = () => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    const { topLevelEmployees, getDirectReports } = buildEmployeeHierarchy()
+    
+    
+    const levelHeight = 180 // Increased from 120 for more vertical space
+    const nodeWidth = 220 // Match card width
+    const nodeHeight = 120 // Match card height  
+    const minHorizontalSpacing = 60 // Increased from 20 for more horizontal space
+    
+    // Track occupied spaces to prevent overlap
+    const levelOccupancy: Record<number, Array<{start: number, end: number}>> = {}
+    
+    // Helper to check if space is available
+    const isSpaceAvailable = (x: number, y: number, width: number): boolean => {
+      const level = Math.round(y / levelHeight)
+      if (!levelOccupancy[level]) return true
+      
+      return !levelOccupancy[level].some(space => 
+        (x < space.end && x + width > space.start)
+      )
+    }
+    
+    // Helper to mark space as occupied
+    const markSpaceOccupied = (x: number, y: number, width: number) => {
+      const level = Math.round(y / levelHeight)
+      if (!levelOccupancy[level]) levelOccupancy[level] = []
+      levelOccupancy[level].push({ start: x, end: x + width })
+    }
+    
+    // Calculate the width needed for a subtree
+    const calculateSubtreeWidth = (employee: User): number => {
+      const directReports = getDirectReports(employee.id)
+      if (directReports.length === 0) return nodeWidth
+      
+      let totalWidth = 0
+      directReports.forEach((report, index) => {
+        if (index > 0) totalWidth += minHorizontalSpacing
+        totalWidth += calculateSubtreeWidth(report)
+      })
+      
+      return Math.max(totalWidth, nodeWidth)
+    }
+    
+    // Recursive function to position employees
+    const positionEmployee = (employee: User, x: number, y: number): void => {
+      // Find available position if current is occupied
+      let finalX = x
+      while (!isSpaceAvailable(finalX, y, nodeWidth)) {
+        finalX += nodeWidth + minHorizontalSpacing
+      }
+      
+      positions[employee.id] = { x: finalX, y }
+      markSpaceOccupied(finalX, y, nodeWidth)
+      
+      const directReports = getDirectReports(employee.id)
+      if (directReports.length === 0) return
+      
+      // Calculate total width needed for children
+      const childrenWidth = directReports.reduce((sum, report, index) => {
+        return sum + calculateSubtreeWidth(report) + (index > 0 ? minHorizontalSpacing : 0)
+      }, 0)
+      
+      // Start position for first child (center children under parent)
+      let childX = finalX + (nodeWidth - childrenWidth) / 2
+      
+      // Position each child
+      directReports.forEach((report, index) => {
+        const reportWidth = calculateSubtreeWidth(report)
+        const reportX = childX + reportWidth / 2 - nodeWidth / 2
+        positionEmployee(report, reportX, y + levelHeight)
+        childX += reportWidth + minHorizontalSpacing
+      })
+    }
+    
+    // Position all top-level employees
+    const totalTopLevelWidth = topLevelEmployees.reduce((sum, emp, index) => {
+      return sum + calculateSubtreeWidth(emp) + (index > 0 ? minHorizontalSpacing * 3 : 0)
+    }, 0)
+    
+    let startX = 500 - totalTopLevelWidth / 2 // Center the tree with more space
+    
+    topLevelEmployees.forEach((employee, index) => {
+      const treeWidth = calculateSubtreeWidth(employee)
+      positionEmployee(employee, startX + treeWidth / 2 - nodeWidth / 2, 80) // Start lower
+      startX += treeWidth + minHorizontalSpacing * 3 // More spacing between trees
+    })
+    
+    
+    return positions
+  }
+  
+  // Render employee connections
+  const renderEmployeeConnections = (positions: Record<string, { x: number; y: number }>) => {
+    const { getDirectReports } = buildEmployeeHierarchy()
+    const cardWidth = 220 // Match actual card width
+    const cardHeight = 120 // Match actual card height
+    
+    // Define different colors for connection lines based on hierarchy
+    const connectionColors = [
+      '#94A3B8', // Slate-400 - Default
+      '#6366F1', // Indigo-500
+      '#10B981', // Emerald-500  
+      '#F59E0B', // Amber-500
+      '#EF4444', // Red-500
+      '#8B5CF6', // Violet-500
+      '#06B6D4', // Cyan-500
+      '#F97316', // Orange-500
+    ]
+    
+    const getConnectionColor = (managerId: string) => {
+      // Use a simple hash of the manager ID to consistently assign colors
+      const hash = managerId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+      return connectionColors[hash % connectionColors.length]
+    }
+    
+    return users.flatMap(manager => {
+      const directReports = getDirectReports(manager.id)
+      if (directReports.length === 0) return []
+      
+      const managerPos = positions[manager.id]
+      if (!managerPos) return []
+      
+      return directReports.map(report => {
+        const reportPos = positions[report.id]
+        if (!reportPos) return null
+        
+        // Calculate connection points
+        const startX = managerPos.x + cardWidth / 2
+        const startY = managerPos.y + cardHeight
+        const endX = reportPos.x + cardWidth / 2
+        const endY = reportPos.y
+        
+        // Create curved path that avoids overlapping with cards
+        const midY = startY + (endY - startY) * 0.5
+        const controlPointOffset = 30 // Curve outward to avoid cards
+        const path = `M ${startX} ${startY} C ${startX} ${midY + controlPointOffset}, ${endX} ${midY + controlPointOffset}, ${endX} ${endY}`
+        
+        return (
+          <path
+            key={`${manager.id}-${report.id}`}
+            d={path}
+            stroke={getConnectionColor(manager.id)}
+            strokeWidth="1.5"
+            fill="none"
+            strokeDasharray="5,3"
+            opacity="0.7"
+          />
+        )
+      }).filter(Boolean)
+    })
+  }
+  
+  // Render employee node
+  const renderEmployeeNode = (employee: User, positions: Record<string, { x: number; y: number }>) => {
+    const position = positions[employee.id]
+    if (!position) return null
+    
+    const role = roles.find(r => r.id === employee.roleId)
+    const cardWidth = 220
+    const cardHeight = 120
+    
+    // Determine status from employee.status
+    const getEmployeeStatus = () => {
+      if (employee.status === 'ahead' || employee.status === 'on_track') return 'on_track'
+      if (employee.status === 'at_risk') return 'at_risk'
+      return 'behind'
+    }
+    
+    return (
+      <g
+        key={employee.id}
+        transform={`translate(${position.x}, ${position.y})`}
+      >
+        <OrganizationCardSVGSimple
+          x={0}
+          y={0}
+          width={cardWidth}
+          height={cardHeight}
+          cardProps={{
+            id: employee.id,
+            type: 'employee',
+            title: employee.name,
+            subtitle: role?.name || 'Unknown Role',
+            color: role?.color || '#7B00FF',
+            progress: employee.completionRate || 0,
+            initials: employee.name.split(' ').map(n => n[0]).join(''),
+            status: getEmployeeStatus(),
+            isSelected: selectedUser === employee.id,
+            onClick: () => {
+              setSelectedUser(employee.id)
+              setSelectedRole(null)
+            }
+          }}
+        />
+      </g>
+    )
+  }
+
+  const employeePositions = useMemo(() => calculateEmployeePositions(), [users])
+  
+  return (
+    <>
+      {/* Employee connections */}
+      <g>
+        {renderEmployeeConnections(employeePositions)}
+      </g>
+      
+      {/* Employee nodes */}
+      <g>
+        {users.length > 0 ? users.map(user => renderEmployeeNode(user, employeePositions)) : (
+          <text x="400" y="200" textAnchor="middle" fontSize="16" fill="#6B7280">
+            No employees found
+          </text>
+        )}
+      </g>
+    </>
+  )
+})
 
 
 export default function OrganisationOverviewPage() {
@@ -90,23 +355,23 @@ export default function OrganisationOverviewPage() {
   }
 
 
-  // Handle mouse move
+  // Handle mouse move with RAF for smooth performance
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isPanningRef.current) {
-      console.log('Mouse move during panning')
-      const dx = e.clientX - lastMousePosRef.current.x
-      const dy = e.clientY - lastMousePosRef.current.y
-      
-      setViewState(prev => ({
-        ...prev,
-        pan: {
-          x: prev.pan.x - dx / prev.zoom,
-          y: prev.pan.y - dy / prev.zoom
-        }
-      }))
-      
-      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
-      setLastMousePos({ x: e.clientX, y: e.clientY })
+      requestAnimationFrame(() => {
+        const dx = e.clientX - lastMousePosRef.current.x
+        const dy = e.clientY - lastMousePosRef.current.y
+        
+        setViewState(prev => ({
+          ...prev,
+          pan: {
+            x: prev.pan.x - dx / prev.zoom,
+            y: prev.pan.y - dy / prev.zoom
+          }
+        }))
+        
+        lastMousePosRef.current = { x: e.clientX, y: e.clientY }
+      })
     }
   }, [])
 
@@ -250,8 +515,8 @@ export default function OrganisationOverviewPage() {
     }, 1000)
   }
 
-  // Render connection lines
-  const renderConnections = () => {
+  // Memoize connection lines for performance
+  const connectionLines = useMemo(() => {
     const cardWidth = 200
     const cardHeight = 90
     
@@ -283,17 +548,17 @@ export default function OrganisationOverviewPage() {
         />
       )
     })
-  }
+  }, [roles])
 
-  // Render detailed grid background with comprehensive coverage
-  const renderGrid = () => {
+  // Memoize grid for performance
+  const gridElements = useMemo(() => {
     if (!viewState.showGrid) return null
     
-    const gridSize = 10 // Very detailed squares for 50x50 mapping
+    const gridSize = 50 // Simplified grid for better performance
     const viewBox = calculateViewBox().split(' ').map(Number)
     
-    // Extend grid coverage well beyond the visible area
-    const padding = 1000 // Extra padding to ensure full coverage
+    // Calculate visible area with some padding
+    const padding = 200
     const startX = Math.floor((viewBox[0] - padding) / gridSize) * gridSize
     const startY = Math.floor((viewBox[1] - padding) / gridSize) * gridSize
     const endX = Math.ceil((viewBox[0] + viewBox[2] + padding) / gridSize) * gridSize
@@ -301,63 +566,30 @@ export default function OrganisationOverviewPage() {
     
     const lines = []
     
-    // Add comprehensive background rectangle
+    // Background
     lines.push(
       <rect
-        key="grid-background"
+        key="grid-bg"
         x={startX}
         y={startY}
         width={endX - startX}
         height={endY - startY}
         fill="#FAFAFA"
-        stroke="none"
       />
     )
     
-    // Major grid lines (every 50px) - main sections for 50x50 mapping
-    const majorGridSize = 50
-    for (let x = Math.floor(startX / majorGridSize) * majorGridSize; x <= endX; x += majorGridSize) {
-      lines.push(
-        <line
-          key={`grid-major-v-${x}`}
-          x1={x}
-          y1={startY}
-          x2={x}
-          y2={endY}
-          stroke="#D1D5DB"
-          strokeWidth="1"
-          opacity="0.7"
-        />
-      )
-    }
-    
-    for (let y = Math.floor(startY / majorGridSize) * majorGridSize; y <= endY; y += majorGridSize) {
-      lines.push(
-        <line
-          key={`grid-major-h-${y}`}
-          x1={startX}
-          y1={y}
-          x2={endX}
-          y2={y}
-          stroke="#D1D5DB"
-          strokeWidth="1"
-          opacity="0.7"
-        />
-      )
-    }
-    
-    // Minor grid lines (every 10px) - detailed squares
+    // Grid lines - only major lines for performance
     for (let x = startX; x <= endX; x += gridSize) {
       lines.push(
         <line
-          key={`grid-minor-v-${x}`}
+          key={`gv-${x}`}
           x1={x}
           y1={startY}
           x2={x}
           y2={endY}
-          stroke="#F3F4F6"
-          strokeWidth="0.5"
-          opacity="0.4"
+          stroke="#E5E7EB"
+          strokeWidth="1"
+          opacity="0.5"
         />
       )
     }
@@ -365,20 +597,20 @@ export default function OrganisationOverviewPage() {
     for (let y = startY; y <= endY; y += gridSize) {
       lines.push(
         <line
-          key={`grid-minor-h-${y}`}
+          key={`gh-${y}`}
           x1={startX}
           y1={y}
           x2={endX}
           y2={y}
-          stroke="#F3F4F6"
-          strokeWidth="0.5"
-          opacity="0.4"
+          stroke="#E5E7EB"
+          strokeWidth="1"
+          opacity="0.5"
         />
       )
     }
     
     return <g>{lines}</g>
-  }
+  }, [viewState.showGrid, viewState.pan, viewState.zoom])
 
   // Switch to users list view
   const zoomToRole = useCallback((roleId: string) => {
@@ -772,243 +1004,7 @@ export default function OrganisationOverviewPage() {
       </g>
     )
   }
-
-  // Build employee hierarchy
-  const buildEmployeeHierarchy = () => {
-    // Create a simple hierarchy for demo
-    // Super Admins at top
-    const superAdmins = users.filter(u => u.roleId === '1')
-    
-    // For demo, create a mapping of who reports to whom
-    const reportingStructure: Record<string, string[]> = {
-      'u1': ['u3', 'u4'], // Sarah Johnson (Super Admin) manages Emily and David (Admins)
-      'u2': ['u5', 'u6', 'u7'], // Michael Chen (Super Admin) manages Lisa, Robert, and Thomas (Admins)
-      'u3': ['u8', 'u9'], // Emily (Admin) manages Jennifer and William (Managers)
-      'u4': ['u10', 'u11'], // David (Admin) manages Jessica and Christopher (Managers)
-      'u5': ['u12'], // Lisa (Admin) manages Amanda (Manager)
-      'u6': ['u17'], // Rachel (Admin) manages one Manager
-      'u7': ['u18'], // Thomas (Admin) manages one Manager
-      'u8': ['u13', 'u14'], // Jennifer (Manager) manages Daniel and Michelle (Instructors)
-      'u9': ['u15', 'u16'], // William (Manager) manages Brian and Stephanie (Instructors)
-      'u10': ['u17'], // Patricia (Manager) manages one Instructor
-      'u11': ['u18'], // Robert (Manager) manages one Instructor
-      'u12': ['u24'], // Amanda (Manager) manages one Instructor
-      'u13': ['u19', 'u20'], // Daniel (Instructor) manages some Employees
-      'u14': ['u21', 'u22'], // Michelle (Instructor) manages some Employees
-      'u15': ['u23'], // Brian (Instructor) manages one Employee
-      'u16': ['u25'], // Stephanie (Instructor) manages one Employee
-      'u17': ['u26'], // Manager manages one Employee
-      'u18': ['u27'], // Manager manages one Employee
-    }
-    
-    const getDirectReports = (managerId: string): User[] => {
-      const reportIds = reportingStructure[managerId] || []
-      return users.filter(u => reportIds.includes(u.id))
-    }
-    
-    return { topLevelEmployees: superAdmins, getDirectReports }
-  }
   
-  // Calculate positions for employee tree
-  const calculateEmployeePositions = () => {
-    const positions: Record<string, { x: number; y: number }> = {}
-    const { topLevelEmployees, getDirectReports } = buildEmployeeHierarchy()
-    
-    
-    const levelHeight = 180 // Increased from 120 for more vertical space
-    const nodeWidth = 220 // Match card width
-    const nodeHeight = 120 // Match card height  
-    const minHorizontalSpacing = 60 // Increased from 20 for more horizontal space
-    
-    // Track occupied spaces to prevent overlap
-    const levelOccupancy: Record<number, Array<{start: number, end: number}>> = {}
-    
-    // Helper to check if space is available
-    const isSpaceAvailable = (x: number, y: number, width: number): boolean => {
-      const level = Math.round(y / levelHeight)
-      if (!levelOccupancy[level]) return true
-      
-      return !levelOccupancy[level].some(space => 
-        (x < space.end && x + width > space.start)
-      )
-    }
-    
-    // Helper to mark space as occupied
-    const markSpaceOccupied = (x: number, y: number, width: number) => {
-      const level = Math.round(y / levelHeight)
-      if (!levelOccupancy[level]) levelOccupancy[level] = []
-      levelOccupancy[level].push({ start: x, end: x + width })
-    }
-    
-    // Calculate the width needed for a subtree
-    const calculateSubtreeWidth = (employee: User): number => {
-      const directReports = getDirectReports(employee.id)
-      if (directReports.length === 0) return nodeWidth
-      
-      let totalWidth = 0
-      directReports.forEach((report, index) => {
-        if (index > 0) totalWidth += minHorizontalSpacing
-        totalWidth += calculateSubtreeWidth(report)
-      })
-      
-      return Math.max(totalWidth, nodeWidth)
-    }
-    
-    // Recursive function to position employees
-    const positionEmployee = (employee: User, x: number, y: number): void => {
-      // Find available position if current is occupied
-      let finalX = x
-      while (!isSpaceAvailable(finalX, y, nodeWidth)) {
-        finalX += nodeWidth + minHorizontalSpacing
-      }
-      
-      positions[employee.id] = { x: finalX, y }
-      markSpaceOccupied(finalX, y, nodeWidth)
-      
-      const directReports = getDirectReports(employee.id)
-      if (directReports.length === 0) return
-      
-      // Calculate total width needed for children
-      const childrenWidth = directReports.reduce((sum, report, index) => {
-        return sum + calculateSubtreeWidth(report) + (index > 0 ? minHorizontalSpacing : 0)
-      }, 0)
-      
-      // Start position for first child (center children under parent)
-      let childX = finalX + (nodeWidth - childrenWidth) / 2
-      
-      // Position each child
-      directReports.forEach((report, index) => {
-        const reportWidth = calculateSubtreeWidth(report)
-        const reportX = childX + reportWidth / 2 - nodeWidth / 2
-        positionEmployee(report, reportX, y + levelHeight)
-        childX += reportWidth + minHorizontalSpacing
-      })
-    }
-    
-    // Position all top-level employees
-    const totalTopLevelWidth = topLevelEmployees.reduce((sum, emp, index) => {
-      return sum + calculateSubtreeWidth(emp) + (index > 0 ? minHorizontalSpacing * 3 : 0)
-    }, 0)
-    
-    let startX = 500 - totalTopLevelWidth / 2 // Center the tree with more space
-    
-    topLevelEmployees.forEach((employee, index) => {
-      const treeWidth = calculateSubtreeWidth(employee)
-      positionEmployee(employee, startX + treeWidth / 2 - nodeWidth / 2, 80) // Start lower
-      startX += treeWidth + minHorizontalSpacing * 3 // More spacing between trees
-    })
-    
-    
-    return positions
-  }
-  
-  // Render employee connections
-  const renderEmployeeConnections = (positions: Record<string, { x: number; y: number }>) => {
-    const { getDirectReports } = buildEmployeeHierarchy()
-    const cardWidth = 220 // Match actual card width
-    const cardHeight = 120 // Match actual card height
-    
-    // Define different colors for connection lines based on hierarchy
-    const connectionColors = [
-      '#94A3B8', // Slate-400 - Default
-      '#6366F1', // Indigo-500
-      '#10B981', // Emerald-500  
-      '#F59E0B', // Amber-500
-      '#EF4444', // Red-500
-      '#8B5CF6', // Violet-500
-      '#06B6D4', // Cyan-500
-      '#F97316', // Orange-500
-    ]
-    
-    const getConnectionColor = (managerId: string) => {
-      // Use a simple hash of the manager ID to consistently assign colors
-      const hash = managerId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-      return connectionColors[hash % connectionColors.length]
-    }
-    
-    return users.flatMap(manager => {
-      const directReports = getDirectReports(manager.id)
-      if (directReports.length === 0) return []
-      
-      const managerPos = positions[manager.id]
-      if (!managerPos) return []
-      
-      return directReports.map(report => {
-        const reportPos = positions[report.id]
-        if (!reportPos) return null
-        
-        // Calculate connection points
-        const startX = managerPos.x + cardWidth / 2
-        const startY = managerPos.y + cardHeight
-        const endX = reportPos.x + cardWidth / 2
-        const endY = reportPos.y
-        
-        // Create curved path that avoids overlapping with cards
-        const midY = startY + (endY - startY) * 0.5
-        const controlPointOffset = 30 // Curve outward to avoid cards
-        const path = `M ${startX} ${startY} C ${startX} ${midY + controlPointOffset}, ${endX} ${midY + controlPointOffset}, ${endX} ${endY}`
-        
-        return (
-          <path
-            key={`${manager.id}-${report.id}`}
-            d={path}
-            stroke={getConnectionColor(manager.id)}
-            strokeWidth="1.5"
-            fill="none"
-            strokeDasharray="5,3"
-            opacity="0.7"
-          />
-        )
-      }).filter(Boolean)
-    })
-  }
-  
-  // Render employee node
-  const renderEmployeeNode = (employee: User, positions: Record<string, { x: number; y: number }>) => {
-    const position = positions[employee.id]
-    if (!position) return null
-    
-    const role = roles.find(r => r.id === employee.roleId)
-    const cardWidth = 220
-    const cardHeight = 120
-    
-    // Determine status from employee.status
-    const getEmployeeStatus = () => {
-      if (employee.status === 'ahead' || employee.status === 'on_track') return 'on_track'
-      if (employee.status === 'at_risk') return 'at_risk'
-      return 'behind'
-    }
-    
-    return (
-      <g
-        key={employee.id}
-        transform={`translate(${position.x}, ${position.y})`}
-      >
-        <OrganizationCardSVGSimple
-          x={0}
-          y={0}
-          width={cardWidth}
-          height={cardHeight}
-          cardProps={{
-            id: employee.id,
-            type: 'employee',
-            title: employee.name,
-            subtitle: role?.name || 'Unknown Role',
-            color: role?.color || '#7B00FF',
-            progress: employee.completionRate || 0,
-            initials: employee.name.split(' ').map(n => n[0]).join(''),
-            status: getEmployeeStatus(),
-            isSelected: selectedUser === employee.id,
-            onClick: () => {
-              setSelectedUser(employee.id)
-              setSelectedRole(null)
-            }
-          }}
-        />
-      </g>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-secondary">
       <div className="h-screen flex flex-col">
@@ -1062,20 +1058,20 @@ export default function OrganisationOverviewPage() {
               onMouseDown={handleMouseDown}
               style={{ 
                 cursor: isPanning ? 'grabbing' : 'grab',
-                transition: 'none',
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
                 MozUserSelect: 'none',
-                msUserSelect: 'none'
+                msUserSelect: 'none',
+                willChange: isPanning ? 'transform' : 'auto'
               }}
             >
               {/* Grid */}
-              {renderGrid()}
+              {gridElements}
               
               {/* Connections (only show in roles view) */}
               {viewState.viewMode === 'roles' && (
                 <g>
-                  {renderConnections()}
+                  {connectionLines}
                 </g>
               )}
               
@@ -1120,26 +1116,9 @@ export default function OrganisationOverviewPage() {
               )}
               
               {/* Employee view (connections and nodes) */}
-              {viewState.viewMode === 'employees' && (() => {
-                const employeePositions = calculateEmployeePositions()
-                return (
-                  <>
-                    {/* Employee connections */}
-                    <g>
-                      {renderEmployeeConnections(employeePositions)}
-                    </g>
-                    
-                    {/* Employee nodes */}
-                    <g>
-                      {users.length > 0 ? users.map(user => renderEmployeeNode(user, employeePositions)) : (
-                        <text x="400" y="200" textAnchor="middle" fontSize="16" fill="#6B7280">
-                          No employees found
-                        </text>
-                      )}
-                    </g>
-                  </>
-                )
-              })()}
+              {viewState.viewMode === 'employees' && (
+                <EmployeeView users={users} roles={roles} selectedUser={selectedUser} setSelectedUser={setSelectedUser} setSelectedRole={setSelectedRole} />
+              )}
             </svg>
             
             {/* Users List View */}

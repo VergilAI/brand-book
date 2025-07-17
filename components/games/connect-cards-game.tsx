@@ -263,7 +263,8 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
   }
 
   const handleComplete = () => {
-    const finalScore = Math.round((score / attempts) * 100) || 0
+    const correctMatches = matchedPairs.size
+    const finalScore = Math.round((correctMatches / attempts) * 100) || 0
     onComplete(finalScore)
   }
 
@@ -345,7 +346,7 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-text-warning">
-                      {Math.round((score / attempts) * 100) || 0}%
+                      {Math.round((matchedPairs.size / attempts) * 100) || 0}%
                     </div>
                     <div className="text-text-secondary">Accuracy</div>
                   </div>
