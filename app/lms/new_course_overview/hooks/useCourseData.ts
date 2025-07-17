@@ -6,6 +6,7 @@ export function useCourseData(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [userProgress, setUserProgress] = useState<any>(null)
 
   const refreshCourse = useCallback(async () => {
     if (courseId) {
@@ -20,6 +21,13 @@ export function useCourseData(courseId: string) {
         })
         
         setCourse(courseData)
+        
+        // Load user progress
+        const progressData = localStorage.getItem(`user-progress-${courseId}`)
+        if (progressData) {
+          setUserProgress(JSON.parse(progressData))
+        }
+        
         console.log(`✅ Course data refreshed successfully`)
       } catch (err) {
         console.error('❌ Failed to refresh course:', err)
@@ -35,6 +43,12 @@ export function useCourseData(courseId: string) {
         setError(null)
         const courseData = await courseAPI.getCourse(courseId)
         setCourse(courseData)
+        
+        // Load user progress
+        const progressData = localStorage.getItem(`user-progress-${courseId}`)
+        if (progressData) {
+          setUserProgress(JSON.parse(progressData))
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load course')
         setCourse(null)
@@ -68,5 +82,5 @@ export function useCourseData(courseId: string) {
 
   // Debug functions removed for now
 
-  return { course, loading, error, refreshCourse }
+  return { course, loading, error, userProgress, refreshCourse }
 }
