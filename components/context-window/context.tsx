@@ -2,10 +2,18 @@
 
 import { createContext, useContext, useState, useEffect } from 'react'
 
+export type ContextWindowState = 'closed' | 'compact' | 'expanded'
+
 interface ContextWindowContextValue {
+  state: ContextWindowState
+  setState: (state: ContextWindowState) => void
+  toggle: () => void
+  expand: () => void
+  compact: () => void
+  close: () => void
+  // Legacy support
   isOpen: boolean
   setIsOpen: (open: boolean) => void
-  toggle: () => void
 }
 
 const ContextWindowContext = createContext<ContextWindowContextValue | null>(null)
@@ -20,23 +28,44 @@ export function useContextWindow() {
 
 interface ContextWindowProviderProps {
   children: React.ReactNode
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
+  defaultState?: ContextWindowState
+  defaultOpen?: boolean // Legacy support
+  onStateChange?: (state: ContextWindowState) => void
+  onOpenChange?: (open: boolean) => void // Legacy support
 }
 
 export function ContextWindowProvider({
   children,
+  defaultState = 'closed',
   defaultOpen = false,
+  onStateChange,
   onOpenChange,
 }: ContextWindowProviderProps) {
-  const [isOpen, setIsOpenState] = useState(defaultOpen)
+  // Initialize with defaultOpen for legacy support
+  const [state, setStateInternal] = useState<ContextWindowState>(
+    defaultOpen ? 'compact' : defaultState
+  )
 
-  const setIsOpen = (open: boolean) => {
-    setIsOpenState(open)
-    onOpenChange?.(open)
+  const setState = (newState: ContextWindowState) => {
+    setStateInternal(newState)
+    onStateChange?.(newState)
+    // Legacy support
+    onOpenChange?.(newState !== 'closed')
   }
 
-  const toggle = () => setIsOpen(!isOpen)
+  const toggle = () => {
+    setState(state === 'closed' ? 'compact' : 'closed')
+  }
+
+  const expand = () => setState('expanded')
+  const compact = () => setState('compact')
+  const close = () => setState('closed')
+
+  // Legacy support
+  const isOpen = state !== 'closed'
+  const setIsOpen = (open: boolean) => {
+    setState(open ? 'compact' : 'closed')
+  }
 
   // Keyboard shortcut support (Cmd/Ctrl + K)
   useEffect(() => {
@@ -45,14 +74,28 @@ export function ContextWindowProvider({
         e.preventDefault()
         toggle()
       }
+      // ESC to close expanded view
+      if (e.key === 'Escape' && state === 'expanded') {
+        e.preventDefault()
+        compact()
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen])
+  }, [state])
 
   return (
-    <ContextWindowContext.Provider value={{ isOpen, setIsOpen, toggle }}>
+    <ContextWindowContext.Provider value={{ 
+      state, 
+      setState, 
+      toggle, 
+      expand, 
+      compact, 
+      close,
+      isOpen, 
+      setIsOpen 
+    }}>
       {children}
     </ContextWindowContext.Provider>
   )

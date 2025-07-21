@@ -26,7 +26,7 @@ import {
   MapPin,
   Lock
 } from 'lucide-react'
-import { Card } from '@/components/card'
+import { Card, CardContent } from '@/components/card'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
 import { 

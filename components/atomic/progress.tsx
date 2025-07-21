@@ -34,9 +34,9 @@ const progressIndicatorVariants = cva(
     variants: {
       variant: {
         default: "bg-purple-600",
-        success: "bg-green-600",
-        warning: "bg-yellow-600",
-        error: "bg-red-600",
+        success: "bg-[#22C55E]",
+        warning: "bg-[#FFC700]",
+        error: "bg-[#E51C23]",
       },
       size: {
         sm: "rounded-md",

@@ -1232,14 +1232,20 @@ export default function OrganisationOverviewPage() {
                                     <span className="font-medium text-secondary">Status:</span>
                                     <span className="ml-2 capitalize">{user.status?.replace('_', ' ') || 'Unknown'}</span>
                                   </div>
-                                  <div>
+                                  <div className="col-span-2">
                                     <span className="font-medium text-secondary">Training Progress:</span>
-                                    <div className="mt-1">
-                                      <Progress value={user.overallProgress || 0} className="h-2" />
+                                    <div className="mt-2">
+                                      <Progress 
+                                        value={user.completionRate || 0} 
+                                        label="Overall Progress"
+                                        showPercentage
+                                        variant={
+                                          user.completionRate >= 80 ? "success" : 
+                                          user.completionRate >= 60 ? "warning" : "error"
+                                        }
+                                        size="sm"
+                                      />
                                     </div>
-                                    <span className="text-xs text-secondary mt-1">
-                                        {user.completionRate}% of required training completed
-                                      </span>
                                   </div>
                                 </div>
                               </div>
@@ -1306,7 +1312,7 @@ export default function OrganisationOverviewPage() {
           {/* Details Panel */}
           <div 
             ref={rightPanelRef}
-            className="w-[480px] bg-vergil-off-white/30 border-l border-vergil-off-black/10 p-8 overflow-y-auto"
+            className="w-[480px] bg-vergil-off-white/30 border-l border-vergil-off-black/10 p-4 overflow-y-auto"
           >
             {/* Back button at the top */}
             {(selectedUser || selectedRole) && (
@@ -1317,7 +1323,7 @@ export default function OrganisationOverviewPage() {
                   setSelectedUser(null)
                   setSelectedRole(null)
                 }}
-                className="mb-4 text-vergil-off-black/60 hover:text-vergil-off-black -ml-2"
+                className="mb-2 text-vergil-off-black/60 hover:text-vergil-off-black -ml-2"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
@@ -1325,8 +1331,8 @@ export default function OrganisationOverviewPage() {
             )}
             
             {(selectedUser || selectedRole || viewState.viewMode === 'users' || viewState.viewMode === 'employees') && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-vergil-off-black mb-4">
+              <div className="mb-3">
+                <h3 className="text-lg font-semibold text-vergil-off-black mb-2">
                   {selectedUser ? 'User Profile' : 
                    selectedRole ? 'Team Details' : 
                    'User Profile'}
@@ -1346,7 +1352,7 @@ export default function OrganisationOverviewPage() {
             
             {(viewState.viewMode === 'users' && selectedUser) || (viewState.viewMode === 'roles' && selectedUser) || (viewState.viewMode === 'employees' && selectedUser) ? (
               // User Details with Personal Statistics
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {(() => {
                   const user = users.find(u => u.id === selectedUser)
                   const role = user ? roles.find(r => r.id === user.roleId) : null
@@ -1364,8 +1370,8 @@ export default function OrganisationOverviewPage() {
                   return (
                     <>
                       {/* User Header */}
-                      <div className="border-b border-vergil-off-black/10 pb-6">
-                        <div className="flex items-center gap-4">
+                      <div className="border-b border-vergil-off-black/10 pb-3">
+                        <div className="flex items-center gap-3">
                           <div
                             className="w-16 h-16 rounded-full flex items-center justify-center text-vergil-off-white font-semibold text-xl shadow-lg"
                             style={{ backgroundColor: role?.color || '#7B00FF' }}
@@ -1373,7 +1379,7 @@ export default function OrganisationOverviewPage() {
                             {user.name.split(' ').map(n => n[0]).join('')}
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-xl font-semibold text-vergil-off-black">{user.name}</h4>
+                            <h4 className="text-lg font-semibold text-vergil-off-black">{user.name}</h4>
                             <p className="text-sm font-medium text-vergil-off-black/70">{role?.name || 'Unknown Role'}</p>
                             <div className="flex items-center gap-4 mt-2">
                               <Badge 
@@ -1396,9 +1402,9 @@ export default function OrganisationOverviewPage() {
                       </div>
                       
                       {/* Contact Information */}
-                      <div className="bg-vergil-off-white/50 rounded-lg p-4">
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Contact Information</h5>
-                        <div className="space-y-3">
+                      <div className="bg-vergil-off-white/50 rounded-lg p-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Contact Information</h5>
+                        <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-vergil-purple/10 flex items-center justify-center">
                               <Mail className="w-4 h-4 text-vergil-purple" />
@@ -1416,61 +1422,55 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Progress Overview */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Progress Overview</h5>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Progress Overview</h5>
                         
                         {/* Overall Progress */}
-                        <div className="bg-vergil-off-white/50 rounded-lg p-4 mb-4">
+                        <div className="bg-vergil-off-white/50 rounded-lg p-3 mb-3">
                           <div className="flex justify-between items-center mb-3">
                             <span className="text-sm font-medium text-vergil-off-black">Overall Progress</span>
-                            <span className="text-2xl font-bold" style={{ 
+                            <span className="text-xl font-bold" style={{ 
                               color: user.completionRate >= 80 ? '#10B981' : 
                                      user.completionRate >= 60 ? '#F59E0B' : '#EF4444' 
                             }}>
                               {user.completionRate}%
                             </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5 shadow-inner">
-                            <div 
-                              className="h-2.5 rounded-full transition-all duration-500 shadow-sm"
-                              style={{ 
-                                width: `${user.completionRate}%`,
-                                backgroundColor: user.completionRate >= 80 ? '#10B981' : 
-                                                user.completionRate >= 60 ? '#F59E0B' : '#EF4444'
-                              }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-vergil-off-black/60 mt-1">
-                            <span>0%</span>
-                            <span>100%</span>
-                          </div>
+                          <Progress 
+                            value={user.completionRate || 0} 
+                            variant={
+                              user.completionRate >= 80 ? "success" : 
+                              user.completionRate >= 60 ? "warning" : "error"
+                            }
+                            size="md"
+                          />
                         </div>
                         
                         {/* Course Stats Grid */}
-                        <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="grid grid-cols-3 gap-2 mb-3">
                           <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-vergil-purple">{coursesCompleted}</p>
+                            <p className="text-xl font-bold text-vergil-purple">{coursesCompleted}</p>
                             <p className="text-xs text-vergil-off-black/60">Completed</p>
                           </div>
                           <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-blue-600">{coursesInProgress}</p>
+                            <p className="text-xl font-bold text-blue-600">{coursesInProgress}</p>
                             <p className="text-xs text-vergil-off-black/60">In Progress</p>
                           </div>
                           <div className="bg-vergil-off-white/50 rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-vergil-off-black/40">{totalCourses - coursesCompleted - coursesInProgress}</p>
+                            <p className="text-xl font-bold text-vergil-off-black/40">{totalCourses - coursesCompleted - coursesInProgress}</p>
                             <p className="text-xs text-vergil-off-black/60">Not Started</p>
                           </div>
                         </div>
                         
                         {/* Additional Stats */}
                         <div className="bg-vergil-off-white/50 rounded-lg p-3">
-                          <p className="text-xs text-vergil-off-black/60 mb-1">Average Score</p>
-                          <p className="text-lg font-semibold text-vergil-off-black">{averageScore}%</p>
+                          <p className="text-xs text-vergil-off-black/60">Average Score</p>
+                          <p className="text-base font-semibold text-vergil-off-black">{averageScore}%</p>
                         </div>
                       </div>
                       
                       {/* Actions */}
-                      <div className="border-t border-vergil-off-black/10 pt-6">
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Quick Actions</h5>
+                      <div className="border-t border-vergil-off-black/10 pt-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Quick Actions</h5>
                         <div className="flex flex-col">
                           <Button 
                             variant="secondary" 
@@ -1518,7 +1518,7 @@ export default function OrganisationOverviewPage() {
               </div>
             ) : viewState.viewMode === 'roles' && selectedRole ? (
               // Role Details - Complete redesign
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {(() => {
                   const role = roles.find(r => r.id === selectedRole)
                   if (!role) return null
@@ -1589,8 +1589,8 @@ export default function OrganisationOverviewPage() {
                   return (
                     <>
                       {/* Role Header */}
-                      <div className="border-b border-gray-200 pb-6">
-                        <div className="flex items-center gap-4 mb-4">
+                      <div className="border-b border-gray-200 pb-3">
+                        <div className="flex items-center gap-3 mb-2">
                           <div
                             className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-semibold text-lg"
                             style={{ backgroundColor: role.color }}
@@ -1611,7 +1611,7 @@ export default function OrganisationOverviewPage() {
                       </div>
                       
                       {/* View Toggle */}
-                      <div className="mb-6">
+                      <div className="mb-3">
                         <div className="bg-vergil-off-white/50 rounded-lg p-1 flex">
                           <button
                             onClick={() => setIncludeSubordinates(false)}
@@ -1623,7 +1623,7 @@ export default function OrganisationOverviewPage() {
                           >
                             <div className="text-center">
                               <div className="font-semibold">Users with this role</div>
-                              <div className="text-xs mt-1 opacity-75">
+                              <div className="text-xs opacity-75">
                                 {roleUsers.length} {roleUsers.length === 1 ? 'user' : 'users'} • {avgProgress}% avg progress
                               </div>
                             </div>
@@ -1638,7 +1638,7 @@ export default function OrganisationOverviewPage() {
                           >
                             <div className="text-center">
                               <div className="font-semibold">All subordinates</div>
-                              <div className="text-xs mt-1 opacity-75">
+                              <div className="text-xs opacity-75">
                                 {subordinatesOnly.length} {subordinatesOnly.length === 1 ? 'user' : 'users'} • {avgSubordinatesOnlyProgress}% avg progress
                               </div>
                             </div>
@@ -1648,7 +1648,7 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Key Metrics */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Key Metrics</h5>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-1">Key Metrics</h5>
                         <div className="grid grid-cols-2 gap-1">
                           <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
@@ -1684,8 +1684,8 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Status Distribution */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Status Distribution</h5>
-                        <div className="space-y-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Status Distribution</h5>
+                        <div className="space-y-2">
                           {/* Calculate status counts for current view */}
                           {(() => {
                             const aheadCount = currentViewUsers.filter(u => u.status === 'ahead').length
@@ -1696,8 +1696,8 @@ export default function OrganisationOverviewPage() {
                             
                             return (
                               <>
-                                <div className="bg-white border border-gray-200 rounded-lg p-3">
-                                  <div className="flex justify-between items-center mb-2">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2">
+                                  <div className="flex justify-between items-center mb-1">
                                     <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
                                     <span className="text-sm font-bold text-cyan-800">{aheadCount} ({totalCount > 0 ? Math.round(aheadCount / totalCount * 100) : 0}%)</span>
                                   </div>
@@ -1709,8 +1709,8 @@ export default function OrganisationOverviewPage() {
                                   />
                                 </div>
                                 
-                                <div className="bg-white border border-gray-200 rounded-lg p-3">
-                                  <div className="flex justify-between items-center mb-2">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2">
+                                  <div className="flex justify-between items-center mb-1">
                                     <span className="text-sm font-medium text-vergil-off-black">On Track</span>
                                     <span className="text-sm font-bold text-emerald-700">{onTrackCount} ({totalCount > 0 ? Math.round(onTrackCount / totalCount * 100) : 0}%)</span>
                                   </div>
@@ -1722,8 +1722,8 @@ export default function OrganisationOverviewPage() {
                                   />
                                 </div>
                                 
-                                <div className="bg-white border border-gray-200 rounded-lg p-3">
-                                  <div className="flex justify-between items-center mb-2">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2">
+                                  <div className="flex justify-between items-center mb-1">
                                     <span className="text-sm font-medium text-vergil-off-black">Falling Behind</span>
                                     <span className="text-sm font-bold text-orange-600">{atRiskCount} ({totalCount > 0 ? Math.round(atRiskCount / totalCount * 100) : 0}%)</span>
                                   </div>
@@ -1735,8 +1735,8 @@ export default function OrganisationOverviewPage() {
                                   />
                                 </div>
                                 
-                                <div className="bg-white border border-gray-200 rounded-lg p-3">
-                                  <div className="flex justify-between items-center mb-2">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2">
+                                  <div className="flex justify-between items-center mb-1">
                                     <span className="text-sm font-medium text-vergil-off-black">Drastically Behind</span>
                                     <span className="text-sm font-bold text-red-700">{behindCount} ({totalCount > 0 ? Math.round(behindCount / totalCount * 100) : 0}%)</span>
                                   </div>
@@ -1817,8 +1817,8 @@ export default function OrganisationOverviewPage() {
                       )}
                       
                       {/* Actions */}
-                      <div className="border-t border-gray-200 pt-6">
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-3">Quick Actions</h5>
+                      <div className="border-t border-gray-200 pt-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Quick Actions</h5>
                         <div className="space-y-2">
                           <Button 
                             variant="secondary" 
@@ -1850,7 +1850,7 @@ export default function OrganisationOverviewPage() {
               </div>
             ) : (
               // Organization-wide Statistics
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {(() => {
                   // Calculate organization-wide metrics
                   const totalUsers = users.length
@@ -1884,7 +1884,7 @@ export default function OrganisationOverviewPage() {
                   return (
                     <>
                       {/* Organization Header */}
-                      <div className="border-b border-gray-200 pb-6">
+                      <div className="border-b border-gray-200 pb-3">
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-lg bg-vergil-purple/10 flex items-center justify-center">
                             <Users className="w-8 h-8 text-vergil-purple" />
@@ -1900,7 +1900,7 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Key Metrics */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Key Metrics</h5>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-1">Key Metrics</h5>
                         <div className="grid grid-cols-2 gap-1">
                           <div className="bg-gray-50 rounded p-1.5">
                             <p className="text-xs text-vergil-off-black/60">Overall Progress</p>
@@ -1936,8 +1936,8 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Status Distribution */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Status Distribution</h5>
-                        <div className="space-y-3">
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Status Distribution</h5>
+                        <div className="space-y-2">
                           <div className="bg-white border border-gray-200 rounded-lg p-3">
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-sm font-medium text-vergil-off-black">Ahead of Time</span>
@@ -1991,7 +1991,7 @@ export default function OrganisationOverviewPage() {
                       
                       {/* Performance by Role */}
                       <div>
-                        <h5 className="text-sm font-semibold text-vergil-off-black mb-4">Performance by Role</h5>
+                        <h5 className="text-sm font-semibold text-vergil-off-black mb-2">Performance by Role</h5>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {roleStats.map(({ role, avgCompletion, userCount }) => (
                             <div 

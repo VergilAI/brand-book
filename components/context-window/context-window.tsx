@@ -23,7 +23,7 @@ export function ContextWindow({ className, children }: ContextWindowProps) {
   if (!portalRef.current) return null
 
   return createPortal(
-    <div className={cn('flex h-full w-full flex-col bg-white', className)}>
+    <div className={cn('flex h-full w-full flex-col bg-white overflow-hidden', className)}>
       {children}
     </div>,
     portalRef.current
@@ -32,7 +32,7 @@ export function ContextWindow({ className, children }: ContextWindowProps) {
 
 // Unified toggle button component
 export function ContextWindowTrigger({ className }: { className?: string }) {
-  const { isOpen, toggle } = useContextWindow()
+  const { state, toggle } = useContextWindow()
 
   return (
     <button
@@ -48,10 +48,10 @@ export function ContextWindowTrigger({ className }: { className?: string }) {
         'focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2',
         className
       )}
-      aria-label={`${isOpen ? 'Close' : 'Open'} context window (Cmd+K)`}
-      title={`${isOpen ? 'Close' : 'Open'} context window (Cmd+K)`}
+      aria-label={`${state !== 'closed' ? 'Close' : 'Open'} context window (Cmd+K)`}
+      title={`${state !== 'closed' ? 'Close' : 'Open'} context window (Cmd+K)`}
     >
-      {isOpen ? (
+      {state !== 'closed' ? (
         <ChevronRight className="h-4 w-4 text-secondary" />
       ) : (
         <ChevronLeft className="h-4 w-4 text-secondary" />
