@@ -13,7 +13,8 @@ import {
   DollarSign,
   Trophy,
   Shuffle,
-  Check
+  Check,
+  MessageSquare
 } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Badge } from '@/components/atomic/badge'
@@ -94,6 +95,15 @@ const gameTypes: GameType[] = [
     description: 'Match related concepts and terms by connecting cards',
     icon: <Shuffle className="h-4 w-4" />,
     category: 'Quiz'
+  },
+  
+  // AI Chat
+  {
+    id: 'ai-chat',
+    title: 'AI Learning Assistant',
+    description: 'Chat with an AI tutor for personalized learning',
+    icon: <MessageSquare className="h-4 w-4" />,
+    category: 'Interactive'
   }
 ]
 

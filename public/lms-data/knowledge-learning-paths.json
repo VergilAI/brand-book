@@ -4,7 +4,7 @@
       "lessonId": "lesson-1-1",
       "lessonTitle": "The Cybersecurity Landscape",
       "chapterTitle": "Introduction to Cybersecurity",
-      "gameTypes": ["written-material", "video", "flashcards", "millionaire"]
+      "gameTypes": ["written-material", "video", "flashcards", "millionaire", "ai-chat"]
     }
   ],
   "kp-2": [
@@ -28,7 +28,7 @@
       "lessonId": "lesson-1-2",
       "lessonTitle": "Security Risk Management",
       "chapterTitle": "Introduction to Cybersecurity",
-      "gameTypes": ["written-material", "audio-material", "flashcards", "connect-cards"]
+      "gameTypes": ["written-material", "audio-material", "flashcards", "connect-cards", "ai-chat"]
     }
   ],
   "kp-5": [
@@ -44,7 +44,7 @@
       "lessonId": "lesson-2-1",
       "lessonTitle": "Network Security Fundamentals",
       "chapterTitle": "Network Security",
-      "gameTypes": ["written-material", "video", "flashcards", "jeopardy"]
+      "gameTypes": ["written-material", "video", "flashcards", "jeopardy", "ai-chat"]
     }
   ],
   "kp-7": [

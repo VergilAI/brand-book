@@ -9,7 +9,8 @@ import {
   List, 
   FileEdit, 
   Type, 
-  Hash
+  Hash,
+  MessageSquare
 } from 'lucide-react'
 
 export interface GameType {
@@ -77,6 +78,16 @@ export const gameTypes: GameType[] = [
     description: 'Duolingo-style card matching game',
     icon: Puzzle,
     category: 'quiz'
+  },
+
+  // AI Chat
+  {
+    id: 'ai-chat',
+    name: 'AI Learning Assistant',
+    description: 'Chat with an AI tutor for personalized learning',
+    icon: MessageSquare,
+    category: 'chat',
+    requiresAI: true
   }
 ]
 

@@ -7,6 +7,7 @@ import { WrittenMaterial } from './written-material'
 import { AudioMaterial } from './audio-material'
 import { VideoMaterial } from './video-material'
 import { ConnectCardsGame } from './connect-cards-game'
+import { AIChatGame } from './ai-chat-game'
 
 interface GameRouterProps {
   gameType: string
@@ -74,6 +75,15 @@ export function GameRouter({ gameType, lessonId, onClose, onComplete }: GameRout
     case 'connect-cards':
       return (
         <ConnectCardsGame
+          lessonId={lessonId}
+          onClose={onClose}
+          onComplete={onComplete}
+        />
+      )
+    
+    case 'ai-chat':
+      return (
+        <AIChatGame
           lessonId={lessonId}
           onClose={onClose}
           onComplete={onComplete}
