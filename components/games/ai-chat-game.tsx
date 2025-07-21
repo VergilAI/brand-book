@@ -200,49 +200,6 @@ export function AIChatGame({
         animate={{ opacity: 1, scale: 1 }}
         className="fixed inset-0 bg-bg-primary flex flex-col"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-spacing-md border-b border-border-subtle bg-bg-secondary">
-          <div className="flex items-center gap-spacing-sm">
-            <div className={`size-10 rounded-lg ${currentMode.color} flex items-center justify-center`}>
-              <currentMode.icon className="size-5 text-text-inverse" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">{currentMode.title}</h3>
-              <p className="text-sm text-text-secondary">{lessonTopic}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-spacing-sm">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="gap-2"
-            >
-              <ArrowLeft className="size-4" />
-              Back to Activities
-            </Button>
-            <Badge variant="secondary">
-              {messageCount} messages
-            </Badge>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleComplete}
-            >
-              Complete Session
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="size-9"
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-        </div>
-
         {/* Chat Interface */}
         <div className="flex-1 overflow-hidden">
           <AIChatbotEnhanced
@@ -258,14 +215,16 @@ export function AIChatGame({
             lessonTopic={lessonTopic}
             lessonContent={null} // Could be populated with actual lesson content
             sessionId={`session-${lessonId}-${Date.now()}`}
+            onClose={onClose}
+            onComplete={handleComplete}
+            messageCount={messageCount}
           />
         </div>
 
         {/* Footer Status */}
         <div className="p-spacing-sm border-t border-border-subtle bg-bg-secondary">
-          <div className="flex items-center justify-between text-sm text-text-secondary">
+          <div className="flex items-center justify-center text-sm text-text-secondary">
             <span>Session started {sessionStartTime.toLocaleTimeString()}</span>
-            <span>Engagement score: {calculateScore()}%</span>
           </div>
         </div>
       </motion.div>

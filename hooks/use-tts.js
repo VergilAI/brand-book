@@ -25,6 +25,7 @@ export function useTTS() {
   const [error, setError] = useState(null)
   const audioRef = useRef(null)
   const audioUrlRef = useRef(null)
+  const playPromiseRef = useRef(null)
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -240,8 +241,19 @@ export function useTTS() {
         if (loadTimeout) clearTimeout(loadTimeout)
         console.log('Audio metadata loaded:', {
           duration: audio.duration,
-          readyState: audio.readyState
+          readyState: audio.readyState,
+          currentTime: audio.currentTime
         })
+        
+        // Force initial progress update
+        if (onProgress && audio.duration > 0) {
+          const words = text.split(' ')
+          onProgress({ 
+            progress: 0, 
+            currentWordIndex: 0,
+            highlightRange: { start: 0, end: Math.min(4, words.length - 1) }
+          })
+        }
       })
       
       audio.addEventListener('canplay', () => {
@@ -306,22 +318,29 @@ export function useTTS() {
       audio.addEventListener('error', handleError)
       audio.addEventListener('ended', handleEnded)
 
+      let lastUpdateTime = 0
+      let updateCount = 0
       audio.addEventListener('timeupdate', () => {
-        if (onProgress && audio.duration) {
+        if (onProgress && audio.duration && audio.duration > 0) {
+          // Throttle updates to every 100ms
+          const now = Date.now()
+          if (now - lastUpdateTime < 100) return
+          lastUpdateTime = now
+          updateCount++
+          
+          
           const progress = (audio.currentTime / audio.duration) * 100
           const words = text.split(' ')
           const totalWords = words.length
           
-          // Calculate the current position with a buffer ahead
+          // Calculate the current position without buffer for more accurate sync
           const progressRatio = audio.currentTime / audio.duration
-          const bufferAhead = 0.05 // 5% buffer ahead of actual playback
-          const adjustedProgress = Math.min(progressRatio + bufferAhead, 1)
           
           // Calculate word range to highlight (multiple words)
-          const centerWordIndex = Math.floor(adjustedProgress * totalWords)
-          const wordsToHighlight = 5 // Highlight 5 words at a time
-          const startIndex = Math.max(0, centerWordIndex - Math.floor(wordsToHighlight / 2))
-          const endIndex = Math.min(totalWords - 1, startIndex + wordsToHighlight - 1)
+          const centerWordIndex = Math.floor(progressRatio * totalWords)
+          const wordsToHighlight = 3 // Highlight 3 words at a time for better accuracy
+          const startIndex = Math.max(0, centerWordIndex - 1) // One word before
+          const endIndex = Math.min(totalWords - 1, centerWordIndex + 1) // One word after
           
           onProgress({ 
             progress, 
@@ -336,10 +355,13 @@ export function useTTS() {
       
       // Start playback with error handling
       try {
-        await audio.play()
+        playPromiseRef.current = audio.play()
+        await playPromiseRef.current
         console.log('Audio playback started successfully')
+        playPromiseRef.current = null
       } catch (playError) {
         console.error('Error starting audio playback:', playError)
+        playPromiseRef.current = null
         
         // Determine specific play error
         let playErrorMessage = 'Failed to start audio playback'
@@ -363,11 +385,27 @@ export function useTTS() {
     }
   }, [cleanup])
 
-  const pause = useCallback(() => {
+  const pause = useCallback(async () => {
     if (audioRef.current && isPlaying) {
-      audioRef.current.pause()
-      setIsPaused(true)
-      setIsPlaying(false)
+      // Wait for play promise to resolve if it exists
+      if (playPromiseRef.current) {
+        try {
+          await playPromiseRef.current
+        } catch (e) {
+          // Play was rejected, no need to pause
+          console.log('Play promise was rejected, skipping pause')
+          return
+        }
+      }
+      
+      // Now safe to pause
+      try {
+        audioRef.current.pause()
+        setIsPaused(true)
+        setIsPlaying(false)
+      } catch (e) {
+        console.warn('Error pausing audio:', e)
+      }
     }
   }, [isPlaying])
 
@@ -384,11 +422,27 @@ export function useTTS() {
     }
   }, [isPaused])
 
-  const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
+  const stop = useCallback(async () => {
+    // Wait for play promise to resolve if it exists
+    if (playPromiseRef.current) {
+      try {
+        await playPromiseRef.current
+      } catch (e) {
+        // Play was rejected, continue with cleanup
+        console.log('Play promise was rejected during stop')
+      }
     }
+    
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      } catch (e) {
+        console.warn('Error stopping audio:', e)
+      }
+    }
+    
+    playPromiseRef.current = null
     setIsPlaying(false)
     setIsPaused(false)
     cleanup()

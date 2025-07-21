@@ -373,6 +373,102 @@ body {
   }
 }
 
+/* Range Slider Styles */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  outline: none;
+  position: relative;
+  z-index: 1;
+  touch-action: none; /* Prevent touch scrolling interference */
+}
+
+input[type="range"].slider::-webkit-slider-track {
+  height: 8px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+input[type="range"].slider::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #7B00FF;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid white;
+  cursor: grab;
+  margin-top: -6px; /* Center thumb on track */
+  position: relative;
+  z-index: 2;
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #7B00FF;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid white;
+  cursor: grab;
+  position: relative;
+  z-index: 2;
+}
+
+/* Remove ALL transitions during drag */
+input[type="range"].slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  box-shadow: 0 0 0 4px rgba(123, 0, 255, 0.2);
+  transition: none !important;
+}
+
+input[type="range"].slider:active::-moz-range-thumb {
+  cursor: grabbing;
+  box-shadow: 0 0 0 4px rgba(123, 0, 255, 0.2);
+  transition: none !important;
+}
+
+/* Hover state when not dragging */
+input[type="range"].slider:not(:active):hover::-webkit-slider-thumb {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(123, 0, 255, 0.4);
+  transition: all 0.15s ease-in-out;
+}
+
+input[type="range"].slider:not(:active):hover::-moz-range-thumb {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(123, 0, 255, 0.4);
+  transition: all 0.15s ease-in-out;
+}
+
+/* Focus state */
+input[type="range"].slider:focus {
+  outline: none;
+}
+
+input[type="range"].slider:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(123, 0, 255, 0.2);
+}
+
+input[type="range"].slider:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(123, 0, 255, 0.2);
+}
+
+/* Ensure the track doesn't interfere with dragging */
+input[type="range"].slider::-webkit-slider-runnable-track {
+  pointer-events: none;
+}
+
 /* Carousel Smooth Scrolling Enhancement */
 body.carousel-active {
   scroll-behavior: smooth;
