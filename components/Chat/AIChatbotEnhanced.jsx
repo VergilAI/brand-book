@@ -55,6 +55,207 @@ const quickActions = [
   { id: 'quiz', label: 'Quiz me on this', prompt: 'Can you create a quiz question about what we just discussed?' }
 ]
 
+// Create a messages context to isolate updates
+const MessagesContext = React.createContext(null)
+
+// Messages provider component
+const MessagesProvider = React.memo(({ children, initialMessages }) => {
+  const [messages, setMessages] = useState(initialMessages)
+  
+  const value = React.useMemo(() => ({
+    messages,
+    setMessages
+  }), [messages])
+  
+  return (
+    <MessagesContext.Provider value={value}>
+      {children}
+    </MessagesContext.Provider>
+  )
+})
+
+// Loading indicator component
+const LoadingIndicator = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="flex justify-start gap-spacing-sm"
+  >
+    <Avatar className="size-8 flex-shrink-0">
+      <div className="size-full bg-bg-brand flex items-center justify-center">
+        <MessageSquare className="size-4 text-text-inverse" />
+      </div>
+    </Avatar>
+    
+    <div className="bg-bg-secondary rounded-lg p-spacing-md">
+      <div className="flex items-center gap-spacing-sm">
+        <Loader2 className="size-4 animate-spin text-text-secondary" />
+        <span className="text-sm text-text-secondary">AI is thinking...</span>
+      </div>
+    </div>
+  </motion.div>
+)
+
+// Render message bubble - Optimized with proper memoization
+const MessageBubble = React.memo(({ message, onToggleTTS, renderMessageContent, formatTimestamp }) => {
+  const isUser = message.role === 'user'
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      className={cn(
+        'flex gap-spacing-sm', // 8px
+        isUser ? 'justify-end' : 'justify-start'
+      )}
+    >
+      {!isUser && (
+        <Avatar className="size-8 flex-shrink-0">
+          <div className="size-full bg-bg-brand flex items-center justify-center">
+            <MessageSquare className="size-4 text-text-inverse" />
+          </div>
+        </Avatar>
+      )}
+      
+      <div className={cn(
+        'max-w-[70%] space-y-spacing-xs', // 4px
+        isUser && 'items-end'
+      )}>
+        <div className={cn(
+          'rounded-lg p-spacing-md', // 16px padding
+          'shadow-sm',
+          isUser 
+            ? 'bg-bg-brand text-text-inverse' // #7B00FF, #F5F5F7
+            : 'bg-bg-secondary text-text-primary' // #F5F5F7, #1D1D1F
+        )}>
+          {renderMessageContent(message)}
+        </div>
+        
+        <div className={cn(
+          'flex items-center gap-spacing-sm text-xs text-text-tertiary', // #71717A
+          isUser ? 'justify-end' : 'justify-start'
+        )}>
+          <span>{formatTimestamp(message.timestamp)}</span>
+          
+          {!isUser && (
+            <div className="flex items-center gap-spacing-xs">
+              {message.isPlaying && (
+                <Badge variant="secondary" className="text-xs">
+                  Speaking...
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggleTTS(message.id)}
+                className="h-6 px-2"
+              >
+                {message.isPlaying ? (
+                  <Pause className="h-3 w-3" />
+                ) : (
+                  <Play className="h-3 w-3" />
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {isUser && (
+        <Avatar className="size-8 flex-shrink-0">
+          <div className="size-full bg-bg-emphasis flex items-center justify-center">
+            <span className="text-sm font-medium text-text-primary">U</span>
+          </div>
+        </Avatar>
+      )}
+    </motion.div>
+  )
+}, (prevProps, nextProps) => {
+  // Deep comparison for message properties that matter for rendering
+  return (
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.content === nextProps.message.content &&
+    prevProps.message.isPlaying === nextProps.message.isPlaying &&
+    prevProps.message.currentWordIndex === nextProps.message.currentWordIndex
+  )
+})
+
+// Message list component - isolated to prevent parent re-renders
+const MessageList = React.memo(({ 
+  messages, 
+  isLoading, 
+  onToggleTTS,
+  renderMessageContent,
+  formatTimestamp 
+}) => {
+  return (
+    <AnimatePresence mode="popLayout">
+      {messages.map((message) => (
+        <MessageBubble 
+          key={message.id} 
+          message={message} 
+          onToggleTTS={onToggleTTS}
+          renderMessageContent={renderMessageContent}
+          formatTimestamp={formatTimestamp}
+        />
+      ))}
+      
+      {isLoading && <LoadingIndicator />}
+    </AnimatePresence>
+  )
+})
+
+// Memoized input component to prevent re-renders - moved outside to prevent recreation
+const ChatInput = React.memo(({ onSend, isLoading, placeholder, value, onChange, disabled }) => {
+  const inputRef = useRef(null)
+  
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (value.trim() && !isLoading && !disabled) {
+        onSend(value)
+      }
+    }
+  }
+  
+  const handleChange = (e) => {
+    onChange(e.target.value)
+  }
+  
+  return (
+    <input
+      ref={inputRef}
+      value={value}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      placeholder={placeholder}
+      disabled={disabled}
+      type="text"
+      autoComplete="off"
+      autoCorrect="off"
+      autoCapitalize="off"
+      spellCheck="false"
+      className={cn(
+        "w-full h-12 px-4 text-base font-normal leading-[48px]",
+        "text-text-primary bg-bg-emphasis-input",
+        "border border-border-default rounded-md",
+        "transition-all duration-fast ease-out",
+        "focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-2",
+        "disabled:opacity-60 disabled:cursor-not-allowed"
+      )}
+    />
+  )
+}, (prevProps, nextProps) => {
+  // Optimized comparison
+  return prevProps.value === nextProps.value && 
+         prevProps.isLoading === nextProps.isLoading &&
+         prevProps.placeholder === nextProps.placeholder &&
+         prevProps.disabled === nextProps.disabled
+})
+
 // Inner component that uses TTS settings
 const AIChatbotInner = ({ 
   embedded = false,
@@ -85,34 +286,58 @@ const AIChatbotInner = ({
   ])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Wrap setInputValue in useCallback to prevent unnecessary re-renders
+  const handleInputChange = useCallback((value) => {
+    setInputValue(value)
+  }, [])
   const [isMinimized, setIsMinimized] = useState(defaultMinimized)
   const [error, setError] = useState(null)
   const [showScrollButton, setShowScrollButton] = useState(false)
   const [ttsQueue, setTtsQueue] = useState([])
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showHistory, setShowHistory] = useState(false)
+  const [messageQueue, setMessageQueue] = useState([])
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false)
   
   const messagesEndRef = useRef(null)
   const chatContainerRef = useRef(null)
   const inputRef = useRef(null)
-  const typingTimeoutRef = useRef(null)
+  const messagesRef = useRef(messages)
   
   // TTS hooks and settings
   const { settings, updateSettings } = useTTSSettings()
   // Single TTS instance for all messages
   const { speak, pause, resume, stop, setPlaybackRate, setVolume, isPlaying, isPaused, error: ttsError } = useTTS()
+  
+  // Show TTS errors to user
+  useEffect(() => {
+    if (ttsError && ttsError.includes('usage limit')) {
+      setError('Monthly TTS limit reached. Audio playback is temporarily disabled.')
+    }
+  }, [ttsError])
 
+  // Track if user is at bottom
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Keep messagesRef updated
   useEffect(() => {
-    scrollToBottom()
+    messagesRef.current = messages
   }, [messages])
+
+  // Only auto-scroll if user is already at bottom
+  useEffect(() => {
+    if (isAtBottom) {
+      scrollToBottom()
+    }
+  }, [messages, isAtBottom])
 
   // Check if user has scrolled up
   const handleScroll = () => {
@@ -120,6 +345,7 @@ const AIChatbotInner = ({
       const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
       setShowScrollButton(!isNearBottom)
+      setIsAtBottom(isNearBottom)
     }
   }
 
@@ -157,34 +383,16 @@ const AIChatbotInner = ({
     }).format(date)
   }
 
-  // Handle typing detection
-  const handleTypingStart = useCallback(() => {
-    if (!isTyping) {
-      setIsTyping(true)
-      // Pause all TTS when typing
-      if (currentlyPlayingId && isPlaying) {
-        pause()
-      }
-    }
-    
-    // Clear existing timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current)
-    }
-    
-    // Set new timeout
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false)
-      // Resume TTS if it was paused due to typing
-      if (currentlyPlayingId && isPaused && !isPlaying) {
-        resume()
-      }
-    }, 1000)
-  }, [isTyping, currentlyPlayingId, isPlaying, isPaused, pause, resume])
 
-  // Handle message sending
+  // Handle message sending with queueing support
   const handleSendMessage = async (messageText = inputValue.trim()) => {
     if (!messageText) return
+    
+    // Prevent sending if TTS is playing
+    if (currentlyPlayingId) {
+      setError('Please stop the current audio playback before sending a new message')
+      return
+    }
 
     const userMessage = {
       id: Date.now().toString(),
@@ -196,84 +404,175 @@ const AIChatbotInner = ({
     setMessages(prev => [...prev, userMessage])
     setInputValue('')
     setError(null)
-    setIsTyping(false)
     
     // Call onMessageSent callback if provided
     if (onMessageSent) {
       onMessageSent()
     }
 
-    // Build context message
-    let contextMessage = ''
-    if (lessonContent) {
-      contextMessage = `Current lesson topic: ${lessonTopic}\n\nLesson content for reference:\n${lessonContent}\n\n`
+    // Add to queue if processing another message
+    if (isProcessingQueue) {
+      setMessageQueue(prev => [...prev, { userMessage, contextMessage: lessonContent ? `Current lesson topic: ${lessonTopic}\n\n` : '' }])
+      return
     }
 
-    // Make API call
+    // Process the message
+    await processMessage(userMessage, lessonContent ? `Current lesson topic: ${lessonTopic}\n\n` : '')
+  }
+
+  // Process a single message with streaming
+  const processMessage = async (userMessage, contextMessage = '') => {
+    setIsProcessingQueue(true)
     setIsLoading(true)
+    
+    const aiResponseId = Date.now().toString() + '-ai'
+    const aiResponse = {
+      id: aiResponseId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      isPlaying: false,
+      currentWordIndex: -1,
+      isStreaming: true
+    }
+    
+    // Add empty AI message that will be filled with streaming content
+    setMessages(prev => [...prev, aiResponse])
+    
     try {
-      const response = await fetch('/api/chat/message', {
+      const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message: contextMessage + userMessage.content,
-          chatHistory: messages.slice(-10),
+          chatHistory: messagesRef.current.slice(-10),
           context: chatContext,
           lessonTopic: lessonTopic
         })
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response')
+        throw new Error('Failed to get response')
       }
 
-      const aiResponse = {
-        id: data.messageId,
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date(),
-        isPlaying: false,
-        currentWordIndex: -1
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let accumulatedText = ''
+      let sentenceBuffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+
+            try {
+              const parsed = JSON.parse(data)
+              if (parsed.error) {
+                throw new Error(parsed.error)
+              }
+              
+              if (parsed.text) {
+                accumulatedText += parsed.text
+                sentenceBuffer += parsed.text
+                
+                // Update the message with accumulated text
+                setMessages(prev => prev.map(msg => 
+                  msg.id === aiResponseId 
+                    ? { ...msg, content: accumulatedText }
+                    : msg
+                ))
+                
+                // Check if we have a complete sentence for TTS
+                const sentenceEnd = /[.!?]\s/.exec(sentenceBuffer)
+                if (sentenceEnd && settings.autoTTS) {
+                  const sentence = sentenceBuffer.substring(0, sentenceEnd.index + 1).trim()
+                  if (sentence.length > 10) { // Only speak meaningful sentences
+                    // Create a temporary message for TTS
+                    const tempId = `${aiResponseId}-sentence-${Date.now()}`
+                    setTtsQueue(prev => [...prev, { id: tempId, text: sentence }])
+                    sentenceBuffer = sentenceBuffer.substring(sentenceEnd.index + 1)
+                  }
+                }
+              }
+            } catch (e) {
+              console.error('Error parsing stream:', e)
+            }
+          }
+        }
       }
 
-      setMessages(prev => [...prev, aiResponse])
+      // Mark streaming as complete
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiResponseId 
+          ? { ...msg, isStreaming: false }
+          : msg
+      ))
       
-      // Auto-play TTS if enabled
-      if (settings.autoTTS) {
-        setTtsQueue(prev => [...prev, aiResponse.id])
+      // Queue any remaining text for TTS
+      if (settings.autoTTS && sentenceBuffer.trim().length > 0) {
+        // Only queue the remaining unspoken text
+        const tempId = `${aiResponseId}-final-${Date.now()}`
+        setTtsQueue(prev => [...prev, { id: tempId, text: sentenceBuffer.trim() }])
       }
       
     } catch (err) {
       setError(err.message || 'An error occurred while sending the message')
+      // Remove the empty AI message on error
+      setMessages(prev => prev.filter(msg => msg.id !== aiResponseId))
     } finally {
       setIsLoading(false)
+      setIsProcessingQueue(false)
+      
+      // Process next message in queue
+      if (messageQueue.length > 0) {
+        const nextMessage = messageQueue[0]
+        setMessageQueue(prev => prev.slice(1))
+        await processMessage(nextMessage.userMessage, nextMessage.contextMessage)
+      }
     }
   }
 
   // Handle quick actions
   const handleQuickAction = (action) => {
+    // Prevent if TTS is playing
+    if (currentlyPlayingId) {
+      setError('Please stop the current audio playback before sending a new message')
+      return
+    }
     handleSendMessage(action.prompt)
   }
 
-  // Toggle message TTS
+  // Toggle message TTS - Optimized to reduce re-renders
   const toggleMessageTTS = useCallback(async (messageId) => {
-    const message = messages.find(m => m.id === messageId)
-    if (!message || message.role !== 'assistant') return
+    const currentMessages = messagesRef.current
+    const messageIndex = currentMessages.findIndex(m => m.id === messageId)
+    if (messageIndex === -1 || currentMessages[messageIndex].role !== 'assistant') return
+    
+    const message = currentMessages[messageIndex]
     
     if (message.isPlaying && currentlyPlayingId === messageId) {
       pause()
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageId ? { ...msg, isPlaying: false } : msg
-      ))
+      setMessages(prev => {
+        const newMessages = [...prev]
+        newMessages[messageIndex] = { ...newMessages[messageIndex], isPlaying: false }
+        return newMessages
+      })
     } else if (currentlyPlayingId === messageId && isPaused) {
       resume()
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageId ? { ...msg, isPlaying: true } : msg
-      ))
+      setMessages(prev => {
+        const newMessages = [...prev]
+        newMessages[messageIndex] = { ...newMessages[messageIndex], isPlaying: true }
+        return newMessages
+      })
     } else {
       // Stop any other playing message
       if (currentlyPlayingId) {
@@ -296,75 +595,102 @@ const AIChatbotInner = ({
         },
         onEnd: () => {
           setMessages(prev => prev.map(msg => 
-            msg.id === messageId ? { ...msg, isPlaying: false, currentWordIndex: -1 } : msg
+            msg.id === messageId ? { ...msg, isPlaying: false, currentWordIndex: -1, highlightRange: null } : msg
           ))
           setCurrentlyPlayingId(null)
           processNextTTS()
         },
-        onProgress: ({ currentWordIndex }) => {
+        onProgress: ({ currentWordIndex, highlightRange }) => {
           setMessages(prev => prev.map(msg => 
-            msg.id === messageId ? { ...msg, currentWordIndex } : msg
+            msg.id === messageId ? { ...msg, currentWordIndex, highlightRange } : msg
           ))
         }
       })
     }
-  }, [messages, currentlyPlayingId, isPaused, settings, speak, pause, resume])
+  }, [currentlyPlayingId, isPaused, settings.voiceName, settings.playbackSpeed, settings.volume, speak, pause, resume])
 
   // Stop a specific message
-  const stopMessage = (messageId) => {
+  const stopMessage = useCallback((messageId) => {
     stop()
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId ? { ...msg, isPlaying: false, currentWordIndex: -1 } : msg
-    ))
+    setMessages(prev => {
+      const index = prev.findIndex(msg => msg.id === messageId)
+      if (index === -1) return prev
+      const newMessages = [...prev]
+      newMessages[index] = { ...newMessages[index], isPlaying: false, currentWordIndex: -1, highlightRange: null }
+      return newMessages
+    })
     if (currentlyPlayingId === messageId) {
       setCurrentlyPlayingId(null)
     }
-  }
-
-  // Stop all TTS
-  const stopAllTTS = () => {
-    stop()
-    setMessages(prev => prev.map(msg => ({ 
-      ...msg, 
-      isPlaying: false, 
-      currentWordIndex: -1 
-    })))
-    setCurrentlyPlayingId(null)
+  }, [currentlyPlayingId, stop])
+  
+  // Stop all TTS playback
+  const stopAllTTS = useCallback(() => {
+    if (currentlyPlayingId) {
+      stopMessage(currentlyPlayingId)
+    }
     setTtsQueue([])
-  }
+    setError(null)
+  }, [currentlyPlayingId, stopMessage])
+
+  // Process TTS queue - don't include in dependency arrays to avoid loops
+  const processNextTTS = useCallback(() => {
+    if (ttsQueue.length === 0 || currentlyPlayingId || !settings.autoTTS) {
+      return
+    }
+    
+    const nextItem = ttsQueue[0]
+    
+    // Handle sentence-based TTS
+    if (typeof nextItem === 'object' && nextItem.text) {
+      setTtsQueue(prev => prev.slice(1))
+      
+      // Speak the sentence directly
+      speak(nextItem.text, {
+        voiceName: settings.voiceName,
+        playbackRate: settings.playbackSpeed,
+        volume: settings.volume,
+        onEnd: () => {
+          setCurrentlyPlayingId(null)
+        }
+      })
+      
+      setCurrentlyPlayingId(nextItem.id)
+      return
+    }
+    
+    // Handle regular message TTS
+    const nextId = typeof nextItem === 'string' ? nextItem : nextItem.id
+    // Check if the message exists in the current messages
+    const messageExists = messagesRef.current.some(m => m.id === nextId)
+    
+    if (!messageExists) {
+      // Message not ready yet, try again shortly
+      setTimeout(() => processNextTTS(), 100)
+      return
+    }
+    
+    setTtsQueue(prev => prev.slice(1))
+    
+    // Immediately toggle TTS without delay
+    toggleMessageTTS(nextId)
+  }, [ttsQueue, currentlyPlayingId, settings.autoTTS, settings.voiceName, settings.playbackSpeed, settings.volume, speak, toggleMessageTTS])
 
   // Skip to next message
-  const skipToNext = () => {
+  const skipToNext = useCallback(() => {
     if (currentlyPlayingId) {
       stopMessage(currentlyPlayingId)
     }
     processNextTTS()
-  }
-
-  // Process TTS queue - don't include in dependency arrays to avoid loops
-  const processNextTTS = () => {
-    if (ttsQueue.length === 0 || currentlyPlayingId || !settings.autoTTS || isTyping) {
-      return
-    }
-    
-    const nextId = ttsQueue[0]
-    setTtsQueue(prev => prev.slice(1))
-    
-    // Delay to ensure state updates have propagated
-    setTimeout(() => {
-      toggleMessageTTS(nextId)
-    }, 100)
-  }
+  }, [currentlyPlayingId, stopMessage, processNextTTS])
 
   // Only process queue when playback ends or queue changes
   useEffect(() => {
-    if (!currentlyPlayingId && ttsQueue.length > 0 && !isTyping && settings.autoTTS) {
-      const timer = setTimeout(() => {
-        processNextTTS()
-      }, 200)
-      return () => clearTimeout(timer)
+    if (!currentlyPlayingId && ttsQueue.length > 0 && settings.autoTTS) {
+      // Process immediately without delay
+      processNextTTS()
     }
-  }, [currentlyPlayingId, ttsQueue.length, isTyping, settings.autoTTS])
+  }, [currentlyPlayingId, ttsQueue.length, settings.autoTTS, processNextTTS])
 
   // Clear chat history
   const handleClearChat = () => {
@@ -405,53 +731,61 @@ const AIChatbotInner = ({
 
   // Render message with highlighted words for TTS
   const renderMessageContent = (message) => {
-    if (message.role !== 'assistant' || message.currentWordIndex < 0) {
+    if (message.role !== 'assistant' || !message.isPlaying) {
       return <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
     }
 
     const words = message.content.split(' ')
+    const highlightRange = message.highlightRange || { start: -1, end: -1 }
+    
     return (
       <p className="text-base leading-relaxed whitespace-pre-wrap">
-        {words.map((word, index) => (
-          <span
-            key={index}
-            className={cn(
-              'cursor-pointer transition-colors',
-              index === message.currentWordIndex && 'bg-yellow-200 dark:bg-yellow-900'
-            )}
-            onClick={async () => {
-              if (message.isPlaying && currentlyPlayingId === message.id) {
-                // Restart from clicked word
-                stop()
-                setCurrentlyPlayingId(message.id)
-                await speak(message.content, {
-                  startFrom: index,
-                  voiceName: settings.voiceName,
-                  playbackRate: settings.playbackSpeed,
-                  volume: settings.volume,
-                  onStart: () => {
-                    setMessages(prev => prev.map(msg => 
-                      msg.id === message.id ? { ...msg, isPlaying: true } : msg
-                    ))
-                  },
-                  onEnd: () => {
-                    setMessages(prev => prev.map(msg => 
-                      msg.id === message.id ? { ...msg, isPlaying: false, currentWordIndex: -1 } : msg
-                    ))
-                    setCurrentlyPlayingId(null)
-                  },
-                  onProgress: ({ currentWordIndex }) => {
-                    setMessages(prev => prev.map(msg => 
-                      msg.id === message.id ? { ...msg, currentWordIndex } : msg
-                    ))
-                  }
-                })
-              }
-            }}
-          >
-            {word}{' '}
-          </span>
-        ))}
+        {words.map((word, index) => {
+          const isHighlighted = index >= highlightRange.start && index <= highlightRange.end
+          const isCenterWord = index === message.currentWordIndex
+          
+          return (
+            <span
+              key={index}
+              className={cn(
+                'cursor-pointer transition-all duration-200',
+                isHighlighted && 'bg-yellow-100 dark:bg-yellow-900/30',
+                isCenterWord && 'bg-yellow-300 dark:bg-yellow-800 font-medium'
+              )}
+              onClick={async () => {
+                if (message.isPlaying && currentlyPlayingId === message.id) {
+                  // Restart from clicked word
+                  stop()
+                  setCurrentlyPlayingId(message.id)
+                  await speak(message.content, {
+                    startFrom: index,
+                    voiceName: settings.voiceName,
+                    playbackRate: settings.playbackSpeed,
+                    volume: settings.volume,
+                    onStart: () => {
+                      setMessages(prev => prev.map(msg => 
+                        msg.id === message.id ? { ...msg, isPlaying: true } : msg
+                      ))
+                    },
+                    onEnd: () => {
+                      setMessages(prev => prev.map(msg => 
+                        msg.id === message.id ? { ...msg, isPlaying: false, currentWordIndex: -1, highlightRange: null } : msg
+                      ))
+                      setCurrentlyPlayingId(null)
+                    },
+                    onProgress: ({ currentWordIndex, highlightRange }) => {
+                      setMessages(prev => prev.map(msg => 
+                        msg.id === message.id ? { ...msg, currentWordIndex, highlightRange } : msg
+                      ))
+                    }
+                  })
+                }
+              }}
+            >
+              {word}{' '}
+            </span>
+          )
+        })}
       </p>
     )
   }
@@ -522,72 +856,6 @@ const AIChatbotInner = ({
     </div>
   )
 
-  // Memoize the messages to prevent unnecessary re-renders
-  const memoizedMessages = React.useMemo(() => messages, [messages])
-
-  // Memoized input component to prevent re-renders
-  const ChatInput = React.memo(({ onSend, onTyping, isLoading, placeholder, value, onChange }) => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
-        if (value.trim() && !isLoading) {
-          onSend(value)
-        }
-      }
-    }
-    
-    const handleChange = (e) => {
-      onChange(e.target.value)
-      onTyping()
-    }
-    
-    return (
-      <input
-        value={value}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        disabled={isLoading}
-        type="text"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck="false"
-        style={{
-          all: 'unset',
-          display: 'block',
-          width: '100%',
-          height: '48px',
-          padding: '0 16px',
-          boxSizing: 'border-box',
-          fontSize: '16px',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          fontWeight: '400',
-          lineHeight: '48px',
-          color: '#1f2937',
-          WebkitTextFillColor: '#1f2937',
-          backgroundColor: '#f3f4f6',
-          border: '1px solid #d1d5db',
-          borderRadius: '8px',
-          opacity: isLoading ? '0.6' : '1',
-          cursor: isLoading ? 'not-allowed' : 'text',
-          outline: 'none'
-        }}
-        onFocus={(e) => {
-          e.target.style.outline = '2px solid #3b82f6'
-          e.target.style.outlineOffset = '2px'
-        }}
-        onBlur={(e) => {
-          e.target.style.outline = 'none'
-        }}
-      />
-    )
-  }, (prevProps, nextProps) => {
-    // Custom comparison to prevent unnecessary re-renders
-    return prevProps.value === nextProps.value && 
-           prevProps.isLoading === nextProps.isLoading &&
-           prevProps.placeholder === nextProps.placeholder
-  })
 
   // Position classes for floating widget
   const positionClasses = {
@@ -596,107 +864,6 @@ const AIChatbotInner = ({
     'top-right': 'top-spacing-lg right-spacing-lg',
     'top-left': 'top-spacing-lg left-spacing-lg'
   }
-
-  // Render message bubble
-  const MessageBubble = React.memo(({ message }) => {
-    const isUser = message.role === 'user'
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.2 }}
-        className={cn(
-          'flex gap-spacing-sm', // 8px
-          isUser ? 'justify-end' : 'justify-start'
-        )}
-      >
-        {!isUser && (
-          <Avatar className="size-8 flex-shrink-0">
-            <div className="size-full bg-bg-brand flex items-center justify-center">
-              <MessageSquare className="size-4 text-text-inverse" />
-            </div>
-          </Avatar>
-        )}
-        
-        <div className={cn(
-          'max-w-[70%] space-y-spacing-xs', // 4px
-          isUser && 'items-end'
-        )}>
-          <div className={cn(
-            'rounded-lg p-spacing-md', // 16px padding
-            'shadow-sm',
-            isUser 
-              ? 'bg-bg-brand text-text-inverse' // #7B00FF, #F5F5F7
-              : 'bg-bg-secondary text-text-primary' // #F5F5F7, #1D1D1F
-          )}>
-            {renderMessageContent(message)}
-          </div>
-          
-          <div className={cn(
-            'flex items-center gap-spacing-sm text-xs text-text-tertiary', // #71717A
-            isUser ? 'justify-end' : 'justify-start'
-          )}>
-            <span>{formatTimestamp(message.timestamp)}</span>
-            
-            {!isUser && (
-              <div className="flex items-center gap-spacing-xs">
-                {message.isPlaying && (
-                  <Badge variant="secondary" className="text-xs">
-                    Speaking...
-                  </Badge>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleMessageTTS(message.id)}
-                  className="h-6 px-2"
-                >
-                  {message.isPlaying ? (
-                    <Pause className="h-3 w-3" />
-                  ) : (
-                    <Play className="h-3 w-3" />
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {isUser && (
-          <Avatar className="size-8 flex-shrink-0">
-            <div className="size-full bg-bg-emphasis flex items-center justify-center">
-              <span className="text-sm font-medium text-text-primary">U</span>
-            </div>
-          </Avatar>
-        )}
-      </motion.div>
-    )
-  })
-
-  // Loading indicator
-  const LoadingIndicator = () => (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex justify-start gap-spacing-sm"
-    >
-      <Avatar className="size-8 flex-shrink-0">
-        <div className="size-full bg-bg-brand flex items-center justify-center">
-          <MessageSquare className="size-4 text-text-inverse" />
-        </div>
-      </Avatar>
-      
-      <div className="bg-bg-secondary rounded-lg p-spacing-md">
-        <div className="flex items-center gap-spacing-sm">
-          <Loader2 className="size-4 animate-spin text-text-secondary" />
-          <span className="text-sm text-text-secondary">AI is thinking...</span>
-        </div>
-      </div>
-    </motion.div>
-  )
 
   // Main chat interface
   const chatInterface = (
@@ -825,6 +992,8 @@ const AIChatbotInner = ({
               size="sm"
               onClick={() => handleSendMessage(`Can you help me understand the key concepts about ${lessonTopic}?`)}
               className="text-xs"
+              disabled={currentlyPlayingId !== null}
+              title={currentlyPlayingId ? "Stop audio to send new message" : "Ask about the lesson"}
             >
               Ask about this lesson
             </Button>
@@ -844,6 +1013,8 @@ const AIChatbotInner = ({
                 size="sm"
                 onClick={() => handleQuickAction(action)}
                 className="text-xs whitespace-nowrap"
+                disabled={currentlyPlayingId !== null}
+                title={currentlyPlayingId ? "Stop audio to send new message" : action.prompt}
               >
                 {action.label}
               </Button>
@@ -861,15 +1032,18 @@ const AIChatbotInner = ({
           'space-y-spacing-md', // 16px gap
           'scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'
         )}
-        style={{ maxHeight: embedded ? maxHeight : '400px' }}
+        style={{ 
+          maxHeight: embedded ? (maxHeight === '100%' ? undefined : maxHeight) : '400px',
+          height: embedded && maxHeight === '100%' ? '100%' : undefined 
+        }}
       >
-        <AnimatePresence>
-          {memoizedMessages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))}
-          
-          {isLoading && <LoadingIndicator />}
-        </AnimatePresence>
+        <MessageList
+          messages={messages}
+          isLoading={isLoading}
+          onToggleTTS={toggleMessageTTS}
+          renderMessageContent={renderMessageContent}
+          formatTimestamp={formatTimestamp}
+        />
         
         {error && (
           <motion.div
@@ -898,7 +1072,10 @@ const AIChatbotInner = ({
             <Button
               variant="secondary"
               size="icon"
-              onClick={scrollToBottom}
+              onClick={() => {
+                scrollToBottom()
+                setIsAtBottom(true)
+              }}
               className="size-10 rounded-full shadow-lg"
             >
               <ChevronDown className="size-4" />
@@ -920,37 +1097,57 @@ const AIChatbotInner = ({
         <div className="flex gap-spacing-sm">
           <ChatInput 
             value={inputValue}
-            onChange={setInputValue}
-            onTyping={handleTypingStart}
-            onSend={(text) => {
-              handleSendMessage(text)
-              setInputValue('')
-            }}
+            onChange={handleInputChange}
+            onSend={handleSendMessage}
             isLoading={isLoading}
             placeholder={placeholder}
+            disabled={currentlyPlayingId !== null}
           />
-          <Button
-            onClick={() => {
-              if (inputValue.trim()) {
-                handleSendMessage(inputValue)
-                setInputValue('')
-              }
-            }}
-            disabled={!inputValue.trim() || isLoading}
-            size="md"
-            className="px-spacing-md"
-          >
-            {isLoading ? (
-              <Loader2 className="size-5 animate-spin" />
-            ) : (
-              <Send className="size-5" />
-            )}
-          </Button>
+          {currentlyPlayingId ? (
+            <Button
+              onClick={stopAllTTS}
+              size="md"
+              variant="destructive"
+              className="px-spacing-md"
+              title="Stop audio playback"
+            >
+              <StopCircle className="size-5 mr-2" />
+              Stop
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                if (inputValue.trim()) {
+                  handleSendMessage(inputValue)
+                }
+              }}
+              disabled={!inputValue.trim()}
+              size="md"
+              className="px-spacing-md"
+            >
+              {isLoading ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <Send className="size-5" />
+              )}
+            </Button>
+          )}
         </div>
         
-        {isTyping && (
-          <div className="mt-spacing-xs text-xs text-text-secondary">
-            TTS paused while typing...
+        {(messageQueue.length > 0 || currentlyPlayingId) && (
+          <div className="mt-spacing-xs text-xs text-text-secondary flex items-center gap-spacing-sm">
+            {currentlyPlayingId && (
+              <span className="inline-flex items-center gap-1">
+                <Volume2 className="size-3 animate-pulse" />
+                Audio playing - Stop to send new message
+              </span>
+            )}
+            {messageQueue.length > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <Loader2 className="size-3 animate-spin" />
+                {messageQueue.length} message{messageQueue.length > 1 ? 's' : ''} queued
+              </span>
+            )}
           </div>
         )}
       </div>

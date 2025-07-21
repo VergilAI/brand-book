@@ -29,6 +29,16 @@ export function AIChatGame({
   const [chatMode, setChatMode] = useState<'tutor' | 'practice' | 'conversation'>('tutor')
   const [sessionStartTime] = useState(new Date())
   const [messageCount, setMessageCount] = useState(0)
+  
+  // Prevent body scrolling when chat is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
 
   // Chat modes configuration
   const chatModes = {

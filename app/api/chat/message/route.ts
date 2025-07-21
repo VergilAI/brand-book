@@ -11,8 +11,8 @@ const MAX_CHAT_HISTORY = 10
 const MAX_INPUT_LENGTH = 2000
 const DEFAULT_MAX_TOKENS = 500
 
-// Detect which API to use based on environment variables
-const API_PROVIDER = process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'openai'
+// Only use Anthropic API
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 
 // System prompts for different contexts
 const SYSTEM_PROMPTS = {
@@ -157,14 +157,11 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Check for API keys
-    const openaiApiKey = process.env.OPENAI_API_KEY
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY
-    
-    if (!openaiApiKey && !anthropicApiKey) {
-      console.error('No AI API key found in environment variables')
+    // Check for Anthropic API key
+    if (!ANTHROPIC_API_KEY) {
+      console.error('No Anthropic API key found in environment variables')
       return NextResponse.json(
-        { error: 'AI service is not configured. Please contact support.' },
+        { error: 'AI service is not configured. Please set ANTHROPIC_API_KEY in your environment variables.' },
         { status: 500 }
       )
     }
@@ -178,8 +175,8 @@ export async function POST(request: NextRequest) {
     let aiResponse: string
     let usage: any = {}
     
-    // Use Anthropic Claude if available, otherwise OpenAI
-    if (anthropicApiKey) {
+    // Use Anthropic Claude API
+    try {
       // Format messages for Claude
       const claudeMessages = formatChatHistory(chatHistory).map(msg => ({
         role: msg.role === 'assistant' ? 'assistant' : 'user',
@@ -192,7 +189,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': anthropicApiKey,
+          'x-api-key': ANTHROPIC_API_KEY,
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
@@ -227,65 +224,9 @@ export async function POST(request: NextRequest) {
         promptTokens: claudeData.usage?.input_tokens || 0,
         completionTokens: claudeData.usage?.output_tokens || 0,
         totalTokens: (claudeData.usage?.input_tokens || 0) + (claudeData.usage?.output_tokens || 0)
-      }
-      
-    } else {
-      // Format messages for OpenAI
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        ...formatChatHistory(chatHistory),
-        { role: 'user', content: sanitizedMessage }
-      ]
-      
-      // Make request to OpenAI
-      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages,
-          temperature: 0.7,
-          max_tokens: Math.min(maxTokens, 1000),
-          n: 1,
-          stream: false
-        })
-      })
-    
-      if (!openaiResponse.ok) {
-        const errorData = await openaiResponse.json()
-        console.error('OpenAI API error:', errorData)
-        
-        // Handle specific OpenAI errors
-        if (openaiResponse.status === 429) {
-          return NextResponse.json(
-            { error: 'AI service is currently busy. Please try again in a moment.' },
-            { status: 503 }
-          )
-        }
-        
-        if (openaiResponse.status === 401) {
-          return NextResponse.json(
-            { error: 'AI service authentication failed. Please contact support.' },
-            { status: 500 }
-          )
-        }
-        
-        return NextResponse.json(
-          { error: 'Failed to generate response. Please try again.' },
-          { status: 500 }
-        )
-      }
-      
-      const openaiData = await openaiResponse.json()
-      aiResponse = openaiData.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response.'
-      usage = {
-        promptTokens: openaiData.usage?.prompt_tokens || 0,
-        completionTokens: openaiData.usage?.completion_tokens || 0,
-        totalTokens: openaiData.usage?.total_tokens || 0
-      }
+    } catch (error) {
+      console.error('Error in Anthropic API request:', error)
+      throw error
     }
     
     // Generate message ID

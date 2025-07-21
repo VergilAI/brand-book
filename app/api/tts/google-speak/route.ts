@@ -59,17 +59,17 @@ export async function POST(request: NextRequest) {
     
     const { text, languageCode, voiceName } = validatedData
     
-    // Check usage limits before processing
-    const usageCheck = ttsUsageTracker.canProcessRequest(text.length)
-    if (!usageCheck.allowed) {
-      return NextResponse.json(
-        { 
-          error: 'Usage limit exceeded',
-          details: usageCheck.reason
-        },
-        { status: 429 }
-      )
-    }
+    // Skip local usage checking - let ElevenLabs handle limits
+    // const usageCheck = ttsUsageTracker.canProcessRequest(text.length)
+    // if (!usageCheck.allowed) {
+    //   return NextResponse.json(
+    //     { 
+    //       error: 'Usage limit exceeded',
+    //       details: usageCheck.reason
+    //     },
+    //     { status: 429 }
+    //   )
+    // }
     
     // Get ElevenLabs API key and voice ID
     const apiKey = getElevenLabsApiKey()
@@ -138,6 +138,8 @@ export async function POST(request: NextRequest) {
     // Get audio data as array buffer
     const audioBuffer = await response.arrayBuffer()
     
+    console.log('ElevenLabs response received, buffer size:', audioBuffer.byteLength)
+    
     if (!audioBuffer || audioBuffer.byteLength === 0) {
       return NextResponse.json(
         { 
@@ -148,17 +150,23 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Track usage after successful generation
-    await ttsUsageTracker.trackRequest(text.length)
+    // Verify it's actually MP3 data (MP3 files start with FF FB or ID3)
+    const uint8Array = new Uint8Array(audioBuffer)
+    const isMP3 = (uint8Array[0] === 0xFF && uint8Array[1] === 0xFB) || 
+                  (uint8Array[0] === 0x49 && uint8Array[1] === 0x44 && uint8Array[2] === 0x33) // ID3
+    
+    if (!isMP3) {
+      console.error('Invalid audio format received from ElevenLabs. First bytes:', 
+        Array.from(uint8Array.slice(0, 10)).map(b => b.toString(16).padStart(2, '0')).join(' '))
+    }
+    
+    // Skip usage tracking - let ElevenLabs handle it
+    // await ttsUsageTracker.trackRequest(text.length)
     
     // Convert audio content to base64
     const audioBase64 = Buffer.from(audioBuffer).toString('base64')
     
-    // Get current usage stats for response
-    const usageStats = ttsUsageTracker.getUsageStats()
-    const usageWarning = ttsUsageTracker.getUsageWarning()
-    
-    // Return successful response with usage info
+    // Return successful response
     return NextResponse.json({
       success: true,
       audio: audioBase64,
@@ -171,13 +179,6 @@ export async function POST(request: NextRequest) {
         model: 'eleven_multilingual_v2',
         audioEncoding: 'MP3',
         generatedAt: new Date().toISOString()
-      },
-      usage: {
-        charactersUsed: usageStats.currentMonth.characters,
-        charactersRemaining: usageStats.charactersRemaining,
-        percentUsed: usageStats.percentUsed,
-        requestsThisMonth: usageStats.currentMonth.requests,
-        warning: usageWarning
       }
     })
     
