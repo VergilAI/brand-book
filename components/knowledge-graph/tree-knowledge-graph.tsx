@@ -4,7 +4,9 @@ import React, { useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ProgressNode } from './progress-node'
 import { NodeDetailsPopover } from './node-details-popover'
-import { User } from 'lucide-react'
+import { User, Play, Pause, RotateCcw, FastForward } from 'lucide-react'
+import { LearningJourney, useJourney } from './journey-context'
+import { Button } from '@/components/button'
 
 interface KnowledgePoint {
   id: string
@@ -30,6 +32,8 @@ interface TreeKnowledgeGraphProps {
   onNodeSelect?: (nodeId: string | null) => void
   availableLessons?: Record<string, LessonInfo[]>
   onLessonClick?: (lessonId: string) => void
+  showJourney?: boolean
+  journey?: LearningJourney | null
 }
 
 export function TreeKnowledgeGraph({ 
@@ -39,12 +43,37 @@ export function TreeKnowledgeGraph({
   selectedNodeId,
   onNodeSelect,
   availableLessons = {},
-  onLessonClick
+  onLessonClick,
+  showJourney = false,
+  journey = null
 }: TreeKnowledgeGraphProps) {
   const [hoveredConnection, setHoveredConnection] = useState<string | null>(null)
+  const [animatedProgress, setAnimatedProgress] = useState<Record<string, number>>({})
+  const [animatedConnections, setAnimatedConnections] = useState<Record<string, number>>({})
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
+  const animationRef = useRef<number | null>(null)
+  
+  const { 
+    isPlaying, 
+    playbackSpeed, 
+    currentStep,
+    startPlayback, 
+    pausePlayback, 
+    resetPlayback, 
+    setPlaybackSpeed,
+    setCurrentStep
+  } = useJourney()
+  
+  
+  // Reset animation when journey is toggled or reset
+  React.useEffect(() => {
+    if (!showJourney || currentStep === 0) {
+      setAnimatedProgress({})
+      setAnimatedConnections({})
+    }
+  }, [showJourney, currentStep])
   
   // Update container width on resize and when component mounts
   React.useEffect(() => {
@@ -266,11 +295,12 @@ export function TreeKnowledgeGraph({
     const maxY = Math.max(...Object.values(positions).map(p => p.y))
     const svgDimensions = {
       width: containerWidth,
-      height: maxY + knowledgeNodeSize / 2 + svgPadding + 110 // Extra space for legend
+      height: maxY + knowledgeNodeSize / 2 + svgPadding + 100 // Space for legend
     }
     
     return { positions, connections, svgDimensions }
   }, [knowledgePoints, knowledgeNodeSize, verticalSpacing, minHorizontalSpacing, containerWidth])
+  
   
   // Create curved path between two points
   const createPath = (from: { x: number, y: number }, to: { x: number, y: number }, stopAtMidpoint?: boolean) => {
@@ -356,6 +386,94 @@ export function TreeKnowledgeGraph({
     return `M ${startX} ${startY} C ${startX} ${startY + controlOffset}, ${endX} ${endY - controlOffset}, ${endX} ${endY}`
   }
   
+  // Simple animation effect - just animate all nodes when playing
+  React.useEffect(() => {
+    if (!isPlaying || !showJourney || !positions) return
+    
+    // Reset all animations
+    setAnimatedProgress({})
+    setAnimatedConnections({})
+    
+    // Animate all nodes in sequence from top to bottom
+    const sortedNodes = [...knowledgePoints].sort((a, b) => {
+      // Sort by Y position (top to bottom)
+      const posA = positions[a.id]
+      const posB = positions[b.id]
+      if (!posA || !posB) return 0
+      return posA.y - posB.y
+    })
+    
+    // Keep track of intervals for cleanup
+    const intervals: NodeJS.Timeout[] = []
+    const timeouts: NodeJS.Timeout[] = []
+    
+    // Animate each node
+    sortedNodes.forEach((node, index) => {
+      const timeout = setTimeout(() => {
+        // Animate the node progress
+        let nodeProgress = 0
+        const nodeInterval = setInterval(() => {
+          nodeProgress += 6  // Increased from 5 to 6 (1.2x faster)
+          if (nodeProgress > 100) nodeProgress = 100
+          
+          setAnimatedProgress(prev => ({
+            ...prev,
+            [node.id]: nodeProgress
+          }))
+          
+          // When node reaches 100%, start animating outgoing connections
+          if (nodeProgress >= 100) {
+            clearInterval(nodeInterval)
+            
+            // Find all nodes that depend on this node
+            const dependentNodes = knowledgePoints.filter(kp => 
+              kp.dependencies?.includes(node.id)
+            )
+            
+            // Animate connections from this node to its dependents
+            dependentNodes.forEach(depNode => {
+              const connectionKey = `${node.id}-${depNode.id}`
+              let connectionProgress = 0
+              
+              const connectionInterval = setInterval(() => {
+                connectionProgress += 2.4 // Increased from 2 to 2.4 (1.2x faster)
+                if (connectionProgress > 100) connectionProgress = 100
+                
+                setAnimatedConnections(prev => ({
+                  ...prev,
+                  [connectionKey]: connectionProgress
+                }))
+                
+                if (connectionProgress >= 100) {
+                  clearInterval(connectionInterval)
+                }
+              }, 42 / playbackSpeed)  // Reduced from 50 to 42 (1.2x faster)
+              
+              intervals.push(connectionInterval)
+            })
+            
+            // Check if this is the last node
+            if (index === sortedNodes.length - 1) {
+              setTimeout(() => {
+                pausePlayback()
+              }, 1700) // Reduced from 2000 to 1700 (1.2x faster)
+            }
+          }
+        }, 42 / playbackSpeed)  // Reduced from 50 to 42 (1.2x faster)
+        
+        intervals.push(nodeInterval)
+      }, index * 1250 / playbackSpeed) // Reduced from 1500 to 1250 (1.2x faster)
+      
+      timeouts.push(timeout)
+    })
+    
+    // Cleanup function
+    return () => {
+      intervals.forEach(clearInterval)
+      timeouts.forEach(clearTimeout)
+    }
+  }, [isPlaying, showJourney, knowledgePoints, positions, playbackSpeed, pausePlayback])
+  
   // Don't render until we have a valid container width
   if (containerWidth === 0) {
     return (
@@ -393,14 +511,25 @@ export function TreeKnowledgeGraph({
             const isIncoming = selectedNodeId === connection.to
             const isOutgoing = selectedNodeId === connection.from
             
-            // Adjust colors based on selection
+            // Adjust colors based on selection and animation
             let strokeColor = connection.isAchieved ? "#86EFAC" : "#9CA3AF"
             if (selectedNodeId && !isRelatedToSelected) {
               strokeColor = "#E5E7EB" // Dim unrelated connections
             }
             
-            // Get path data
-            const pathData = connection.isLocked ? createPath(fromPos, toPos, true) : null
+            // Check if this connection is animated
+            const connectionKey = `${connection.from}-${connection.to}`
+            const animationProgress = animatedConnections[connectionKey] || 0
+            const isAnimated = showJourney && animationProgress > 0
+            
+            // Check if the source node has reached 100% progress (unlocking the connection)
+            const sourceProgress = showJourney && animatedProgress[connection.from] !== undefined 
+              ? animatedProgress[connection.from] 
+              : connection.fromProgress
+            const isUnlocked = sourceProgress >= (connection.requiredElo || 80)
+            
+            // Get path data - show as locked only if not unlocked by animation
+            const pathData = (connection.isLocked && !isUnlocked) ? createPath(fromPos, toPos, true) : null
             const fullPath = createPath(fromPos, toPos)
             
             return (
@@ -416,7 +545,7 @@ export function TreeKnowledgeGraph({
                   style={{ cursor: 'pointer' }}
                 />
                 
-                {connection.isLocked && pathData && typeof pathData !== 'string' ? (
+                {(connection.isLocked && !isUnlocked) && pathData && typeof pathData !== 'string' ? (
                   pathData.tooShort ? (
                     /* Line too short for lock - show as thick dashed line */
                     <path
@@ -471,17 +600,51 @@ export function TreeKnowledgeGraph({
                     </>
                   )
                 ) : (
-                  /* Normal line without lock */
-                  <path
-                    d={typeof fullPath === 'string' ? fullPath : fullPath.fullPath || fullPath}
-                    fill="none"
-                    stroke={strokeColor}
-                    strokeWidth={isRelatedToSelected ? "3" : "2"}
-                    strokeDasharray={connection.type === 'soft' ? "4 4" : "0"}
-                    className="transition-all duration-300"
-                    opacity={selectedNodeId ? (isRelatedToSelected ? (connection.isAchieved ? 0.9 : 0.7) : 0.2) : (connection.isAchieved ? 0.7 : 0.5)}
-                    pointerEvents="none"
-                  />
+                  <>
+                    {/* Normal line without lock */}
+                    <path
+                      d={typeof fullPath === 'string' ? fullPath : fullPath.fullPath || fullPath}
+                      fill="none"
+                      stroke={strokeColor}
+                      strokeWidth={isRelatedToSelected ? "3" : "2"}
+                      strokeDasharray={connection.type === 'soft' ? "4 4" : "0"}
+                      className="transition-all duration-300"
+                      opacity={selectedNodeId ? (isRelatedToSelected ? (connection.isAchieved ? 0.9 : 0.7) : 0.2) : (connection.isAchieved ? 0.7 : 0.5)}
+                      pointerEvents="none"
+                    />
+                    
+                    {/* Animated gradient overlay for journey */}
+                    {isAnimated && (
+                      <>
+                        {/* Define gradient for this specific connection */}
+                        <defs>
+                          <linearGradient 
+                            id={`gradient-${connectionKey}`} 
+                            x1={fromPos.x} 
+                            y1={fromPos.y} 
+                            x2={toPos.x} 
+                            y2={toPos.y}
+                            gradientUnits="userSpaceOnUse"
+                          >
+                            <stop offset="0%" stopColor="#7B00FF" />
+                            <stop offset={`${animationProgress}%`} stopColor="#7B00FF" />
+                            <stop offset={`${animationProgress}%`} stopColor={strokeColor} />
+                            <stop offset="100%" stopColor={strokeColor} />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d={typeof fullPath === 'string' ? fullPath : fullPath.fullPath || fullPath}
+                          fill="none"
+                          stroke={`url(#gradient-${connectionKey})`}
+                          strokeWidth={isRelatedToSelected ? "3" : "2"}
+                          strokeDasharray={connection.type === 'soft' ? "4 4" : "0"}
+                          className="transition-all duration-300"
+                          opacity={0.8}
+                          pointerEvents="none"
+                        />
+                      </>
+                    )}
+                  </>
                 )}
                 
                 {/* Tooltip on hover */}
@@ -517,6 +680,67 @@ export function TreeKnowledgeGraph({
           const pos = positions[kp.id]
           if (!pos) return null
           
+          // Find journey order for this node
+          const journeyStep = showJourney && journey ? 
+            journey.steps.find(step => step.knowledgePointId === kp.id) : null
+          
+          // Determine if this node should be animated during playback
+          const isAnimating = isPlaying && journeyStep && journeyStep.order === currentStep
+          const isCompleted = journeyStep && journeyStep.order < currentStep
+          
+          // Determine popover side based on incoming and outgoing connections
+          let popoverSide: 'top' | 'right' | 'bottom' | 'left' = 'right'
+          if (selectedNodeId === kp.id) {
+            // Get all connected nodes (both incoming and outgoing)
+            const connectedPositions: Array<{x: number, y: number}> = []
+            
+            // Add positions of dependencies (incoming)
+            if (kp.dependencies) {
+              kp.dependencies.forEach(depId => {
+                const depPos = positions[depId]
+                if (depPos) connectedPositions.push(depPos)
+              })
+            }
+            
+            // Add positions of nodes that depend on this one (outgoing)
+            knowledgePoints.forEach(otherKp => {
+              if (otherKp.dependencies?.includes(kp.id)) {
+                const otherPos = positions[otherKp.id]
+                if (otherPos) connectedPositions.push(otherPos)
+              }
+            })
+            
+            if (connectedPositions.length > 0) {
+              // Calculate connection density in each quadrant
+              const quadrants = {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+              }
+              
+              connectedPositions.forEach(connPos => {
+                const dx = connPos.x - pos.x
+                const dy = connPos.y - pos.y
+                
+                if (Math.abs(dx) > Math.abs(dy)) {
+                  if (dx > 0) quadrants.right++
+                  else quadrants.left++
+                } else {
+                  if (dy > 0) quadrants.bottom++
+                  else quadrants.top++
+                }
+              })
+              
+              // Choose the side with the least connections
+              const minConnections = Math.min(quadrants.top, quadrants.right, quadrants.bottom, quadrants.left)
+              if (quadrants.bottom === minConnections) popoverSide = 'bottom'
+              else if (quadrants.top === minConnections) popoverSide = 'top'
+              else if (quadrants.left === minConnections) popoverSide = 'left'
+              else popoverSide = 'right'
+            }
+          }
+          
           return (
             <g 
               key={kp.id}
@@ -534,16 +758,19 @@ export function TreeKnowledgeGraph({
                       onNodeSelect?.(null)
                     }
                   }}
+                  side={popoverSide}
                 >
-                  <div className="w-full h-full">
+                  <div className="w-full h-full relative">
                     <ProgressNode
-                      progress={kp.progress}
+                      progress={showJourney && animatedProgress[kp.id] !== undefined ? animatedProgress[kp.id] : kp.progress}
                       size={knowledgeNodeSize}
                       onClick={() => onNodeSelect?.(selectedNodeId === kp.id ? null : kp.id)}
                       className={cn(
                         "cursor-pointer transition-all duration-200",
                         selectedNodeId === kp.id ? "ring-2 ring-primary scale-110" : "",
-                        selectedNodeId && selectedNodeId !== kp.id ? "opacity-50" : ""
+                        selectedNodeId && selectedNodeId !== kp.id ? "opacity-50" : "",
+                        showJourney && journeyStep ? "ring-2 ring-brand" : "",
+                        isAnimating ? "animate-pulse ring-4 ring-brand ring-opacity-50" : ""
                       )}
                       title={kp.title}
                       showLabel={false}
@@ -592,6 +819,62 @@ export function TreeKnowledgeGraph({
           </text>
         </g>
       </svg>
+      
+      {/* Journey Playback Controls - Floating */}
+      {showJourney && journey && (
+        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-md border border-border-default p-2">
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={resetPlayback}
+              className="h-8 w-8 p-0"
+              title="Reset"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                console.log('[TreeKnowledgeGraph] Play/Pause clicked, isPlaying:', isPlaying)
+                if (isPlaying) {
+                  pausePlayback()
+                } else {
+                  startPlayback()
+                }
+              }}
+              className="h-8 px-3"
+            >
+              {isPlaying ? (
+                <>
+                  <Pause className="h-4 w-4 mr-1" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-1" />
+                  Play
+                </>
+              )}
+            </Button>
+            <div className="flex items-center gap-1 border-l border-border-subtle pl-2">
+              <span className="text-xs text-secondary">Speed:</span>
+              {[1, 2, 4].map(speed => (
+                <Button
+                  key={speed}
+                  size="sm"
+                  variant={playbackSpeed === speed ? "primary" : "ghost"}
+                  onClick={() => setPlaybackSpeed(speed)}
+                  className="h-6 w-6 p-0 text-xs"
+                >
+                  {speed}x
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

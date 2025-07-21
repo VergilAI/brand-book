@@ -38,6 +38,7 @@ interface NodeDetailsPopoverProps {
   children: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  side?: 'top' | 'right' | 'bottom' | 'left'
 }
 
 export function NodeDetailsPopover({
@@ -47,7 +48,8 @@ export function NodeDetailsPopover({
   onLessonClick,
   children,
   open,
-  onOpenChange
+  onOpenChange,
+  side = 'right'
 }: NodeDetailsPopoverProps) {
   // Calculate prerequisites (incoming dependencies)
   const prerequisites = React.useMemo(() => {
@@ -113,7 +115,13 @@ export function NodeDetailsPopover({
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-spacing-md space-y-spacing-md" side="right" align="center">
+      <PopoverContent 
+        className="w-80 p-spacing-md space-y-spacing-md" 
+        side={side} 
+        align="center"
+        sideOffset={20}
+        alignOffset={0}
+      >
         {/* Header */}
         <div className="space-y-spacing-xs">
           <div className="flex items-start justify-between">

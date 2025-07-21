@@ -9,6 +9,7 @@ import {
   ContextWindowTrigger,
   useContextWindow,
 } from '@/components/context-window'
+import { JourneyProvider } from '@/components/knowledge-graph/journey-context'
 import { KnowledgeGraph, KnowledgeNode, GraphConnection } from '@/components/knowledge-graph'
 import { ProgressNode } from '@/components/knowledge-graph/progress-node'
 import { TreeKnowledgeGraph } from '@/components/knowledge-graph/tree-knowledge-graph'
@@ -241,96 +242,98 @@ export default function KnowledgeDemoPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <ContextWindowProvider>
-      <ContextWindowLayout 
-        className="min-h-screen bg-bg-primary" 
-        compactSize="medium"
-        expandedSize="large"
-      >
-        <div className="flex flex-col h-full">
-          <LMSHeader 
-            currentView="course" 
-            onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
-          />
-          
-          <main className="flex-1 overflow-auto p-spacing-xl">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-3xl font-bold text-primary mb-spacing-md">
-                Knowledge Graph Demo
-              </h1>
-              <p className="text-lg text-secondary mb-spacing-xl">
-                This demo showcases the knowledge graph visualization in the context window. 
-                Click the toggle button on the right to see the interactive knowledge map.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-spacing-lg">
-                <div className="bg-secondary rounded-lg p-spacing-lg">
-                  <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
-                    Course Structure
-                  </h2>
-                  <p className="text-secondary mb-spacing-md">
-                    The demo course contains 3 chapters with 2 lessons each:
-                  </p>
-                  <ul className="space-y-spacing-sm text-secondary">
-                    <li>• <strong>Fundamentals:</strong> ML basics and math foundations</li>
-                    <li>• <strong>Algorithms:</strong> Linear models and tree-based models</li>
-                    <li>• <strong>Neural Networks:</strong> Basics and deep learning</li>
-                  </ul>
+    <JourneyProvider>
+      <ContextWindowProvider>
+        <ContextWindowLayout 
+          className="min-h-screen bg-bg-primary" 
+          compactSize="medium"
+          expandedSize="large"
+        >
+          <div className="flex flex-col h-full">
+            <LMSHeader 
+              currentView="course" 
+              onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
+            />
+            
+            <main className="flex-1 overflow-auto p-spacing-xl">
+              <div className="max-w-6xl mx-auto">
+                <h1 className="text-3xl font-bold text-primary mb-spacing-md">
+                  Knowledge Graph Demo
+                </h1>
+                <p className="text-lg text-secondary mb-spacing-xl">
+                  This demo showcases the knowledge graph visualization in the context window. 
+                  Click the toggle button on the right to see the interactive knowledge map.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-spacing-lg">
+                  <div className="bg-secondary rounded-lg p-spacing-lg">
+                    <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
+                      Course Structure
+                    </h2>
+                    <p className="text-secondary mb-spacing-md">
+                      The demo course contains 3 chapters with 2 lessons each:
+                    </p>
+                    <ul className="space-y-spacing-sm text-secondary">
+                      <li>• <strong>Fundamentals:</strong> ML basics and math foundations</li>
+                      <li>• <strong>Algorithms:</strong> Linear models and tree-based models</li>
+                      <li>• <strong>Neural Networks:</strong> Basics and deep learning</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-secondary rounded-lg p-spacing-lg">
+                    <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
+                      Progress Visualization
+                    </h2>
+                    <p className="text-secondary mb-spacing-md">
+                      The knowledge graph shows:
+                    </p>
+                    <ul className="space-y-spacing-sm text-secondary">
+                      <li>• <span className="text-status-success">Green nodes:</span> Mastered (80%+ proficiency)</li>
+                      <li>• <span className="text-status-warning">Yellow nodes:</span> Learning in progress</li>
+                      <li>• <span className="text-status-info">Blue nodes:</span> Available to learn</li>
+                      <li>• <span className="text-status-default">Gray nodes:</span> Locked</li>
+                    </ul>
+                  </div>
                 </div>
                 
-                <div className="bg-secondary rounded-lg p-spacing-lg">
+                <div className="mt-spacing-xl bg-secondary rounded-lg p-spacing-lg">
                   <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
-                    Progress Visualization
+                    Interactive Features
                   </h2>
-                  <p className="text-secondary mb-spacing-md">
-                    The knowledge graph shows:
-                  </p>
-                  <ul className="space-y-spacing-sm text-secondary">
-                    <li>• <span className="text-status-success">Green nodes:</span> Mastered (80%+ proficiency)</li>
-                    <li>• <span className="text-status-warning">Yellow nodes:</span> Learning in progress</li>
-                    <li>• <span className="text-status-info">Blue nodes:</span> Available to learn</li>
-                    <li>• <span className="text-status-default">Gray nodes:</span> Locked</li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="mt-spacing-xl bg-secondary rounded-lg p-spacing-lg">
-                <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
-                  Interactive Features
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-spacing-md mt-spacing-md">
-                  <div>
-                    <h3 className="font-medium text-primary mb-spacing-xs">Pan & Zoom</h3>
-                    <p className="text-sm text-secondary">
-                      Click and drag to pan, use mouse wheel or buttons to zoom
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary mb-spacing-xs">Node Selection</h3>
-                    <p className="text-sm text-secondary">
-                      Click on nodes to see details and connections
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary mb-spacing-xs">Progress Rings</h3>
-                    <p className="text-sm text-secondary">
-                      Visual proficiency indicators around each node
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-spacing-md mt-spacing-md">
+                    <div>
+                      <h3 className="font-medium text-primary mb-spacing-xs">Pan & Zoom</h3>
+                      <p className="text-sm text-secondary">
+                        Click and drag to pan, use mouse wheel or buttons to zoom
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-primary mb-spacing-xs">Node Selection</h3>
+                      <p className="text-sm text-secondary">
+                        Click on nodes to see details and connections
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-primary mb-spacing-xs">Progress Rings</h3>
+                      <p className="text-sm text-secondary">
+                        Visual proficiency indicators around each node
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </main>
-        </div>
+            </main>
+          </div>
 
-        {/* Context Window Trigger */}
-        <ContextWindowTrigger />
+          {/* Context Window Trigger */}
+          <ContextWindowTrigger />
 
-        {/* Context Window Content */}
-        <ContextWindow>
-          <DemoContextWindowContent />
-        </ContextWindow>
-      </ContextWindowLayout>
-    </ContextWindowProvider>
+          {/* Context Window Content */}
+          <ContextWindow>
+            <DemoContextWindowContent />
+          </ContextWindow>
+        </ContextWindowLayout>
+      </ContextWindowProvider>
+    </JourneyProvider>
   )
 }
