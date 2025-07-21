@@ -7,12 +7,16 @@ import {
   ContextWindowLayout,
   ContextWindow,
   ContextWindowTrigger,
+  useContextWindow,
 } from '@/components/context-window'
+import { JourneyProvider } from '@/components/knowledge-graph/journey-context'
 import { KnowledgeGraph, KnowledgeNode, GraphConnection } from '@/components/knowledge-graph'
 import { ProgressNode } from '@/components/knowledge-graph/progress-node'
 import { TreeKnowledgeGraph } from '@/components/knowledge-graph/tree-knowledge-graph'
+import { KnowledgeTreeCard } from '@/components/knowledge-tree-card'
+import { KnowledgeGraphPreview } from '@/components/knowledge-graph/knowledge-graph-preview'
 
-// Dummy course data for demo
+// Dummy course data for demo with dependencies
 const dummyCourse = {
   id: 'demo-course',
   title: 'Introduction to Machine Learning',
@@ -25,18 +29,18 @@ const dummyCourse = {
           id: 'lesson-1-1',
           title: 'What is Machine Learning?',
           knowledgePoints: [
-            { id: 'kp-1-1-1', title: 'ML Definition', description: 'Understanding what Machine Learning is' },
-            { id: 'kp-1-1-2', title: 'Types of ML', description: 'Supervised, Unsupervised, and Reinforcement Learning' },
-            { id: 'kp-1-1-3', title: 'Applications', description: 'Real-world applications of ML' }
+            { id: 'kp-1-1-1', title: 'ML Definition', description: 'Understanding what Machine Learning is', dependencies: [] },
+            { id: 'kp-1-1-2', title: 'Types of ML', description: 'Supervised, Unsupervised, and Reinforcement Learning', dependencies: [{ id: 'kp-1-1-1', type: 'hard', requiredElo: 80 }] },
+            { id: 'kp-1-1-3', title: 'Applications', description: 'Real-world applications of ML', dependencies: [{ id: 'kp-1-1-2', type: 'soft', requiredElo: 60 }] }
           ]
         },
         {
           id: 'lesson-1-2', 
           title: 'Mathematical Foundations',
           knowledgePoints: [
-            { id: 'kp-1-2-1', title: 'Linear Algebra', description: 'Vectors, matrices, and operations' },
-            { id: 'kp-1-2-2', title: 'Probability', description: 'Basic probability theory' },
-            { id: 'kp-1-2-3', title: 'Statistics', description: 'Statistical concepts for ML' }
+            { id: 'kp-1-2-1', title: 'Linear Algebra', description: 'Vectors, matrices, and operations', dependencies: [] },
+            { id: 'kp-1-2-2', title: 'Probability', description: 'Basic probability theory', dependencies: [] },
+            { id: 'kp-1-2-3', title: 'Statistics', description: 'Statistical concepts for ML', dependencies: [{ id: 'kp-1-2-2', type: 'hard', requiredElo: 75 }] }
           ]
         }
       ]
@@ -49,18 +53,18 @@ const dummyCourse = {
           id: 'lesson-2-1',
           title: 'Linear Models',
           knowledgePoints: [
-            { id: 'kp-2-1-1', title: 'Linear Regression', description: 'Predicting continuous values' },
-            { id: 'kp-2-1-2', title: 'Logistic Regression', description: 'Binary classification' },
-            { id: 'kp-2-1-3', title: 'Regularization', description: 'L1 and L2 regularization techniques' }
+            { id: 'kp-2-1-1', title: 'Linear Regression', description: 'Predicting continuous values', dependencies: [{ id: 'kp-1-2-1', type: 'hard', requiredElo: 85 }, { id: 'kp-1-2-3', type: 'hard', requiredElo: 80 }] },
+            { id: 'kp-2-1-2', title: 'Logistic Regression', description: 'Binary classification', dependencies: [{ id: 'kp-2-1-1', type: 'hard', requiredElo: 80 }] },
+            { id: 'kp-2-1-3', title: 'Regularization', description: 'L1 and L2 regularization techniques', dependencies: [{ id: 'kp-2-1-1', type: 'soft', requiredElo: 70 }, { id: 'kp-2-1-2', type: 'soft', requiredElo: 70 }] }
           ]
         },
         {
           id: 'lesson-2-2',
           title: 'Tree-based Models',
           knowledgePoints: [
-            { id: 'kp-2-2-1', title: 'Decision Trees', description: 'Tree-based decision making' },
-            { id: 'kp-2-2-2', title: 'Random Forests', description: 'Ensemble of decision trees' },
-            { id: 'kp-2-2-3', title: 'Gradient Boosting', description: 'Boosting techniques' }
+            { id: 'kp-2-2-1', title: 'Decision Trees', description: 'Tree-based decision making', dependencies: [{ id: 'kp-1-1-2', type: 'soft', requiredElo: 65 }, { id: 'kp-1-2-3', type: 'hard', requiredElo: 75 }] },
+            { id: 'kp-2-2-2', title: 'Random Forests', description: 'Ensemble of decision trees', dependencies: [{ id: 'kp-2-2-1', type: 'hard', requiredElo: 85 }] },
+            { id: 'kp-2-2-3', title: 'Gradient Boosting', description: 'Boosting techniques', dependencies: [{ id: 'kp-2-2-1', type: 'hard', requiredElo: 85 }] }
           ]
         }
       ]
@@ -73,18 +77,18 @@ const dummyCourse = {
           id: 'lesson-3-1',
           title: 'Basics of Neural Networks',
           knowledgePoints: [
-            { id: 'kp-3-1-1', title: 'Perceptron', description: 'Single layer neural network' },
-            { id: 'kp-3-1-2', title: 'Activation Functions', description: 'ReLU, Sigmoid, Tanh' },
-            { id: 'kp-3-1-3', title: 'Backpropagation', description: 'Training neural networks' }
+            { id: 'kp-3-1-1', title: 'Perceptron', description: 'Single layer neural network', dependencies: [{ id: 'kp-1-2-1', type: 'hard' }, { id: 'kp-2-1-1', type: 'soft' }] },
+            { id: 'kp-3-1-2', title: 'Activation Functions', description: 'ReLU, Sigmoid, Tanh', dependencies: [{ id: 'kp-3-1-1', type: 'hard' }] },
+            { id: 'kp-3-1-3', title: 'Backpropagation', description: 'Training neural networks', dependencies: [{ id: 'kp-3-1-1', type: 'hard' }, { id: 'kp-3-1-2', type: 'hard' }] }
           ]
         },
         {
           id: 'lesson-3-2',
           title: 'Deep Learning',
           knowledgePoints: [
-            { id: 'kp-3-2-1', title: 'CNNs', description: 'Convolutional Neural Networks' },
-            { id: 'kp-3-2-2', title: 'RNNs', description: 'Recurrent Neural Networks' },
-            { id: 'kp-3-2-3', title: 'Transformers', description: 'Attention mechanisms' }
+            { id: 'kp-3-2-1', title: 'CNNs', description: 'Convolutional Neural Networks', dependencies: [{ id: 'kp-3-1-3', type: 'hard' }] },
+            { id: 'kp-3-2-2', title: 'RNNs', description: 'Recurrent Neural Networks', dependencies: [{ id: 'kp-3-1-3', type: 'hard' }] },
+            { id: 'kp-3-2-3', title: 'Transformers', description: 'Attention mechanisms', dependencies: [{ id: 'kp-3-1-2', type: 'soft' }, { id: 'kp-3-2-2', type: 'hard' }] }
           ]
         }
       ]
@@ -117,6 +121,8 @@ const dummyProgress = {
 }
 
 function DemoContextWindowContent() {
+  const { state, expand, compact } = useContextWindow()
+  
   // Transform course data into graph nodes
   const { nodes, connections } = React.useMemo(() => {
     const nodes: KnowledgeNode[] = []
@@ -166,29 +172,68 @@ function DemoContextWindowContent() {
     console.log('Selected knowledge point:', node.title)
   }
 
-  // Create knowledge points from course data
-  const knowledgePointsData = nodes.map(node => ({
-    id: node.id,
-    title: node.title,
-    progress: node.proficiency
-  }))
+  // Create knowledge points from course data with dependencies
+  const knowledgePointsData = React.useMemo(() => {
+    const points: Array<{
+      id: string
+      title: string
+      progress: number
+      dependencies: string[]
+    }> = []
+    
+    dummyCourse.chapters.forEach((chapter) => {
+      chapter.lessons.forEach((lesson) => {
+        lesson.knowledgePoints.forEach((kp) => {
+          const userProgress = dummyProgress.knowledgePoints[kp.id] || { proficiency: 0 }
+          points.push({
+            id: kp.id,
+            title: kp.title,
+            progress: userProgress.proficiency || 0,
+            dependencies: kp.dependencies ? kp.dependencies.map(dep => 
+              typeof dep === 'string' ? dep : dep.id
+            ) : [],
+            hardDependencies: kp.dependencies ? kp.dependencies
+              .filter(dep => typeof dep !== 'string' && dep.type === 'hard')
+              .map(dep => dep.id) : [],
+            dependencyDetails: kp.dependencies ? kp.dependencies
+              .filter(dep => typeof dep !== 'string')
+              .reduce((acc, dep) => {
+                acc[dep.id] = { type: dep.type, requiredElo: dep.requiredElo }
+                return acc
+              }, {}) : {}
+          })
+        })
+      })
+    })
+    
+    return points
+  }, [])
 
-  return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-spacing-lg py-spacing-md border-b border-border-default">
-        <h3 className="font-semibold text-primary">Learning Map - {dummyCourse.title}</h3>
-        <p className="text-sm text-secondary mt-1">
-          Your personalized knowledge journey
-        </p>
-      </div>
-      
-      <div className="flex-1 overflow-auto p-spacing-md">
-        <TreeKnowledgeGraph
-          userName="Alex"
+  // Show different content based on state
+  if (state === 'compact') {
+    return (
+      <div className="h-full overflow-auto bg-secondary p-spacing-md">
+        <KnowledgeGraphPreview
           knowledgePoints={knowledgePointsData}
-          className="h-full"
+          userName="Alex"
+          courseTitle={dummyCourse.title}
+          onExpand={expand}
         />
       </div>
+    )
+  }
+  
+  // Expanded state
+  return (
+    <div className="h-full overflow-auto bg-secondary p-spacing-md">
+      <KnowledgeTreeCard
+        title={`Learning Map - ${dummyCourse.title}`}
+        subtitle="Your personalized knowledge journey"
+        userName="Alex"
+        knowledgePoints={knowledgePointsData}
+        showStats={true}
+        onCompact={compact}
+      />
     </div>
   )
 }
@@ -197,92 +242,98 @@ export default function KnowledgeDemoPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <ContextWindowProvider>
-      <ContextWindowLayout className="min-h-screen bg-bg-primary">
-        <div className="flex flex-col h-full">
-          <LMSHeader 
-            currentView="course" 
-            onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
-          />
-          
-          <main className="flex-1 overflow-auto p-spacing-xl">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-3xl font-bold text-primary mb-spacing-md">
-                Knowledge Graph Demo
-              </h1>
-              <p className="text-lg text-secondary mb-spacing-xl">
-                This demo showcases the knowledge graph visualization in the context window. 
-                Click the toggle button on the right to see the interactive knowledge map.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-spacing-lg">
-                <div className="bg-secondary rounded-lg p-spacing-lg">
-                  <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
-                    Course Structure
-                  </h2>
-                  <p className="text-secondary mb-spacing-md">
-                    The demo course contains 3 chapters with 2 lessons each:
-                  </p>
-                  <ul className="space-y-spacing-sm text-secondary">
-                    <li>• <strong>Fundamentals:</strong> ML basics and math foundations</li>
-                    <li>• <strong>Algorithms:</strong> Linear models and tree-based models</li>
-                    <li>• <strong>Neural Networks:</strong> Basics and deep learning</li>
-                  </ul>
+    <JourneyProvider>
+      <ContextWindowProvider>
+        <ContextWindowLayout 
+          className="min-h-screen bg-bg-primary" 
+          compactSize="medium"
+          expandedSize="large"
+        >
+          <div className="flex flex-col h-full">
+            <LMSHeader 
+              currentView="course" 
+              onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
+            />
+            
+            <main className="flex-1 overflow-auto p-spacing-xl">
+              <div className="max-w-6xl mx-auto">
+                <h1 className="text-3xl font-bold text-primary mb-spacing-md">
+                  Knowledge Graph Demo
+                </h1>
+                <p className="text-lg text-secondary mb-spacing-xl">
+                  This demo showcases the knowledge graph visualization in the context window. 
+                  Click the toggle button on the right to see the interactive knowledge map.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-spacing-lg">
+                  <div className="bg-secondary rounded-lg p-spacing-lg">
+                    <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
+                      Course Structure
+                    </h2>
+                    <p className="text-secondary mb-spacing-md">
+                      The demo course contains 3 chapters with 2 lessons each:
+                    </p>
+                    <ul className="space-y-spacing-sm text-secondary">
+                      <li>• <strong>Fundamentals:</strong> ML basics and math foundations</li>
+                      <li>• <strong>Algorithms:</strong> Linear models and tree-based models</li>
+                      <li>• <strong>Neural Networks:</strong> Basics and deep learning</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-secondary rounded-lg p-spacing-lg">
+                    <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
+                      Progress Visualization
+                    </h2>
+                    <p className="text-secondary mb-spacing-md">
+                      The knowledge graph shows:
+                    </p>
+                    <ul className="space-y-spacing-sm text-secondary">
+                      <li>• <span className="text-status-success">Green nodes:</span> Mastered (80%+ proficiency)</li>
+                      <li>• <span className="text-status-warning">Yellow nodes:</span> Learning in progress</li>
+                      <li>• <span className="text-status-info">Blue nodes:</span> Available to learn</li>
+                      <li>• <span className="text-status-default">Gray nodes:</span> Locked</li>
+                    </ul>
+                  </div>
                 </div>
                 
-                <div className="bg-secondary rounded-lg p-spacing-lg">
+                <div className="mt-spacing-xl bg-secondary rounded-lg p-spacing-lg">
                   <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
-                    Progress Visualization
+                    Interactive Features
                   </h2>
-                  <p className="text-secondary mb-spacing-md">
-                    The knowledge graph shows:
-                  </p>
-                  <ul className="space-y-spacing-sm text-secondary">
-                    <li>• <span className="text-status-success">Green nodes:</span> Mastered (80%+ proficiency)</li>
-                    <li>• <span className="text-status-warning">Yellow nodes:</span> Learning in progress</li>
-                    <li>• <span className="text-status-info">Blue nodes:</span> Available to learn</li>
-                    <li>• <span className="text-status-default">Gray nodes:</span> Locked</li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="mt-spacing-xl bg-secondary rounded-lg p-spacing-lg">
-                <h2 className="text-xl font-semibold text-primary mb-spacing-sm">
-                  Interactive Features
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-spacing-md mt-spacing-md">
-                  <div>
-                    <h3 className="font-medium text-primary mb-spacing-xs">Pan & Zoom</h3>
-                    <p className="text-sm text-secondary">
-                      Click and drag to pan, use mouse wheel or buttons to zoom
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary mb-spacing-xs">Node Selection</h3>
-                    <p className="text-sm text-secondary">
-                      Click on nodes to see details and connections
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-primary mb-spacing-xs">Progress Rings</h3>
-                    <p className="text-sm text-secondary">
-                      Visual proficiency indicators around each node
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-spacing-md mt-spacing-md">
+                    <div>
+                      <h3 className="font-medium text-primary mb-spacing-xs">Pan & Zoom</h3>
+                      <p className="text-sm text-secondary">
+                        Click and drag to pan, use mouse wheel or buttons to zoom
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-primary mb-spacing-xs">Node Selection</h3>
+                      <p className="text-sm text-secondary">
+                        Click on nodes to see details and connections
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-primary mb-spacing-xs">Progress Rings</h3>
+                      <p className="text-sm text-secondary">
+                        Visual proficiency indicators around each node
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </main>
-        </div>
+            </main>
+          </div>
 
-        {/* Context Window Trigger */}
-        <ContextWindowTrigger />
+          {/* Context Window Trigger */}
+          <ContextWindowTrigger />
 
-        {/* Context Window Content */}
-        <ContextWindow>
-          <DemoContextWindowContent />
-        </ContextWindow>
-      </ContextWindowLayout>
-    </ContextWindowProvider>
+          {/* Context Window Content */}
+          <ContextWindow>
+            <DemoContextWindowContent />
+          </ContextWindow>
+        </ContextWindowLayout>
+      </ContextWindowProvider>
+    </JourneyProvider>
   )
 }

@@ -8,6 +8,7 @@ interface ProgressNodeProps {
   size?: number
   className?: string
   onClick?: () => void
+  showLabel?: boolean
 }
 
 export function ProgressNode({ 
@@ -15,7 +16,8 @@ export function ProgressNode({
   progress, 
   size = 48,
   className,
-  onClick 
+  onClick,
+  showLabel = true
 }: ProgressNodeProps) {
   const radius = size / 2
   const strokeWidth = 3
@@ -74,7 +76,7 @@ export function ProgressNode({
         />
       </svg>
 
-      {/* Inner circle with title */}
+      {/* Inner circle */}
       <div 
         className={cn(
           "absolute inset-0 flex items-center justify-center rounded-full",
@@ -88,12 +90,24 @@ export function ProgressNode({
           left: 4
         }}
       >
-        <span className={cn(
-          "text-xs font-medium text-center px-1",
-          isStarted ? "text-gray-900" : "text-gray-500"
-        )}>
-          {title}
-        </span>
+        {showLabel ? (
+          <span className={cn(
+            "text-xs font-medium text-center px-1",
+            isStarted ? "text-gray-900" : "text-gray-500"
+          )}>
+            {title}
+          </span>
+        ) : (
+          <span className={cn(
+            "font-medium",
+            size <= 20 ? "text-[8px]" : size <= 28 ? "text-[10px]" : "text-xs",
+            progress >= 70 ? "text-green-700" :
+            progress >= 40 ? "text-yellow-700" :
+            progress > 0 ? "text-red-700" : "text-gray-400"
+          )}>
+            {progress}
+          </span>
+        )}
       </div>
 
       {/* Progress percentage on hover */}
