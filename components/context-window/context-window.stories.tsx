@@ -12,6 +12,9 @@ import { Progress } from '@/components/progress'
 import { Badge } from '@/components/badge'
 import { TreeKnowledgeGraph } from '@/components/knowledge-graph/tree-knowledge-graph'
 import { KnowledgeTreeCard } from '@/components/knowledge-tree-card'
+import { KnowledgeGraphPreview } from '@/components/knowledge-graph/knowledge-graph-preview'
+import { JourneyProvider } from '@/components/knowledge-graph/journey-context'
+import { useContextWindow } from './index'
 
 const meta = {
   title: 'Components/ContextWindow',
@@ -26,11 +29,13 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <ContextWindowProvider>
-        <ContextWindowLayout className="min-h-screen bg-gray-50">
-          <Story />
-        </ContextWindowLayout>
-      </ContextWindowProvider>
+      <JourneyProvider>
+        <ContextWindowProvider>
+          <ContextWindowLayout className="min-h-screen bg-gray-50">
+            <Story />
+          </ContextWindowLayout>
+        </ContextWindowProvider>
+      </JourneyProvider>
     ),
   ],
 } satisfies Meta<typeof ContextWindow>
@@ -180,6 +185,64 @@ export const WithKnowledgeGraph: Story = {
   ),
 }
 
+// Component that shows both compact and expanded states
+const KnowledgeGraphWithStates = () => {
+  const { state, expand, compact } = useContextWindow()
+  const knowledgePoints = [
+    { id: 'kp1', title: 'ML Basics', progress: 100, dependencies: [] },
+    { id: 'kp2', title: 'Types of ML', progress: 85, dependencies: ['kp1'] },
+    { id: 'kp3', title: 'Applications', progress: 70, dependencies: ['kp2'] },
+    { id: 'kp4', title: 'Linear Algebra', progress: 60, dependencies: [] },
+    { id: 'kp5', title: 'Statistics', progress: 30, dependencies: [] },
+    { id: 'kp6', title: 'Linear Regression', progress: 0, dependencies: ['kp4', 'kp5'] },
+  ]
+
+  if (state === 'compact') {
+    return (
+      <div className="h-full overflow-auto bg-secondary p-spacing-md">
+        <KnowledgeGraphPreview
+          knowledgePoints={knowledgePoints}
+          userName="Alex"
+          courseTitle="Machine Learning"
+          onExpand={expand}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-full overflow-auto bg-secondary p-spacing-md">
+      <KnowledgeTreeCard
+        title="Machine Learning Path"
+        subtitle="Your personalized journey"
+        userName="Alex"
+        knowledgePoints={knowledgePoints}
+        showStats={true}
+        onCompact={compact}
+      />
+    </div>
+  )
+}
+
+export const CompactKnowledgeGraph: Story = {
+  render: () => (
+    <>
+      <MainContent />
+      <ContextWindowTrigger />
+      <ContextWindow>
+        <KnowledgeGraphWithStates />
+      </ContextWindow>
+    </>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows the compact preview state of the knowledge graph with the ability to expand to full view.',
+      },
+    },
+  },
+}
+
 export const CustomWidth: Story = {
   render: () => {
     // This would require modifying the context window component to accept width prop
@@ -199,6 +262,50 @@ export const CustomWidth: Story = {
             </div>
           </div>
         </ContextWindow>
+      </>
+    )
+  },
+}
+
+export const DifferentSizes: Story = {
+  render: () => {
+    const [size, setSize] = useState<'compact' | 'medium' | 'large'>('medium')
+    
+    return (
+      <>
+        <div className="p-8">
+          <h1 className="text-3xl font-bold mb-4">Context Window Size Demo</h1>
+          <div className="flex gap-2 mb-4">
+            <Button 
+              variant={size === 'compact' ? 'primary' : 'secondary'}
+              onClick={() => setSize('compact')}
+            >
+              Compact
+            </Button>
+            <Button 
+              variant={size === 'medium' ? 'primary' : 'secondary'}
+              onClick={() => setSize('medium')}
+            >
+              Medium
+            </Button>
+            <Button 
+              variant={size === 'large' ? 'primary' : 'secondary'}
+              onClick={() => setSize('large')}
+            >
+              Large
+            </Button>
+          </div>
+          <p>Current size: {size}</p>
+        </div>
+        <ContextWindowLayout compactSize={size} expandedSize={size}>
+          <ContextWindowTrigger />
+          <ContextWindow>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Size: {size}</h3>
+              <p>This context window is set to {size} size.</p>
+            </div>
+          </ContextWindow>
+        </ContextWindowLayout>
       </>
     )
   },

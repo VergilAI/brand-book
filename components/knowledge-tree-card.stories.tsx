@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { KnowledgeTreeCard } from './knowledge-tree-card'
+import { JourneyProvider } from './knowledge-graph/journey-context'
 
 const meta = {
   title: 'LMS/KnowledgeTreeCard',
@@ -8,6 +9,13 @@ const meta = {
     layout: 'padded',
   },
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <JourneyProvider>
+        <Story />
+      </JourneyProvider>
+    ),
+  ],
 } satisfies Meta<typeof KnowledgeTreeCard>
 
 export default meta
