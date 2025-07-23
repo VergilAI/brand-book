@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/button"
 import { Card } from "@/components/card"
 import { Input } from "@/components/input"
-import { Trash2, Plus, GripVertical } from "lucide-react"
+import { GripVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ConnectCardsPair {
@@ -23,28 +23,11 @@ interface ConnectCardsEditorProps {
 }
 
 export function ConnectCardsEditor({ content, onChange }: ConnectCardsEditorProps) {
-  const addPair = () => {
-    const newPair: ConnectCardsPair = {
-      id: `pair-${Date.now()}`,
-      left: "",
-      right: ""
-    }
-    onChange({
-      pairs: [...content.pairs, newPair]
-    })
-  }
-
   const updatePair = (id: string, field: "left" | "right", value: string) => {
     onChange({
       pairs: content.pairs.map(pair =>
         pair.id === id ? { ...pair, [field]: value } : pair
       )
-    })
-  }
-
-  const removePair = (id: string) => {
-    onChange({
-      pairs: content.pairs.filter(pair => pair.id !== id)
     })
   }
 
@@ -54,14 +37,6 @@ export function ConnectCardsEditor({ content, onChange }: ConnectCardsEditorProp
         <h4 className="text-base font-medium text-primary"> {/* 16px, 500, #1D1D1F */}
           Card Pairs
         </h4>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={addPair}
-        >
-          <Plus size={16} className="mr-spacing-xs" /> {/* 4px */}
-          Add Pair
-        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-spacing-md"> {/* 16px */}
@@ -96,15 +71,6 @@ export function ConnectCardsEditor({ content, onChange }: ConnectCardsEditorProp
                 />
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removePair(pair.id)}
-                className="h-8 w-8 p-0 hover:bg-error-light transition-colors duration-fast" // #FEF2F2, 100ms
-                disabled={content.pairs.length === 1}
-              >
-                <Trash2 size={16} className="text-error" /> {/* #E51C23 */}
-              </Button>
             </div>
           </div>
         ))}

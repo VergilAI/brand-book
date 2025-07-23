@@ -14,20 +14,17 @@ interface AIQuestionGeneratorModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onGenerate: (questions: Question[]) => void
-  chapters: Array<{ id: string; title: string }>
 }
 
 export function AIQuestionGeneratorModal({
   open,
   onOpenChange,
-  onGenerate,
-  chapters
+  onGenerate
 }: AIQuestionGeneratorModalProps) {
   const [prompt, setPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedQuestions, setGeneratedQuestions] = useState<Question[]>([])
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([])
-  const [selectedChapters, setSelectedChapters] = useState<string[]>([])
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
@@ -38,54 +35,79 @@ export function AIQuestionGeneratorModal({
       // Simulate AI generation - replace with actual API call
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      // Mock generated questions based on prompt
-      const mockQuestions: Question[] = [
-        {
-          id: `ai-${Date.now()}-1`,
-          type: "multiple-choice",
-          title: "Understanding React Components",
-          content: {
-            question: "What is the primary purpose of React components?",
-            options: [
-              { id: "1", text: "To create reusable UI elements", isCorrect: true },
-              { id: "2", text: "To manage database connections", isCorrect: false },
-              { id: "3", text: "To handle server-side routing", isCorrect: false },
-              { id: "4", text: "To compile JavaScript code", isCorrect: false }
-            ]
-          },
-          points: 1,
-          order: 0,
-          chapterIds: selectedChapters.length > 0 ? selectedChapters : undefined
-        },
-        {
-          id: `ai-${Date.now()}-2`,
-          type: "question-answer",
-          title: "Explain State Management",
-          content: {
-            question: "Explain how state management works in React and why it's important.",
-            answer: "State management in React refers to how components store and manage their data. It's important because it allows components to be dynamic and interactive, updating the UI based on user actions or data changes."
-          },
-          points: 2,
-          order: 1,
-          chapterIds: selectedChapters.length > 0 ? selectedChapters : undefined
-        },
-        {
-          id: `ai-${Date.now()}-3`,
-          type: "connect-cards",
-          title: "Match React Hooks",
-          content: {
-            pairs: [
-              { id: "p1", left: "useState", right: "Manages component state" },
-              { id: "p2", left: "useEffect", right: "Handles side effects" },
-              { id: "p3", left: "useContext", right: "Consumes context values" },
-              { id: "p4", left: "useReducer", right: "Complex state management" }
-            ]
-          },
-          points: 3,
-          order: 2,
-          chapterIds: selectedChapters.length > 0 ? selectedChapters : undefined
-        }
+      // Parse the prompt to extract number of questions requested
+      const numberMatch = prompt.match(/(\d+)\s*question/i)
+      const requestedCount = numberMatch ? parseInt(numberMatch[1]) : 3 // Default to 3 if not specified
+      
+      // Extract topic from prompt for more realistic questions
+      const topicMatch = prompt.match(/about\s+([^.]+)/i)
+      const topic = topicMatch ? topicMatch[1].trim() : "the requested topic"
+      
+      // Generate the requested number of questions
+      const mockQuestions: Question[] = []
+      
+      // Sample question templates for variety
+      const mcTemplates = [
+        `What is the primary purpose of ${topic}?`,
+        `Which of the following best describes ${topic}?`,
+        `What is a key characteristic of ${topic}?`,
+        `How does ${topic} differ from other approaches?`,
+        `When should you use ${topic}?`,
+        `What is the main benefit of ${topic}?`,
+        `Which statement about ${topic} is correct?`,
+        `What problem does ${topic} solve?`
       ]
+      
+      const qaTemplates = [
+        `Explain how ${topic} works and why it's important.`,
+        `Describe the main concepts of ${topic} in your own words.`,
+        `What are the advantages and disadvantages of ${topic}?`,
+        `How would you implement ${topic} in a real-world scenario?`,
+        `Compare and contrast ${topic} with alternative approaches.`,
+        `What are the best practices when working with ${topic}?`,
+        `Explain the key principles behind ${topic}.`,
+        `How has ${topic} evolved over time?`
+      ]
+      
+      for (let i = 0; i < requestedCount; i++) {
+        const timestamp = Date.now() + i // Ensure unique IDs
+        
+        // Alternate between question types
+        if (i % 2 === 0) {
+          // Multiple choice question
+          const questionTemplate = mcTemplates[i % mcTemplates.length]
+          mockQuestions.push({
+            id: `ai-${timestamp}`,
+            type: "multiple-choice",
+            title: `${topic} - Concept ${Math.floor(i/2) + 1}`,
+            content: {
+              question: questionTemplate,
+              options: [
+                { id: `${timestamp}-1`, text: `Correct answer about ${topic}`, isCorrect: true },
+                { id: `${timestamp}-2`, text: `Plausible but incorrect option`, isCorrect: false },
+                { id: `${timestamp}-3`, text: `Common misconception about ${topic}`, isCorrect: false },
+                { id: `${timestamp}-4`, text: `Unrelated or clearly wrong option`, isCorrect: false }
+              ]
+            },
+            points: 1,
+            order: i
+          })
+        } else {
+          // Question & Answer
+          const questionTemplate = qaTemplates[Math.floor(i/2) % qaTemplates.length]
+          mockQuestions.push({
+            id: `ai-${timestamp}`,
+            type: "question-answer",
+            title: `${topic} - Analysis ${Math.floor(i/2) + 1}`,
+            content: {
+              question: questionTemplate,
+              answer: `This is a comprehensive answer about ${topic}. In a real implementation, this would contain detailed information based on the learning material provided.`
+            },
+            points: 2,
+            order: i
+          })
+        }
+      }
       
       setGeneratedQuestions(mockQuestions)
       setSelectedQuestions(mockQuestions.map(q => q.id))
@@ -113,7 +135,6 @@ export function AIQuestionGeneratorModal({
       setPrompt("")
       setGeneratedQuestions([])
       setSelectedQuestions([])
-      setSelectedChapters([])
     }, 300)
   }
 
@@ -184,43 +205,9 @@ export function AIQuestionGeneratorModal({
       size="xl"
       footer={footerElement}
     >
-      <div className="space-y-spacing-lg">
+      <div className="space-y-spacing-lg max-h-[70vh] overflow-y-auto"> {/* 24px */}
         {generatedQuestions.length === 0 ? (
           <>
-            {/* Chapter Selection */}
-            {chapters.length > 0 && (
-              <div className="space-y-spacing-sm">
-                <label className="text-sm font-medium text-primary">
-                  Assign to Chapters (Optional)
-                </label>
-                <div className="flex flex-wrap gap-spacing-xs">
-                  {chapters.map(chapter => {
-                    const isSelected = selectedChapters.includes(chapter.id)
-                    return (
-                      <button
-                        key={chapter.id}
-                        onClick={() => {
-                          setSelectedChapters(prev =>
-                            isSelected
-                              ? prev.filter(id => id !== chapter.id)
-                              : [...prev, chapter.id]
-                          )
-                        }}
-                        className={cn(
-                          "px-spacing-sm py-spacing-xs text-sm rounded-md border transition-all duration-fast",
-                          isSelected
-                            ? "bg-brand text-inverse border-brand"
-                            : "bg-primary text-secondary border-subtle hover:border-default"
-                        )}
-                      >
-                        {chapter.title}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* Prompt Input */}
             <div className="space-y-spacing-sm">
               <label className="text-sm font-medium text-primary">
@@ -229,7 +216,7 @@ export function AIQuestionGeneratorModal({
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Example: Create questions about React hooks including useState, useEffect, and useContext. Focus on practical applications and common use cases. Include a mix of multiple choice and open-ended questions."
+                placeholder="Example: Create 5 questions about React hooks including useState, useEffect, and useContext. Focus on practical applications and common use cases."
                 className="w-full min-h-[200px] p-spacing-md text-base text-primary bg-primary border border-default rounded-lg resize-y focus:border-focus focus:ring-2 focus:ring-border-focus transition-all duration-fast"
                 rows={8}
               />
@@ -246,8 +233,8 @@ export function AIQuestionGeneratorModal({
               <div className="space-y-spacing-xs">
                 {[
                   "Create 5 questions about photosynthesis for high school biology students",
-                  "Generate questions testing understanding of JavaScript async/await concepts",
-                  "Create a mix of questions about World War II causes and consequences"
+                  "Generate 10 questions testing understanding of JavaScript async/await concepts",
+                  "Create 8 questions about World War II causes and consequences"
                 ].map((example, index) => (
                   <Card
                     key={index}
@@ -269,7 +256,7 @@ export function AIQuestionGeneratorModal({
           <>
             {/* Generated Questions */}
             <div className="space-y-spacing-sm">
-              <div className="flex items-center justify-between mb-spacing-md">
+              <div className="flex items-center justify-between mb-spacing-md sticky top-0 bg-primary z-10 pb-spacing-sm"> {/* #FFFFFF, 8px */}
                 <h3 className="text-base font-medium text-primary">
                   Generated Questions
                 </h3>
@@ -286,7 +273,8 @@ export function AIQuestionGeneratorModal({
                 </Button>
               </div>
 
-              {generatedQuestions.map((question, index) => {
+              <div className="space-y-spacing-sm max-h-[400px] overflow-y-auto pr-spacing-sm"> {/* 8px, 8px */}
+                {generatedQuestions.map((question, index) => {
                 const isSelected = selectedQuestions.includes(question.id)
                 return (
                   <Card
@@ -305,9 +293,7 @@ export function AIQuestionGeneratorModal({
                           </h4>
                           <Badge 
                             variant={
-                              question.type === "connect-cards" ? "warning" :
-                              question.type === "question-answer" ? "success" :
-                              "info"
+                              question.type === "question-answer" ? "success" : "info"
                             } 
                             size="sm"
                           >
@@ -337,6 +323,7 @@ export function AIQuestionGeneratorModal({
                   </Card>
                 )
               })}
+              </div>
             </div>
 
             {/* Original Prompt */}
@@ -358,8 +345,6 @@ function getQuestionPreview(question: Question): string {
       return question.content.question
     case "question-answer":
       return question.content.question
-    case "connect-cards":
-      return `Match ${question.content.pairs.length} pairs`
     default:
       return ""
   }

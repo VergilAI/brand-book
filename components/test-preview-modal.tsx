@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Modal } from "@/components/modal"
 import { Button } from "@/components/button"
 import { Card } from "@/components/card"
@@ -20,22 +20,13 @@ interface TestPreviewModalProps {
 export function TestPreviewModal({ test, open, onOpenChange }: TestPreviewModalProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, any>>({})
+  const [elapsedTime, setElapsedTime] = useState(0) // in seconds
+  const [isTimeUp, setIsTimeUp] = useState(false)
 
   const currentQuestion = test.questions[currentQuestionIndex]
   const totalQuestions = test.questions.length
   const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100
-
-  const handleNext = () => {
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(prev => prev + 1)
-    }
-  }
-
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1)
-    }
-  }
+  const timeLimitInSeconds = test.settings.timeLimit ? test.settings.timeLimit * 60 : null
 
   const handleFinish = () => {
     // Calculate score
@@ -61,6 +52,57 @@ export function TestPreviewModal({ test, open, onOpenChange }: TestPreviewModalP
     onOpenChange(false)
     setCurrentQuestionIndex(0)
     setAnswers({})
+    setElapsedTime(0)
+    setIsTimeUp(false)
+  }
+
+  // Timer effect
+  useEffect(() => {
+    if (!open) {
+      // Reset timer when modal closes
+      setElapsedTime(0)
+      setIsTimeUp(false)
+      return
+    }
+
+    const interval = setInterval(() => {
+      setElapsedTime(prev => {
+        const newTime = prev + 1
+        if (timeLimitInSeconds && newTime >= timeLimitInSeconds) {
+          setIsTimeUp(true)
+          handleFinish() // Auto-submit when time is up
+          return prev
+        }
+        return newTime
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [open, timeLimitInSeconds])
+
+  // Format time display
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  const getRemainingTime = () => {
+    if (!timeLimitInSeconds) return null
+    const remaining = Math.max(0, timeLimitInSeconds - elapsedTime)
+    return remaining
+  }
+
+  const handleNext = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex(prev => prev + 1)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1)
+    }
   }
 
   if (!currentQuestion) {
@@ -71,17 +113,7 @@ export function TestPreviewModal({ test, open, onOpenChange }: TestPreviewModalP
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={
-        <div className="flex items-center justify-between w-full">
-          <span>{test.title} - Preview Mode</span>
-          {test.settings.timeLimit && (
-            <Badge variant="secondary" className="flex items-center gap-spacing-xs"> {/* 4px */}
-              <Clock size={14} />
-              {test.settings.timeLimit} min
-            </Badge>
-          )}
-        </div>
-      }
+      title={`${test.title} - Preview Mode`}
       size="lg"
       showCloseButton={false}
       footer={
@@ -114,6 +146,19 @@ export function TestPreviewModal({ test, open, onOpenChange }: TestPreviewModalP
       }
     >
       <div className="space-y-spacing-lg"> {/* 24px */}
+        {/* Timer Display */}
+        {test.settings.timeLimit && (
+          <div className="flex items-center gap-spacing-sm"> {/* 8px */}
+            <Clock size={18} className="text-secondary" /> {/* #6C6C6D */}
+            <Badge 
+              variant={getRemainingTime() && getRemainingTime() < 60 ? "error" : "secondary"}
+              className="flex items-center gap-spacing-xs" /* 4px */
+            >
+              <span className="font-medium">Time Remaining: {formatTime(getRemainingTime() || 0)}</span>
+            </Badge>
+          </div>
+        )}
+
         {/* Progress Bar */}
         <div className="space-y-spacing-sm"> {/* 8px */}
           <div className="flex justify-between text-sm text-secondary"> {/* 14px, #6C6C6D */}
@@ -179,31 +224,6 @@ export function TestPreviewModal({ test, open, onOpenChange }: TestPreviewModalP
               </div>
             )}
 
-            {currentQuestion.type === "connect-cards" && (
-              <div className="space-y-spacing-md"> {/* 16px */}
-                <p className="text-sm text-secondary"> {/* 14px, #6C6C6D */}
-                  Draw lines to connect matching items (preview only - interaction not implemented)
-                </p>
-                <div className="grid grid-cols-2 gap-spacing-lg"> {/* 24px */}
-                  <div className="space-y-spacing-sm"> {/* 8px */}
-                    <h4 className="text-sm font-medium text-secondary">Left Column</h4> {/* 14px, 500, #6C6C6D */}
-                    {currentQuestion.content.pairs.map((pair: any) => (
-                      <Card key={pair.id} className="p-spacing-sm"> {/* 8px */}
-                        {pair.left}
-                      </Card>
-                    ))}
-                  </div>
-                  <div className="space-y-spacing-sm"> {/* 8px */}
-                    <h4 className="text-sm font-medium text-secondary">Right Column</h4> {/* 14px, 500, #6C6C6D */}
-                    {currentQuestion.content.pairs.map((pair: any) => (
-                      <Card key={pair.id} className="p-spacing-sm"> {/* 8px */}
-                        {pair.right}
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </Card>
 

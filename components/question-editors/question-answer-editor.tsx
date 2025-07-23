@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Card } from "@/components/card"
 import { Label } from "@/components/label"
+import { HelpCircle, CheckCircle2, AlertCircle } from "lucide-react"
 
 interface QuestionAnswerContent {
   question: string
@@ -18,9 +19,12 @@ export function QuestionAnswerEditor({ content, onChange }: QuestionAnswerEditor
   return (
     <div className="space-y-spacing-md"> {/* 16px */}
       <div className="space-y-spacing-sm"> {/* 8px */}
-        <Label htmlFor="question" className="text-base font-medium text-primary"> {/* 16px, 500, #1D1D1F */}
-          Question
-        </Label>
+        <div className="flex items-center gap-spacing-xs mb-spacing-xs"> {/* 4px, 4px */}
+          <HelpCircle size={18} className="text-info" /> {/* #0087FF */}
+          <Label htmlFor="question" className="text-base font-medium text-primary mb-0"> {/* 16px, 500, #1D1D1F */}
+            Question
+          </Label>
+        </div>
         <textarea
           id="question"
           value={content.question}
@@ -32,9 +36,12 @@ export function QuestionAnswerEditor({ content, onChange }: QuestionAnswerEditor
       </div>
 
       <div className="space-y-spacing-sm"> {/* 8px */}
-        <Label htmlFor="answer" className="text-base font-medium text-primary"> {/* 16px, 500, #1D1D1F */}
-          Expected Answer
-        </Label>
+        <div className="flex items-center gap-spacing-xs mb-spacing-xs"> {/* 4px, 4px */}
+          <CheckCircle2 size={18} className="text-success" /> {/* #0F8A0F */}
+          <Label htmlFor="answer" className="text-base font-medium text-primary mb-0"> {/* 16px, 500, #1D1D1F */}
+            Expected Answer
+          </Label>
+        </div>
         <textarea
           id="answer"
           value={content.answer}
@@ -46,10 +53,13 @@ export function QuestionAnswerEditor({ content, onChange }: QuestionAnswerEditor
       </div>
 
       <Card className="p-spacing-md bg-warning-light border-warning"> {/* 16px, #FFFEF0, #FFF490 */}
-        <p className="text-sm text-emphasis"> {/* 14px, #303030 */}
-          <strong>Note:</strong> This is an open-ended question type. Students will provide text responses 
-          that may need manual grading unless you set up keyword-based auto-grading.
-        </p>
+        <div className="flex items-start gap-spacing-sm"> {/* 8px */}
+          <AlertCircle size={18} className="text-warning mt-0.5 flex-shrink-0" /> {/* #FFC700 */}
+          <p className="text-sm text-emphasis"> {/* 14px, #303030 */}
+            <strong>Note:</strong> This is an open-ended question type. Students will provide text responses 
+            that may need manual grading unless you set up keyword-based auto-grading.
+          </p>
+        </div>
       </Card>
     </div>
   )

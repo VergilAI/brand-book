@@ -5,8 +5,8 @@ import { Button } from "@/components/button"
 import { Card } from "@/components/card"
 import { Input } from "@/components/input"
 import { Label } from "@/components/label"
-import { Trash2, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { HelpCircle, ListChecks, Info, CheckCircle, Circle } from "lucide-react"
 
 interface MultipleChoiceOption {
   id: string
@@ -25,18 +25,6 @@ interface MultipleChoiceEditorProps {
 }
 
 export function MultipleChoiceEditor({ content, onChange }: MultipleChoiceEditorProps) {
-  const addOption = () => {
-    const newOption: MultipleChoiceOption = {
-      id: `opt-${Date.now()}`,
-      text: "",
-      isCorrect: false
-    }
-    onChange({
-      ...content,
-      options: [...content.options, newOption]
-    })
-  }
-
   const updateOption = (id: string, text: string) => {
     onChange({
       ...content,
@@ -56,21 +44,17 @@ export function MultipleChoiceEditor({ content, onChange }: MultipleChoiceEditor
     })
   }
 
-  const removeOption = (id: string) => {
-    onChange({
-      ...content,
-      options: content.options.filter(option => option.id !== id)
-    })
-  }
-
   const hasCorrectAnswer = content.options.some(opt => opt.isCorrect)
 
   return (
     <div className="space-y-spacing-md"> {/* 16px */}
       <div className="space-y-spacing-sm"> {/* 8px */}
-        <Label htmlFor="mc-question" className="text-base font-medium text-primary"> {/* 16px, 500, #1D1D1F */}
-          Question
-        </Label>
+        <div className="flex items-center gap-spacing-xs mb-spacing-xs"> {/* 4px, 4px */}
+          <HelpCircle size={18} className="text-info" /> {/* #0087FF */}
+          <Label htmlFor="mc-question" className="text-base font-medium text-primary mb-0"> {/* 16px, 500, #1D1D1F */}
+            Question
+          </Label>
+        </div>
         <textarea
           id="mc-question"
           value={content.question}
@@ -82,19 +66,11 @@ export function MultipleChoiceEditor({ content, onChange }: MultipleChoiceEditor
       </div>
 
       <div className="space-y-spacing-sm"> {/* 8px */}
-        <div className="flex items-center justify-between">
-          <Label className="text-base font-medium text-primary"> {/* 16px, 500, #1D1D1F */}
+        <div className="flex items-center gap-spacing-xs mb-spacing-xs"> {/* 4px, 4px */}
+          <ListChecks size={18} className="text-info" /> {/* #0087FF */}
+          <Label className="text-base font-medium text-primary mb-0"> {/* 16px, 500, #1D1D1F */}
             Answer Options
           </Label>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={addOption}
-            disabled={content.options.length >= 4}
-          >
-            <Plus size={16} className="mr-spacing-xs" /> {/* 4px */}
-            Add Option
-          </Button>
         </div>
 
         <div className="space-y-spacing-sm"> {/* 8px */}
@@ -113,6 +89,11 @@ export function MultipleChoiceEditor({ content, onChange }: MultipleChoiceEditor
                 </div>
 
                 <div className="flex-1 flex items-center gap-spacing-sm"> {/* 8px */}
+                  {option.isCorrect ? (
+                    <CheckCircle size={20} className="text-success flex-shrink-0" /> // #0F8A0F
+                  ) : (
+                    <Circle size={20} className="text-tertiary flex-shrink-0" /> // #71717A
+                  )}
                   <span className="text-sm font-medium text-secondary w-6"> {/* 14px, 500, #6C6C6D */}
                     {String.fromCharCode(65 + index)}.
                   </span>
@@ -127,15 +108,6 @@ export function MultipleChoiceEditor({ content, onChange }: MultipleChoiceEditor
                   />
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeOption(option.id)}
-                  className="h-8 w-8 p-0 hover:bg-error-light transition-colors duration-fast" // #FEF2F2, 100ms
-                  disabled={content.options.length <= 2}
-                >
-                  <Trash2 size={16} className="text-error" /> {/* #E51C23 */}
-                </Button>
               </div>
             </div>
           ))}
@@ -148,21 +120,16 @@ export function MultipleChoiceEditor({ content, onChange }: MultipleChoiceEditor
             </p>
           </Card>
         )}
-        
-        {content.options.length >= 4 && (
-          <Card className="p-spacing-sm bg-warning-light border-warning"> {/* 8px, #FFFEF0, #FFF490 */}
-            <p className="text-sm text-emphasis"> {/* 14px, #303030 */}
-              Maximum of 4 options allowed
-            </p>
-          </Card>
-        )}
       </div>
 
       <Card className="p-spacing-md bg-info-light border-info"> {/* 16px, #EFF6FF, #93C5FD */}
-        <p className="text-sm text-info"> {/* 14px, #0087FF */}
-          <strong>Tip:</strong> Click the radio button next to an option to mark it as the correct answer. 
-          The correct answer will be highlighted in green.
-        </p>
+        <div className="flex items-start gap-spacing-sm"> {/* 8px */}
+          <Info size={18} className="text-info mt-0.5 flex-shrink-0" /> {/* #0087FF */}
+          <p className="text-sm text-info"> {/* 14px, #0087FF */}
+            <strong>Tip:</strong> Click the radio button next to an option to mark it as the correct answer. 
+            The correct answer will be highlighted in green.
+          </p>
+        </div>
       </Card>
     </div>
   )

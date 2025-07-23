@@ -33,16 +33,17 @@ import {
   ChevronLeft,
   ChevronRight,
   GripVertical,
-  Sparkles
+  Sparkles,
+  FileQuestion,
+  ListChecks
 } from "lucide-react"
 import { QuestionEditor } from "./question-editor"
 import { TestSettings } from "./test-settings"
 import { SortableQuestionItem } from "./sortable-question-item"
-import { QuestionLibraryModal } from "./question-library-modal"
 import { TestPreviewModal } from "./test-preview-modal"
 import { AIQuestionGeneratorModal } from "./ai-question-generator-modal"
 
-export type QuestionType = "connect-cards" | "question-answer" | "multiple-choice"
+export type QuestionType = "question-answer" | "multiple-choice"
 
 export interface Question {
   id: string
@@ -51,7 +52,6 @@ export interface Question {
   content: any // Type varies based on question type
   points: number
   order: number
-  chapterIds?: string[] // Which chapters this question belongs to
   isInLibrary?: boolean // Whether this is saved to the library
 }
 
@@ -70,21 +70,9 @@ export interface Test {
   status: "draft" | "published"
 }
 
-// Mock chapters data - replace with actual data from your API
-const mockChapters = [
-  { id: "ch1", title: "Chapter 1: Introduction", courseId: "course1" },
-  { id: "ch2", title: "Chapter 2: Basic Concepts", courseId: "course1" },
-  { id: "ch3", title: "Chapter 3: Advanced Topics", courseId: "course1" },
-]
 
 const getQuestionTypeColor = (type: QuestionType) => {
   switch (type) {
-    case "connect-cards":
-      return {
-        bg: "bg-yellow-light", // #FFFEF0
-        border: "border-yellow", // #FFF490
-        text: "text-yellow-600" // #FFB300
-      }
     case "question-answer":
       return {
         bg: "bg-success-light", // #F0FDF4
@@ -123,7 +111,6 @@ export function TestCreator() {
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [showLibrary, setShowLibrary] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
@@ -173,12 +160,6 @@ export function TestCreator() {
 
   const getDefaultContent = (type: QuestionType) => {
     switch (type) {
-      case "connect-cards":
-        return {
-          pairs: [
-            { left: "", right: "", id: `pair-${Date.now()}` }
-          ]
-        }
       case "question-answer":
         return {
           question: "",
@@ -189,7 +170,9 @@ export function TestCreator() {
           question: "",
           options: [
             { id: `opt-${Date.now()}-1`, text: "", isCorrect: false },
-            { id: `opt-${Date.now()}-2`, text: "", isCorrect: false }
+            { id: `opt-${Date.now()}-2`, text: "", isCorrect: false },
+            { id: `opt-${Date.now()}-3`, text: "", isCorrect: false },
+            { id: `opt-${Date.now()}-4`, text: "", isCorrect: false }
           ]
         }
     }
@@ -336,14 +319,6 @@ export function TestCreator() {
                   <Sparkles size={16} className="mr-spacing-xs" /> {/* 4px */}
                   Do with AI
                 </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => setShowLibrary(true)}
-                >
-                  Import from Library
-                </Button>
               </>
             ) : (
               <Button
@@ -447,7 +422,6 @@ export function TestCreator() {
                   <QuestionEditor
                     question={question}
                     questionNumber={questionIndex + 1}
-                    chapters={mockChapters}
                     onUpdate={(updatedQuestion) => {
                       setTest(prev => ({
                         ...prev,
@@ -511,28 +485,6 @@ export function TestCreator() {
         </div>
       )}
 
-      {/* Question Library Modal */}
-      <QuestionLibraryModal
-        open={showLibrary}
-        onOpenChange={setShowLibrary}
-        chapters={mockChapters}
-        onImport={(importedQuestions) => {
-          setTest(prev => ({
-            ...prev,
-            questions: [
-              ...prev.questions,
-              ...importedQuestions.map((q, index) => ({
-                ...q,
-                order: prev.questions.length + index
-              }))
-            ]
-          }))
-          // Select the first imported question
-          if (importedQuestions.length > 0) {
-            setSelectedQuestionId(importedQuestions[0].id)
-          }
-        }}
-      />
 
       {/* Test Preview Modal */}
       <TestPreviewModal
@@ -545,7 +497,6 @@ export function TestCreator() {
       <AIQuestionGeneratorModal
         open={showAIModal}
         onOpenChange={setShowAIModal}
-        chapters={mockChapters}
         onGenerate={(generatedQuestions) => {
           setTest(prev => ({
             ...prev,
@@ -570,25 +521,20 @@ export function TestCreator() {
 function QuestionTypeSelector({ onSelect }: { onSelect: (type: QuestionType) => void }) {
   const questionTypes = [
     {
-      type: "connect-cards" as QuestionType,
-      label: "Connect Cards",
-      description: "Match items between two columns",
-      color: "bg-yellow-50 hover:bg-yellow-100 border-yellow-300",
-      dot: "bg-yellow-500"
-    },
-    {
       type: "question-answer" as QuestionType,
       label: "Question & Answer",
       description: "Open-ended text response",
       color: "bg-green-50 hover:bg-green-100 border-green-300",
-      dot: "bg-green-500"
+      dot: "bg-green-500",
+      icon: FileQuestion
     },
     {
       type: "multiple-choice" as QuestionType,
       label: "Multiple Choice",
       description: "Select one correct answer",
       color: "bg-blue-50 hover:bg-blue-100 border-blue-300",
-      dot: "bg-blue-500"
+      dot: "bg-blue-500",
+      icon: ListChecks
     }
   ]
 
@@ -597,7 +543,7 @@ function QuestionTypeSelector({ onSelect }: { onSelect: (type: QuestionType) => 
       <p className="text-sm font-medium text-primary mb-spacing-sm"> {/* 14px, 500, #1D1D1F, 8px */}
         Add Question
       </p>
-      {questionTypes.map(({ type, label, description, color, dot }) => (
+      {questionTypes.map(({ type, label, description, color, dot, icon: Icon }) => (
         <button
           key={type}
           onClick={() => onSelect(type)}
@@ -607,7 +553,7 @@ function QuestionTypeSelector({ onSelect }: { onSelect: (type: QuestionType) => 
           )}
         >
           <div className="flex items-start gap-spacing-sm"> {/* 8px */}
-            <span className={cn("w-2 h-2 rounded-full mt-1", dot)} />
+            <Icon size={18} className={cn("mt-0.5", dot.replace('bg-', 'text-'))} />
             <div className="flex-1">
               <div className="text-sm font-medium text-primary"> {/* 14px, 500, #1D1D1F */}
                 {label}
