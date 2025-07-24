@@ -82,6 +82,9 @@ export interface MapEditorState {
   // View state
   view: ViewState
   
+  // Edit mode (view-only vs editable)
+  editMode: 'view' | 'edit'
+  
   // Snapping state
   snapping: SnapState
   
@@ -169,6 +172,9 @@ export interface MapEditorState {
   sendToBack: (territoryId: string) => void
   bringForward: (territoryId: string) => void
   sendBackward: (territoryId: string) => void
+  
+  // Edit mode actions
+  setEditMode: (mode: 'view' | 'edit') => void
 }
 
 export interface PointerPosition {

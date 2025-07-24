@@ -7,28 +7,24 @@ import { ToolbarSettings } from './ToolbarSettings'
 import { ToolbarSnappingSettings } from './ToolbarSnappingSettings'
 import { cn } from '@/lib/utils'
 import { 
-  MousePointer2, 
-  Pen, 
-  Link,
-  Hand,
+  Eye,
+  Edit,
   Library,
   Table2
 } from 'lucide-react'
 import { SnappingIcon, GridIcon } from '@/components/diagram-tool/ui/MapIcons'
 import type { ToolType } from '@/app/map-editor/types/editor'
 
-interface Tool {
-  id: ToolType
+interface EditMode {
+  id: 'view' | 'edit'
   name: string
   icon: React.ReactNode
-  shortcut?: string
+  tooltip: string
 }
 
-const tools: Tool[] = [
-  { id: 'select', name: 'Select', icon: <MousePointer2 />, shortcut: 'V' },
-  { id: 'move', name: 'Pan', icon: <Hand />, shortcut: 'H' },
-  { id: 'pen', name: 'Draw Territory', icon: <Pen />, shortcut: 'D' },
-  { id: 'connect', name: 'Sea Routes', icon: <Link />, shortcut: 'C' },
+const editModes: EditMode[] = [
+  { id: 'view', name: 'View Only', icon: <Eye />, tooltip: 'View only mode - Disable editing to prevent accidental changes' },
+  { id: 'edit', name: 'Edit', icon: <Edit />, tooltip: 'Edit mode - Make changes to the database' },
 ]
 
 export function Toolbar() {
@@ -58,21 +54,20 @@ export function Toolbar() {
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1 px-2 py-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-subtle">
-          {/* Main tools */}
+          {/* Edit mode buttons */}
           <div className="flex items-center gap-1">
-            {tools.map(tool => (
+            {editModes.map(mode => (
               <IconButtonWithTooltip
-                key={tool.id}
-                icon={tool.icon}
-                onClick={() => store.setTool(tool.id)}
-                active={store.tool === tool.id}
-                tooltip={`${tool.name} - ${tool.shortcut === 'V' ? 'Select and move territories' : tool.shortcut === 'H' ? 'Pan around the canvas' : tool.shortcut === 'D' ? 'Draw new territory shapes' : 'Create sea routes between territories'}`}
-                rightSubscript={tool.shortcut}
+                key={mode.id}
+                icon={mode.icon}
+                onClick={() => store.setEditMode(mode.id)}
+                active={store.editMode === mode.id}
+                tooltip={mode.tooltip}
                 size="sm"
                 variant="ghost"
                 className={cn(
                   "transition-colors",
-                  store.tool === tool.id && "hover:bg-brand/10"
+                  store.editMode === mode.id && "hover:bg-brand/10"
                 )}
               />
             ))}
@@ -120,7 +115,7 @@ export function Toolbar() {
             onClick={() => store.toggleTemplateLibrary()}
             active={store.templateLibrary.isOpen}
             tooltip="Shape Library - Access pre-made shapes and templates"
-            rightSubscript="L"
+            rightSubscript="K"
             size="sm"
             variant="ghost"
             className={cn(

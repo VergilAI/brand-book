@@ -1,55 +1,64 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useMapEditor } from '@/app/map-editor/hooks/useMapEditor'
-import { ShapeGrid } from './ShapeGrid'
-import { ShapeSearch } from './ShapeSearch'
-import { CategorySection } from './CategorySection'
-import { shapeLibrary } from '@/components/diagram-tool/shapes/ShapeLibrary'
-import { SHAPE_CATEGORIES } from '@/app/map-editor/types/template-library'
-import { ChevronLeft, Library } from 'lucide-react'
+import { ChevronLeft, Table, Link } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/select'
 
 export function TemplateLibraryPanel() {
   const store = useMapEditor()
-  const { isOpen, selectedCategory, searchQuery, recentShapes } = store.templateLibrary
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['basic', 'recent']))
+  const { isOpen } = store.templateLibrary
+  const [connectionType, setConnectionType] = useState<string>('one-to-one')
   
-  // Get shapes based on search or category
-  const displayedShapes = useMemo(() => {
-    if (searchQuery) {
-      return shapeLibrary.searchShapes(searchQuery)
-    }
+  const handleAddTable = () => {
+    // Generate SVG path for a table with name, header and rows
+    const width = 300
+    const nameHeight = 30
+    const headerHeight = 30
+    const rowHeight = 30
+    const numRows = 3 // 3 data rows
+    const height = nameHeight + headerHeight + (rowHeight * numRows)
     
-    if (selectedCategory === 'all') {
-      return shapeLibrary.getShapesByCategory('all')
-    }
+    // Create table outline (just the outer rectangle)
+    const tablePath = `M 0 0 L ${width} 0 L ${width} ${height} L 0 ${height} Z`
     
-    return shapeLibrary.getShapesByCategory(selectedCategory)
-  }, [searchQuery, selectedCategory])
-  
-  // Get recent shapes
-  const recentShapeObjects = useMemo(() => {
-    return recentShapes
-      .map(id => shapeLibrary.getShape(id))
-      .filter(Boolean)
-      .slice(0, 10)
-  }, [recentShapes])
-  
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategories(prev => {
-      const next = new Set(prev)
-      if (next.has(categoryId)) {
-        next.delete(categoryId)
-      } else {
-        next.add(categoryId)
+    // Add the table to the map
+    const newTerritoryId = `table-${Date.now()}`
+    const territory = {
+      id: newTerritoryId,
+      name: 'New Table',
+      continent: '',
+      fillPath: tablePath,
+      borderSegments: [],
+      center: { x: store.view.pan.x + 400, y: store.view.pan.y + 300 },
+      zIndex: Object.keys(store.map.territories).length,
+      metadata: {
+        type: 'database-table',
+        tableName: 'New Table',
+        columns: ['Key', 'Name', 'Type'],
+        rows: [
+          { key: '', name: '', type: 'text' },
+          { key: '', name: '', type: 'text' },
+          { key: '', name: '', type: 'text' }
+        ],
+        nameHeight,
+        headerHeight,
+        rowHeight,
+        width
       }
-      return next
-    })
-  }
-  
-  const handleShapeSelect = (shapeId: string) => {
-    store.startShapePlacement(shapeId)
+    } as any
+    
+    store.addTerritory(territory)
+    
+    // Close the panel after adding
+    store.toggleTemplateLibrary()
   }
   
   return (
@@ -66,7 +75,7 @@ export function TemplateLibraryPanel() {
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Shape Library</h2>
+            <h2 className="text-lg font-semibold">Database Elements</h2>
             <button
               onClick={() => store.toggleTemplateLibrary()}
               className="p-1 hover:bg-gray-100 rounded"
@@ -74,84 +83,62 @@ export function TemplateLibraryPanel() {
               <ChevronLeft className="w-5 h-5" />
             </button>
           </div>
-          
-          {/* Search */}
-          <ShapeSearch
-            value={searchQuery}
-            onChange={(query) => store.setTemplateSearch(query)}
-            onClear={() => store.setTemplateSearch('')}
-          />
         </div>
         
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {searchQuery ? (
-            // Search Results
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Search Results ({displayedShapes.length})
-              </h3>
-              <ShapeGrid
-                shapes={displayedShapes}
-                onShapeSelect={handleShapeSelect}
-              />
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {/* Table Section */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Tables</h3>
+            <button
+              onClick={handleAddTable}
+              className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-brand hover:bg-gray-50 transition-colors flex flex-col items-center gap-2"
+            >
+              <Table className="w-8 h-8 text-gray-600" />
+              <span className="text-sm font-medium">Add Table</span>
+              <span className="text-xs text-gray-500">Key | Name | Data</span>
+            </button>
+          </div>
+          
+          {/* Connection Type Section */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Connection Type</h3>
+            <div className="space-y-2">
+              <Select value={connectionType} onValueChange={setConnectionType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select connection type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one-to-one">
+                    <div className="flex items-center gap-2">
+                      <Link className="w-4 h-4" />
+                      <span>One to One</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="one-to-many">
+                    <div className="flex items-center gap-2">
+                      <Link className="w-4 h-4" />
+                      <span>One to Many</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="many-to-many">
+                    <div className="flex items-center gap-2">
+                      <Link className="w-4 h-4" />
+                      <span>Many to Many</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                Select the type of relationship for database connections
+              </p>
             </div>
-          ) : selectedCategory === 'all' ? (
-            // All Categories
-            <div className="space-y-4">
-              {/* Recent Shapes */}
-              {recentShapeObjects.length > 0 && (
-                <CategorySection
-                  category={{ id: 'recent', name: 'Recent', icon: '🕐', order: 0 }}
-                  shapes={recentShapeObjects}
-                  isExpanded={expandedCategories.has('recent')}
-                  onToggle={() => toggleCategory('recent')}
-                  onShapeSelect={handleShapeSelect}
-                />
-              )}
-              
-              {/* All Categories */}
-              {SHAPE_CATEGORIES.map(category => {
-                const shapes = shapeLibrary.getShapesByCategory(category.id)
-                if (shapes.length === 0) return null
-                
-                return (
-                  <CategorySection
-                    key={category.id}
-                    category={category}
-                    shapes={shapes}
-                    isExpanded={expandedCategories.has(category.id)}
-                    onToggle={() => toggleCategory(category.id)}
-                    onShapeSelect={handleShapeSelect}
-                  />
-                )
-              })}
-            </div>
-          ) : (
-            // Single Category
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  onClick={() => store.setTemplateCategory('all')}
-                  className="text-sm text-blue-600 hover:text-blue-700"
-                >
-                  ← All Categories
-                </button>
-              </div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                {SHAPE_CATEGORIES.find(c => c.id === selectedCategory)?.name} ({displayedShapes.length})
-              </h3>
-              <ShapeGrid
-                shapes={displayedShapes}
-                onShapeSelect={handleShapeSelect}
-              />
-            </div>
-          )}
+          </div>
         </div>
         
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
-          Click a shape to place • L to toggle panel
+          K to toggle panel
         </div>
       </div>
   )

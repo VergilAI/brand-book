@@ -57,6 +57,8 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     gridSize: 10
   },
   
+  editMode: 'edit', // Default to edit mode
+  
   snapping: {
     activeSnaps: [],
     indicators: [],
@@ -1262,7 +1264,10 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
         territories
       }
     }
-  })
+  }),
+  
+  // Edit mode actions
+  setEditMode: (mode) => set({ editMode: mode })
 }))
 
 // Helper functions
