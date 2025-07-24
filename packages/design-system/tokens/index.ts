@@ -12,6 +12,9 @@ export * from './semantic';
 // Export all component tokens
 export * from './components';
 
+// Export icon system
+export * from '../icons';
+
 // Legacy exports for backwards compatibility
 export * from './colors';
 export * from './typography';

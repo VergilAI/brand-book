@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const switchVariants = cva(
-  "group relative inline-flex shrink-0 cursor-pointer items-center rounded-full outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50",
+  "group relative inline-flex shrink-0 cursor-pointer items-center rounded-lg outline-none transition-all disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       size: {

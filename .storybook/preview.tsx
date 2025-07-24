@@ -58,6 +58,12 @@ const preview: Preview = {
         },
       },
     },
+    options: {
+      storySort: {
+        method: 'alphabetical',
+        order: ['Design Tokens', 'Icons', 'Atomic', '*'],
+      },
+    },
   },
   decorators: [
     (Story) => (
