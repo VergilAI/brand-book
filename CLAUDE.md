@@ -60,9 +60,9 @@ The Tailwind configuration supports TWO spacing conventions. **You MUST be consi
 3. If a spacing class produces no CSS, you're using the wrong convention
 
 **Available spacing tokens:**
-- `spacing-xs` (4px) 
-- `spacing-sm` (8px)
-- `spacing-md` (16px) 
+- `spacing-xs` (4px)
+- `spacing-sm` (8px) (Preferred)
+- `spacing-md` (16px) (Preferred)
 - `spacing-lg` (24px)
 - `spacing-xl` (32px)
 - `spacing-2xl` (48px)
@@ -70,11 +70,84 @@ The Tailwind configuration supports TWO spacing conventions. **You MUST be consi
 
 **Common mistake:** Using `space-y-spacing-md` when the config only supports `space-y-4`. Always verify which convention is active by checking an existing working component.
 
-### 3. Tailwind Version
+### 3. Border Radius Usage - CRITICAL
+
+**NEVER use `rounded-full` on rectangular elements**
+
+#### For Horizontal Bars (sliders, progress bars, etc.):
+- `rounded-md` (8px) - For subtle rounding on thin bars
+- `rounded-lg` (12px) - For medium rounding on standard bars
+- `rounded-xl` (16px) - For pill-shaped ends on thick bars
+- `rounded-full` - **ONLY for square elements to make perfect circles**
+
+#### Why This Matters:
+- `rounded-full` = `border-radius: 50%` = Creates ovals on rectangles
+- A 300px × 8px element with `rounded-full` becomes an ugly elongated oval
+- Use pixel-based rounding for rectangular elements
+
+#### Examples:
+```tsx
+// ✅ CORRECT - Slider track
+<div className="h-2 w-full rounded-md bg-bg-emphasis">
+
+// ✅ CORRECT - Avatar (square element)
+<div className="h-10 w-10 rounded-full">
+
+// ❌ WRONG - Creates oval shape
+<div className="h-2 w-full rounded-full">
+```
+
+### 4. Tailwind Version
 - **ONLY Tailwind CSS v3 is allowed**
 - **NO Tailwind CSS v4** - The project is configured for v3 and must remain compatible
 
-### 4. Component Creation Process
+### 5. Icon Usage - CRITICAL
+
+**YOU MUST ONLY USE ICONS FROM OUR CENTRAL REGISTRY**
+
+#### Finding Icons
+```tsx
+// Check available icons in Storybook under "Icons" section
+// OR search programmatically:
+import { searchIcons } from '@vergil/design-system/icons'
+const userIcons = searchIcons('user') // Find all user-related icons
+```
+
+#### Using Icons
+```tsx
+// ✅ CORRECT - Import from central registry
+import { Icon } from '@/components/icon'
+import { User, Settings, ChevronRight } from '@vergil/design-system/icons'
+
+<Icon name="User" size="md" />
+<Icon name="Settings" className="text-text-brand" />
+
+// ❌ WRONG - Never import directly from lucide-react
+import { User } from 'lucide-react' // FORBIDDEN
+```
+
+#### Adding New Icons
+If you need an icon that doesn't exist:
+1. Find it in lucide-react library
+2. Add it to the appropriate category file in `/packages/design-system/icons/categories/`
+3. Include name, category, description, and keywords
+4. The icon will automatically appear in Storybook
+
+Example:
+```tsx
+// In /packages/design-system/icons/categories/action.ts
+{
+  icon: Smile, // Import from lucide-react at top
+  name: 'Smile',
+  category: 'action',
+  description: 'Happy face emoji',
+  keywords: ['smile', 'happy', 'emoji', 'face']
+}
+```
+
+**NEVER use an icon without adding it to the registry first**
+
+### 6. Component Creation Process
 - **ALWAYS check shadcn/ui first** before creating any new component
 - **Use shadcn/ui components as the base** and adapt them to our design system
 - **Process:**
@@ -102,14 +175,14 @@ The Tailwind configuration supports TWO spacing conventions. **You MUST be consi
 ### Button Implementation
 ```tsx
 // ✅ CORRECT
-<Button 
+<Button
   variant="primary"
   size="md"
   className="shadow-brand-sm hover:shadow-brand-md"
 >
 
 // ❌ WRONG
-<button 
+<button
   className="h-10 px-4 bg-blue-500 rounded-md"
 >
 ```
@@ -127,7 +200,7 @@ The Tailwind configuration supports TWO spacing conventions. **You MUST be consi
 // ✅ CORRECT
 <Card className="p-spacing-lg space-y-spacing-md">
 
-// ❌ WRONG  
+// ❌ WRONG
 <div className="p-6 space-y-4">
 ```
 
@@ -140,12 +213,12 @@ The Tailwind configuration supports TWO spacing conventions. **You MUST be consi
 ### Form Elements
 ```tsx
 // ✅ CORRECT
-<Input 
+<Input
   className="h-12 sm:h-9 px-4 sm:px-3 text-base"
 />
 
 // ❌ WRONG
-<input 
+<input
   className="h-12 px-6 text-lg"
 />
 ```
@@ -161,7 +234,7 @@ The Tailwind configuration supports TWO spacing conventions. **You MUST be consi
 // Page title
 <h1 className="text-3xl font-bold text-primary">
 
-// Section title  
+// Section title
 <h2 className="text-2xl font-semibold text-primary">
 
 // Card title
@@ -238,12 +311,12 @@ export function CourseCard() {
           Description with proper line height
         </p>
       </div>
-      
+
       <div className="flex gap-spacing-sm">
         <Badge variant="success">Active</Badge>
         <Badge variant="info">New</Badge>
       </div>
-      
+
       <Button size="lg" className="w-full">
         Start Learning
       </Button>
