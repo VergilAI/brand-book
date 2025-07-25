@@ -1,5 +1,6 @@
 {
   "metadata": {
+    "name": "E-commerce Schema",
     "dialect": "postgresql",
     "version": "1.0"
   },

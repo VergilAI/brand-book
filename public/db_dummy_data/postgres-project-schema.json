@@ -1,5 +1,6 @@
 {
   "metadata": {
+    "name": "Project Management Schema",
     "dialect": "postgresql",
     "version": "1.0"
   },

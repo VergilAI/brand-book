@@ -181,8 +181,10 @@ export interface MapEditorState {
   addItem: (item: any) => void
   isDirty: boolean
   currentDiagramPath: string | null
+  currentDiagramMetadata: { name: string, dialect: string, version: string } | null
   setDirty: (dirty: boolean) => void
   setCurrentDiagramPath: (path: string | null) => void
+  setCurrentDiagramMetadata: (metadata: { name: string, dialect: string, version: string } | null) => void
 }
 
 export interface PointerPosition {

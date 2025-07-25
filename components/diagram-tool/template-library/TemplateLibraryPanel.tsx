@@ -137,6 +137,7 @@ export function TemplateLibraryPanel() {
                       // Mark as clean since we just loaded
                       if (store.setDirty) store.setDirty(false)
                       if (store.setCurrentDiagramPath) store.setCurrentDiagramPath(diagram.file)
+                      if (store.setCurrentDiagramMetadata) store.setCurrentDiagramMetadata(schema.metadata)
                     } catch (error) {
                       console.error('Failed to load diagram:', error)
                     } finally {
@@ -172,6 +173,7 @@ export function TemplateLibraryPanel() {
                   setSelectedDiagram(null)
                   if (store.setDirty) store.setDirty(false)
                   if (store.setCurrentDiagramPath) store.setCurrentDiagramPath(null)
+                  if (store.setCurrentDiagramMetadata) store.setCurrentDiagramMetadata(DEFAULT_SCHEMA.metadata)
                 }}
                 className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-brand hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                 disabled={isLoading}

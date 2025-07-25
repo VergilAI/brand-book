@@ -21,6 +21,7 @@ This specification defines a JSON format for representing relational database sc
 ### Metadata Object
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| name | string | Yes | Display name for the schema |
 | dialect | string | Yes | Database type: `postgresql`, `mysql`, `sqlite` |
 | version | string | Yes | Schema version (semantic versioning) |
 
@@ -128,6 +129,7 @@ Valid values for `on_delete` and `on_update`:
 ```json
 {
   "metadata": {
+    "name": "User and Posts Schema",
     "dialect": "postgresql",
     "version": "1.0"
   },

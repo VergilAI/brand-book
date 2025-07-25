@@ -5,6 +5,7 @@ export type DatabaseDialect = 'postgresql' | 'mysql' | 'sqlite';
 export type ForeignKeyAction = 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION';
 
 export interface SchemaMetadata {
+  name: string;
   dialect: DatabaseDialect;
   version: string;
 }

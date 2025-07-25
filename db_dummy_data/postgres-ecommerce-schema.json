@@ -1,11 +1,12 @@
 {
   "metadata": {
+    "name": "kukacfej",
     "dialect": "postgresql",
     "version": "1.0"
   },
   "tables": [
     {
-      "name": "customers",
+      "name": "boti",
       "columns": [
         {
           "name": "id",
@@ -21,22 +22,22 @@
         },
         {
           "name": "first_name",
-          "type": "varchar(100)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "last_name",
-          "type": "varchar(100)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "phone",
-          "type": "varchar(20)",
+          "type": "varchar(255)",
           "nullable": true
         },
         {
           "name": "created_at",
-          "type": "timestamp with time zone",
+          "type": "timestamp",
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
@@ -54,22 +55,22 @@
         },
         {
           "name": "sku",
-          "type": "varchar(50)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "name",
-          "type": "varchar(200)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "description",
-          "type": "text",
+          "type": "varchar(255)",
           "nullable": true
         },
         {
           "name": "price",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false
         },
         {
@@ -86,7 +87,7 @@
         },
         {
           "name": "created_at",
-          "type": "timestamp with time zone",
+          "type": "timestamp",
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
@@ -97,7 +98,7 @@
       "columns": [
         {
           "name": "id",
-          "type": "bigint",
+          "type": "integer",
           "nullable": false,
           "primary_key": true,
           "auto_increment": true
@@ -109,46 +110,46 @@
         },
         {
           "name": "order_number",
-          "type": "varchar(20)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "status",
-          "type": "varchar(20)",
+          "type": "varchar(255)",
           "nullable": false,
           "default": "'pending'"
         },
         {
           "name": "subtotal",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false
         },
         {
           "name": "tax",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false,
           "default": "0.00"
         },
         {
           "name": "shipping",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false,
           "default": "0.00"
         },
         {
           "name": "total",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false
         },
         {
           "name": "created_at",
-          "type": "timestamp with time zone",
+          "type": "timestamp",
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         },
         {
           "name": "updated_at",
-          "type": "timestamp with time zone",
+          "type": "timestamp",
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
@@ -158,7 +159,7 @@
           "name": "fk_orders_customer_id",
           "column": "customer_id",
           "references": {
-            "table": "customers",
+            "table": "boti",
             "column": "id"
           },
           "on_delete": "RESTRICT",
@@ -171,14 +172,14 @@
       "columns": [
         {
           "name": "id",
-          "type": "bigint",
+          "type": "integer",
           "nullable": false,
           "primary_key": true,
           "auto_increment": true
         },
         {
           "name": "order_id",
-          "type": "bigint",
+          "type": "integer",
           "nullable": false
         },
         {
@@ -193,12 +194,12 @@
         },
         {
           "name": "unit_price",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false
         },
         {
           "name": "total_price",
-          "type": "decimal(10,2)",
+          "type": "integer",
           "nullable": false
         }
       ],
@@ -242,7 +243,7 @@
         },
         {
           "name": "type",
-          "type": "varchar(20)",
+          "type": "varchar(255)",
           "nullable": false,
           "default": "'shipping'"
         },
@@ -253,22 +254,22 @@
         },
         {
           "name": "city",
-          "type": "varchar(100)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "state_province",
-          "type": "varchar(100)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "postal_code",
-          "type": "varchar(20)",
+          "type": "varchar(255)",
           "nullable": false
         },
         {
           "name": "country",
-          "type": "varchar(2)",
+          "type": "varchar(255)",
           "nullable": false
         }
       ],
@@ -277,7 +278,7 @@
           "name": "fk_addresses_customer_id",
           "column": "customer_id",
           "references": {
-            "table": "customers",
+            "table": "boti",
             "column": "id"
           },
           "on_delete": "CASCADE",

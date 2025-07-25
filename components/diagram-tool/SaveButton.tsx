@@ -12,19 +12,54 @@ export function SaveButton() {
   const { relationships } = useRelationships()
   
   const handleSave = () => {
-    // Convert visual data to schema format
-    const schema = visualToSchema(store.map.territories, relationships)
+    // Get current metadata or use defaults
+    const metadata = store.currentDiagramMetadata || {
+      name: 'New Database Schema',
+      dialect: 'postgresql' as const,
+      version: '1.0'
+    }
     
-    // For now, save to local storage
-    // In production, this would send to backend API
-    const key = store.currentDiagramPath || 'new-diagram'
+    // Convert visual data to schema format
+    const schema = visualToSchema(
+      store.map.territories, 
+      relationships,
+      metadata.dialect,
+      metadata.version,
+      metadata.name
+    )
+    
+    // Generate filename
+    const filename = store.currentDiagramPath 
+      ? store.currentDiagramPath.split('/').pop() 
+      : `${metadata.name.toLowerCase().replace(/\s+/g, '-')}-schema.json`
+    
+    // Create a blob with the JSON data
+    const jsonString = JSON.stringify(schema, null, 2)
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    
+    // Create download link
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    
+    // Trigger download
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    // Clean up
+    URL.revokeObjectURL(url)
+    
+    // Also save to localStorage for persistence
+    const key = store.currentDiagramPath || filename
     saveSchemaToStorage(key, schema)
     
     // Mark as clean
     store.setDirty(false)
     
-    // Show success feedback (could be a toast in production)
-    console.log('Diagram saved successfully!')
+    // Show success feedback
+    console.log(`Diagram saved as ${filename}`)
   }
   
   return (

@@ -12,6 +12,7 @@ export interface TableRow {
 }
 
 export interface TableMetadata {
+  type?: 'database-table';
   tableName: string;
   rows: TableRow[];
   columns: string[];

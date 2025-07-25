@@ -67,6 +67,7 @@ export function schemaToVisual(schema: DatabaseSchema): {
     
     // Create table metadata
     const metadata: TableMetadata = {
+      type: 'database-table',
       tableName: table.name,
       rows: rows,
       columns: ['key', 'name', 'type'],
@@ -150,17 +151,18 @@ export function visualToSchema(
   items: Record<string, MapItem>,
   relationships: TableRelationship[],
   dialect: DatabaseSchema['metadata']['dialect'] = 'postgresql',
-  version: string = '1.0'
+  version: string = '1.0',
+  name: string = 'New Database Schema'
 ): DatabaseSchema {
   const tables: TableDefinition[] = [];
   
   // Sort tables by zIndex to maintain order
   const sortedItems = Object.values(items)
-    .filter(item => item.type === 'table' && item.metadata?.tableName)
+    .filter(item => item.metadata?.type === 'database-table' && item.metadata?.tableName)
     .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   
   sortedItems.forEach(item => {
-    const metadata = item.metadata!;
+    const metadata = item.metadata as TableMetadata;
     
     // Convert table rows to columns
     const columns: ColumnDefinition[] = metadata.rows.map(row => {
@@ -225,6 +227,7 @@ export function visualToSchema(
   
   return {
     metadata: {
+      name: name,
       dialect: dialect,
       version: version,
     },

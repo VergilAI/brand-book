@@ -1316,9 +1316,11 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
   // State tracking for persistence
   isDirty: false,
   currentDiagramPath: null as string | null,
+  currentDiagramMetadata: null as { name: string, dialect: string, version: string } | null,
   
   setDirty: (dirty) => set({ isDirty: dirty }),
-  setCurrentDiagramPath: (path) => set({ currentDiagramPath: path })
+  setCurrentDiagramPath: (path) => set({ currentDiagramPath: path }),
+  setCurrentDiagramMetadata: (metadata) => set({ currentDiagramMetadata: metadata })
 }))
 
 // Helper functions

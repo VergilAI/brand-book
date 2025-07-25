@@ -2,6 +2,7 @@ import { DatabaseSchema } from '../types/json-schema-types';
 
 export const DEFAULT_SCHEMA: DatabaseSchema = {
   metadata: {
+    name: 'New Database Schema',
     dialect: 'postgresql',
     version: '1.0'
   },

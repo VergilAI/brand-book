@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "name": "hello",
+    "dialect": "postgresql",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "example_table",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "name",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ]
+    },
+    {
+      "name": "kukac",
+      "columns": [
+        {
+          "name": "danie",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "",
+          "type": "varchar(255)",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_kukac_danie",
+          "column": "danie",
+          "references": {
+            "table": "example_table",
+            "column": "id"
+          }
+        }
+      ]
+    }
+  ]
+}
