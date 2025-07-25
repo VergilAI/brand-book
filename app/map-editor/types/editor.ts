@@ -175,6 +175,14 @@ export interface MapEditorState {
   
   // Edit mode actions
   setEditMode: (mode: 'view' | 'edit') => void
+  
+  // Database diagram specific
+  clearAll: () => void
+  addItem: (item: any) => void
+  isDirty: boolean
+  currentDiagramPath: string | null
+  setDirty: (dirty: boolean) => void
+  setCurrentDiagramPath: (path: string | null) => void
 }
 
 export interface PointerPosition {

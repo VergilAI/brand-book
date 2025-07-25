@@ -1,0 +1,235 @@
+{
+  "metadata": {
+    "dialect": "postgresql",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "username",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "password_hash",
+          "type": "varchar(255)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ]
+    },
+    {
+      "name": "posts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "author_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "slug",
+          "type": "varchar(200)",
+          "nullable": false
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "published",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        {
+          "name": "published_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_posts_author_id",
+          "column": "author_id",
+          "references": {
+            "table": "users",
+            "column": "id"
+          },
+          "on_delete": "CASCADE",
+          "on_update": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "comments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "post_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_comments_post_id",
+          "column": "post_id",
+          "references": {
+            "table": "posts",
+            "column": "id"
+          },
+          "on_delete": "CASCADE",
+          "on_update": "CASCADE"
+        },
+        {
+          "name": "fk_comments_user_id",
+          "column": "user_id",
+          "references": {
+            "table": "users",
+            "column": "id"
+          },
+          "on_delete": "CASCADE",
+          "on_update": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "name",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "slug",
+          "type": "varchar(50)",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "post_tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true,
+          "auto_increment": true
+        },
+        {
+          "name": "post_id",
+          "type": "integer",
+          "nullable": false
+        },
+        {
+          "name": "tag_id",
+          "type": "integer",
+          "nullable": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_post_tags_post_id",
+          "column": "post_id",
+          "references": {
+            "table": "posts",
+            "column": "id"
+          },
+          "on_delete": "CASCADE",
+          "on_update": "CASCADE"
+        },
+        {
+          "name": "fk_post_tags_tag_id",
+          "column": "tag_id",
+          "references": {
+            "table": "tags",
+            "column": "id"
+          },
+          "on_delete": "CASCADE",
+          "on_update": "CASCADE"
+        }
+      ]
+    }
+  ]
+}

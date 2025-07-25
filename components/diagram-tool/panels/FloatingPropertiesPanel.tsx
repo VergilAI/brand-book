@@ -38,6 +38,7 @@ export function FloatingPropertiesPanel() {
                   onClick={() => {
                     setRelationships(relationships.filter(r => r.id !== selectedRelationshipId))
                     setSelectedRelationshipId(null)
+                    store.setDirty(true)
                   }}
                   className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                   title="Delete Relationship"
@@ -84,6 +85,7 @@ export function FloatingPropertiesPanel() {
                         const newType = `${fromType}-to-${toType}` as any;
                         const updatedRel = { ...relationship, relationshipType: newType };
                         setRelationships(relationships.map(r => r.id === relationship.id ? updatedRel : r));
+                        store.setDirty(true);
                       }}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     >
@@ -101,6 +103,7 @@ export function FloatingPropertiesPanel() {
                         const newType = `${fromType}-to-${toType}` as any;
                         const updatedRel = { ...relationship, relationshipType: newType };
                         setRelationships(relationships.map(r => r.id === relationship.id ? updatedRel : r));
+                        store.setDirty(true);
                       }}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     >
@@ -125,6 +128,43 @@ export function FloatingPropertiesPanel() {
                     <span className="font-medium"> Name:</span> {toRow.name || '-'} | 
                     <span className="font-medium"> Type:</span> {toRow.type || '-'}
                   </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">On Delete</label>
+                  <select
+                    value={relationship.onDelete || 'RESTRICT'}
+                    onChange={(e) => {
+                      const updatedRel = { ...relationship, onDelete: e.target.value as any };
+                      setRelationships(relationships.map(r => r.id === relationship.id ? updatedRel : r));
+                      store.setDirty(true);
+                    }}
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="CASCADE">CASCADE</option>
+                    <option value="SET NULL">SET NULL</option>
+                    <option value="RESTRICT">RESTRICT</option>
+                    <option value="NO ACTION">NO ACTION</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">On Update</label>
+                  <select
+                    value={relationship.onUpdate || 'CASCADE'}
+                    onChange={(e) => {
+                      const updatedRel = { ...relationship, onUpdate: e.target.value as any };
+                      setRelationships(relationships.map(r => r.id === relationship.id ? updatedRel : r));
+                      store.setDirty(true);
+                    }}
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="CASCADE">CASCADE</option>
+                    <option value="SET NULL">SET NULL</option>
+                    <option value="RESTRICT">RESTRICT</option>
+                    <option value="NO ACTION">NO ACTION</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -227,6 +267,33 @@ export function FloatingPropertiesPanel() {
                   </label>
                   <div className="text-base">
                     {meta.rows.length} {meta.rows.length === 1 ? 'row' : 'rows'}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Columns
+                  </label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {meta.rows.map((row, index) => (
+                      <div key={index} className="bg-gray-50 p-2 rounded-md text-sm">
+                        <div className="font-medium mb-1">
+                          {row.key && <span className="text-yellow-600 mr-1">{row.key}</span>}
+                          {row.name || 'Column ' + (index + 1)}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-600">
+                          <span className="font-medium">Type:</span> {row.type}
+                          {row.primaryKey && <span className="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">PK</span>}
+                          {row.nullable === false && <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded">NOT NULL</span>}
+                          {row.autoIncrement && <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">AUTO</span>}
+                        </div>
+                        {row.default && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-medium">Default:</span> {row.default}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
                 

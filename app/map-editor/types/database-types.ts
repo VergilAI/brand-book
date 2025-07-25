@@ -4,6 +4,11 @@ export interface TableRow {
   key: string;
   name: string;
   type: string;
+  // Additional properties from JSON schema
+  nullable?: boolean;
+  primaryKey?: boolean;
+  autoIncrement?: boolean;
+  default?: string;
 }
 
 export interface TableMetadata {
@@ -25,6 +30,10 @@ export interface TableRelationship {
   toRow: number;
   toSide: 'left' | 'right';
   relationshipType: 'one-to-one' | 'one-to-many' | 'many-to-many';
+  // Additional properties from JSON schema
+  constraintName?: string;
+  onDelete?: 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION';
+  onUpdate?: 'CASCADE' | 'SET NULL' | 'RESTRICT' | 'NO ACTION';
 }
 
 export type RelationshipType = 'one-to-one' | 'one-to-many' | 'many-to-many';

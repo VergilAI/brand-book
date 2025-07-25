@@ -142,7 +142,8 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       selection: {
         ...state.selection,
         territories: newSelection
-      }
+      },
+      isDirty: true
     }
   }),
   
@@ -422,7 +423,8 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
       map: {
         ...state.map,
         territories: updatedTerritories
-      }
+      },
+      isDirty: true
     }
   }),
   
@@ -1275,7 +1277,48 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
   }),
   
   // Edit mode actions
-  setEditMode: (mode) => set({ editMode: mode })
+  setEditMode: (mode) => set({ editMode: mode }),
+  
+  // Database diagram specific actions
+  clearAll: () => set(state => ({
+    map: createEmptyMap(),
+    selection: {
+      territories: new Set(),
+      borders: new Set()
+    },
+    editing: {
+      ...state.editing,
+      isEditing: false,
+      editingTerritoryId: null,
+      selectedVertices: new Set()
+    }
+  })),
+  
+  addItem: (item) => set(state => ({
+    map: {
+      ...state.map,
+      territories: {
+        ...state.map.territories,
+        [item.id]: {
+          id: item.id,
+          name: item.metadata?.tableName || 'New Table',
+          continent: '',
+          fillPath: '',
+          borderSegments: [],
+          center: { x: item.coordinates[0][0], y: item.coordinates[0][1] },
+          zIndex: item.zIndex,
+          metadata: item.metadata
+        }
+      }
+    }
+  })),
+  
+  // State tracking for persistence
+  isDirty: false,
+  currentDiagramPath: null as string | null,
+  
+  setDirty: (dirty) => set({ isDirty: dirty }),
+  setCurrentDiagramPath: (path) => set({ currentDiagramPath: path })
 }))
 
 // Helper functions
