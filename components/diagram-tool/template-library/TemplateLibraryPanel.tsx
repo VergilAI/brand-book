@@ -14,8 +14,7 @@ import {
 
 export function TemplateLibraryPanel() {
   const store = useMapEditor()
-  const { isOpen } = store.templateLibrary
-  const [connectionType, setConnectionType] = useState<string>('one-to-one')
+  const { isOpen, connectionType } = store.templateLibrary
   
   const handleAddTable = () => {
     // Generate SVG path for a table with name, header and rows
@@ -29,6 +28,15 @@ export function TemplateLibraryPanel() {
     // Create table outline (just the outer rectangle)
     const tablePath = `M 0 0 L ${width} 0 L ${width} ${height} L 0 ${height} Z`
     
+    // Calculate offset for new table position
+    // Count existing tables to determine offset
+    const existingTables = Object.values(store.map.territories).filter(
+      t => t.metadata?.type === 'database-table'
+    ).length
+    
+    // Offset each new table by 30px both horizontally and vertically
+    const offset = existingTables * 30
+    
     // Add the table to the map
     const newTerritoryId = `table-${Date.now()}`
     const territory = {
@@ -37,7 +45,7 @@ export function TemplateLibraryPanel() {
       continent: '',
       fillPath: tablePath,
       borderSegments: [],
-      center: { x: store.view.pan.x + 400, y: store.view.pan.y + 300 },
+      center: { x: store.view.pan.x + 400 + offset, y: store.view.pan.y + 300 + offset },
       zIndex: Object.keys(store.map.territories).length,
       metadata: {
         type: 'database-table',
@@ -104,7 +112,7 @@ export function TemplateLibraryPanel() {
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Connection Type</h3>
             <div className="space-y-2">
-              <Select value={connectionType} onValueChange={setConnectionType}>
+              <Select value={connectionType} onValueChange={store.setConnectionType}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select connection type" />
                 </SelectTrigger>

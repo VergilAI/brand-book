@@ -6,7 +6,6 @@ import { usePointerPosition } from "@/app/map-editor/hooks/usePointerPosition";
 import { useSnapping } from "@/app/map-editor/hooks/useSnapping";
 import { useGestureDetection } from "@/app/map-editor/hooks/useGestureDetection";
 import { useInertiaScroll } from "@/app/map-editor/hooks/useInertiaScroll";
-// import { useSmoothZoom } from '@/app/map-editor/hooks/useSmoothZoom' // Replaced with useSmoothZoomController
 import { useSmoothZoomController } from "@/app/map-editor/hooks/useSmoothZoomController";
 import { HierarchicalGrid } from "./HierarchicalGrid";
 import { SnapIndicators } from "./SnapIndicators";
@@ -16,8 +15,9 @@ import { ZoomIndicator } from "@/components/diagram-tool/ui/ZoomIndicator";
 import { GestureHint } from "@/components/diagram-tool/ui/GestureHint";
 import { DebugPanel } from "@/components/diagram-tool/debug/DebugPanel";
 import { cn } from "@/lib/utils";
-// Remove tokens import - will use CSS variables directly
 import { Trash2, Crosshair } from "lucide-react";
+import { useRelationships } from "@/app/map-editor/contexts/RelationshipContext";
+import { TableMetadata, TableRow, TableRelationship } from "@/app/map-editor/types/database-types";
 // Import from our local UI components
 import { GridIcon, SnappingIcon } from "@/components/diagram-tool/ui/MapIcons";
 // We'll use lucide-react icons for the others
@@ -51,6 +51,45 @@ interface TableRelationship {
   toTable: string;
   toRow: number;
   toSide: 'left' | 'right';
+  relationshipType: 'one-to-one' | 'one-to-many' | 'many-to-many';
+}
+
+// Semantic bounding box for relationship markers
+interface MarkerSemanticBox {
+  lineSide: number;    // X-coordinate where marker attaches to line  
+  tableSide: number;   // X-coordinate facing the table
+  // The marker content is drawn FROM tableSide TO lineSide
+  // This ensures crow's foot prongs point toward the table
+}
+
+// Helper function to calculate distance from point to line segment
+function getDistanceToLine(point: Point, lineStart: Point, lineEnd: Point): number {
+  const A = point.x - lineStart.x;
+  const B = point.y - lineStart.y;
+  const C = lineEnd.x - lineStart.x;
+  const D = lineEnd.y - lineStart.y;
+
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  let param = -1;
+  if (lenSq !== 0) param = dot / lenSq;
+
+  let xx, yy;
+
+  if (param < 0) {
+    xx = lineStart.x;
+    yy = lineStart.y;
+  } else if (param > 1) {
+    xx = lineEnd.x;
+    yy = lineEnd.y;
+  } else {
+    xx = lineStart.x + param * C;
+    yy = lineStart.y + param * D;
+  }
+
+  const dx = point.x - xx;
+  const dy = point.y - yy;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 // import styles from './MapCanvas.module.css' // Temporarily disabled due to build error
@@ -142,7 +181,6 @@ function parsePathToPoints(pathString: string): Point[] {
   let currentX = 0;
   let currentY = 0;
 
-  console.log("Parsing path:", pathString);
 
   // Match all path commands - updated regex to handle commas and decimals better
   const commandRegex = /([MLCQZ])\s*([^MLCQZ]*)/gi;
@@ -152,7 +190,6 @@ function parsePathToPoints(pathString: string): Point[] {
     const command = match[1].toUpperCase();
     const coordsStr = match[2].trim();
 
-    console.log("Found command:", command, "with coords:", coordsStr);
 
     if (command === "Z") {
       continue; // Close path, no coordinates
@@ -163,7 +200,6 @@ function parsePathToPoints(pathString: string): Point[] {
       .split(/[\s,]+/)
       .map(parseFloat)
       .filter((n) => !isNaN(n));
-    console.log("Parsed coords:", coords);
 
     switch (command) {
       case "M": // Move to
@@ -195,7 +231,6 @@ function parsePathToPoints(pathString: string): Point[] {
     }
   }
 
-  console.log("Final points extracted:", points);
   return points;
 }
 
@@ -224,8 +259,8 @@ function isPointInPolygon(point: Point, polygon: Point[]): boolean {
 // Helper function to check if point is inside territory using accurate polygon detection
 function isPointInTerritory(point: Point, territory: Territory): boolean {
   // Special handling for database tables
-  if ((territory as any).metadata?.type === 'database-table') {
-    const { width, nameHeight, headerHeight, rowHeight, rows } = (territory as any).metadata;
+  if (territory.metadata && 'tableName' in territory.metadata) {
+    const { width, nameHeight, headerHeight, rowHeight, rows } = territory.metadata as TableMetadata;
     const totalHeight = nameHeight + headerHeight + rowHeight * rows.length;
     const x = territory.center.x - width / 2;
     const y = territory.center.y - totalHeight / 2;
@@ -238,14 +273,6 @@ function isPointInTerritory(point: Point, territory: Territory): boolean {
   // Regular territory handling
   const polygonPoints = parsePathToPoints(territory.fillPath);
   if (polygonPoints.length < 3) {
-    console.warn(
-      "Territory has less than 3 points:",
-      territory.id,
-      "path:",
-      territory.fillPath,
-      "parsed points:",
-      polygonPoints,
-    );
     return false;
   }
   return isPointInPolygon(point, polygonPoints);
@@ -334,11 +361,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
     snapTarget?: { tableId: string; row: number; side: 'left' | 'right' } | null;
   } | null>(null);
   
-  // Stored relationships
-  const [relationships, setRelationships] = useState<TableRelationship[]>([]);
-  
-  // Selected relationship
-  const [selectedRelationship, setSelectedRelationship] = useState<string | null>(null);
+  // Use relationship context
+  const { relationships, setRelationships, selectedRelationshipId, setSelectedRelationshipId } = useRelationships();
   
   // Force update during dragging for smooth relationship lines
   const [, forceUpdate] = React.useReducer(x => x + 1, 0);
@@ -366,13 +390,6 @@ export function MapCanvas({ className }: MapCanvasProps) {
   const [duplicatePreviewOffset, setDuplicatePreviewOffset] =
     React.useState<Point | null>(null);
 
-  // Context menu state
-  const [contextMenu, setContextMenu] = React.useState<{
-    show: boolean;
-    x: number;
-    y: number;
-    territoryId: string | null;
-  }>({ show: false, x: 0, y: 0, territoryId: null });
 
   // Hover state for territories
   const [hoveredTerritoryId, setHoveredTerritoryId] = React.useState<
@@ -464,10 +481,6 @@ export function MapCanvas({ className }: MapCanvasProps) {
       e.preventDefault(); // Prevent default behaviors like text selection
       updatePosition(e);
 
-      // Hide context menu on any click
-      if (contextMenu.show) {
-        setContextMenu({ show: false, x: 0, y: 0, territoryId: null });
-      }
       
       // Close any active cell or table name editing when clicking away
       const target = e.target as HTMLElement;
@@ -482,29 +495,15 @@ export function MapCanvas({ className }: MapCanvasProps) {
       }
       
       // Clear relationship selection when clicking on empty space
-      if (target.tagName === 'svg' || target.tagName === 'rect') {
-        setSelectedRelationship(null);
+      // But not when clicking on a relationship path
+      const isRelationshipClick = target.tagName === 'path' && target.getAttribute('cursor') === 'pointer';
+      if (!isRelationshipClick && (target.tagName === 'svg' || target.tagName === 'rect')) {
+        setSelectedRelationshipId(null);
       }
 
-      // Handle right-click for context menu
+      // Disable right-click context menu
       if (e.button === 2) {
-        const point = position.svg;
-        const clickedTerritory = Object.values(store.map.territories)
-          .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
-          .reverse()
-          .find((territory) => {
-            return isPointInTerritory(point, territory);
-          });
-
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (rect) {
-          setContextMenu({
-            show: true,
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            territoryId: clickedTerritory ? clickedTerritory.id : null,
-          });
-        }
+        e.preventDefault();
         return;
       }
 
@@ -637,6 +636,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
         // Check if clicking on an editable element (table cell or name)
         const target = e.target as SVGElement;
         const isEditableElement = target.getAttribute('cursor') === 'text' && store.editMode === 'edit';
+        const isRelationshipClick = target.tagName === 'path' && target.getAttribute('cursor') === 'pointer';
 
         // Check if clicking on any territory (selected or not)
         // Sort by zIndex first, then reverse to check topmost (last rendered) territories first
@@ -687,9 +687,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
           }
 
           e.currentTarget.setPointerCapture(e.pointerId);
-        } else if (!isEditableElement) {
+        } else if (!isEditableElement && !isRelationshipClick) {
           // Start area selection on empty space (clamp to canvas bounds)
-          // But not if clicking on an editable element
+          // But not if clicking on an editable element or relationship
           const svgAspectRatio = svgRef.current
             ? svgRef.current.getBoundingClientRect().width /
               svgRef.current.getBoundingClientRect().height
@@ -771,7 +771,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
         // Check all database tables for proximity
         Object.values(store.map.territories).forEach(territory => {
           if (territory.metadata?.type === 'database-table') {
-            const meta = territory.metadata as any;
+            const meta = territory.metadata as TableMetadata;
             const width = meta.width || 300;
             const height = meta.nameHeight + meta.headerHeight + meta.rowHeight * meta.rows.length;
             const x = territory.center.x - width / 2;
@@ -1070,11 +1070,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
               fromSide: drawingRelationship.fromSide,
               toTable: tableId,
               toRow: row,
-              toSide: side
+              toSide: side,
+              relationshipType: store.templateLibrary.connectionType
             };
             
             setRelationships(prev => [...prev, newRelationship]);
-            console.log('Created relationship:', newRelationship);
           }
         } else {
           // Fallback: check if we're directly over a connection dot
@@ -1097,12 +1097,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 fromSide: drawingRelationship.fromSide,
                 toTable: toTableId!,
                 toRow: toRowIndex,
-                toSide: toSide
+                toSide: toSide,
+                relationshipType: store.templateLibrary.connectionType
               };
               
               setRelationships(prev => [...prev, newRelationship]);
-              console.log('Created relationship:', newRelationship);
-            }
+              }
           }
         }
         setDrawingRelationship(null);
@@ -1360,12 +1360,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
 
     // Add Safari gesture event listeners if available
     if ("GestureEvent" in window) {
-      canvasElement.addEventListener("gesturestart", handleGestureStart as any);
+      canvasElement.addEventListener("gesturestart", handleGestureStart as EventListener);
       canvasElement.addEventListener(
         "gesturechange",
-        handleGestureChange as any,
+        handleGestureChange as EventListener,
       );
-      canvasElement.addEventListener("gestureend", handleGestureEnd as any);
+      canvasElement.addEventListener("gestureend", handleGestureEnd as EventListener);
     }
 
     return () => {
@@ -1373,15 +1373,15 @@ export function MapCanvas({ className }: MapCanvasProps) {
       if ("GestureEvent" in window) {
         canvasElement.removeEventListener(
           "gesturestart",
-          handleGestureStart as any,
+          handleGestureStart as EventListener,
         );
         canvasElement.removeEventListener(
           "gesturechange",
-          handleGestureChange as any,
+          handleGestureChange as EventListener,
         );
         canvasElement.removeEventListener(
           "gestureend",
-          handleGestureEnd as any,
+          handleGestureEnd as EventListener,
         );
       }
     };
@@ -1483,10 +1483,10 @@ export function MapCanvas({ className }: MapCanvasProps) {
           e.preventDefault();
         }
       } else if (e.key === "Delete" || e.key === "Backspace") {
-        if (selectedRelationship && !editingCell && !editingTableName) {
+        if (selectedRelationshipId && !editingCell && !editingTableName) {
           // Delete selected relationship
-          setRelationships(prev => prev.filter(rel => rel.id !== selectedRelationship));
-          setSelectedRelationship(null);
+          setRelationships(prev => prev.filter(rel => rel.id !== selectedRelationshipId));
+          setSelectedRelationshipId(null);
         }
       } else if (e.key === "Escape") {
         if (store.templateLibrary.placementMode.active) {
@@ -1497,9 +1497,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
           store.stopEditingTerritory();
         } else if (store.drawing.isDrawing) {
           store.cancelDrawing();
-        } else if (selectedRelationship) {
+        } else if (selectedRelationshipId) {
           // Clear relationship selection
-          setSelectedRelationship(null);
+          setSelectedRelationshipId(null);
         } else {
           store.clearSelection();
         }
@@ -1636,7 +1636,6 @@ export function MapCanvas({ className }: MapCanvasProps) {
       ref={canvasRef}
       className={cn(
         "relative w-full h-full overflow-hidden bg-primary",
-        // styles.canvas,
         gesture.isGesturing() && "cursor-grabbing",
         className,
       )}
@@ -1713,6 +1712,137 @@ export function MapCanvas({ className }: MapCanvasProps) {
                           : "default",
         }}
       >
+        {/* SVG Definitions */}
+        <defs>
+          {/* 
+            Semantic Bounding Box for Crow's Foot Markers:
+            - Line Side: The side attached to the relationship line (x=10 in our coordinate system)
+            - Table Side: The side facing the table (x=0 in our coordinate system)
+            - The crow's foot always points TOWARD the table it's connected to
+            - We need separate markers for start and end due to SVG orientation
+          */}
+          
+          {/* Crow's foot marker for END positions (points forward toward table) */}
+          <marker
+            id="crowsfoot-end"
+            markerWidth="10"
+            markerHeight="10"
+            refX="10"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            {/* Three lines diverging - crow's foot pointing toward table */}
+            <path
+              d="M10,0 L0,5 M10,5 L0,5 M10,10 L0,5"
+              stroke="var(--color-purple-400)"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </marker>
+          
+          {/* Crow's foot marker for START positions (points backward toward table) */}
+          <marker
+            id="crowsfoot-start"
+            markerWidth="10"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            {/* Three lines converging - crow's foot pointing toward table */}
+            <path
+              d="M0,0 L10,5 M0,5 L10,5 M0,10 L10,5"
+              stroke="var(--color-purple-400)"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </marker>
+          {/* Crow's foot marker for selected END positions */}
+          <marker
+            id="crowsfoot-end-selected"
+            markerWidth="10"
+            markerHeight="10"
+            refX="10"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path
+              d="M10,0 L0,5 M10,5 L0,5 M10,10 L0,5"
+              stroke="var(--color-purple-600)"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </marker>
+          
+          {/* Crow's foot marker for selected START positions */}
+          <marker
+            id="crowsfoot-start-selected"
+            markerWidth="10"
+            markerHeight="10"
+            refX="0"
+            refY="5"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <path
+              d="M0,0 L10,5 M0,5 L10,5 M0,10 L10,5"
+              stroke="var(--color-purple-600)"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </marker>
+          {/* One relationship marker (vertical line) */}
+          <marker
+            id="one"
+            markerWidth="10"
+            markerHeight="24"
+            refX="0"
+            refY="12"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+            data-line-side="0"
+            data-table-side="5"
+          >
+            <line
+              x1="5"
+              y1="0"
+              x2="5"
+              y2="24"
+              stroke="var(--color-purple-400)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+          </marker>
+          {/* One relationship marker for selected */}
+          <marker
+            id="one-selected"
+            data-line-side="0"
+            data-table-side="5"
+            markerWidth="10"
+            markerHeight="24"
+            refX="0"
+            refY="12"
+            orient="auto"
+            markerUnits="userSpaceOnUse"
+          >
+            <line
+              x1="5"
+              y1="0"
+              x2="5"
+              y2="24"
+              stroke="var(--color-purple-600)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+          </marker>
+        </defs>
         {/* SVG Grid removed - now using Canvas HierarchicalGrid */}
 
         {/* Relationships between tables */}
@@ -1728,8 +1858,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
               return null;
             }
             
-            const fromMeta = fromTable.metadata as any;
-            const toMeta = toTable.metadata as any;
+            const fromMeta = fromTable.metadata as TableMetadata;
+            const toMeta = toTable.metadata as TableMetadata;
             
             // Calculate positions with movement offset if table is being moved
             let fromCenterX = fromTable.center.x;
@@ -1767,18 +1897,22 @@ export function MapCanvas({ className }: MapCanvasProps) {
             const toRowY = toY + toMeta.nameHeight + toMeta.headerHeight + toMeta.rowHeight * rel.toRow + toMeta.rowHeight / 2;
             const toDotX = rel.toSide === 'left' ? toX - 5 : toX + toWidth + 5;
             
-            // Create a smoother curved path
-            const midX = (fromDotX + toDotX) / 2;
-            const midY = (fromRowY + toRowY) / 2;
+            // Helper function to create a bezier curved path
+            const createBezierPath = (fromX: number, fromY: number, toX: number, toY: number) => {
+              const dx = Math.abs(toX - fromX);
+              const controlOffset = Math.min(dx * 0.5, 100); // Limit the curve offset
+              return `M ${fromX} ${fromY} C ${fromX + controlOffset} ${fromY}, ${toX - controlOffset} ${toY}, ${toX} ${toY}`;
+            };
             
-            // Calculate control points for a smoother curve
-            const dx = Math.abs(toDotX - fromDotX);
-            const controlOffset = Math.min(dx * 0.5, 100); // Limit the curve offset
+            // Helper function to create a straight line path
+            const createStraightPath = (fromX: number, fromY: number, toX: number, toY: number) => {
+              return `M ${fromX} ${fromY} L ${toX} ${toY}`;
+            };
             
-            // Use cubic bezier for smoother curves
-            const path = `M ${fromDotX} ${fromRowY} C ${fromDotX + controlOffset} ${fromRowY}, ${toDotX - controlOffset} ${toRowY}, ${toDotX} ${toRowY}`;
+            // Use straight line for database relationships
+            const path = createStraightPath(fromDotX, fromRowY, toDotX, toRowY);
             
-            const isSelected = selectedRelationship === rel.id;
+            const isSelected = selectedRelationshipId === rel.id;
             
             return (
               <g key={rel.id}>
@@ -1791,7 +1925,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   cursor="pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedRelationship(rel.id);
+                    setSelectedRelationshipId(rel.id);
                     // Clear territory selection when selecting a relationship
                     store.clearSelection();
                   }}
@@ -1807,56 +1941,17 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   style={{
                     transition: isMovingTerritories.current ? 'none' : 'all 200ms'
                   }}
+                  markerStart={
+                    rel.relationshipType === 'many-to-many' 
+                      ? (isSelected ? "url(#crowsfoot-start-selected)" : "url(#crowsfoot-start)")
+                      : (isSelected ? "url(#one-selected)" : "url(#one)")
+                  }
+                  markerEnd={
+                    rel.relationshipType === 'one-to-many' || rel.relationshipType === 'many-to-many'
+                      ? (isSelected ? "url(#crowsfoot-end-selected)" : "url(#crowsfoot-end)")
+                      : (isSelected ? "url(#one-selected)" : "url(#one)")
+                  }
                 />
-                {/* Start indicator (only show when selected) */}
-                {isSelected && (
-                  <>
-                    <circle
-                      cx={fromDotX}
-                      cy={fromRowY}
-                      r="6"
-                      fill="var(--color-purple-600)"
-                      stroke="white"
-                      strokeWidth="2"
-                      className="pointer-events-none"
-                    />
-                    <text
-                      x={fromDotX + (rel.fromSide === 'left' ? -20 : 20)}
-                      y={fromRowY - 10}
-                      textAnchor={rel.fromSide === 'left' ? 'end' : 'start'}
-                      fontSize="12"
-                      fill="var(--color-purple-600)"
-                      fontWeight="600"
-                      className="pointer-events-none"
-                    >
-                      Start
-                    </text>
-                  </>
-                )}
-                {/* End indicator */}
-                <circle
-                  cx={toDotX}
-                  cy={toRowY}
-                  r={isSelected ? "6" : "3"}
-                  fill={isSelected ? "var(--color-purple-600)" : "var(--color-purple-400)"}
-                  stroke={isSelected ? "white" : "none"}
-                  strokeWidth={isSelected ? "2" : "0"}
-                  opacity={isSelected ? "1" : "0.8"}
-                  className="pointer-events-none transition-all duration-200"
-                />
-                {isSelected && (
-                  <text
-                    x={toDotX + (rel.toSide === 'left' ? -20 : 20)}
-                    y={toRowY - 10}
-                    textAnchor={rel.toSide === 'left' ? 'end' : 'start'}
-                    fontSize="12"
-                    fill="var(--color-purple-600)"
-                    fontWeight="600"
-                    className="pointer-events-none"
-                  >
-                    End
-                  </text>
-                )}
               </g>
             );
           })}
@@ -1895,8 +1990,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
               }
 
               // Check if this is a database table
-              if ((territory as any).metadata?.type === 'database-table') {
-                const { width, nameHeight, headerHeight, rowHeight, columns, rows, tableName } = (territory as any).metadata;
+              if (territory.metadata && 'tableName' in territory.metadata) {
+                const { width, nameHeight, headerHeight, rowHeight, columns, rows, tableName } = territory.metadata as TableMetadata;
                 const totalHeight = nameHeight + headerHeight + rowHeight * rows.length;
                 const x = territory.center.x - width / 2;
                 const y = territory.center.y - totalHeight / 2;
@@ -1965,11 +2060,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
                           onChange={(e) => setEditingTableName({ ...editingTableName, value: e.target.value })}
                           onBlur={() => {
                             if (editingTableName) {
-                              const metadata = (territory as any).metadata;
+                              const metadata = territory.metadata as TableMetadata;
                               store.updateTerritory(territory.id, {
                                 name: editingTableName.value,
                                 metadata: { ...metadata, tableName: editingTableName.value }
-                              } as any);
+                              });
                               setEditingTableName(null);
                             }
                           }}
@@ -2010,7 +2105,6 @@ export function MapCanvas({ className }: MapCanvasProps) {
                               if (lastNameClick.current && 
                                   lastNameClick.current.territoryId === territory.id &&
                                   now - lastNameClick.current.time < 300) {
-                                console.log('Double click detected on table name', territory.id);
                                 setEditingTableName({ territoryId: territory.id, value: tableName || 'Untitled Table' });
                                 lastNameClick.current = null;
                               } else {
@@ -2107,10 +2201,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
                             />
                           )}
                           
-                          {/* Connection dots */}
-                          <circle
-                            cx={x - 5}
-                            cy={rowY}
+                          {/* Connection dots - only show when table is selected or during relationship drawing */}
+                          {(isSelected || drawingRelationship) && (
+                            <circle
+                              cx={x - 5}
+                              cy={rowY}
                             r={drawingRelationship?.snapTarget?.tableId === territory.id && 
                                drawingRelationship?.snapTarget?.row === rowIndex && 
                                drawingRelationship?.snapTarget?.side === 'left' 
@@ -2155,9 +2250,11 @@ export function MapCanvas({ className }: MapCanvasProps) {
                               e.currentTarget.setPointerCapture(e.pointerId);
                             }}
                           />
-                          <circle
-                            cx={x + width + 5}
-                            cy={rowY}
+                          )}
+                          {(isSelected || drawingRelationship) && (
+                            <circle
+                              cx={x + width + 5}
+                              cy={rowY}
                             r={drawingRelationship?.snapTarget?.tableId === territory.id && 
                                drawingRelationship?.snapTarget?.row === rowIndex && 
                                drawingRelationship?.snapTarget?.side === 'right' 
@@ -2202,6 +2299,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                               e.currentTarget.setPointerCapture(e.pointerId);
                             }}
                           />
+                          )}
                         
                         {/* Row data */}
                         {Object.entries(row).map(([key, value], colIndex) => {
@@ -2224,12 +2322,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                     <TypeCombobox
                                       value={value || 'text'}
                                       onChange={(newValue) => {
-                                        const metadata = (territory as any).metadata;
+                                        const metadata = territory.metadata as TableMetadata;
                                         const newRows = [...metadata.rows];
                                         newRows[rowIndex][key] = newValue;
                                         store.updateTerritory(territory.id, {
                                           metadata: { ...metadata, rows: newRows }
-                                        } as any);
+                                        });
                                         setEditingCell(null);
                                       }}
                                       onBlur={() => {
@@ -2258,12 +2356,12 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                   onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
                                   onBlur={() => {
                                     if (editingCell) {
-                                      const metadata = (territory as any).metadata;
+                                      const metadata = territory.metadata as TableMetadata;
                                       const newRows = [...metadata.rows];
                                       newRows[editingCell.rowIndex][editingCell.columnKey] = editingCell.value;
                                       store.updateTerritory(territory.id, {
                                         metadata: { ...metadata, rows: newRows }
-                                      } as any);
+                                      });
                                       setEditingCell(null);
                                     }
                                   }}
@@ -2320,7 +2418,6 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                         lastCellClick.current.rowIndex === rowIndex &&
                                         lastCellClick.current.columnKey === key &&
                                         now - lastCellClick.current.time < 300) {
-                                      console.log('Double click detected on cell', territory.id, rowIndex, key);
                                       setEditingCell({
                                         territoryId: territory.id,
                                         rowIndex,
@@ -2993,225 +3090,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
       {/* Debug Panel */}
       <DebugPanel />
 
-      {/* Context Menu */}
-      {contextMenu.show && (
-        <div
-          className="absolute bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-          onContextMenu={(e) => e.preventDefault()}
-        >
-          {contextMenu.territoryId ? (
-            // Territory-specific context menu
-            <>
-              {store.editMode === "edit" ? (
-                <>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                    onClick={() => {
-                      store.bringToFront(contextMenu.territoryId!);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <BringToFrontIcon />
-                    Bring to Front
-                  </button>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                    onClick={() => {
-                      store.bringForward(contextMenu.territoryId!);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <BringForwardIcon />
-                    Bring Forward
-                  </button>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                    onClick={() => {
-                      store.sendBackward(contextMenu.territoryId!);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <SendBackwardIcon />
-                    Send Backward
-                  </button>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                    onClick={() => {
-                      store.sendToBack(contextMenu.territoryId!);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <SendToBackIcon />
-                    Send to Back
-                  </button>
-                  <div className="border-t border-gray-200 my-1"></div>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                    onClick={() => {
-                      store.copyTerritories([contextMenu.territoryId!]);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <CopyIcon />
-                    Copy
-                  </button>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                    onClick={() => {
-                      store.duplicateTerritories([contextMenu.territoryId!]);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <DuplicateIcon />
-                    Duplicate
-                  </button>
-                  <div className="border-t border-gray-200 my-1"></div>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 text-red-600 flex items-center gap-2"
-                    onClick={() => {
-                      store.deleteTerritory(contextMenu.territoryId!);
-                      setContextMenu({
-                        show: false,
-                        x: 0,
-                        y: 0,
-                        territoryId: null,
-                      });
-                    }}
-                  >
-                    <Trash2 size={16} />
-                    Delete
-                  </button>
-                </>
-              ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">
-                  View mode - editing disabled
-                </div>
-              )}
-            </>
-          ) : (
-            // Canvas context menu (no territory selected)
-            <>
-              <button
-                className={`w-full px-4 py-2 text-sm text-left flex items-center gap-2 ${
-                  store.clipboard && store.clipboard.territories.length > 0
-                    ? "hover:bg-gray-100"
-                    : "text-gray-400 cursor-not-allowed"
-                }`}
-                onClick={() => {
-                  if (
-                    store.editMode === "edit" &&
-                    store.clipboard &&
-                    store.clipboard.territories.length > 0
-                  ) {
-                    store.pasteTerritories(position.svg);
-                    setContextMenu({
-                      show: false,
-                      x: 0,
-                      y: 0,
-                      territoryId: null,
-                    });
-                  }
-                }}
-                disabled={
-                  store.editMode === "view" ||
-                  !store.clipboard ||
-                  store.clipboard.territories.length === 0
-                }
-              >
-                <PasteIcon
-                  size={16}
-                  className={
-                    store.clipboard && store.clipboard.territories.length > 0
-                      ? ""
-                      : "opacity-50"
-                  }
-                />
-                Paste{" "}
-                {store.clipboard && store.clipboard.territories.length > 0
-                  ? `(${store.clipboard.territories.length} item${store.clipboard.territories.length > 1 ? "s" : ""})`
-                  : ""}
-              </button>
-              <div className="border-t border-gray-200 my-1"></div>
-              <button
-                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                onClick={() => {
-                  store.selectAll();
-                  setContextMenu({
-                    show: false,
-                    x: 0,
-                    y: 0,
-                    territoryId: null,
-                  });
-                }}
-              >
-                <SelectAllIcon size={16} />
-                Select All
-              </button>
-              <button
-                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                onClick={() => {
-                  store.toggleGrid();
-                  setContextMenu({
-                    show: false,
-                    x: 0,
-                    y: 0,
-                    territoryId: null,
-                  });
-                }}
-              >
-                <GridIcon size={16} />
-                {store.view.showGrid ? "Hide Grid" : "Show Grid"}
-              </button>
-              <button
-                className="w-full px-4 py-2 text-sm text-left hover:bg-gray-100 flex items-center gap-2"
-                onClick={() => {
-                  store.toggleSnapping();
-                  setContextMenu({
-                    show: false,
-                    x: 0,
-                    y: 0,
-                    territoryId: null,
-                  });
-                }}
-              >
-                <SnappingIcon size={16} enabled={isSnappingEnabled} />
-                {isSnappingEnabled ? "Disable Snapping" : "Enable Snapping"}
-              </button>
-            </>
-          )}
-        </div>
-      )}
+      {/* Context Menu removed - using FloatingPropertiesPanel instead */}
     </div>
   );
 }

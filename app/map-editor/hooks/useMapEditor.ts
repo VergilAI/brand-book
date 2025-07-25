@@ -87,6 +87,7 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     searchQuery: '',
     recentShapes: [],
     customShapes: [],
+    connectionType: 'one-to-one',
     placementMode: {
       active: false,
       shapeId: null,
@@ -1005,6 +1006,13 @@ export const useMapEditor = create<MapEditorState>((set, get) => ({
     templateLibrary: {
       ...state.templateLibrary,
       searchQuery: query
+    }
+  })),
+  
+  setConnectionType: (connectionType) => set(state => ({
+    templateLibrary: {
+      ...state.templateLibrary,
+      connectionType
     }
   })),
   

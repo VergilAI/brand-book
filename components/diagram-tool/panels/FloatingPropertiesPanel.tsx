@@ -5,10 +5,134 @@ import { useMapEditor } from '@/app/map-editor/hooks/useMapEditor'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/card'
 import { Trash2, X } from 'lucide-react'
+import { useRelationships } from '@/app/map-editor/contexts/RelationshipContext'
+import { TableMetadata, TableRow, TableRelationship } from '@/app/map-editor/types/database-types'
 
 export function FloatingPropertiesPanel() {
   const store = useMapEditor()
+  const { relationships, setRelationships, selectedRelationshipId, setSelectedRelationshipId } = useRelationships()
   const selectedTerritoryIds = Array.from(store.selection.territories)
+  
+  // Show relationship panel if a relationship is selected
+  if (selectedRelationshipId) {
+    const relationship = relationships.find(r => r.id === selectedRelationshipId)
+    if (!relationship) return null
+    
+    const fromTable = store.map.territories[relationship.fromTable]
+    const toTable = store.map.territories[relationship.toTable]
+    if (!fromTable || !toTable) return null
+    
+    const fromMeta = fromTable.metadata as TableMetadata
+    const toMeta = toTable.metadata as TableMetadata
+    const fromRow = fromMeta.rows[relationship.fromRow]
+    const toRow = toMeta.rows[relationship.toRow]
+    
+    return (
+      <div className="absolute right-4 top-20 z-20 w-80">
+        <Card className="p-4 bg-white/95 backdrop-blur-sm shadow-xl">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Relationship Properties</h3>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setRelationships(relationships.filter(r => r.id !== selectedRelationshipId))
+                    setSelectedRelationshipId(null)
+                  }}
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                  title="Delete Relationship"
+                >
+                  <Trash2 size={16} />
+                </button>
+                <button
+                  onClick={() => setSelectedRelationshipId(null)}
+                  className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
+                  title="Close"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  From
+                </label>
+                <div className="bg-gray-50 p-3 rounded-md space-y-1">
+                  <div className="font-medium text-sm">{fromMeta.tableName || 'Untitled Table'}</div>
+                  <div className="text-xs text-gray-600">
+                    <span className="font-medium">Key:</span> {fromRow.key || '-'} | 
+                    <span className="font-medium"> Name:</span> {fromRow.name || '-'} | 
+                    <span className="font-medium"> Type:</span> {fromRow.type || '-'}
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Relationship Type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">From End</label>
+                    <select
+                      value={relationship.relationshipType.split('-')[0]}
+                      onChange={(e) => {
+                        const fromType = e.target.value;
+                        const toType = relationship.relationshipType.split('-').pop() || 'one';
+                        const newType = `${fromType}-to-${toType}` as any;
+                        const updatedRel = { ...relationship, relationshipType: newType };
+                        setRelationships(relationships.map(r => r.id === relationship.id ? updatedRel : r));
+                      }}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="one">One</option>
+                      <option value="many">Many</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">To End</label>
+                    <select
+                      value={relationship.relationshipType.split('-').pop() || 'one'}
+                      onChange={(e) => {
+                        const toType = e.target.value;
+                        const fromType = relationship.relationshipType.split('-')[0];
+                        const newType = `${fromType}-to-${toType}` as any;
+                        const updatedRel = { ...relationship, relationshipType: newType };
+                        setRelationships(relationships.map(r => r.id === relationship.id ? updatedRel : r));
+                      }}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="one">One</option>
+                      <option value="many">Many</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500 text-center bg-purple-50 text-purple-700 px-2 py-1 rounded">
+                  {relationship.relationshipType}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  To
+                </label>
+                <div className="bg-gray-50 p-3 rounded-md space-y-1">
+                  <div className="font-medium text-sm">{toMeta.tableName || 'Untitled Table'}</div>
+                  <div className="text-xs text-gray-600">
+                    <span className="font-medium">Key:</span> {toRow.key || '-'} | 
+                    <span className="font-medium"> Name:</span> {toRow.name || '-'} | 
+                    <span className="font-medium"> Type:</span> {toRow.type || '-'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
   
   if (selectedTerritoryIds.length === 0) {
     return null
@@ -20,6 +144,146 @@ export function FloatingPropertiesPanel() {
     
     if (!territory) return null
     
+    // For database tables
+    if (territory.metadata && 'tableName' in territory.metadata) {
+      const meta = territory.metadata as TableMetadata
+      
+      // Find all relationships for this table
+      const tableRelationships = relationships.filter(
+        rel => rel.fromTable === territoryId || rel.toTable === territoryId
+      )
+      
+      // Group relationships by connected table
+      const relationshipsByTable = new Map<string, {
+        incoming: Array<{rel: any, row: any}>,
+        outgoing: Array<{rel: any, row: any}>
+      }>()
+      
+      tableRelationships.forEach(rel => {
+        if (rel.fromTable === territoryId) {
+          // Outgoing relationship
+          const targetTable = store.map.territories[rel.toTable]
+          if (!targetTable) return
+          
+          if (!relationshipsByTable.has(rel.toTable)) {
+            relationshipsByTable.set(rel.toTable, { incoming: [], outgoing: [] })
+          }
+          relationshipsByTable.get(rel.toTable)!.outgoing.push({
+            rel,
+            row: meta.rows[rel.fromRow]
+          })
+        } else {
+          // Incoming relationship
+          const sourceTable = store.map.territories[rel.fromTable]
+          if (!sourceTable) return
+          
+          if (!relationshipsByTable.has(rel.fromTable)) {
+            relationshipsByTable.set(rel.fromTable, { incoming: [], outgoing: [] })
+          }
+          relationshipsByTable.get(rel.fromTable)!.incoming.push({
+            rel,
+            row: meta.rows[rel.toRow]
+          })
+        }
+      })
+      
+      return (
+        <div className="absolute right-4 top-20 z-20 w-80">
+          <Card className="p-4 bg-white/95 backdrop-blur-sm shadow-xl">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Table Properties</h3>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => store.deleteTerritory(territoryId)}
+                    className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                    title="Delete Table"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => store.clearSelection()}
+                    className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
+                    title="Close"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Table Name
+                  </label>
+                  <div className="font-semibold text-lg">
+                    {meta.tableName || 'Untitled Table'}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Number of Rows
+                  </label>
+                  <div className="text-base">
+                    {meta.rows.length} {meta.rows.length === 1 ? 'row' : 'rows'}
+                  </div>
+                </div>
+                
+                {relationshipsByTable.size > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Relationships
+                    </label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(relationshipsByTable.entries()).map(([tableId, rels]) => {
+                        const connectedTable = store.map.territories[tableId]
+                        const connectedMeta = connectedTable?.metadata as TableMetadata
+                        const tableName = connectedMeta?.tableName || 'Untitled Table'
+                        
+                        return (
+                          <div key={tableId} className="bg-gray-50 p-2 rounded-md text-sm">
+                            <div className="font-medium mb-1">{tableName}</div>
+                            {rels.outgoing.length > 0 && (
+                              <div className="text-xs text-gray-600">
+                                <span className="font-medium">→ Outgoing:</span>
+                                {rels.outgoing.map((item, idx) => (
+                                  <div key={idx} className="ml-2">
+                                    {item.row.name} ({item.rel.relationshipType})
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {rels.incoming.length > 0 && (
+                              <div className="text-xs text-gray-600 mt-1">
+                                <span className="font-medium">← Incoming:</span>
+                                {rels.incoming.map((item, idx) => (
+                                  <div key={idx} className="ml-2">
+                                    {item.row.name} ({item.rel.relationshipType})
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                {relationshipsByTable.size === 0 && (
+                  <div className="text-sm text-gray-500 italic">
+                    No relationships defined
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )
+    }
+    
+    // Original territory properties for non-table territories
     return (
       <div className="absolute right-4 top-20 z-20 w-80">
         <Card className="p-4 bg-white/95 backdrop-blur-sm shadow-xl">

@@ -33,6 +33,7 @@ export interface TemplateLibraryState {
   searchQuery: string
   recentShapes: string[] // Shape IDs
   customShapes: TemplateShape[]
+  connectionType: 'one-to-one' | 'one-to-many' | 'many-to-many'
   placementMode: {
     active: boolean
     shapeId: string | null

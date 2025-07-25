@@ -6,10 +6,12 @@ import { Toolbar } from '@/components/diagram-tool/tools/Toolbar'
 import { FloatingPropertiesPanel } from '@/components/diagram-tool/panels/FloatingPropertiesPanel'
 import { TemplateLibraryPanel } from '@/components/diagram-tool/template-library/TemplateLibraryPanel'
 import { HelpInfo } from '@/components/diagram-tool/HelpInfo'
+import { RelationshipProvider } from './contexts/RelationshipContext'
 
 export default function MapEditorPage() {
   return (
-    <div className="h-screen relative bg-secondary overflow-hidden">
+    <RelationshipProvider>
+      <div className="h-screen relative bg-secondary overflow-hidden">
       {/* Main canvas - full screen */}
       <MapCanvas />
       
@@ -35,5 +37,6 @@ export default function MapEditorPage() {
       {/* Help info (bottom left corner) */}
       <HelpInfo />
     </div>
+    </RelationshipProvider>
   )
 }
