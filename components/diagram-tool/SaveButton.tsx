@@ -4,6 +4,7 @@ import React from 'react'
 import { useMapEditor } from '@/app/map-editor/hooks/useMapEditor'
 import { useRelationships } from '@/app/map-editor/contexts/RelationshipContext'
 import { visualToSchema, saveSchemaToStorage } from '@/app/map-editor/lib/schema-converters'
+import { MapItem } from '@/app/map-editor/types'
 import { Save } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -19,9 +20,28 @@ export function SaveButton() {
       version: '1.0'
     }
     
+    // Convert territories to MapItem format for visualToSchema
+    const items: Record<string, MapItem> = {}
+    Object.entries(store.map.territories).forEach(([id, territory]) => {
+      // Skip if not a table (check for metadata with table info)
+      if (!territory.metadata || !territory.metadata.tableName) {
+        return
+      }
+      
+      items[id] = {
+        id: id,
+        type: 'table',
+        coordinates: [[territory.center.x, territory.center.y]],
+        metadata: territory.metadata,
+        zIndex: territory.zIndex || 0,
+        color: territory.fillPath || '#f3f4f6',
+        borderColor: '#e5e7eb'
+      }
+    })
+    
     // Convert visual data to schema format
     const schema = visualToSchema(
-      store.map.territories, 
+      items, 
       relationships,
       metadata.dialect,
       metadata.version,

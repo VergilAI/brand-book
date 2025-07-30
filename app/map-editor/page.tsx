@@ -7,13 +7,16 @@ import { FloatingPropertiesPanel } from '@/components/diagram-tool/panels/Floati
 import { TemplateLibraryPanel } from '@/components/diagram-tool/template-library/TemplateLibraryPanel'
 import { HelpInfo } from '@/components/diagram-tool/HelpInfo'
 import { SaveButton } from '@/components/diagram-tool/SaveButton'
+import { ImportButton } from '@/components/diagram-tool/ImportButton'
 import { SchemaNameInput } from '@/components/diagram-tool/SchemaNameInput'
 import { RelationshipProvider } from './contexts/RelationshipContext'
+import { LineSettingsProvider } from './contexts/LineSettingsContext'
 
 export default function MapEditorPage() {
   return (
     <RelationshipProvider>
-      <div className="h-screen relative bg-secondary overflow-hidden">
+      <LineSettingsProvider>
+        <div className="h-screen relative bg-secondary overflow-hidden">
       {/* Main canvas - full screen */}
       <MapCanvas />
       
@@ -30,18 +33,14 @@ export default function MapEditorPage() {
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
         <SchemaNameInput />
         <div className="w-px h-6 bg-gray-300" />
+        <ImportButton />
         <SaveButton />
-        <button className="inline-flex items-center justify-center h-8 px-3 text-sm font-medium rounded-md border bg-primary shadow-sm hover:bg-emphasis transition-all">
-          Import
-        </button>
-        <button className="inline-flex items-center justify-center h-8 px-3 text-sm font-medium rounded-md bg-brand text-inverse shadow-sm hover:bg-brand-hover transition-all">
-          Export
-        </button>
       </div>
       
       {/* Help info (bottom left corner) */}
       <HelpInfo />
     </div>
+      </LineSettingsProvider>
     </RelationshipProvider>
   )
 }

@@ -1,0 +1,377 @@
+{
+  "metadata": {
+    "name": "seven_tables",
+    "dialect": "postgresql",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "question_and_answer_mq",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "exact_answer",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_question_and_answer_mq_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -2015.3509140625001,
+          "y": -967.11623046875
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 0
+      }
+    },
+    {
+      "name": "multiple_choce_mq",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question_text",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_4",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1_veracity",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_2_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_3_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_4_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_multiple_choce_mq_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -2015.9792324218752,
+          "y": -1460.6613349609374
+        },
+        "size": {
+          "width": 300,
+          "height": 530
+        },
+        "zIndex": 1
+      }
+    },
+    {
+      "name": "course",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "passing_score",
+          "type": "integer",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -1329.0204979292998,
+          "y": -1665.6190118607033
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 2
+      }
+    },
+    {
+      "name": "chapter",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "order",
+          "type": "integer",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_chapter_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -671.1118029951604,
+          "y": -1671.4115858485843
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 3
+      }
+    },
+    {
+      "name": "New Table",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "chapter_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "order",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_New Table_chapter_id",
+          "column": "chapter_id",
+          "references": {
+            "table": "chapter",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -72.7332922406049,
+          "y": -1675.9413638112987
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 4
+      }
+    },
+    {
+      "name": "lesson_knowledge_point",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "lesson_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "knowledge_point_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_lesson_knowledge_point_lesson_id",
+          "column": "lesson_id",
+          "references": {
+            "table": "New Table",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_lesson_knowledge_point_knowledge_point_id",
+          "column": "knowledge_point_id",
+          "references": {
+            "table": "knowledge_point",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 500.167806339804,
+          "y": -1678.2740987901175
+        },
+        "size": {
+          "width": 300,
+          "height": 210
+        },
+        "zIndex": 5
+      }
+    },
+    {
+      "name": "knowledge_point",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 492.0840245351858,
+          "y": -1349.2263669387476
+        },
+        "size": {
+          "width": 300,
+          "height": 210
+        },
+        "zIndex": 6
+      }
+    }
+  ]
+}

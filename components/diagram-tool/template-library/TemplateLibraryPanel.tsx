@@ -20,6 +20,8 @@ const DIAGRAM_FILES = [
   { name: 'Blog Schema', file: '/db_dummy_data/postgres-blog-schema.json' },
   { name: 'E-commerce Schema', file: '/db_dummy_data/postgres-ecommerce-schema.json' },
   { name: 'Project Management', file: '/db_dummy_data/postgres-project-schema.json' },
+  { name: 'Vergil Demo Database v2', file: '/db_dummy_data/postgres-vergil-demo-v2.json' },
+  { name: 'First Two Tables', file: '/db_dummy_data/firs_two_tables-schema.json' },
 ]
 
 export function TemplateLibraryPanel() {
@@ -63,11 +65,11 @@ export function TemplateLibraryPanel() {
       metadata: {
         type: 'database-table',
         tableName: 'New Table',
-        columns: ['Key', 'Name', 'Type'],
+        columns: ['key', 'name', 'type'],
         rows: [
-          { key: '', name: '', type: 'text' },
-          { key: '', name: '', type: 'text' },
-          { key: '', name: '', type: 'text' }
+          { key: '', name: '', type: 'text', nullable: false },
+          { key: '', name: '', type: 'text', nullable: false },
+          { key: '', name: '', type: 'text', nullable: false }
         ],
         nameHeight,
         headerHeight,

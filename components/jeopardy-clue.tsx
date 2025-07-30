@@ -66,30 +66,30 @@ export function JeopardyClue({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal overflow-y-auto"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] overflow-y-auto"
         onClick={onClose}
       >
-        <div className="min-h-full flex items-center justify-center p-space-md">
+        <div className="min-h-full flex items-center justify-center p-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl my-auto max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-2xl my-auto"
           >
-          <Card className="bg-bg-primary border-border-subtle shadow-elevated overflow-hidden flex flex-col">
-            <div className="p-space-lg pb-space-md">
-              <div className="flex items-center justify-between mb-space-lg">
-                <div className="flex items-center gap-space-md">
-                  <Card className="px-space-md py-space-xs bg-bg-inverse text-text-inverse border-0">
-                    <span className="text-2xl font-bold font-mono">
+          <Card className="bg-bg-primary border-2 border-border-default shadow-2xl">
+            <div className="p-4 bg-bg-secondary border-b-2 border-border-default">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="px-4 py-2 bg-gray-900 text-white rounded-md">
+                    <span className="text-xl font-bold font-mono">
                       ${clue.isDailyDouble ? wager : clue.value}
                     </span>
-                  </Card>
+                  </div>
                   {clue.isDailyDouble && (
-                    <div className="flex items-center gap-space-xs px-space-md py-space-xs bg-bg-secondary rounded-lg">
-                      <Star className="w-4 h-4 text-text-brand" />
-                      <span className="text-sm font-display font-bold text-text-brand">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 rounded-md">
+                      <Star className="w-4 h-4 text-yellow-600" />
+                      <span className="text-sm font-bold text-yellow-800">
                         DAILY DOUBLE
                       </span>
                     </div>
@@ -99,33 +99,33 @@ export function JeopardyClue({
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="text-text-tertiary hover:text-text-primary"
+                  className="hover:bg-bg-emphasis"
                 >
                   <X className="w-5 h-5" />
                 </Button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-space-lg">
+            <div className="p-6 bg-bg-primary">
               {clue.isDailyDouble && phase === 'wager' ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-space-lg"
+                  className="space-y-4"
                 >
                   <div className="text-center">
-                    <h3 className="text-2xl font-display font-bold mb-space-xs text-text-primary">Make Your Wager</h3>
+                    <h3 className="text-xl font-bold mb-2 text-text-primary">Make Your Wager</h3>
                     <p className="text-text-secondary">
                       Current Score: ${currentScore} | Max Wager: ${maxWager}
                     </p>
                   </div>
                   
-                  <div className="space-y-space-md">
+                  <div>
                     <Input
                       type="number"
                       value={wager}
                       onChange={(e) => setWager(Math.min(maxWager, Math.max(0, parseInt(e.target.value) || 0)))}
-                      className="text-center text-2xl font-bold border-border-subtle"
+                      className="text-center text-xl font-bold"
                       min={0}
                       max={maxWager}
                     />
@@ -135,25 +135,25 @@ export function JeopardyClue({
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-space-lg"
+                  className="space-y-6"
                 >
                   <div className="text-center">
-                    <h3 className="text-sm font-display font-bold uppercase tracking-wider text-text-primary mb-space-md">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-text-brand mb-3">
                       {clue.category}
                     </h3>
-                    <p className="text-2xl font-medium leading-relaxed text-text-primary">
+                    <p className="text-xl font-medium leading-relaxed text-text-primary px-4">
                       {clue.clue}
                     </p>
                   </div>
 
                   {!showResult ? (
-                    <div className="space-y-space-md">
+                    <div>
                       <Input
                         type="text"
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
                         placeholder="What is..."
-                        className="text-lg border-border-subtle placeholder:text-text-tertiary"
+                        className="text-lg text-center"
                         autoFocus
                       />
                     </div>
@@ -161,23 +161,23 @@ export function JeopardyClue({
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="text-center space-y-space-md"
+                      className="text-center space-y-4"
                     >
                       <div className={cn(
-                        "w-20 h-20 rounded-full mx-auto flex items-center justify-center",
-                        isCorrect ? "bg-bg-success/10" : "bg-bg-error/10"
+                        "w-16 h-16 rounded-full mx-auto flex items-center justify-center",
+                        isCorrect ? "bg-green-100" : "bg-red-100"
                       )}>
                         {isCorrect ? (
-                          <Check className="w-10 h-10 text-text-brand" />
+                          <Check className="w-8 h-8 text-green-600" />
                         ) : (
-                          <AlertCircle className="w-10 h-10 text-text-error" />
+                          <AlertCircle className="w-8 h-8 text-red-600" />
                         )}
                       </div>
                       <div>
-                        <p className="text-2xl font-display font-bold mb-space-xs text-text-primary">
+                        <p className="text-xl font-bold mb-2 text-text-primary">
                           {isCorrect ? "Correct!" : "Sorry, that's incorrect"}
                         </p>
-                        <p className="text-lg text-text-secondary">
+                        <p className="text-base text-text-secondary">
                           The answer was: <span className="font-bold text-text-primary">{clue.answer}</span>
                         </p>
                       </div>
@@ -187,12 +187,14 @@ export function JeopardyClue({
               )}
             </div>
             
-            {/* Sticky Buttons */}
-            <div className="sticky bottom-0 bg-bg-primary border-t border-border-subtle p-space-lg pt-space-md">
+            {/* Footer Buttons */}
+            <div className="bg-bg-secondary border-t-2 border-border-default p-4">
               {clue.isDailyDouble && phase === 'wager' ? (
                 <Button
                   onClick={handleWagerSubmit}
-                  className="w-full bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
+                  className="w-full"
+                  variant="primary"
+                  size="lg"
                 >
                   Lock In Wager
                 </Button>
@@ -200,14 +202,18 @@ export function JeopardyClue({
                 <Button
                   onClick={handleSubmit}
                   disabled={!answer.trim()}
-                  className="w-full bg-bg-brand text-text-inverse hover:bg-bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full"
+                  variant="primary"
+                  size="lg"
                 >
                   Submit Answer
                 </Button>
               ) : (
                 <Button
                   onClick={handleContinue}
-                  className="w-full bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
+                  className="w-full"
+                  variant="primary"
+                  size="lg"
                 >
                   Continue
                 </Button>

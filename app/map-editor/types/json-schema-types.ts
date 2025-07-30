@@ -32,10 +32,27 @@ export interface ForeignKeyDefinition {
   on_update?: ForeignKeyAction;
 }
 
+export interface DisplayPosition {
+  x: number;
+  y: number;
+}
+
+export interface DisplaySize {
+  width: number;
+  height: number;
+}
+
+export interface DisplayInfo {
+  position?: DisplayPosition;
+  size?: DisplaySize;
+  zIndex?: number;
+}
+
 export interface TableDefinition {
   name: string;
   columns: ColumnDefinition[];
   foreign_keys?: ForeignKeyDefinition[];
+  display?: DisplayInfo;
 }
 
 export interface DatabaseSchema {
@@ -82,16 +99,44 @@ export const SQL_TO_VISUAL_TYPE_MAP: Record<string, string> = {
 
 // Visual editor types that map back to SQL
 export const VISUAL_TO_SQL_TYPE_MAP: Record<string, string> = {
-  'text': 'varchar(255)', // Default for text
-  'number': 'integer', // Default for number
-  'boolean': 'boolean',
+  // Direct SQL type mappings (used by TypeCombobox)
+  // String types
+  'text': 'text',
+  'varchar': 'varchar(255)', // fallback for bare varchar
+  'varchar(255)': 'varchar(255)',
+  'varchar(50)': 'varchar(50)',
+  'char(10)': 'char(10)',
+  
+  // Numeric types
+  'integer': 'integer',
+  'int': 'integer', // alias
+  'bigint': 'bigint',
+  'smallint': 'smallint',
+  'decimal': 'decimal(10,2)', // fallback for bare decimal
+  'decimal(10,2)': 'decimal(10,2)',
+  'numeric': 'numeric(10,2)', // fallback for bare numeric
+  'numeric(10,2)': 'numeric(10,2)',
+  'real': 'real',
+  'float': 'real', // alias
+  'double precision': 'double precision',
+  
+  // Date/Time types
   'date': 'date',
-  'json': 'json',
-  'uuid': 'uuid',
+  'time': 'time',
   'timestamp': 'timestamp',
-  'enum': 'varchar(50)', // Default for enum
-  'array': 'json', // Arrays stored as JSON
-  'object': 'json', // Objects stored as JSON
+  'timestamp with time zone': 'timestamp with time zone',
+  
+  // Other types
+  'boolean': 'boolean',
+  'uuid': 'uuid',
+  'json': 'json',
+  'jsonb': 'jsonb',
+  'array': 'json',
+  'enum': 'varchar(50)',
+  
+  // Legacy abstract type mappings (for backward compatibility)
+  'number': 'integer',
+  'object': 'json',
 };
 
 // Helper function to parse SQL type strings

@@ -52,6 +52,11 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
       ? Math.round(course.chapters.reduce((acc, ch) => acc + (ch.testScore || 0), 0) / completedChapterTests)
       : 0
 
+    // Calculate time to finish
+    const incompleteLessons = allLessons.filter(l => !l.completed)
+    const totalMinutesRemaining = incompleteLessons.reduce((acc, lesson) => acc + lesson.estimatedTime, 0)
+    const hoursToFinish = Math.ceil(totalMinutesRemaining / 60)
+
     return {
       totalLessons: allLessons.length,
       completedLessons: allLessons.filter(l => l.knowledgePoints.every(kp => kp.proficiency >= 80)).length,
@@ -64,7 +69,8 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
       completedChapterTests,
       totalChapters: course.chapters.length,
       averageTestScore,
-      overallProgress: Math.round((masteredKnowledgePoints / totalKnowledgePoints) * 100)
+      overallProgress: Math.round((masteredKnowledgePoints / totalKnowledgePoints) * 100),
+      hoursToFinish
     }
   }, [course])
 
@@ -197,20 +203,20 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
             </CardContent>
           </Card>
 
-          {/* Chapter Tests */}
+          {/* Time to Finish */}
           <Card className="p-6 border border-border-subtle hover:border-border-default transition-all duration-200">
             <CardContent className="p-0">
               <div className="flex items-center gap-2 mb-3">
-                <Target className="h-5 w-5 text-text-info" /> {/* #0087FF */}
+                <Clock className="h-5 w-5 text-text-warning" /> {/* #FFC700 */}
                 <p className="text-sm font-medium text-text-secondary">
-                  Chapter Tests
+                  Finish in
                 </p>
               </div>
               <p className="text-2xl font-bold text-text-primary mb-2">
-                {stats.completedChapterTests}/{stats.totalChapters}
+                {stats.hoursToFinish} {stats.hoursToFinish === 1 ? 'hour' : 'hours'}
               </p>
               <p className="text-sm text-text-secondary mb-1">
-                Completed (Avg: {stats.averageTestScore > 0 ? `${stats.averageTestScore}%` : '0%'})
+                Estimated time remaining
               </p>
             </CardContent>
           </Card>

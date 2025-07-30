@@ -39,23 +39,61 @@ export function schemaToVisual(schema: DatabaseSchema): {
   const items: Record<string, MapItem> = {};
   const relationships: TableRelationship[] = [];
   
+  // First pass: collect all foreign key columns
+  const foreignKeyColumns = new Map<string, Set<string>>();
+  schema.tables.forEach(table => {
+    if (table.foreign_keys) {
+      const columnSet = new Set<string>();
+      table.foreign_keys.forEach(fk => {
+        columnSet.add(fk.column);
+      });
+      foreignKeyColumns.set(table.name, columnSet);
+    }
+  });
+
   // Create visual tables from schema
   schema.tables.forEach((table, index) => {
     const tableId = generateId('table');
     
-    // Calculate position in grid layout
-    const col = index % GRID_COLUMNS;
-    const row = Math.floor(index / GRID_COLUMNS);
-    const x = 100 + (col * TABLE_SPACING_X);
-    const y = 100 + (row * TABLE_SPACING_Y);
+    // Use display position if available, otherwise calculate position in grid layout
+    let x: number, y: number, width: number, zIndex: number;
+    
+    if (table.display?.position) {
+      x = table.display.position.x;
+      y = table.display.position.y;
+      width = table.display.size?.width || TABLE_WIDTH;
+      zIndex = table.display.zIndex ?? index;
+    } else {
+      // Fallback to grid layout
+      const col = index % GRID_COLUMNS;
+      const row = Math.floor(index / GRID_COLUMNS);
+      x = 100 + (col * TABLE_SPACING_X);
+      y = 100 + (row * TABLE_SPACING_Y);
+      width = TABLE_WIDTH;
+      zIndex = index;
+    }
+    
+    // Get foreign key columns for this table
+    const tableFKColumns = foreignKeyColumns.get(table.name) || new Set();
     
     // Convert columns to table rows
     const rows: TableRow[] = table.columns.map(column => {
-      const parsedType = parseSQLType(column.type);
-      const visualType = SQL_TO_VISUAL_TYPE_MAP[parsedType.baseType.toLowerCase()] || 'text';
+      // Use the full SQL type directly to preserve parameters
+      // This ensures we preserve types like varchar(255), decimal(10,2), etc.
+      const visualType = column.type.toLowerCase();
+      
+      // Determine key type
+      let keyType = '';
+      if (column.primary_key && tableFKColumns.has(column.name)) {
+        keyType = 'PK,FK';
+      } else if (column.primary_key) {
+        keyType = 'PK';
+      } else if (tableFKColumns.has(column.name)) {
+        keyType = 'FK';
+      }
       
       return {
-        key: column.primary_key ? '🔑' : '',
+        key: keyType,
         name: column.name,
         type: visualType,
         nullable: column.nullable,
@@ -71,7 +109,7 @@ export function schemaToVisual(schema: DatabaseSchema): {
       tableName: table.name,
       rows: rows,
       columns: ['key', 'name', 'type'],
-      width: TABLE_WIDTH,
+      width: width,
       nameHeight: NAME_HEIGHT,
       headerHeight: HEADER_HEIGHT,
       rowHeight: ROW_HEIGHT,
@@ -85,7 +123,7 @@ export function schemaToVisual(schema: DatabaseSchema): {
       metadata: metadata,
       color: '#f3f4f6',
       borderColor: '#e5e7eb',
-      zIndex: index,
+      zIndex: zIndex,
     };
   });
   
@@ -100,38 +138,38 @@ export function schemaToVisual(schema: DatabaseSchema): {
   schema.tables.forEach((table, tableIndex) => {
     if (!table.foreign_keys) return;
     
-    const fromTableId = tableIdMap[table.name];
-    if (!fromTableId) return;
+    const targetTableId = tableIdMap[table.name]; // Table with the foreign key
+    if (!targetTableId) return;
     
     table.foreign_keys.forEach(fk => {
-      const toTableId = tableIdMap[fk.references.table];
-      if (!toTableId) return;
+      const sourceTableId = tableIdMap[fk.references.table]; // Table being referenced
+      if (!sourceTableId) return;
       
       // Find row indices
-      const fromItem = items[fromTableId];
-      const toItem = items[toTableId];
+      const targetItem = items[targetTableId]; // Has the foreign key
+      const sourceItem = items[sourceTableId]; // Has the primary key
       
-      const fromRowIndex = fromItem.metadata?.rows.findIndex(
-        row => row.name === fk.column
+      const targetRowIndex = targetItem.metadata?.rows.findIndex(
+        row => row.name === fk.column // Foreign key column
       ) ?? 0;
       
-      const toRowIndex = toItem.metadata?.rows.findIndex(
-        row => row.name === fk.references.column
+      const sourceRowIndex = sourceItem.metadata?.rows.findIndex(
+        row => row.name === fk.references.column // Primary key column
       ) ?? 0;
       
       // Determine relationship type
-      const fromTable = schema.tables.find(t => t.name === table.name)!;
-      const toTable = schema.tables.find(t => t.name === fk.references.table)!;
-      const relationshipType = inferRelationshipType(fromTable, toTable, fk);
+      const targetTable = schema.tables.find(t => t.name === table.name)!;
+      const sourceTable = schema.tables.find(t => t.name === fk.references.table)!;
+      const relationshipType = inferRelationshipType(targetTable, sourceTable, fk);
       
-      // Create relationship
+      // Create relationship arrow FROM source (primary key) TO target (foreign key)
       relationships.push({
         id: generateId('relationship'),
-        fromTable: fromTableId,
-        fromRow: fromRowIndex,
+        fromTable: sourceTableId, // Arrow starts at referenced table
+        fromRow: sourceRowIndex, // Primary key row
         fromSide: 'right',
-        toTable: toTableId,
-        toRow: toRowIndex,
+        toTable: targetTableId, // Arrow ends at table with foreign key
+        toRow: targetRowIndex, // Foreign key row
         toSide: 'left',
         relationshipType: relationshipType,
         constraintName: fk.name,
@@ -158,7 +196,7 @@ export function visualToSchema(
   
   // Sort tables by zIndex to maintain order
   const sortedItems = Object.values(items)
-    .filter(item => item.metadata?.type === 'database-table' && item.metadata?.tableName)
+    .filter(item => item.metadata?.tableName) // Just check for tableName, not type
     .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   
   sortedItems.forEach(item => {
@@ -167,7 +205,8 @@ export function visualToSchema(
     // Convert table rows to columns
     const columns: ColumnDefinition[] = metadata.rows.map(row => {
       // Map visual type back to SQL type
-      let sqlType = VISUAL_TO_SQL_TYPE_MAP[row.type] || 'varchar(255)';
+      // First check if we have a direct mapping, otherwise use the type as-is
+      let sqlType = VISUAL_TO_SQL_TYPE_MAP[row.type] || row.type;
       
       // Handle special cases
       if (row.primaryKey && row.autoIncrement) {
@@ -187,23 +226,25 @@ export function visualToSchema(
     });
     
     // Find foreign keys for this table
+    // According to spec: Arrow FROM primary key TO foreign key means 
+    // the foreign key goes on the TARGET table (where arrow ends)
     const tableForeignKeys = relationships
-      .filter(rel => rel.fromTable === item.id)
+      .filter(rel => rel.toTable === item.id) // This table is the TARGET of the arrow
       .map(rel => {
-        const fromRow = metadata.rows[rel.fromRow];
-        const toItem = items[rel.toTable];
-        const toRow = toItem.metadata?.rows[rel.toRow];
+        const fromItem = items[rel.fromTable]; // Source table (has the primary key)
+        const fromRow = fromItem.metadata?.rows[rel.fromRow]; // Source column (primary key)
+        const toRow = metadata.rows[rel.toRow]; // Local column (foreign key)
         
-        if (!fromRow || !toRow || !toItem.metadata?.tableName) {
+        if (!fromRow || !toRow || !fromItem.metadata?.tableName) {
           return null;
         }
         
         const fk: ForeignKeyDefinition = {
-          name: rel.constraintName || `fk_${metadata.tableName}_${fromRow.name}`,
-          column: fromRow.name,
+          name: rel.constraintName || `fk_${metadata.tableName}_${toRow.name}`,
+          column: toRow.name, // Local column in THIS table
           references: {
-            table: toItem.metadata.tableName,
-            column: toRow.name,
+            table: fromItem.metadata.tableName, // References the SOURCE table
+            column: fromRow.name, // References the column in SOURCE table
           },
           on_delete: rel.onDelete,
           on_update: rel.onUpdate,
@@ -220,6 +261,21 @@ export function visualToSchema(
     
     if (tableForeignKeys.length > 0) {
       table.foreign_keys = tableForeignKeys;
+    }
+    
+    // Add display information
+    if (item.coordinates && item.coordinates.length > 0) {
+      table.display = {
+        position: {
+          x: item.coordinates[0][0],
+          y: item.coordinates[0][1],
+        },
+        size: {
+          width: metadata.width || TABLE_WIDTH,
+          height: (metadata.rows.length * ROW_HEIGHT) + NAME_HEIGHT + HEADER_HEIGHT,
+        },
+        zIndex: item.zIndex,
+      };
     }
     
     tables.push(table);

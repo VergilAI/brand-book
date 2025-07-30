@@ -11,16 +11,30 @@ import {
 } from "@/components/popover"
 
 const dataTypes = [
+  // String types
   { value: "text", label: "text", color: "#3B82F6" }, // Blue
-  { value: "varchar", label: "varchar", color: "#3B82F6" }, // Blue
-  { value: "uuid", label: "uuid", color: "#8B5CF6" }, // Purple
+  { value: "varchar(255)", label: "varchar(255)", color: "#3B82F6" }, // Blue
+  { value: "varchar(50)", label: "varchar(50)", color: "#3B82F6" }, // Blue
+  { value: "char(10)", label: "char(10)", color: "#3B82F6" }, // Blue
+  
+  // Numeric types
   { value: "integer", label: "integer", color: "#10B981" }, // Green
   { value: "bigint", label: "bigint", color: "#10B981" }, // Green
-  { value: "decimal", label: "decimal", color: "#10B981" }, // Green
-  { value: "boolean", label: "boolean", color: "#F59E0B" }, // Amber
+  { value: "smallint", label: "smallint", color: "#10B981" }, // Green
+  { value: "decimal(10,2)", label: "decimal(10,2)", color: "#10B981" }, // Green
+  { value: "numeric(10,2)", label: "numeric(10,2)", color: "#10B981" }, // Green
+  { value: "real", label: "real", color: "#10B981" }, // Green
+  { value: "double precision", label: "double precision", color: "#10B981" }, // Green
+  
+  // Date/Time types
   { value: "date", label: "date", color: "#EC4899" }, // Pink
   { value: "time", label: "time", color: "#EC4899" }, // Pink
   { value: "timestamp", label: "timestamp", color: "#EC4899" }, // Pink
+  { value: "timestamp with time zone", label: "timestamp with time zone", color: "#EC4899" }, // Pink
+  
+  // Other types
+  { value: "boolean", label: "boolean", color: "#F59E0B" }, // Amber
+  { value: "uuid", label: "uuid", color: "#8B5CF6" }, // Purple
   { value: "json", label: "json", color: "#6366F1" }, // Indigo
   { value: "jsonb", label: "jsonb", color: "#6366F1" }, // Indigo
   { value: "array", label: "array", color: "#14B8A6" }, // Teal
@@ -99,7 +113,7 @@ export function TypeCombobox({ value, onChange, onBlur, onOpenChange }: TypeComb
             <span 
               className="w-2 h-2 rounded-full flex-shrink-0" 
               style={{ 
-                backgroundColor: dataTypes.find(t => t.value === (value || 'text'))?.color 
+                backgroundColor: dataTypes.find(t => t.value === (value || 'text'))?.color || dataTypes.find(t => t.value === 'text')?.color
               }}
             />
             {value || "text"}

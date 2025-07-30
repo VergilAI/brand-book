@@ -26,7 +26,12 @@
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 100, "y": 100 },
+        "size": { "width": 250, "height": 120 },
+        "zIndex": 1
+      }
     },
     {
       "name": "kukac",
@@ -56,7 +61,12 @@
             "column": "id"
           }
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 400, "y": 100 },
+        "size": { "width": 200, "height": 140 },
+        "zIndex": 2
+      }
     }
   ]
 }

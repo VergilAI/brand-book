@@ -20,6 +20,7 @@ export interface TableMetadata {
   nameHeight: number;
   headerHeight: number;
   rowHeight: number;
+  columnWidths?: number[]; // Optional array of column widths
 }
 
 export interface TableRelationship {

@@ -23,24 +23,69 @@ import { GridIcon, SnappingIcon } from "@/components/diagram-tool/ui/MapIcons";
 // We'll use lucide-react icons for the others
 import { Layers, Copy, Clipboard, Square } from "lucide-react";
 import { TypeCombobox } from "@/components/diagram-tool/TypeCombobox";
+import { useLineInteractions, EnhancedRelationship } from "@/app/map-editor/hooks/useLineInteractions";
+import { useLineSettings } from "@/app/map-editor/contexts/LineSettingsContext";
 
 // Data type color mapping
 const dataTypeColors: Record<string, string> = {
+  // String types
   text: "#3B82F6", // Blue
   varchar: "#3B82F6", // Blue
-  uuid: "#8B5CF6", // Purple
+  "varchar(255)": "#3B82F6", // Blue
+  "varchar(50)": "#3B82F6", // Blue
+  "char(10)": "#3B82F6", // Blue
+  char: "#3B82F6", // Blue
+  
+  // Numeric types
   integer: "#10B981", // Green
+  int: "#10B981", // Green
   bigint: "#10B981", // Green
+  smallint: "#10B981", // Green
   decimal: "#10B981", // Green
-  boolean: "#F59E0B", // Amber
+  "decimal(10,2)": "#10B981", // Green
+  numeric: "#10B981", // Green
+  "numeric(10,2)": "#10B981", // Green
+  real: "#10B981", // Green
+  float: "#10B981", // Green
+  "double precision": "#10B981", // Green
+  
+  // Date/Time types
   date: "#EC4899", // Pink
   time: "#EC4899", // Pink
   timestamp: "#EC4899", // Pink
+  "timestamp with time zone": "#EC4899", // Pink
+  
+  // Other types
+  boolean: "#F59E0B", // Amber
+  uuid: "#8B5CF6", // Purple
   json: "#6366F1", // Indigo
   jsonb: "#6366F1", // Indigo
   array: "#14B8A6", // Teal
   enum: "#F97316", // Orange
 };
+
+// Helper function to get color for a data type
+// Handles parameterized types by extracting the base type
+function getDataTypeColor(type: string): string {
+  if (!type) return dataTypeColors.text;
+  
+  // First try exact match
+  if (dataTypeColors[type]) {
+    return dataTypeColors[type];
+  }
+  
+  // Try to extract base type for parameterized types
+  const baseTypeMatch = type.match(/^([^(]+)/);
+  if (baseTypeMatch) {
+    const baseType = baseTypeMatch[1].trim();
+    if (dataTypeColors[baseType]) {
+      return dataTypeColors[baseType];
+    }
+  }
+  
+  // Default to text color
+  return dataTypeColors.text;
+}
 
 // Relationship type
 interface TableRelationship {
@@ -257,11 +302,14 @@ function isPointInPolygon(point: Point, polygon: Point[]): boolean {
 }
 
 // Helper function to check if point is inside territory using accurate polygon detection
-function isPointInTerritory(point: Point, territory: Territory): boolean {
+function isPointInTerritory(point: Point, territory: Territory, store?: any): boolean {
   // Special handling for database tables
   if (territory.metadata && 'tableName' in territory.metadata) {
     const { width, nameHeight, headerHeight, rowHeight, rows } = territory.metadata as TableMetadata;
-    const totalHeight = nameHeight + headerHeight + rowHeight * rows.length;
+    // Include add button height if table is selected in edit mode
+    const isSelected = store?.selection?.territories?.has(territory.id) || false;
+    const addButtonHeight = (isSelected && store?.editMode === "edit") ? 30 : 0;
+    const totalHeight = nameHeight + headerHeight + rowHeight * rows.length + addButtonHeight;
     const x = territory.center.x - width / 2;
     const y = territory.center.y - totalHeight / 2;
     
@@ -364,8 +412,44 @@ export function MapCanvas({ className }: MapCanvasProps) {
   // Use relationship context
   const { relationships, setRelationships, selectedRelationshipId, setSelectedRelationshipId } = useRelationships();
   
+  // Use line interactions hook for LucidChart-style behavior
+  const {
+    hoveredLineId,
+    hoveredWaypointId,
+    draggingWaypoint,
+    dragOffset,
+    handleLineHover,
+    handleWaypointHover,
+    handleWaypointDragStart,
+    handleWaypointDrag,
+    handleWaypointDragEnd,
+    generatePathData,
+    generateWaypoints
+  } = useLineInteractions();
+  
+  // Get line settings from context
+  const { lineType, connectionMode } = useLineSettings();
+  
   // Force update during dragging for smooth relationship lines
   const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+  
+  // Row dragging state
+  const [draggingRow, setDraggingRow] = useState<{
+    territoryId: string;
+    rowIndex: number;
+    startY: number;
+    currentY: number;
+  } | null>(null);
+  
+  // Convert mouse coordinates to SVG coordinates
+  const getSVGPoint = (e: React.MouseEvent | React.PointerEvent): Point => {
+    if (!svgRef.current) return { x: 0, y: 0 };
+    const pt = svgRef.current.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const svgP = pt.matrixTransform(svgRef.current.getScreenCTM()?.inverse());
+    return { x: svgP.x, y: svgP.y };
+  };
 
   // Selection box state
   const isAreaSelecting = useRef(false);
@@ -773,7 +857,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
           if (territory.metadata?.type === 'database-table') {
             const meta = territory.metadata as TableMetadata;
             const width = meta.width || 300;
-            const height = meta.nameHeight + meta.headerHeight + meta.rowHeight * meta.rows.length;
+            const isSelected = store.selection.territories.has(territory.id);
+            const addButtonHeight = (isSelected && store.editMode === "edit") ? 30 : 0;
+            const height = meta.nameHeight + meta.headerHeight + meta.rowHeight * meta.rows.length + addButtonHeight;
             const x = territory.center.x - width / 2;
             const y = territory.center.y - height / 2;
             
@@ -1063,7 +1149,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 side === drawingRelationship.fromSide)) {
             
             // Create the relationship
-            const newRelationship: TableRelationship = {
+            const newRelationship: EnhancedRelationship = {
               id: `rel-${Date.now()}`,
               fromTable: drawingRelationship.fromTable,
               fromRow: drawingRelationship.fromRow,
@@ -1071,7 +1157,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
               toTable: tableId,
               toRow: row,
               toSide: side,
-              relationshipType: store.templateLibrary.connectionType
+              relationshipType: store.templateLibrary.connectionType,
+              lineType: lineType
             };
             
             setRelationships(prev => [...prev, newRelationship]);
@@ -1090,7 +1177,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   toSide === drawingRelationship.fromSide)) {
               
               // Create the relationship
-              const newRelationship: TableRelationship = {
+              const newRelationship: EnhancedRelationship = {
                 id: `rel-${Date.now()}`,
                 fromTable: drawingRelationship.fromTable,
                 fromRow: drawingRelationship.fromRow,
@@ -1098,7 +1185,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 toTable: toTableId!,
                 toRow: toRowIndex,
                 toSide: toSide,
-                relationshipType: store.templateLibrary.connectionType
+                relationshipType: store.templateLibrary.connectionType,
+                lineType: lineType
               };
               
               setRelationships(prev => [...prev, newRelationship]);
@@ -1487,6 +1575,22 @@ export function MapCanvas({ className }: MapCanvasProps) {
           // Delete selected relationship
           setRelationships(prev => prev.filter(rel => rel.id !== selectedRelationshipId));
           setSelectedRelationshipId(null);
+        } else if (store.selection.territories.size > 0 && !editingCell && !editingTableName) {
+          // Delete selected tables
+          const selectedIds = Array.from(store.selection.territories);
+          
+          // Remove all relationships connected to the tables being deleted
+          setRelationships(prev => prev.filter(rel => 
+            !selectedIds.includes(rel.fromTable) && !selectedIds.includes(rel.toTable)
+          ));
+          
+          // Delete the tables
+          selectedIds.forEach(id => {
+            const territory = store.map.territories[id];
+            if (territory?.metadata?.type === 'database-table') {
+              store.deleteTerritory(id);
+            }
+          });
         }
       } else if (e.key === "Escape") {
         if (store.templateLibrary.placementMode.active) {
@@ -1611,6 +1715,101 @@ export function MapCanvas({ className }: MapCanvasProps) {
       window.removeEventListener("keyup", handleGestureKeyUp);
     };
   }, [gesture]);
+  
+  // Handle waypoint dragging
+  useEffect(() => {
+    if (!draggingWaypoint) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      // Convert mouse coordinates to SVG coordinates
+      if (!svgRef.current) return;
+      const pt = svgRef.current.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const svgP = pt.matrixTransform(svgRef.current.getScreenCTM()?.inverse());
+      const point = { x: svgP.x, y: svgP.y };
+      
+      handleWaypointDrag(point);
+      forceUpdate();
+    };
+    
+    const handleMouseUp = () => {
+      handleWaypointDragEnd();
+      
+      // Update the relationship with new waypoint positions
+      if (draggingWaypoint) {
+        const rel = relationships.find(r => r.id === draggingWaypoint.relationshipId);
+        if (rel) {
+          // Get the updated waypoints with drag offset applied
+          const fromTable = store.map.territories[rel.fromTable];
+          const toTable = store.map.territories[rel.toTable];
+          
+          if (fromTable && toTable) {
+            const fromMeta = fromTable.metadata as TableMetadata;
+            const toMeta = toTable.metadata as TableMetadata;
+            
+            const fromCenter = fromTable.center || { x: fromTable.points[0].x, y: fromTable.points[0].y };
+            const toCenter = toTable.center || { x: toTable.points[0].x, y: toTable.points[0].y };
+            
+            const fromWidth = fromMeta.width || 300;
+            const fromHeight = fromMeta.nameHeight + fromMeta.headerHeight + fromMeta.rowHeight * fromMeta.rows.length;
+            const fromX = fromCenter.x - fromWidth / 2;
+            const fromY = fromCenter.y - fromHeight / 2;
+            const fromRowY = fromY + fromMeta.nameHeight + fromMeta.headerHeight + fromMeta.rowHeight * rel.fromRow + fromMeta.rowHeight / 2;
+            const fromDotX = rel.fromSide === 'left' ? fromX - 5 : fromX + fromWidth + 5;
+            
+            const toWidth = toMeta.width || 300;
+            const toHeight = toMeta.nameHeight + toMeta.headerHeight + toMeta.rowHeight * toMeta.rows.length;
+            const toX = toCenter.x - toWidth / 2;
+            const toY = toCenter.y - toHeight / 2;
+            const toRowY = toY + toMeta.nameHeight + toMeta.headerHeight + toMeta.rowHeight * rel.toRow + toMeta.rowHeight / 2;
+            const toDotX = rel.toSide === 'left' ? toX - 5 : toX + toWidth + 5;
+            
+            const fromPoint = { x: fromDotX, y: fromRowY };
+            const toPoint = { x: toDotX, y: toRowY };
+            
+            // Use existing waypoints if available, otherwise generate new ones
+            const enhancedRel = rel as EnhancedRelationship;
+            const existingWaypoints = enhancedRel.waypoints || generateWaypoints(enhancedRel, fromPoint, toPoint, lineType);
+            
+            // Apply drag offset to the dragged waypoint
+            const updatedWaypoints = existingWaypoints.map(wp => {
+              if (wp.id === draggingWaypoint.waypointId) {
+                // Apply constraints if they exist
+                if (wp.constraints?.axis === 'x') {
+                  return { ...wp, x: wp.x + dragOffset.x };
+                } else if (wp.constraints?.axis === 'y') {
+                  return { ...wp, y: wp.y + dragOffset.y };
+                } else {
+                  return { ...wp, x: wp.x + dragOffset.x, y: wp.y + dragOffset.y };
+                }
+              }
+              return wp;
+            });
+            
+            // Update the relationship with new waypoints
+            const updatedRelationship: EnhancedRelationship = {
+              ...rel,
+              lineType: lineType,
+              waypoints: updatedWaypoints
+            };
+            
+            setRelationships(relationships.map(r => 
+              r.id === updatedRelationship.id ? updatedRelationship : r
+            ));
+          }
+        }
+      }
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [draggingWaypoint, dragOffset, relationships, lineType]);
 
   // Calculate viewBox with dynamic aspect ratio
   const svgAspectRatio = svgRef.current
@@ -1909,10 +2108,18 @@ export function MapCanvas({ className }: MapCanvasProps) {
               return `M ${fromX} ${fromY} L ${toX} ${toY}`;
             };
             
-            // Use straight line for database relationships
-            const path = createStraightPath(fromDotX, fromRowY, toDotX, toRowY);
+            // Generate path using the line interactions system
+            const fromPoint = { x: fromDotX, y: fromRowY };
+            const toPoint = { x: toDotX, y: toRowY };
+            const enhancedRel: EnhancedRelationship = {
+              ...rel,
+              lineType: lineType,
+              waypoints: generateWaypoints(rel as EnhancedRelationship, fromPoint, toPoint, lineType)
+            };
+            const path = generatePathData(enhancedRel, fromPoint, toPoint, lineType);
             
             const isSelected = selectedRelationshipId === rel.id;
+            const isHovered = hoveredLineId === rel.id;
             
             return (
               <g key={rel.id}>
@@ -1923,6 +2130,8 @@ export function MapCanvas({ className }: MapCanvasProps) {
                   stroke="transparent"
                   strokeWidth="20"
                   cursor="pointer"
+                  onMouseEnter={() => handleLineHover(rel.id)}
+                  onMouseLeave={() => handleLineHover(null)}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedRelationshipId(rel.id);
@@ -1934,15 +2143,15 @@ export function MapCanvas({ className }: MapCanvasProps) {
                 <path
                   d={path}
                   fill="none"
-                  stroke={isSelected ? "var(--color-purple-600)" : "var(--color-purple-400)"}
-                  strokeWidth={isSelected ? "3" : "2"}
-                  opacity={isSelected ? "1" : "0.8"}
+                  stroke={isSelected ? "var(--color-purple-600)" : isHovered ? "var(--color-purple-500)" : "var(--color-purple-400)"}
+                  strokeWidth={isSelected ? "3" : isHovered ? "2.5" : "2"}
+                  opacity={isSelected ? "1" : isHovered ? "0.9" : "0.8"}
                   className="pointer-events-none"
                   style={{
                     transition: isMovingTerritories.current ? 'none' : 'all 200ms'
                   }}
                   markerStart={
-                    rel.relationshipType === 'many-to-many' 
+                    rel.relationshipType === 'many-to-many' || rel.relationshipType === 'many-to-one'
                       ? (isSelected ? "url(#crowsfoot-start-selected)" : "url(#crowsfoot-start)")
                       : (isSelected ? "url(#one-selected)" : "url(#one)")
                   }
@@ -1952,6 +2161,36 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       : (isSelected ? "url(#one-selected)" : "url(#one)")
                   }
                 />
+                
+                {/* Waypoints for editing - only show when selected or hovered */}
+                {(isSelected || isHovered) && enhancedRel.waypoints && enhancedRel.waypoints.map((waypoint, idx) => {
+                  // Don't show endpoints and perpendicular segments
+                  if (waypoint.type === 'start' || waypoint.type === 'end' || 
+                      waypoint.id.includes('perp-start') || waypoint.id.includes('perp-end')) return null;
+                  
+                  const isWaypointHovered = hoveredWaypointId === waypoint.id;
+                  const isWaypointDragging = draggingWaypoint?.waypointId === waypoint.id;
+                  
+                  return (
+                    <circle
+                      key={waypoint.id}
+                      cx={waypoint.x + (isWaypointDragging && waypoint.constraints?.axis === 'x' ? dragOffset.x : 0)}
+                      cy={waypoint.y + (isWaypointDragging && waypoint.constraints?.axis === 'y' ? dragOffset.y : 0)}
+                      r={isWaypointHovered || isWaypointDragging ? "6" : "5"}
+                      fill="white"
+                      stroke={isSelected ? "var(--color-purple-600)" : "var(--color-purple-400)"}
+                      strokeWidth="2"
+                      cursor="move"
+                      onMouseEnter={() => handleWaypointHover(waypoint.id)}
+                      onMouseLeave={() => handleWaypointHover(null)}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        const point = getSVGPoint(e);
+                        handleWaypointDragStart(rel.id, waypoint.id, point);
+                      }}
+                    />
+                  );
+                })}
               </g>
             );
           })}
@@ -1991,8 +2230,72 @@ export function MapCanvas({ className }: MapCanvasProps) {
 
               // Check if this is a database table
               if (territory.metadata && 'tableName' in territory.metadata) {
-                const { width, nameHeight, headerHeight, rowHeight, columns, rows, tableName } = territory.metadata as TableMetadata;
-                const totalHeight = nameHeight + headerHeight + rowHeight * rows.length;
+                const metadata = territory.metadata as TableMetadata;
+                const { width, nameHeight, headerHeight, rowHeight, columns, rows, tableName } = metadata;
+                
+                // Calculate column widths based on content
+                const calculateColumnWidths = () => {
+                  const minWidths = [50, 100, 100]; // Minimum widths for key, name, type columns
+                  const padding = 20; // Padding for each cell
+                  
+                  // Calculate required width for each column based on content
+                  const requiredWidths = columns.map((col, index) => {
+                    let maxWidth = minWidths[index] || 80;
+                    
+                    // Check header width
+                    const headerText = col.charAt(0).toUpperCase() + col.slice(1);
+                    const headerWidth = headerText.length * 8 + padding;
+                    maxWidth = Math.max(maxWidth, headerWidth);
+                    
+                    // Check content width for each row
+                    rows.forEach(row => {
+                      const value = row[col] || '';
+                      let contentWidth = padding;
+                      
+                      if (col === 'type') {
+                        // Type column needs space for dropdown
+                        contentWidth = value.length * 8 + 60; // Extra space for dot and arrow
+                      } else if (col === 'key') {
+                        // Key column with PK/FK labels
+                        contentWidth = value.length * 10 + padding;
+                      } else {
+                        // Regular text content
+                        contentWidth = value.length * 8 + padding;
+                      }
+                      
+                      maxWidth = Math.max(maxWidth, contentWidth);
+                    });
+                    
+                    return maxWidth;
+                  });
+                  
+                  // If total required width exceeds table width, scale proportionally
+                  const totalRequired = requiredWidths.reduce((sum, w) => sum + w, 0);
+                  if (totalRequired > width) {
+                    const scale = width / totalRequired;
+                    return requiredWidths.map(w => w * scale);
+                  }
+                  
+                  // Otherwise, distribute extra space proportionally
+                  const extraSpace = width - totalRequired;
+                  const extraPerColumn = extraSpace / columns.length;
+                  return requiredWidths.map(w => w + extraPerColumn);
+                };
+                
+                const columnWidths = metadata.columnWidths || calculateColumnWidths();
+                
+                // Helper to get x position for a column
+                const getColumnX = (colIndex: number) => {
+                  let xPos = x;
+                  for (let i = 0; i < colIndex; i++) {
+                    xPos += columnWidths[i];
+                  }
+                  return xPos;
+                };
+                
+                const isSelected = store.selection.territories.has(territory.id);
+                const addButtonHeight = (isSelected && store.editMode === "edit") ? 30 : 0;
+                const totalHeight = nameHeight + headerHeight + rowHeight * rows.length + addButtonHeight;
                 const x = territory.center.x - width / 2;
                 const y = territory.center.y - totalHeight / 2;
                 
@@ -2057,21 +2360,32 @@ export function MapCanvas({ className }: MapCanvasProps) {
                         <input
                           type="text"
                           value={editingTableName.value}
-                          onChange={(e) => setEditingTableName({ ...editingTableName, value: e.target.value })}
+                          onChange={(e) => {
+                            const newValue = e.target.value;
+                            setEditingTableName({ ...editingTableName, value: newValue });
+                            // Save immediately on every keystroke
+                            const metadata = territory.metadata as TableMetadata;
+                            store.updateTerritory(territory.id, {
+                              name: newValue,
+                              metadata: { ...metadata, tableName: newValue }
+                            });
+                            store.setDirty(true);
+                          }}
                           onBlur={() => {
-                            if (editingTableName) {
-                              const metadata = territory.metadata as TableMetadata;
-                              store.updateTerritory(territory.id, {
-                                name: editingTableName.value,
-                                metadata: { ...metadata, tableName: editingTableName.value }
-                              });
-                              setEditingTableName(null);
-                            }
+                            // Just close the editor on blur, changes are already saved
+                            setEditingTableName(null);
                           }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.currentTarget.blur();
                             } else if (e.key === 'Escape') {
+                              // Revert to original value on Escape
+                              const metadata = territory.metadata as TableMetadata;
+                              const originalName = metadata.tableName || 'Untitled Table';
+                              store.updateTerritory(territory.id, {
+                                name: originalName,
+                                metadata: { ...metadata, tableName: originalName }
+                              });
                               setEditingTableName(null);
                             }
                           }}
@@ -2161,16 +2475,16 @@ export function MapCanvas({ className }: MapCanvasProps) {
                       <g key={i}>
                         {i > 0 && (
                           <line
-                            x1={x + (width / 3) * i}
+                            x1={getColumnX(i)}
                             y1={y + nameHeight}
-                            x2={x + (width / 3) * i}
+                            x2={getColumnX(i)}
                             y2={y + nameHeight + headerHeight + rowHeight * rows.length}
                             stroke="var(--color-gray-200)"
                             strokeWidth="1"
                           />
                         )}
                         <text
-                          x={x + (width / 3) * i + width / 6}
+                          x={getColumnX(i) + columnWidths[i] / 2}
                           y={y + nameHeight + headerHeight / 2}
                           textAnchor="middle"
                           dominantBaseline="middle"
@@ -2178,7 +2492,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                           fontWeight="500"
                           fill="var(--color-gray-600)"
                         >
-                          {col}
+                          {col.charAt(0).toUpperCase() + col.slice(1)}
                         </text>
                       </g>
                     ))}
@@ -2186,9 +2500,36 @@ export function MapCanvas({ className }: MapCanvasProps) {
                     {/* Data rows */}
                     {rows.map((row, rowIndex) => {
                       const rowY = y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2;
+                      const isHoveringRow = hoveredTerritoryId === territory.id && 
+                                          position && 
+                                          position.svg &&
+                                          position.svg.x >= x &&
+                                          position.svg.x <= x + width &&
+                                          position.svg.y >= y + nameHeight + headerHeight + rowHeight * rowIndex &&
+                                          position.svg.y < y + nameHeight + headerHeight + rowHeight * (rowIndex + 1);
                       
                       return (
                         <g key={rowIndex}>
+                          {/* Drag handle hover area */}
+                          <rect
+                            x={x}
+                            y={y + nameHeight + headerHeight + rowHeight * rowIndex}
+                            width={25}
+                            height={rowHeight}
+                            fill="transparent"
+                            pointerEvents="all"
+                          />
+                          
+                          {/* Row hover area - adjusted to not cover drag handle area */}
+                          <rect
+                            x={x + 25}
+                            y={y + nameHeight + headerHeight + rowHeight * rowIndex}
+                            width={width - 25}
+                            height={rowHeight}
+                            fill="transparent"
+                            pointerEvents="all"
+                          />
+                          
                           {/* Row separator */}
                           {rowIndex > 0 && (
                             <line
@@ -2198,6 +2539,39 @@ export function MapCanvas({ className }: MapCanvasProps) {
                               y2={y + nameHeight + headerHeight + rowHeight * rowIndex}
                               stroke="var(--color-gray-200)"
                               strokeWidth="1"
+                            />
+                          )}
+                          
+                          {/* Drop indicator */}
+                          {draggingRow && draggingRow.territoryId === territory.id && (() => {
+                            const deltaY = draggingRow.currentY - draggingRow.startY;
+                            const rowsMoved = Math.round(deltaY / rowHeight);
+                            const targetIndex = Math.max(0, Math.min(rows.length - 1, draggingRow.rowIndex + rowsMoved));
+                            
+                            if (targetIndex !== draggingRow.rowIndex && targetIndex === rowIndex) {
+                              return (
+                                <rect
+                                  x={x}
+                                  y={y + nameHeight + headerHeight + rowHeight * rowIndex - 2}
+                                  width={width}
+                                  height={4}
+                                  fill="var(--color-purple-500)"
+                                  opacity="0.5"
+                                />
+                              );
+                            }
+                            return null;
+                          })()}
+                          
+                          {/* Dragging row opacity */}
+                          {draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex && (
+                            <rect
+                              x={x}
+                              y={y + nameHeight + headerHeight + rowHeight * rowIndex}
+                              width={width}
+                              height={rowHeight}
+                              fill="white"
+                              opacity="0.5"
                             />
                           )}
                           
@@ -2302,7 +2676,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
                           )}
                         
                         {/* Row data */}
-                        {Object.entries(row).map(([key, value], colIndex) => {
+                        {columns.map((columnKey, colIndex) => {
+                          const key = columnKey;
+                          const value = row[columnKey];
                           const isEditingThisCell = editingCell?.territoryId === territory.id && 
                                                   editingCell?.rowIndex === rowIndex && 
                                                   editingCell?.columnKey === key;
@@ -2313,9 +2689,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
                               return (
                                 <foreignObject
                                   key={`${rowIndex}-${colIndex}`}
-                                  x={x + (width / 3) * colIndex}
+                                  x={getColumnX(colIndex)}
                                   y={y + nameHeight + headerHeight + rowHeight * rowIndex}
-                                  width={width / 3}
+                                  width={columnWidths[colIndex]}
                                   height={rowHeight}
                                 >
                                   <div className="w-full h-full flex items-center px-2">
@@ -2345,30 +2721,64 @@ export function MapCanvas({ className }: MapCanvasProps) {
                             return (
                               <foreignObject
                                 key={`${rowIndex}-${colIndex}`}
-                                x={x + (width / 3) * colIndex}
+                                x={getColumnX(colIndex)}
                                 y={y + nameHeight + headerHeight + rowHeight * rowIndex}
-                                width={width / 3}
+                                width={columnWidths[colIndex]}
                                 height={rowHeight}
                               >
                                 <input
                                   type="text"
                                   value={editingCell.value}
-                                  onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
-                                  onBlur={() => {
-                                    if (editingCell) {
-                                      const metadata = territory.metadata as TableMetadata;
-                                      const newRows = [...metadata.rows];
-                                      newRows[editingCell.rowIndex][editingCell.columnKey] = editingCell.value;
-                                      store.updateTerritory(territory.id, {
-                                        metadata: { ...metadata, rows: newRows }
-                                      });
-                                      setEditingCell(null);
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    setEditingCell({ ...editingCell, value: newValue });
+                                    
+                                    // Save immediately on every keystroke
+                                    const metadata = territory.metadata as TableMetadata;
+                                    const newRows = [...metadata.rows];
+                                    newRows[editingCell.rowIndex][editingCell.columnKey] = newValue;
+                                    
+                                    // If editing the key column, update related properties
+                                    if (editingCell.columnKey === 'key') {
+                                      const keyValue = newValue.toUpperCase();
+                                      newRows[editingCell.rowIndex].primaryKey = keyValue.includes('PK');
+                                      // Ensure nullable is false for primary keys
+                                      if (keyValue.includes('PK')) {
+                                        newRows[editingCell.rowIndex].nullable = false;
+                                      }
                                     }
+                                    
+                                    store.updateTerritory(territory.id, {
+                                      metadata: { ...metadata, rows: newRows }
+                                    });
+                                    store.setDirty(true);
+                                  }}
+                                  onBlur={() => {
+                                    // Just close the editor on blur, changes are already saved
+                                    setEditingCell(null);
                                   }}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                       e.currentTarget.blur();
                                     } else if (e.key === 'Escape') {
+                                      // Revert to original value on Escape
+                                      const metadata = territory.metadata as TableMetadata;
+                                      const originalValue = metadata.rows[editingCell.rowIndex][editingCell.columnKey] || '';
+                                      const newRows = [...metadata.rows];
+                                      newRows[editingCell.rowIndex][editingCell.columnKey] = originalValue;
+                                      
+                                      // If editing the key column, restore related properties
+                                      if (editingCell.columnKey === 'key') {
+                                        const keyValue = originalValue.toUpperCase();
+                                        newRows[editingCell.rowIndex].primaryKey = keyValue.includes('PK');
+                                        if (keyValue.includes('PK')) {
+                                          newRows[editingCell.rowIndex].nullable = false;
+                                        }
+                                      }
+                                      
+                                      store.updateTerritory(territory.id, {
+                                        metadata: { ...metadata, rows: newRows }
+                                      });
                                       setEditingCell(null);
                                     }
                                   }}
@@ -2383,9 +2793,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
                             <g key={`${rowIndex}-${colIndex}`}>
                               {/* Invisible clickable area for the cell */}
                               <rect
-                                x={x + (width / 3) * colIndex}
+                                x={getColumnX(colIndex)}
                                 y={y + nameHeight + headerHeight + rowHeight * rowIndex}
-                                width={width / 3}
+                                width={columnWidths[colIndex]}
                                 height={rowHeight}
                                 fill="transparent"
                                 cursor={store.editMode === "edit" ? "text" : "default"}
@@ -2449,9 +2859,9 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                 <g>
                                   {/* Background for dropdown appearance */}
                                   <rect
-                                    x={x + (width / 3) * colIndex + 10}
+                                    x={getColumnX(colIndex) + 10}
                                     y={y + nameHeight + headerHeight + rowHeight * rowIndex + 5}
-                                    width={width / 3 - 20}
+                                    width={columnWidths[colIndex] - 20}
                                     height={rowHeight - 10}
                                     rx="4"
                                     fill="var(--color-gray-50)"
@@ -2461,14 +2871,14 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                   />
                                   {/* Color dot */}
                                   <circle
-                                    cx={x + (width / 3) * colIndex + 24}
+                                    cx={getColumnX(colIndex) + 24}
                                     cy={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2}
                                     r="4"
-                                    fill={dataTypeColors[value as string] || dataTypeColors.text}
+                                    fill={getDataTypeColor(value as string)}
                                     pointerEvents="none"
                                   />
                                   <text
-                                    x={x + (width / 3) * colIndex + 34}
+                                    x={getColumnX(colIndex) + 34}
                                     y={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2}
                                     textAnchor="start"
                                     dominantBaseline="middle"
@@ -2481,7 +2891,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                   {/* Dropdown arrow */}
                                   <path
                                     d="M 0 0 L 4 4 L 8 0"
-                                    transform={`translate(${x + (width / 3) * (colIndex + 1) - 20}, ${y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 - 2})`}
+                                    transform={`translate(${getColumnX(colIndex) + columnWidths[colIndex] - 20}, ${y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 - 2})`}
                                     fill="none"
                                     stroke="var(--color-gray-500)"
                                     strokeWidth="1.5"
@@ -2492,7 +2902,7 @@ export function MapCanvas({ className }: MapCanvasProps) {
                                 </g>
                               ) : (
                                 <text
-                                  x={x + (width / 3) * colIndex + width / 6}
+                                  x={getColumnX(colIndex) + columnWidths[colIndex] / 2}
                                   y={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2}
                                   textAnchor="middle"
                                   dominantBaseline="middle"
@@ -2506,9 +2916,251 @@ export function MapCanvas({ className }: MapCanvasProps) {
                             </g>
                           );
                         })}
+                        
+                        {/* Delete row button - show when hovering and in edit mode */}
+                        {isHoveringRow && store.editMode === "edit" && rows.length > 1 && (
+                          <g>
+                            <rect
+                              x={x + width - 25}
+                              y={y + nameHeight + headerHeight + rowHeight * rowIndex + 5}
+                              width={20}
+                              height={rowHeight - 10}
+                              rx="3"
+                              fill="var(--color-red-500)"
+                              cursor="pointer"
+                              onPointerDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                
+                                // Remove relationships connected to this row
+                                const updatedRelationships = relationships.filter(rel => {
+                                  // Keep relationships that don't involve this row
+                                  return !(
+                                    (rel.fromTable === territory.id && rel.fromRow === rowIndex) ||
+                                    (rel.toTable === territory.id && rel.toRow === rowIndex)
+                                  );
+                                }).map(rel => {
+                                  // Adjust row indices for relationships after the deleted row
+                                  if (rel.fromTable === territory.id && rel.fromRow > rowIndex) {
+                                    return { ...rel, fromRow: rel.fromRow - 1 };
+                                  }
+                                  if (rel.toTable === territory.id && rel.toRow > rowIndex) {
+                                    return { ...rel, toRow: rel.toRow - 1 };
+                                  }
+                                  return rel;
+                                });
+                                setRelationships(updatedRelationships);
+                                
+                                // Remove the row
+                                const newRows = rows.filter((_, index) => index !== rowIndex);
+                                store.updateTerritory(territory.id, {
+                                  metadata: { ...metadata, rows: newRows }
+                                });
+                                store.setDirty(true);
+                              }}
+                            />
+                            <line
+                              x1={x + width - 19}
+                              y1={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 - 4}
+                              x2={x + width - 11}
+                              y2={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 + 4}
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              pointerEvents="none"
+                            />
+                            <line
+                              x1={x + width - 11}
+                              y1={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 - 4}
+                              x2={x + width - 19}
+                              y2={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 + 4}
+                              stroke="white"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              pointerEvents="none"
+                            />
+                          </g>
+                        )}
+                        
+                        {/* Drag handle - show only on hover or when dragging */}
+                        {store.editMode === "edit" && (isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex)) && (
+                          <g>
+                            <rect
+                              x={x + 5}
+                              y={y + nameHeight + headerHeight + rowHeight * rowIndex + 5}
+                              width={15}
+                              height={rowHeight - 10}
+                              rx="3"
+                              fill={isHoveringRow ? "var(--color-gray-400)" : "var(--color-gray-300)"}
+                              opacity={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? 1 : 0.5}
+                              cursor="move"
+                              style={{ transition: 'opacity 150ms ease-out' }}
+                              onPointerDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                const svgPoint = getSVGPoint(e);
+                                setDraggingRow({
+                                  territoryId: territory.id,
+                                  rowIndex,
+                                  startY: svgPoint.y,
+                                  currentY: svgPoint.y
+                                });
+                                (e.target as Element).setPointerCapture(e.pointerId);
+                              }}
+                              onPointerMove={(e) => {
+                                if (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) {
+                                  const svgPoint = getSVGPoint(e);
+                                  setDraggingRow({
+                                    ...draggingRow,
+                                    currentY: svgPoint.y
+                                  });
+                                }
+                              }}
+                              onPointerUp={(e) => {
+                                if (draggingRow && draggingRow.territoryId === territory.id) {
+                                  const deltaY = draggingRow.currentY - draggingRow.startY;
+                                  const rowsMoved = Math.round(deltaY / rowHeight);
+                                  
+                                  if (rowsMoved !== 0) {
+                                    const newIndex = Math.max(0, Math.min(rows.length - 1, draggingRow.rowIndex + rowsMoved));
+                                    
+                                    if (newIndex !== draggingRow.rowIndex) {
+                                      const newRows = [...rows];
+                                      const [movedRow] = newRows.splice(draggingRow.rowIndex, 1);
+                                      newRows.splice(newIndex, 0, movedRow);
+                                      
+                                      // Update relationships to point to new row indices
+                                      const updatedRelationships = relationships.map(rel => {
+                                        if (rel.fromTable === territory.id) {
+                                          let newFromRow = rel.fromRow;
+                                          if (rel.fromRow === draggingRow.rowIndex) {
+                                            newFromRow = newIndex;
+                                          } else if (draggingRow.rowIndex < newIndex) {
+                                            // Moving down
+                                            if (rel.fromRow > draggingRow.rowIndex && rel.fromRow <= newIndex) {
+                                              newFromRow = rel.fromRow - 1;
+                                            }
+                                          } else {
+                                            // Moving up
+                                            if (rel.fromRow >= newIndex && rel.fromRow < draggingRow.rowIndex) {
+                                              newFromRow = rel.fromRow + 1;
+                                            }
+                                          }
+                                          return { ...rel, fromRow: newFromRow };
+                                        }
+                                        
+                                        if (rel.toTable === territory.id) {
+                                          let newToRow = rel.toRow;
+                                          if (rel.toRow === draggingRow.rowIndex) {
+                                            newToRow = newIndex;
+                                          } else if (draggingRow.rowIndex < newIndex) {
+                                            // Moving down
+                                            if (rel.toRow > draggingRow.rowIndex && rel.toRow <= newIndex) {
+                                              newToRow = rel.toRow - 1;
+                                            }
+                                          } else {
+                                            // Moving up
+                                            if (rel.toRow >= newIndex && rel.toRow < draggingRow.rowIndex) {
+                                              newToRow = rel.toRow + 1;
+                                            }
+                                          }
+                                          return { ...rel, toRow: newToRow };
+                                        }
+                                        
+                                        return rel;
+                                      });
+                                      
+                                      setRelationships(updatedRelationships);
+                                      store.updateTerritory(territory.id, {
+                                        metadata: { ...metadata, rows: newRows }
+                                      });
+                                      store.setDirty(true);
+                                    }
+                                  }
+                                  
+                                  setDraggingRow(null);
+                                  (e.target as Element).releasePointerCapture(e.pointerId);
+                                }
+                              }}
+                            />
+                            {/* Drag handle icon */}
+                            <g pointerEvents="none">
+                              <line x1={x + 8} y1={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 - 4} 
+                                    x2={x + 17} y2={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 - 4}
+                                    stroke={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? "var(--color-gray-600)" : "var(--color-gray-400)"} 
+                                    strokeWidth="1.5" 
+                                    strokeLinecap="round" 
+                                    opacity={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? 1 : 0.8} />
+                              <line x1={x + 8} y1={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2} 
+                                    x2={x + 17} y2={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2}
+                                    stroke={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? "var(--color-gray-600)" : "var(--color-gray-400)"} 
+                                    strokeWidth="1.5" 
+                                    strokeLinecap="round"
+                                    opacity={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? 1 : 0.8} />
+                              <line x1={x + 8} y1={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 + 4} 
+                                    x2={x + 17} y2={y + nameHeight + headerHeight + rowHeight * rowIndex + rowHeight / 2 + 4}
+                                    stroke={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? "var(--color-gray-600)" : "var(--color-gray-400)"} 
+                                    strokeWidth="1.5" 
+                                    strokeLinecap="round"
+                                    opacity={isHoveringRow || (draggingRow && draggingRow.territoryId === territory.id && draggingRow.rowIndex === rowIndex) ? 1 : 0.8} />
+                            </g>
+                          </g>
+                        )}
                         </g>
                       );
                     })}
+                    
+                    {/* Add Row button - show when table is selected and in edit mode */}
+                    {isSelected && store.editMode === "edit" && (
+                      <g>
+                        {/* Button background */}
+                        <rect
+                          x={x}
+                          y={y + nameHeight + headerHeight + rowHeight * rows.length}
+                          width={width}
+                          height={30}
+                          fill="var(--color-gray-50)"
+                          stroke="var(--color-gray-200)"
+                          strokeWidth="1"
+                          strokeDasharray="2 2"
+                          cursor="pointer"
+                          onPointerDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            const newRow: TableRow = {
+                              key: '',
+                              name: 'new_column',
+                              type: 'varchar(255)',
+                              nullable: false
+                            };
+                            const newRows = [...rows, newRow];
+                            store.updateTerritory(territory.id, {
+                              metadata: { ...metadata, rows: newRows }
+                            });
+                            store.setDirty(true);
+                          }}
+                        />
+                        <text
+                          x={x + width / 2}
+                          y={y + nameHeight + headerHeight + rowHeight * rows.length + 15}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fontSize="12"
+                          fill="var(--color-gray-600)"
+                          pointerEvents="none"
+                        >
+                          + Add Column
+                        </text>
+                      </g>
+                    )}
                   </g>
                 );
               }

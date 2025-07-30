@@ -5,6 +5,7 @@ import { useMapEditor } from '@/app/map-editor/hooks/useMapEditor'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/card'
 import { Trash2, X } from 'lucide-react'
+import { Switch } from '@/components/ui/Switch'
 import { useRelationships } from '@/app/map-editor/contexts/RelationshipContext'
 import { TableMetadata, TableRow, TableRelationship } from '@/app/map-editor/types/database-types'
 
@@ -233,116 +234,245 @@ export function FloatingPropertiesPanel() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Table Properties</h3>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => store.deleteTerritory(territoryId)}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                    title="Delete Table"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => store.clearSelection()}
-                    className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
-                    title="Close"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
+                <button
+                  onClick={() => store.clearSelection()}
+                  className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
+                  title="Close"
+                >
+                  <X size={16} />
+                </button>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
+                {/* Table Name - Inline Editable */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Table Name
-                  </label>
-                  <div className="font-semibold text-lg">
+                  <div className="font-semibold text-lg text-gray-900">
                     {meta.tableName || 'Untitled Table'}
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Number of Rows
-                  </label>
-                  <div className="text-base">
-                    {meta.rows.length} {meta.rows.length === 1 ? 'row' : 'rows'}
+                  {/* Quick Stats */}
+                  <div className="text-xs text-gray-500 mt-1">
+                    {meta.rows.length} columns • {tableRelationships.length} relationships
                   </div>
                 </div>
                 
+                {/* Column Nullability - Most Important */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Columns
-                  </label>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <h4 className="text-xs font-medium text-gray-700 mb-2">Column Nullability</h4>
+                  <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-36 overflow-y-auto">
                     {meta.rows.map((row, index) => (
-                      <div key={index} className="bg-gray-50 p-2 rounded-md text-sm">
-                        <div className="font-medium mb-1">
-                          {row.key && <span className="text-yellow-600 mr-1">{row.key}</span>}
-                          {row.name || 'Column ' + (index + 1)}
+                      <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50">
+                        <div className="flex items-center gap-2 flex-1">
+                          {row.key && (
+                            <span className={cn(
+                              "text-xs font-medium",
+                              row.key.includes('PK') ? "text-yellow-600" : "text-purple-600"
+                            )}>
+                              {row.key}
+                            </span>
+                          )}
+                          <span className="text-sm text-gray-900">{row.name || `column_${index + 1}`}</span>
+                          <span className="text-xs text-gray-500">({row.type})</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                          <span className="font-medium">Type:</span> {row.type}
-                          {row.primaryKey && <span className="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded">PK</span>}
-                          {row.nullable === false && <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded">NOT NULL</span>}
-                          {row.autoIncrement && <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">AUTO</span>}
+                        <div className="flex items-center gap-2 ml-auto">
+                          {row.primaryKey ? (
+                            <span className="text-xs text-gray-500 italic">Primary Key</span>
+                          ) : (
+                            <>
+                              <span className={cn(
+                                "text-xs font-medium min-w-[60px] text-right",
+                                row.nullable !== false 
+                                  ? "text-green-700"
+                                  : "text-red-700"
+                              )}>
+                                {row.nullable !== false ? 'NULL' : 'NOT NULL'}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  const updatedRows = [...meta.rows];
+                                  updatedRows[index] = {
+                                    ...updatedRows[index],
+                                    nullable: !row.nullable
+                                  };
+                                  store.updateTerritory(territoryId, {
+                                    metadata: { ...meta, rows: updatedRows }
+                                  });
+                                  store.setDirty(true);
+                                }}
+                                className={cn(
+                                  "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-lg transition-all",
+                                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2",
+                                  row.nullable !== false
+                                    ? "bg-green-500"
+                                    : "bg-red-500"
+                                )}
+                              >
+                                <span className={cn(
+                                  "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+                                  row.nullable !== false 
+                                    ? "translate-x-[18px]"  // Right position for ON (nullable)
+                                    : "translate-x-[1px]"    // Left position for OFF (not nullable)
+                                )} />
+                              </button>
+                            </>
+                          )}
                         </div>
-                        {row.default && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            <span className="font-medium">Default:</span> {row.default}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
                 </div>
                 
-                {relationshipsByTable.size > 0 && (
+                
+                {/* Relationships Section */}
+                {tableRelationships.length > 0 ? (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Relationships
-                    </label>
+                    <h4 className="text-xs font-medium text-gray-700 mb-2">
+                      Relationships ({tableRelationships.length})
+                    </h4>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {Array.from(relationshipsByTable.entries()).map(([tableId, rels]) => {
-                        const connectedTable = store.map.territories[tableId]
-                        const connectedMeta = connectedTable?.metadata as TableMetadata
-                        const tableName = connectedMeta?.tableName || 'Untitled Table'
+                      {tableRelationships.map((rel) => {
+                        const isOutgoing = rel.fromTable === territoryId;
+                        const connectedTableId = isOutgoing ? rel.toTable : rel.fromTable;
+                        const connectedTable = store.map.territories[connectedTableId];
+                        const connectedMeta = connectedTable?.metadata as TableMetadata;
+                        const connectedTableName = connectedMeta?.tableName || 'Untitled Table';
+                        const localRow = isOutgoing ? meta.rows[rel.fromRow] : meta.rows[rel.toRow];
+                        const connectedRow = isOutgoing ? connectedMeta?.rows[rel.toRow] : connectedMeta?.rows[rel.fromRow];
                         
                         return (
-                          <div key={tableId} className="bg-gray-50 p-2 rounded-md text-sm">
-                            <div className="font-medium mb-1">{tableName}</div>
-                            {rels.outgoing.length > 0 && (
-                              <div className="text-xs text-gray-600">
-                                <span className="font-medium">→ Outgoing:</span>
-                                {rels.outgoing.map((item, idx) => (
-                                  <div key={idx} className="ml-2">
-                                    {item.row.name} ({item.rel.relationshipType})
-                                  </div>
-                                ))}
+                          <div key={rel.id} className="border border-gray-200 rounded p-2">
+                            <div className="flex items-start justify-between mb-1">
+                              <div className="text-xs">
+                                <span className="font-medium text-gray-900">
+                                  {isOutgoing ? '→' : '←'} {connectedTableName}
+                                </span>
+                                <div className="text-gray-600 mt-0.5">
+                                  {isOutgoing ? (
+                                    <span>{localRow?.name} → {connectedRow?.name}</span>
+                                  ) : (
+                                    <span>{connectedRow?.name} → {localRow?.name}</span>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                            {rels.incoming.length > 0 && (
-                              <div className="text-xs text-gray-600 mt-1">
-                                <span className="font-medium">← Incoming:</span>
-                                {rels.incoming.map((item, idx) => (
-                                  <div key={idx} className="ml-2">
-                                    {item.row.name} ({item.rel.relationshipType})
-                                  </div>
-                                ))}
+                              <button
+                                onClick={() => {
+                                  setRelationships(relationships.filter(r => r.id !== rel.id));
+                                  store.setDirty(true);
+                                }}
+                                className="text-red-600 hover:text-red-700 p-0.5"
+                                title="Delete Relationship"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                            {isOutgoing && (
+                              <div className="grid grid-cols-2 gap-1 mt-1">
+                                <div>
+                                  <label className="block text-xs text-gray-500">ON DELETE</label>
+                                  <select
+                                    value={rel.onDelete || 'RESTRICT'}
+                                    onChange={(e) => {
+                                      const updatedRel = { ...rel, onDelete: e.target.value as any };
+                                      setRelationships(relationships.map(r => r.id === rel.id ? updatedRel : r));
+                                      store.setDirty(true);
+                                    }}
+                                    className="w-full px-1 py-0.5 text-xs border border-gray-200 rounded"
+                                  >
+                                    <option value="CASCADE">CASCADE</option>
+                                    <option value="SET NULL">SET NULL</option>
+                                    <option value="RESTRICT">RESTRICT</option>
+                                    <option value="NO ACTION">NO ACTION</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-500">ON UPDATE</label>
+                                  <select
+                                    value={rel.onUpdate || 'CASCADE'}
+                                    onChange={(e) => {
+                                      const updatedRel = { ...rel, onUpdate: e.target.value as any };
+                                      setRelationships(relationships.map(r => r.id === rel.id ? updatedRel : r));
+                                      store.setDirty(true);
+                                    }}
+                                    className="w-full px-1 py-0.5 text-xs border border-gray-200 rounded"
+                                  >
+                                    <option value="CASCADE">CASCADE</option>
+                                    <option value="SET NULL">SET NULL</option>
+                                    <option value="RESTRICT">RESTRICT</option>
+                                    <option value="NO ACTION">NO ACTION</option>
+                                  </select>
+                                </div>
                               </div>
                             )}
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   </div>
-                )}
-                
-                {relationshipsByTable.size === 0 && (
-                  <div className="text-sm text-gray-500 italic">
+                ) : (
+                  <div className="text-xs text-gray-500 italic">
                     No relationships defined
                   </div>
                 )}
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      // Deep copy table to ensure independence
+                      const newTableId = `table-${Date.now()}`;
+                      const newTable = {
+                        id: newTableId,
+                        name: `${territory.name}_copy`,
+                        continent: territory.continent,
+                        fillPath: territory.fillPath,
+                        borderSegments: territory.borderSegments ? [...territory.borderSegments] : [],
+                        center: {
+                          x: territory.center.x + 50,
+                          y: territory.center.y + 50
+                        },
+                        zIndex: territory.zIndex,
+                        metadata: {
+                          type: 'database-table',
+                          tableName: `${meta.tableName}_copy`,
+                          columns: [...meta.columns],
+                          rows: meta.rows.map(row => ({
+                            ...row,
+                            // Deep copy each row to avoid shared references
+                            key: row.key,
+                            name: row.name,
+                            type: row.type,
+                            nullable: row.nullable,
+                            primaryKey: row.primaryKey,
+                            autoIncrement: row.autoIncrement,
+                            default: row.default
+                          })),
+                          nameHeight: meta.nameHeight,
+                          headerHeight: meta.headerHeight,
+                          rowHeight: meta.rowHeight,
+                          width: meta.width,
+                          columnWidths: meta.columnWidths ? [...meta.columnWidths] : undefined
+                        }
+                      };
+                      store.addTerritory(newTable as any);
+                      store.setDirty(true);
+                      
+                      // Select the new table
+                      store.clearSelection();
+                      store.selectTerritory(newTableId);
+                    }}
+                    className="flex-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Copy Table
+                  </button>
+                  <button
+                    onClick={() => {
+                      store.deleteTerritory(territoryId);
+                      store.setDirty(true);
+                    }}
+                    className="flex-1 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                  >
+                    Delete Table
+                  </button>
+                </div>
               </div>
             </div>
           </Card>

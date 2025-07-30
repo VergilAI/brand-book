@@ -41,7 +41,12 @@
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 50, "y": 50 },
+        "size": { "width": 300, "height": 180 },
+        "zIndex": 1
+      }
     },
     {
       "name": "products",
@@ -91,7 +96,12 @@
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 50, "y": 280 },
+        "size": { "width": 320, "height": 220 },
+        "zIndex": 2
+      }
     },
     {
       "name": "orders",
@@ -165,7 +175,12 @@
           "on_delete": "RESTRICT",
           "on_update": "CASCADE"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 450, "y": 50 },
+        "size": { "width": 340, "height": 280 },
+        "zIndex": 3
+      }
     },
     {
       "name": "order_items",
@@ -224,7 +239,12 @@
           "on_delete": "RESTRICT",
           "on_update": "CASCADE"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 850, "y": 50 },
+        "size": { "width": 280, "height": 180 },
+        "zIndex": 4
+      }
     },
     {
       "name": "addresses",
@@ -284,7 +304,12 @@
           "on_delete": "CASCADE",
           "on_update": "CASCADE"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 450, "y": 380 },
+        "size": { "width": 340, "height": 220 },
+        "zIndex": 5
+      }
     }
   ]
 }

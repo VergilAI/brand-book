@@ -21,10 +21,13 @@ export function JeopardyBoard({
 }: JeopardyBoardProps) {
   const values = [200, 400, 600, 800, 1000]
 
+  const numCategories = categories.length
+  const gridCols = numCategories === 6 ? 'grid-cols-6' : 'grid-cols-5'
+
   return (
-    <div className={cn("space-y-space-sm", className)}>
+    <div className={cn("flex flex-col flex-1 gap-3", className)}>
       {/* Category Headers */}
-      <div className="grid grid-cols-5 gap-space-xs">
+      <div className={cn("grid gap-2", gridCols)}>
         {categories.map((category, catIndex) => (
           <motion.div
             key={`header-${category.name}`}
@@ -37,7 +40,7 @@ export function JeopardyBoard({
               damping: 20
             }}
           >
-            <Card className="relative h-16 flex items-center justify-center p-space-sm bg-bg-primary border-2 border-border-primary overflow-hidden">
+            <Card className="relative h-14 flex items-center justify-center p-2 bg-bg-primary border-2 border-border-primary overflow-hidden">
               <h3 className="text-xs font-display font-bold uppercase tracking-wider text-center text-text-primary leading-tight">
                 {category.name}
               </h3>
@@ -47,9 +50,9 @@ export function JeopardyBoard({
       </div>
       
       {/* Game Board */}
-      <div className="grid grid-cols-5 gap-space-xs">
+      <div className={cn("grid gap-2 flex-1", gridCols)}>
         {categories.map((category, catIndex) => (
-          <div key={category.name} className="space-y-space-xs">
+          <div key={category.name} className="grid grid-rows-5 gap-2 h-full">
             {values.map((value, valueIndex) => {
             const clue = category.clues[valueIndex]
             const isUsed = usedClues.has(clue.id)
@@ -67,12 +70,12 @@ export function JeopardyBoard({
                 }}
                 onClick={() => !isUsed && onClueSelect(clue)}
                 disabled={isUsed}
-                className="w-full"
+                className="w-full h-full"
               >
                 <Card 
                   variant={isUsed ? "default" : "interactive"}
                   className={cn(
-                    "h-16 flex items-center justify-center transition-all duration-200 relative overflow-hidden",
+                    "h-full flex items-center justify-center transition-all duration-200 relative overflow-hidden",
                     isUsed ? [
                       "bg-bg-muted border-border-subtle cursor-default"
                     ] : [

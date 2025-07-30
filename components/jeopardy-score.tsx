@@ -15,22 +15,26 @@ export function JeopardyScore({ score, className }: JeopardyScoreProps) {
   const displayScore = Math.abs(score)
 
   return (
-    <Card className={cn("px-space-md py-space-sm bg-bg-primary border-border-primary shadow-base", className)}>
-      <div className="flex items-center gap-space-sm">
-        <div className="w-8 h-8 rounded-full bg-bg-brand/20 flex items-center justify-center">
-          <Trophy className="w-4 h-4 text-text-brand" />
+    <Card className={cn(
+      "px-4 py-2 bg-bg-primary border-2 border-border-default shadow-md", /* #FFFFFF, rgba(0,0,0,0.1) */
+      className
+    )}>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-bg-brand-light flex items-center justify-center"> {/* #F3E6FF */}
+          <Trophy className="w-5 h-5 text-text-brand" /> {/* #7B00FF */}
         </div>
         <div>
-          <div className="text-xs font-medium text-text-tertiary uppercase tracking-wider">Score</div>
+          <div className="text-xs font-medium text-text-secondary uppercase tracking-wider">Score</div> {/* #6C6C6D */}
           <AnimatePresence mode="wait">
             <motion.div
               key={score}
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className={cn(
-                "text-xl font-bold font-mono",
-                isNegative ? "text-text-error" : "text-text-primary"
+                "text-2xl font-bold font-mono",
+                isNegative ? "text-text-error" : "text-text-primary" /* #E51C23, #1D1D1F */
               )}
             >
               {isNegative && "-"}${displayScore.toLocaleString()}

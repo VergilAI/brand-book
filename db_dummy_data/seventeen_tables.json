@@ -1,0 +1,942 @@
+{
+  "metadata": {
+    "name": "11_tables_done",
+    "dialect": "postgresql",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "question_and_answer_mq",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "exact_answer",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_question_and_answer_mq_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -2015.3509140625001,
+          "y": -967.34279296875
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 0
+      }
+    },
+    {
+      "name": "multiple_choce_mq",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question_text",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_4",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_2_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_3_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_4_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_multiple_choce_mq_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -2015.9792324218752,
+          "y": -1483.0656318359374
+        },
+        "size": {
+          "width": 300,
+          "height": 530
+        },
+        "zIndex": 1
+      }
+    },
+    {
+      "name": "course",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "passing_score",
+          "type": "integer",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -1329.0204979292998,
+          "y": -1665.6190118607033
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 2
+      }
+    },
+    {
+      "name": "chapter",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "order",
+          "type": "integer",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_chapter_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -671.1118029951604,
+          "y": -1671.4115858485843
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 3
+      }
+    },
+    {
+      "name": "lesson",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "chapter_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "order",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_lesson_chapter_id",
+          "column": "chapter_id",
+          "references": {
+            "table": "chapter",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -72.7332922406049,
+          "y": -1675.9413638112987
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 4
+      }
+    },
+    {
+      "name": "lesson_knowledge_point",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "lesson_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "knowledge_point_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_lesson_knowledge_point_lesson_id",
+          "column": "lesson_id",
+          "references": {
+            "table": "lesson",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_lesson_knowledge_point_knowledge_point_id",
+          "column": "knowledge_point_id",
+          "references": {
+            "table": "knowledge_point",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 500.167806339804,
+          "y": -1678.2740987901175
+        },
+        "size": {
+          "width": 300,
+          "height": 210
+        },
+        "zIndex": 5
+      }
+    },
+    {
+      "name": "knowledge_point",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 492.0840245351858,
+          "y": -1349.2263669387476
+        },
+        "size": {
+          "width": 300,
+          "height": 210
+        },
+        "zIndex": 6
+      }
+    },
+    {
+      "name": "user",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "public_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "vergil_tag",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "role_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "manager_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_user_manager_id",
+          "column": "manager_id",
+          "references": {
+            "table": "user",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_user_role_id",
+          "column": "role_id",
+          "references": {
+            "table": "role",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 502.8305339437143,
+          "y": -749.2240267053935
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 7
+      }
+    },
+    {
+      "name": "course_user",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "mastery_quiz_score",
+          "type": "integer",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_course_user_course_id",
+          "column": "course_id",
+          "references": {
+            "table": "course",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_course_user_user_id",
+          "column": "user_id",
+          "references": {
+            "table": "user",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -638.9120354636893,
+          "y": -1375.0604287260576
+        },
+        "size": {
+          "width": 300,
+          "height": 250
+        },
+        "zIndex": 8
+      }
+    },
+    {
+      "name": "user_knowledge_point",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "knowledge_point_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "elo",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "k-factor",
+          "type": "decimal(10,2)",
+          "nullable": true
+        },
+        {
+          "name": "last_updated",
+          "type": "timestamp",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_user_knowledge_point_knowledge_point_id",
+          "column": "knowledge_point_id",
+          "references": {
+            "table": "knowledge_point",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_user_knowledge_point_user_id",
+          "column": "user_id",
+          "references": {
+            "table": "user",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 1129.0747848963501,
+          "y": -1249.2048638608867
+        },
+        "size": {
+          "width": 300,
+          "height": 330
+        },
+        "zIndex": 9
+      }
+    },
+    {
+      "name": "assumes_rel",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "source_knowledge_point",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "target_knowledge_point",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "assumes_strenght",
+          "type": "decimal(10,2)",
+          "nullable": true
+        },
+        {
+          "name": "hard_dependency",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "limit",
+          "type": "decimal(10,2)",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_assumes_rel_source_knowledge_point",
+          "column": "source_knowledge_point",
+          "references": {
+            "table": "knowledge_point",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_assumes_rel_target_knowledge_point",
+          "column": "target_knowledge_point",
+          "references": {
+            "table": "knowledge_point",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 480.90469695569436,
+          "y": -1064.8664061620511
+        },
+        "size": {
+          "width": 300,
+          "height": 330
+        },
+        "zIndex": 10
+      }
+    },
+    {
+      "name": "role",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "level",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 1010.4873530273437,
+          "y": -531.8631040039063
+        },
+        "size": {
+          "width": 300,
+          "height": 250
+        },
+        "zIndex": 11
+      }
+    },
+    {
+      "name": "user_achievement",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "achievement_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "earned_at",
+          "type": "timestamp",
+          "nullable": true
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_user_achievement_user_id",
+          "column": "user_id",
+          "references": {
+            "table": "user",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_user_achievement_achievement_id",
+          "column": "achievement_id",
+          "references": {
+            "table": "achievement",
+            "column": "id"
+          }
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 1100.4958843430957,
+          "y": -794.3105419374026
+        },
+        "size": {
+          "width": 300,
+          "height": 250
+        },
+        "zIndex": 12
+      }
+    },
+    {
+      "name": "achievement",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "criteria_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "criteria_value",
+          "type": "json",
+          "nullable": true
+        },
+        {
+          "name": "progress",
+          "type": "decimal(10,2)",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": 1634.0903664396976,
+          "y": -793.0033666314232
+        },
+        "size": {
+          "width": 300,
+          "height": 370
+        },
+        "zIndex": 13
+      }
+    },
+    {
+      "name": "connect_the_cards",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "left_side_data",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "right_side_data",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "elo",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "k-factor",
+          "type": "decimal(10,2)",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -1358.7909704338908,
+          "y": -1095.9684196162916
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 14
+      }
+    },
+    {
+      "name": "question_and_answer",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "exact_answer",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "elo",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "k-factor",
+          "type": "decimal(10,2)",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -1358.4667431640626,
+          "y": -828.9581020507812
+        },
+        "size": {
+          "width": 300,
+          "height": 330
+        },
+        "zIndex": 15
+      }
+    },
+    {
+      "name": "multiple_choice",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question_text",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_4",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_2_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_3_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_4_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "elo",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "k-factor",
+          "type": "decimal(10,2)",
+          "nullable": true
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -1361.1997412109376,
+          "y": -441.30252685546884
+        },
+        "size": {
+          "width": 300,
+          "height": 570
+        },
+        "zIndex": 16
+      }
+    }
+  ]
+}

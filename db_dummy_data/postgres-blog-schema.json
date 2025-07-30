@@ -42,7 +42,12 @@
           "nullable": false,
           "default": "CURRENT_TIMESTAMP"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 50, "y": 50 },
+        "size": { "width": 280, "height": 180 },
+        "zIndex": 1
+      }
     },
     {
       "name": "posts",
@@ -109,7 +114,12 @@
           "on_delete": "CASCADE",
           "on_update": "CASCADE"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 400, "y": 50 },
+        "size": { "width": 320, "height": 240 },
+        "zIndex": 2
+      }
     },
     {
       "name": "comments",
@@ -164,7 +174,12 @@
           "on_delete": "CASCADE",
           "on_update": "CASCADE"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 780, "y": 50 },
+        "size": { "width": 280, "height": 160 },
+        "zIndex": 3
+      }
     },
     {
       "name": "tags",
@@ -186,7 +201,12 @@
           "type": "varchar(50)",
           "nullable": false
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 50, "y": 350 },
+        "size": { "width": 200, "height": 120 },
+        "zIndex": 4
+      }
     },
     {
       "name": "post_tags",
@@ -230,7 +250,12 @@
           "on_delete": "CASCADE",
           "on_update": "CASCADE"
         }
-      ]
+      ],
+      "display": {
+        "position": { "x": 400, "y": 350 },
+        "size": { "width": 220, "height": 120 },
+        "zIndex": 5
+      }
     }
   ]
 }

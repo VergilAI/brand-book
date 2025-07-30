@@ -1,0 +1,125 @@
+{
+  "metadata": {
+    "name": "firs_two_tables",
+    "dialect": "postgresql",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "question_and_answer_mq",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "exact_answer",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -2016.2640000000001,
+          "y": -1089.23
+        },
+        "size": {
+          "width": 300,
+          "height": 290
+        },
+        "zIndex": 0
+      }
+    },
+    {
+      "name": "multiple_choce_mq",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "primary_key": true
+        },
+        {
+          "name": "question_text",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_4",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_1_veracity",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "answer_2_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_3_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "answer_4_veracity",
+          "type": "boolean",
+          "nullable": true
+        },
+        {
+          "name": "course_id",
+          "type": "integer",
+          "nullable": true,
+          "primary_key": false
+        }
+      ],
+      "display": {
+        "position": {
+          "x": -2015.9792324218752,
+          "y": -1460.6613349609374
+        },
+        "size": {
+          "width": 300,
+          "height": 530
+        },
+        "zIndex": 1
+      }
+    }
+  ]
+}

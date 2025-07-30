@@ -35,12 +35,14 @@ export interface JeopardyGameState {
 interface JeopardyGameProps {
   categories: JeopardyCategory[]
   onGameEnd?: (finalScore: number) => void
+  onClose?: () => void
   className?: string
 }
 
 export function JeopardyGame({ 
   categories, 
   onGameEnd,
+  onClose,
   className 
 }: JeopardyGameProps) {
   const [gameState, setGameState] = useState<JeopardyGameState>({
@@ -50,7 +52,7 @@ export function JeopardyGame({
     dailyDoubleWager: 0,
     gamePhase: 'board'
   })
-  const [showExitConfirm, setShowExitConfirm] = useState(false)
+  // Removed showExitConfirm state - no longer needed with direct close
 
   const handleClueSelect = (clue: JeopardyClue) => {
     if (gameState.usedClues.has(clue.id)) return
@@ -107,60 +109,60 @@ export function JeopardyGame({
       <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal overflow-y-auto">
         <div className="min-h-full flex items-center justify-center p-space-md">
           <Card className={cn(
-            "p-space-lg max-w-3xl w-full border-border-subtle bg-gradient-to-br from-bg-secondary to-bg-primary my-auto max-h-[90vh] overflow-y-auto",
+            "p-space-md max-w-2xl w-full border-border-subtle bg-gradient-to-br from-bg-secondary to-bg-primary",
             className
           )}>
-            <div className="space-y-space-lg">
+            <div className="space-y-space-md">
               {/* Header Section */}
-              <div className="text-center space-y-space-md">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-color-brand-primary to-color-brand-secondary mx-auto flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-10 h-10 text-text-inverse" />
+              <div className="text-center space-y-space-sm">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-color-brand-primary to-color-brand-secondary mx-auto flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-8 h-8 text-text-inverse" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-text-primary">
+                <h2 className="text-2xl font-display font-bold text-text-primary">
                   Jeopardy Complete!
                 </h2>
-                <p className="text-base text-text-secondary max-w-md mx-auto">
+                <p className="text-sm text-text-secondary max-w-md mx-auto">
                   Great job navigating through all those challenging questions!
                 </p>
               </div>
               
               {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-space-md">
-                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
-                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
+              <div className="grid grid-cols-3 gap-space-sm">
+                <Card variant="outlined" className="p-space-sm text-center border-border-subtle">
+                  <div className="text-xl font-bold text-text-brand">
                     ${gameState.score.toLocaleString()}
                   </div>
-                  <div className="text-sm text-text-tertiary">Final Score</div>
+                  <div className="text-xs text-text-tertiary">Final Score</div>
                 </Card>
                 
-                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
-                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
+                <Card variant="outlined" className="p-space-sm text-center border-border-subtle">
+                  <div className="text-xl font-bold text-text-brand">
                     {gameState.usedClues.size}
                   </div>
-                  <div className="text-sm text-text-tertiary">Questions Answered</div>
+                  <div className="text-xs text-text-tertiary">Answered</div>
                 </Card>
                 
-                <Card variant="outlined" className="p-space-md text-center border-border-subtle">
-                  <div className="text-2xl font-bold text-text-brand mb-space-xs">
+                <Card variant="outlined" className="p-space-sm text-center border-border-subtle">
+                  <div className="text-xl font-bold text-text-brand">
                     {totalClues - gameState.usedClues.size}
                   </div>
-                  <div className="text-sm text-text-tertiary">Questions Left</div>
+                  <div className="text-xs text-text-tertiary">Remaining</div>
                 </Card>
               </div>
               
               {/* Knowledge Impact */}
-              <Card variant="outlined" className="p-space-md border-border-brand/20 bg-bg-brand/5">
+              <Card variant="outlined" className="p-space-sm border-border-brand/20 bg-bg-brand/5">
                 <div className="flex items-start gap-space-sm">
-                  <div className="w-10 h-10 rounded-lg bg-bg-brand/10 flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-5 h-5 text-text-brand" />
+                  <div className="w-8 h-8 rounded-lg bg-bg-brand/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="w-4 h-4 text-text-brand" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-text-primary mb-space-xs">
+                    <h3 className="text-xs font-semibold text-text-primary mb-1">
                       Knowledge Point Impact
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-text-tertiary">Estimated improvement</span>
-                      <span className="text-lg font-bold text-text-brand">
+                      <span className="text-xs text-text-tertiary">Estimated improvement</span>
+                      <span className="text-base font-bold text-text-brand">
                         +{knowledgeImprovement}%
                       </span>
                     </div>
@@ -168,16 +170,16 @@ export function JeopardyGame({
                 </div>
               </Card>
               
-              <div className="flex gap-space-md">
+              <div className="flex gap-space-sm">
                 <Button
-                  size="lg"
+                  size="md"
                   variant="secondary"
                   onClick={() => onGameEnd?.(gameState.score)}
                 >
                   Exit Game
                 </Button>
                 <Button
-                  size="lg"
+                  size="md"
                   onClick={() => window.location.reload()}
                   className="bg-bg-brand text-text-inverse hover:bg-bg-brand-hover"
                 >
@@ -217,16 +219,25 @@ export function JeopardyGame({
   }, [])
 
   return (
-    <div className={cn("fixed inset-0 bg-bg-secondary flex flex-col", className)}>
+    <div className={cn("fixed inset-0 bg-bg-secondary flex flex-col z-50", className)}>
       {/* Fixed Header */}
       <div className="bg-bg-primary shadow-base z-elevation-high">
-        <div className="max-w-7xl mx-auto px-space-lg py-space-md">
-          <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-space-lg py-space-sm">
+          <div className="flex items-center gap-spacing-sm">
+            <Trophy className="w-6 h-6 text-text-brand" />
             <h2 className="text-xl font-semibold text-text-primary">Jeopardy!</h2>
+          </div>
+          <div className="flex items-center gap-spacing-md">
+            <div className="text-right">
+              <div className="text-xs text-text-secondary uppercase">Score</div>
+              <div className="text-2xl font-bold text-text-brand">
+                ${gameState.score.toLocaleString()}
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowExitConfirm(true)}
+              onClick={() => onClose?.()}
             >
               <X className="w-5 h-5" />
             </Button>
@@ -236,13 +247,9 @@ export function JeopardyGame({
 
       {/* Game Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-space-lg space-y-space-md">
-          <div className="flex justify-between items-center mb-space-md">
-            <p className="text-sm text-text-secondary">Test your knowledge across categories</p>
-            <JeopardyScore score={gameState.score} />
-          </div>
+        <div className="max-w-7xl mx-auto px-space-lg py-space-sm h-full flex flex-col">
 
-          <div className="space-y-space-sm">
+          <div className="flex-1 flex flex-col">
             <JeopardyBoard
               categories={categories}
               usedClues={gameState.usedClues}
@@ -250,7 +257,7 @@ export function JeopardyGame({
             />
             
             {/* Choose Random Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-space-sm">
               <Button
                 onClick={chooseRandomClue}
                 variant="secondary"
@@ -275,36 +282,6 @@ export function JeopardyGame({
         </div>
       </div>
       
-      {showExitConfirm && (
-        <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-elevation-modal flex items-center justify-center p-space-md">
-          <Card className="p-space-lg max-w-md bg-bg-primary border-border-subtle">
-            <h3 className="text-xl font-semibold text-text-primary mb-space-md">
-              Exit Game?
-            </h3>
-            <p className="text-text-secondary mb-space-lg">
-              Are you sure you want to exit? You'll lose your current score and progress.
-            </p>
-            <div className="flex gap-space-sm">
-              <Button
-                variant="secondary"
-                onClick={() => setShowExitConfirm(false)}
-                className="flex-1"
-              >
-                Continue Playing
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowExitConfirm(false)
-                  onGameEnd?.(gameState.score)
-                }}
-                className="flex-1 bg-bg-error text-text-inverse hover:bg-bg-error-hover"
-              >
-                Exit Game
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }

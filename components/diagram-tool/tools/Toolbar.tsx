@@ -9,10 +9,11 @@ import { cn } from '@/lib/utils'
 import { 
   Eye,
   Edit,
-  Library,
   Table2
 } from 'lucide-react'
 import { SnappingIcon, GridIcon } from '@/components/diagram-tool/ui/MapIcons'
+import { LineControls } from '@/components/diagram-tool/ui/LineControls'
+import { useLineSettings } from '@/app/map-editor/contexts/LineSettingsContext'
 import type { ToolType } from '@/app/map-editor/types/editor'
 
 interface EditMode {
@@ -30,6 +31,7 @@ const editModes: EditMode[] = [
 export function Toolbar() {
   const store = useMapEditor()
   const [showSnappingSettings, setShowSnappingSettings] = useState(false)
+  const { lineType, setLineType, connectionMode, setConnectionMode } = useLineSettings()
   
   // Show snapping settings when snapping is enabled
   useEffect(() => {
@@ -109,20 +111,16 @@ export function Toolbar() {
           {/* Separator */}
           <div className="w-px h-6 bg-border mx-1" />
           
-          {/* Library toggle */}
-          <IconButtonWithTooltip
-            icon={<Library />}
-            onClick={() => store.toggleTemplateLibrary()}
-            active={store.templateLibrary.isOpen}
-            tooltip="Shape Library - Access pre-made shapes and templates"
-            rightSubscript="K"
-            size="sm"
-            variant="ghost"
-            className={cn(
-              "transition-colors",
-              store.templateLibrary.isOpen && "hover:bg-brand/10"
-            )}
+          {/* Line Controls */}
+          <LineControls
+            lineType={lineType}
+            onLineTypeChange={setLineType}
+            connectionMode={connectionMode}
+            onConnectionModeChange={setConnectionMode}
           />
+          
+          {/* Separator */}
+          <div className="w-px h-6 bg-border mx-1" />
           
           {/* Territory Table toggle */}
           <IconButtonWithTooltip

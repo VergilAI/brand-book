@@ -1,0 +1,252 @@
+{
+  "gameType": "jeopardy",
+  "lessonId": "lesson-1-1",
+  "content": {
+    "categories": [
+      {
+        "name": "JavaScript",
+        "questions": [
+          {
+            "id": "js-200",
+            "value": 200,
+            "question": "This keyword is used to declare a variable that cannot be reassigned",
+            "answer": "What is const?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "js-400",
+            "value": 400,
+            "question": "This array method creates a new array with the results of calling a function on every element",
+            "answer": "What is map?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "js-600",
+            "value": 600,
+            "question": "This operator is used to spread the elements of an array or object",
+            "answer": "What is the spread operator?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "js-800",
+            "value": 800,
+            "question": "This method returns a promise that resolves after all of the given promises have either resolved or rejected",
+            "answer": "What is Promise.allSettled?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "js-1000",
+            "value": 1000,
+            "question": "This is the name of the specification that defines the JavaScript language",
+            "answer": "What is ECMAScript?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      },
+      {
+        "name": "React",
+        "questions": [
+          {
+            "id": "react-200",
+            "value": 200,
+            "question": "This hook is used to manage state in functional components",
+            "answer": "What is useState?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "react-400",
+            "value": 400,
+            "question": "This lifecycle method in class components is equivalent to useEffect with an empty dependency array",
+            "answer": "What is componentDidMount?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "react-600",
+            "value": 600,
+            "question": "This React feature allows you to return multiple elements without adding extra nodes to the DOM",
+            "answer": "What are Fragments?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "react-800",
+            "value": 800,
+            "question": "This hook allows you to subscribe to React context without introducing nesting",
+            "answer": "What is useContext?",
+            "knowledgePointId": "kp-2"
+          },
+          {
+            "id": "react-1000",
+            "value": 1000,
+            "question": "This optimization technique prevents unnecessary re-renders by memoizing a component",
+            "answer": "What is React.memo?",
+            "knowledgePointId": "kp-2"
+          }
+        ]
+      },
+      {
+        "name": "CSS",
+        "questions": [
+          {
+            "id": "css-200",
+            "value": 200,
+            "question": "This property is used to change the color of text",
+            "answer": "What is color?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "css-400",
+            "value": 400,
+            "question": "This layout method arranges items in a one-dimensional row or column",
+            "answer": "What is flexbox?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "css-600",
+            "value": 600,
+            "question": "This unit is relative to the font size of the root element",
+            "answer": "What is rem?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "css-800",
+            "value": 800,
+            "question": "This property allows you to create animations by gradually changing from one set of CSS styles to another",
+            "answer": "What is transition?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "css-1000",
+            "value": 1000,
+            "question": "This at-rule is used to define styles for different media types and screen sizes",
+            "answer": "What is @media?",
+            "knowledgePointId": "kp-3"
+          }
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "questions": [
+          {
+            "id": "ts-200",
+            "value": 200,
+            "question": "This keyword is used to define a custom type",
+            "answer": "What is type?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "ts-400",
+            "value": 400,
+            "question": "This operator is used to tell TypeScript that a value is not null or undefined",
+            "answer": "What is the non-null assertion operator?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "ts-600",
+            "value": 600,
+            "question": "This TypeScript feature allows you to create types that can work with multiple types",
+            "answer": "What are generics?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "ts-800",
+            "value": 800,
+            "question": "This utility type constructs a type with all properties of Type set to optional",
+            "answer": "What is Partial?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "ts-1000",
+            "value": 1000,
+            "question": "This TypeScript feature allows you to extract the type of a variable or property",
+            "answer": "What is typeof?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      },
+      {
+        "name": "Web APIs",
+        "questions": [
+          {
+            "id": "api-200",
+            "value": 200,
+            "question": "This method is used to select an element by its ID",
+            "answer": "What is getElementById?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "api-400",
+            "value": 400,
+            "question": "This API is used to make HTTP requests from the browser",
+            "answer": "What is fetch?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "api-600",
+            "value": 600,
+            "question": "This storage mechanism persists data even after the browser is closed",
+            "answer": "What is localStorage?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "api-800",
+            "value": 800,
+            "question": "This API provides a way to asynchronously observe changes in the intersection of a target element",
+            "answer": "What is Intersection Observer?",
+            "knowledgePointId": "kp-3"
+          },
+          {
+            "id": "api-1000",
+            "value": 1000,
+            "question": "This API allows web applications to use the device's camera and microphone",
+            "answer": "What is getUserMedia?",
+            "knowledgePointId": "kp-3"
+          }
+        ]
+      },
+      {
+        "name": "Git",
+        "questions": [
+          {
+            "id": "git-200",
+            "value": 200,
+            "question": "This command is used to stage changes for commit",
+            "answer": "What is git add?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "git-400",
+            "value": 400,
+            "question": "This command shows the commit history",
+            "answer": "What is git log?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "git-600",
+            "value": 600,
+            "question": "This command is used to combine changes from one branch into another",
+            "answer": "What is git merge?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "git-800",
+            "value": 800,
+            "question": "This command temporarily stores changes that you don't want to commit immediately",
+            "answer": "What is git stash?",
+            "knowledgePointId": "kp-1"
+          },
+          {
+            "id": "git-1000",
+            "value": 1000,
+            "question": "This Git feature allows you to rewrite commit history by combining commits",
+            "answer": "What is interactive rebase?",
+            "knowledgePointId": "kp-1"
+          }
+        ]
+      }
+    ],
+    "dailyDouble": {
+      "categoryIndex": 2,
+      "questionIndex": 2
+    }
+  }
+}
