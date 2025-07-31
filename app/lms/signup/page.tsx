@@ -26,8 +26,8 @@ export default function SignupPage() {
         console.log('Signup successful:', response.data)
         
         // Since registration returns tokens and logs the user in,
-        // redirect directly to the dashboard
-        router.push('/lms/user-management')
+        // redirect directly to the course overview
+        router.push('/lms/new_course_overview')
       } else {
         // Signup failed
         setError(response.error || 'An error occurred during registration. Please try again.')

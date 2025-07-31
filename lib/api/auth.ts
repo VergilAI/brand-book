@@ -74,12 +74,14 @@ class AuthAPI {
       }
 
       // Store tokens
-      localStorage.setItem('access_token', data.access_token)
-      localStorage.setItem('refresh_token', data.refresh_token)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('refresh_token', data.refresh_token)
+      }
 
       // After successful login, fetch user details
       const user = await this.getCurrentUser()
-      if (user) {
+      if (user && typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(user))
       }
 
@@ -112,9 +114,11 @@ class AuthAPI {
       }
 
       // Store tokens and user info from registration response
-      localStorage.setItem('access_token', data.access_token)
-      localStorage.setItem('refresh_token', data.refresh_token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('refresh_token', data.refresh_token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+      }
 
       return {
         success: true,
@@ -170,8 +174,10 @@ class AuthAPI {
       const data = await response.json()
       
       // Update stored tokens
-      localStorage.setItem('access_token', data.access_token)
-      localStorage.setItem('refresh_token', data.refresh_token)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', data.access_token)
+        localStorage.setItem('refresh_token', data.refresh_token)
+      }
       
       return true
     } catch (error) {
@@ -184,20 +190,25 @@ class AuthAPI {
 
   logout(): void {
     // Clear all auth data from localStorage
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    localStorage.removeItem('user')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user')
+    }
   }
 
   getAccessToken(): string | null {
+    if (typeof window === 'undefined') return null
     return localStorage.getItem('access_token')
   }
 
   getRefreshToken(): string | null {
+    if (typeof window === 'undefined') return null
     return localStorage.getItem('refresh_token')
   }
 
   getStoredUser(): User | null {
+    if (typeof window === 'undefined') return null
     const userStr = localStorage.getItem('user')
     if (!userStr) return null
     try {

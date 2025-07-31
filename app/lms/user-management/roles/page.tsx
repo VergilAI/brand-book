@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Plus, Edit2, Trash2, Shield, Users, MoreVertical, Palette, X, Check, Lock } from 'lucide-react'
-import { UserManagementHeader } from '@/components/user-management-header'
+import { LMSHeader } from '@/components/lms-header'
+import { Building2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
@@ -178,9 +180,55 @@ export default function RolesPage() {
 
   return (
     <div className="min-h-screen bg-vergil-off-white">
+      {/* LMS Header */}
+      <LMSHeader 
+        currentView="dashboard" 
+        onMenuToggle={() => {}} 
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/lms' },
+          { label: 'User Management' }
+        ]}
+      />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with Tabs */}
-        <UserManagementHeader />
+        {/* Page Title and Navigation Tabs */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-vergil-off-black mb-6">User Management</h1>
+          
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1 mb-6">
+            <Link
+              href="/lms/user-management"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-vergil-off-white"
+              )}
+            >
+              <Users className="w-4 h-4" />
+              Users
+            </Link>
+            <Link
+              href="/lms/user-management/organisation-overview"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-vergil-off-white"
+              )}
+            >
+              <Building2 className="w-4 h-4" />
+              Organisation Overview
+            </Link>
+            <Link
+              href="/lms/user-management/roles"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "bg-vergil-purple text-white hover:bg-vergil-purple/90"
+              )}
+            >
+              <Shield className="w-4 h-4" />
+              Roles & Permissions
+            </Link>
+          </div>
+        </div>
 
         {/* Roles Header */}
         <div className="mb-6">
@@ -300,8 +348,8 @@ export default function RolesPage() {
           ))}
         </div>
 
-        {/* Create Role Modal */}
-        {showCreateModal && (
+            {/* Create Role Modal */}
+            {showCreateModal && (
           <div 
             className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50" /* rgba(0, 0, 0, 0.5), 16px */
             onClick={() => setShowCreateModal(false)}
@@ -416,8 +464,8 @@ export default function RolesPage() {
           </div>
         )}
 
-        {/* Edit Role Modal */}
-        {showEditModal && editingRole && (
+            {/* Edit Role Modal */}
+            {showEditModal && editingRole && (
           <div 
             className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50" /* rgba(0, 0, 0, 0.5), 16px */
             onClick={() => {
@@ -541,8 +589,8 @@ export default function RolesPage() {
           </div>
         )}
 
-        {/* Manage Privileges Modal */}
-        {showPrivilegesModal && selectedRoleForPrivileges && (
+            {/* Manage Privileges Modal */}
+            {showPrivilegesModal && selectedRoleForPrivileges && (
           <div 
             className="fixed inset-0 bg-overlay flex items-center justify-center p-spacing-md z-50" /* rgba(0, 0, 0, 0.5), 16px */
             onClick={() => {

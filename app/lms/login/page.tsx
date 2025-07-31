@@ -21,8 +21,8 @@ export default function LoginPage() {
         // Login successful
         console.log('Login successful:', response.data)
         
-        // Redirect to user management page or dashboard
-        router.push('/lms/user-management')
+        // Redirect to course overview page
+        router.push('/lms/new_course_overview')
       } else {
         // Login failed
         setError(response.error || 'Invalid email or password. Please try again.')

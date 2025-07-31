@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Menu, ChevronDown, ChevronRight, LogOut, Shield, Users, BookOpen, Home, Settings, HelpCircle, Bell, CheckCircle, AlertCircle, Clock, Award, MessageSquare, Calendar } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Menu, ChevronDown, LogOut, Shield, Users, Bell, CheckCircle, AlertCircle, Award, MessageSquare, Calendar, ArrowLeft, BookOpen } from 'lucide-react'
+import { authAPI } from '@/lib/api/auth'
 import { VergilLogo } from '@/components/vergil-logo'
 import { Button } from '@/components/button'
 import {
@@ -24,16 +26,35 @@ interface LMSHeaderProps {
 }
 
 export function LMSHeader({ onMenuToggle, currentView, breadcrumbs }: LMSHeaderProps) {
+  const router = useRouter()
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
-  
-  // Mock user data
-  const user = {
-    name: "Alex Chen",
-    email: "alex.chen@company.com",
+  const [user, setUser] = useState({
+    name: "User",
+    email: "user@example.com",
     avatar: "/avatars/alex.jpg",
     role: "Super Admin",
-    initials: "AC"
+    initials: "U"
+  })
+  
+  // Load user data on client side
+  useEffect(() => {
+    const storedUser = authAPI.getStoredUser()
+    if (storedUser) {
+      setUser({
+        name: storedUser.name || "User",
+        email: storedUser.email || "user@example.com",
+        avatar: "/avatars/alex.jpg",
+        role: "Super Admin",
+        initials: storedUser.name ? storedUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : "U"
+      })
+    }
+  }, [])
+  
+  // Handle logout
+  const handleLogout = () => {
+    authAPI.logout()
+    router.push('/lms/login')
   }
 
   // Sample notifications data
@@ -110,10 +131,9 @@ export function LMSHeader({ onMenuToggle, currentView, breadcrumbs }: LMSHeaderP
 
   // Default breadcrumbs if none provided
   const defaultBreadcrumbs = [
-    { label: 'Dashboard', href: '/lms' },
-    ...(currentView === 'course' ? [{ label: 'Courses', href: '/lms/new_course_overview' }] : []),
+    { label: 'Courses', href: '/lms/new_course_overview' },
+    ...(currentView === 'course' ? [] : []),
     ...(currentView === 'lesson' ? [
-      { label: 'Courses', href: '/lms/new_course_overview' },
       { label: 'Course Name', href: '/lms/new_course_overview' }
     ] : [])
   ]
@@ -137,7 +157,7 @@ export function LMSHeader({ onMenuToggle, currentView, breadcrumbs }: LMSHeaderP
             </Button>
             
             {/* Logo and brand */}
-            <Link href="/lms" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <Link href="/lms/new_course_overview" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <VergilLogo variant="mark" size="sm" color="primary" />
               <span className="hidden sm:block text-xl font-semibold text-gray-900">
                 Vergil Learn
@@ -215,16 +235,28 @@ export function LMSHeader({ onMenuToggle, currentView, breadcrumbs }: LMSHeaderP
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* User Management Button */}
-            <Button
-              variant="secondary"
-              size="sm"
-              className="hidden sm:flex items-center gap-2"
-              onClick={() => window.location.href = '/lms/user-management'}
-            >
-              <Users className="h-4 w-4" />
-              User Management
-            </Button>
+            {/* Navigation Button - conditional based on current view */}
+            {currentView === 'dashboard' ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="hidden sm:flex items-center gap-2"
+                onClick={() => router.push('/lms/new_course_overview')}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Course
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="hidden sm:flex items-center gap-2"
+                onClick={() => router.push('/lms/user-management')}
+              >
+                <Users className="h-4 w-4" />
+                User Management
+              </Button>
+            )}
           
             {/* User menu */}
             <DropdownMenu open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen}>
@@ -275,20 +307,10 @@ export function LMSHeader({ onMenuToggle, currentView, breadcrumbs }: LMSHeaderP
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex items-center gap-2">
-                  <Home className="h-4 w-4" />
-                  <span>Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  <span>My Courses</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex items-center gap-2 text-red-600">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 text-red-600 cursor-pointer"
+                  onClick={handleLogout}
+                >
                   <LogOut className="h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

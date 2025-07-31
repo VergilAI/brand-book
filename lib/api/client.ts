@@ -15,6 +15,7 @@ class APIClient {
   }
 
   private getAuthHeader(): HeadersInit {
+    if (typeof window === 'undefined') return {}
     const token = localStorage.getItem('access_token')
     return token ? { 'Authorization': `Bearer ${token}` } : {}
   }

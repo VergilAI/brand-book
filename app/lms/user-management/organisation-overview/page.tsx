@@ -3,7 +3,9 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Mail, MessageSquare, Phone, User as UserIcon, ArrowLeft, Users, Plus, Minus, Edit2 } from 'lucide-react'
-import { UserManagementHeader } from '@/components/user-management-header'
+import { LMSHeader } from '@/components/lms-header'
+import { Building2, Shield } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Card } from '@/components/card'
 import { Button } from '@/components/button'
 import { Badge } from '@/components/badge'
@@ -1004,23 +1006,67 @@ export default function OrganisationOverviewPage() {
       </g>
     )
   }
-  
+
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="h-screen flex flex-col">
-        {/* Header with Tabs */}
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 bg-white">
-          <UserManagementHeader noMargin />
+    <div className="min-h-screen bg-vergil-off-white">
+      {/* LMS Header */}
+      <LMSHeader 
+        currentView="dashboard" 
+        onMenuToggle={() => {}} 
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/lms' },
+          { label: 'User Management' }
+        ]}
+      />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title and Navigation Tabs */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-vergil-off-black mb-6">User Management</h1>
+          
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1 mb-6">
+            <Link
+              href="/lms/user-management"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-vergil-off-white"
+              )}
+            >
+              <Users className="w-4 h-4" />
+              Users
+            </Link>
+            <Link
+              href="/lms/user-management/organisation-overview"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "bg-vergil-purple text-white hover:bg-vergil-purple/90"
+              )}
+            >
+              <Building2 className="w-4 h-4" />
+              Organisation Overview
+            </Link>
+            <Link
+              href="/lms/user-management/roles"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-vergil-off-white"
+              )}
+            >
+              <Shield className="w-4 h-4" />
+              Roles & Permissions
+            </Link>
+          </div>
         </div>
 
         {/* Main Canvas and Details */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <Card className="overflow-hidden">
           {/* Canvas area */}
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex" style={{ height: '600px' }}>
             {/* Canvas */}
             <div 
               ref={containerRef} 
-              className="flex-1 relative bg-secondary"
+              className="flex-1 relative bg-gray-50"
               onWheel={handleWheel}
             >
               {/* View Toggle */}
@@ -2057,8 +2103,8 @@ export default function OrganisationOverviewPage() {
             )}
           </div>
         </div>
+        </Card>
       </div>
     </div>
-  </div>
   )
 }

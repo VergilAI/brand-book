@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle } from 'lucide-react'
+import { Search, Filter, ChevronDown, MoreVertical, Plus, Download, Upload, Trash2, UserCheck, AlertTriangle, X, Check, Mail, FileText, AlertCircle, Users, Building2, Shield } from 'lucide-react'
 import Image from 'next/image'
-import { UserManagementHeader } from '@/components/user-management-header'
+import { LMSHeader } from '@/components/lms-header'
 import { Card } from '@/components/card'
 import { Input } from '@/components/input'
 import { Button } from '@/components/button'
@@ -23,6 +23,7 @@ import {
 } from '@/components/dropdown-menu'
 import { mockUsers, getRoleName, type User } from '@/lib/lms/mock-data'
 import { initialRoles } from '@/lib/lms/roles-data'
+import { cn } from '@/lib/utils'
 
 // Map status for compatibility with existing UI
 const mapStatus = (status: string): 'ahead' | 'on_track' | 'falling_behind' | 'drastically_behind' => {
@@ -259,10 +260,55 @@ export default function UserManagementPage() {
 
   return (
     <div className="min-h-screen bg-vergil-off-white">
+      {/* LMS Header */}
+      <LMSHeader 
+        currentView="dashboard" 
+        onMenuToggle={() => {}} 
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/lms' },
+          { label: 'User Management' }
+        ]}
+      />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with Tabs */}
-        <UserManagementHeader />
-
+        {/* Page Title and Navigation Tabs */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-vergil-off-black mb-6">User Management</h1>
+          
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1 mb-6">
+            <Link
+              href="/lms/user-management"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "bg-vergil-purple text-white hover:bg-vergil-purple/90"
+              )}
+            >
+              <Users className="w-4 h-4" />
+              Users
+            </Link>
+            <Link
+              href="/lms/user-management/organisation-overview"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-vergil-off-white"
+              )}
+            >
+              <Building2 className="w-4 h-4" />
+              Organisation Overview
+            </Link>
+            <Link
+              href="/lms/user-management/roles"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                "text-vergil-off-black/60 hover:text-vergil-off-black hover:bg-vergil-off-white"
+              )}
+            >
+              <Shield className="w-4 h-4" />
+              Roles & Permissions
+            </Link>
+          </div>
+        </div>
 
         {/* Filters and Actions */}
         <Card className="mb-6">
