@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, DollarSign, Phone, Users, Zap, TrendingUp, Star, Shield } from 'lucide-react'
+import { X, DollarSign, Phone, Users, Zap, TrendingUp, Star, Shield, Loader2 } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
 import { cn } from '@/lib/utils'
+import { gameContentAPI } from '@/app/lms/new_course_overview/api/course-api'
+import { useGameResults } from '@/lib/hooks/use-game-results'
 
 interface MillionaireGameProps {
   lessonId: string
@@ -51,173 +53,6 @@ const moneyLadder = [
   { level: 1, amount: '$100' }
 ]
 
-const aiQuestions: Question[] = [
-  {
-    id: '1',
-    question: 'What is AI Definition?',
-    options: [
-      { id: 'a', text: 'Understanding what artificial intelligence is', correct: true },
-      { id: 'b', text: 'An incorrect definition that sounds plausible', correct: false },
-      { id: 'c', text: 'Another wrong answer that might confuse', correct: false },
-      { id: 'd', text: 'A completely unrelated concept', correct: false }
-    ],
-    difficulty: 'easy'
-  },
-  {
-    id: '2',
-    question: 'Which of the following is NOT a type of machine learning?',
-    options: [
-      { id: 'a', text: 'Supervised Learning', correct: false },
-      { id: 'b', text: 'Unsupervised Learning', correct: false },
-      { id: 'c', text: 'Reinforcement Learning', correct: false },
-      { id: 'd', text: 'Quantum Learning', correct: true }
-    ],
-    difficulty: 'easy'
-  },
-  {
-    id: '3',
-    question: 'What does CNN stand for in deep learning?',
-    options: [
-      { id: 'a', text: 'Computer Neural Network', correct: false },
-      { id: 'b', text: 'Convolutional Neural Network', correct: true },
-      { id: 'c', text: 'Cognitive Neural Network', correct: false },
-      { id: 'd', text: 'Computational Neural Network', correct: false }
-    ],
-    difficulty: 'medium'
-  },
-  {
-    id: '4',
-    question: 'Which algorithm is commonly used for training neural networks?',
-    options: [
-      { id: 'a', text: 'Bubble Sort', correct: false },
-      { id: 'b', text: 'Binary Search', correct: false },
-      { id: 'c', text: 'Backpropagation', correct: true },
-      { id: 'd', text: 'Quick Sort', correct: false }
-    ],
-    difficulty: 'medium'
-  },
-  {
-    id: '5',
-    question: 'What is the main goal of Artificial General Intelligence (AGI)?',
-    options: [
-      { id: 'a', text: 'To solve specific tasks better than humans', correct: false },
-      { id: 'b', text: 'To match or exceed human cognitive abilities across all domains', correct: true },
-      { id: 'c', text: 'To replace human workers in factories', correct: false },
-      { id: 'd', text: 'To create faster computers', correct: false }
-    ],
-    difficulty: 'hard'
-  },
-  {
-    id: '6',
-    question: 'What is overfitting in machine learning?',
-    options: [
-      { id: 'a', text: 'When a model performs well on training data but poorly on new data', correct: true },
-      { id: 'b', text: 'When a model is too simple to capture patterns', correct: false },
-      { id: 'c', text: 'When training takes too long', correct: false },
-      { id: 'd', text: 'When the dataset is too large', correct: false }
-    ],
-    difficulty: 'easy'
-  },
-  {
-    id: '7',
-    question: 'Which of the following is a popular deep learning framework?',
-    options: [
-      { id: 'a', text: 'MySQL', correct: false },
-      { id: 'b', text: 'TensorFlow', correct: true },
-      { id: 'c', text: 'Apache', correct: false },
-      { id: 'd', text: 'WordPress', correct: false }
-    ],
-    difficulty: 'easy'
-  },
-  {
-    id: '8',
-    question: 'What is the purpose of an activation function in neural networks?',
-    options: [
-      { id: 'a', text: 'To introduce non-linearity', correct: true },
-      { id: 'b', text: 'To speed up training', correct: false },
-      { id: 'c', text: 'To reduce memory usage', correct: false },
-      { id: 'd', text: 'To prevent overfitting', correct: false }
-    ],
-    difficulty: 'medium'
-  },
-  {
-    id: '9',
-    question: 'What does GPU stand for in AI computing?',
-    options: [
-      { id: 'a', text: 'General Purpose Unit', correct: false },
-      { id: 'b', text: 'Graphics Processing Unit', correct: true },
-      { id: 'c', text: 'Graphical Programming Unit', correct: false },
-      { id: 'd', text: 'Global Processing Unit', correct: false }
-    ],
-    difficulty: 'easy'
-  },
-  {
-    id: '10',
-    question: 'Which technique is used to prevent overfitting?',
-    options: [
-      { id: 'a', text: 'Dropout', correct: true },
-      { id: 'b', text: 'Speedup', correct: false },
-      { id: 'c', text: 'Overflow', correct: false },
-      { id: 'd', text: 'Underflow', correct: false }
-    ],
-    difficulty: 'medium'
-  },
-  {
-    id: '11',
-    question: 'What is the Turing Test designed to measure?',
-    options: [
-      { id: 'a', text: 'Computer processing speed', correct: false },
-      { id: 'b', text: 'Machine intelligence indistinguishable from human intelligence', correct: true },
-      { id: 'c', text: 'Network bandwidth', correct: false },
-      { id: 'd', text: 'Memory capacity', correct: false }
-    ],
-    difficulty: 'medium'
-  },
-  {
-    id: '12',
-    question: 'What is gradient descent used for?',
-    options: [
-      { id: 'a', text: 'Data visualization', correct: false },
-      { id: 'b', text: 'Optimizing model parameters', correct: true },
-      { id: 'c', text: 'Data preprocessing', correct: false },
-      { id: 'd', text: 'Feature selection', correct: false }
-    ],
-    difficulty: 'medium'
-  },
-  {
-    id: '13',
-    question: 'What does NLP stand for in AI?',
-    options: [
-      { id: 'a', text: 'Neural Learning Process', correct: false },
-      { id: 'b', text: 'Natural Language Processing', correct: true },
-      { id: 'c', text: 'Network Layer Protocol', correct: false },
-      { id: 'd', text: 'Numerical Logic Programming', correct: false }
-    ],
-    difficulty: 'hard'
-  },
-  {
-    id: '14',
-    question: 'Which company developed the GPT (Generative Pre-trained Transformer) models?',
-    options: [
-      { id: 'a', text: 'Google', correct: false },
-      { id: 'b', text: 'OpenAI', correct: true },
-      { id: 'c', text: 'Microsoft', correct: false },
-      { id: 'd', text: 'Meta', correct: false }
-    ],
-    difficulty: 'hard'
-  },
-  {
-    id: '15',
-    question: 'What is the singularity in AI context?',
-    options: [
-      { id: 'a', text: 'A point where AI surpasses human intelligence', correct: true },
-      { id: 'b', text: 'The first AI computer', correct: false },
-      { id: 'c', text: 'A type of neural network', correct: false },
-      { id: 'd', text: 'A programming language', correct: false }
-    ],
-    difficulty: 'hard'
-  }
-]
 
 export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGameProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -231,6 +66,41 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
   const [hiddenAnswers, setHiddenAnswers] = useState<Set<string>>(new Set())
   const [audienceResults, setAudienceResults] = useState<{[key: string]: number} | null>(null)
   const [friendAdvice, setFriendAdvice] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [questionTimes, setQuestionTimes] = useState<{[key: string]: number}>({})
+  const [startTime, setStartTime] = useState<number>(Date.now())
+  const { submitResult } = useGameResults()
+
+  // Load questions from API
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        setLoading(true)
+        setError(null)
+        const gameContent = await gameContentAPI.getGameContent(lessonId, 'millionaire')
+        
+        if (gameContent && gameContent.content && gameContent.content.questions) {
+          setQuestions(gameContent.content.questions)
+          setStartTime(Date.now())
+        } else {
+          // No questions available
+          setQuestions([])
+          setError('No questions available for this lesson')
+        }
+      } catch (err) {
+        console.error('Error loading millionaire questions:', err)
+        setError('Failed to load game questions')
+        // No fallback - show error
+        setQuestions([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadQuestions()
+  }, [lessonId])
 
   // Handle body scroll lock
   useEffect(() => {
@@ -284,7 +154,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
     }
   ])
 
-  const currentQuestion = aiQuestions[currentQuestionIndex]
+  const currentQuestion = questions[currentQuestionIndex]
   const currentLevel = currentQuestionIndex + 1
   const currentAmount = moneyLadder.find(m => m.level === currentLevel)?.amount || '$100'
   
@@ -333,7 +203,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
     }
     
     setTimeout(() => {
-      if (isAnswerCorrect && currentQuestionIndex < aiQuestions.length - 1) {
+      if (isAnswerCorrect && currentQuestionIndex < questions.length - 1) {
         // Move to next question
         setCurrentQuestionIndex(prev => prev + 1)
         setSelectedAnswer(null)
@@ -345,7 +215,18 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
       } else {
         // Game over (either wrong answer or completed all questions)
         setGameOver(true)
-        const finalScore = isAnswerCorrect ? Math.round((currentLevel / aiQuestions.length) * 100) : 0
+        const finalScore = isAnswerCorrect ? Math.round((currentLevel / questions.length) * 100) : 0
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000)
+        
+        // Submit result to backend
+        submitResult({
+          gameTypeId: 1, // Millionaire game
+          lessonId,
+          score: finalScore,
+          timeSpent,
+          completed: isAnswerCorrect && currentQuestionIndex === questions.length - 1
+        })
+        
         setTimeout(() => {
           restoreScrolling()
           onComplete(finalScore)
@@ -363,10 +244,21 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
     setWalkedAway(true)
     setGameOver(true)
     
+    const finalScore = Math.round((currentQuestionIndex / questions.length) * 100)
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000)
+    
+    // Submit result to backend
+    submitResult({
+      gameTypeId: 1, // Millionaire game
+      lessonId,
+      score: finalScore,
+      timeSpent,
+      completed: false // walked away
+    })
+    
     // Auto-close after showing results
     setTimeout(() => {
       restoreScrolling()
-      const finalScore = Math.round((currentQuestionIndex / aiQuestions.length) * 100)
       onComplete(finalScore)
     }, 3000)
   }
@@ -392,7 +284,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
       lifeline.id === lifelineId ? { ...lifeline, used: true } : lifeline
     ))
     
-    const currentQuestion = aiQuestions[currentQuestionIndex]
+    const currentQuestion = questions[currentQuestionIndex]
     const correctAnswer = currentQuestion.options.find(opt => opt.correct)
     const incorrectAnswers = currentQuestion.options.filter(opt => !opt.correct)
     
@@ -473,14 +365,49 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
             </p>
             <p className="text-text-secondary">
               {walkedAway 
-                ? `You answered ${questionsAnswered} out of ${aiQuestions.length} questions correctly before walking away safely.`
-                : `You answered ${questionsAnswered} out of ${aiQuestions.length} questions correctly.`
+                ? `You answered ${questionsAnswered} out of ${questions.length} questions correctly before walking away safely.`
+                : `You answered ${questionsAnswered} out of ${questions.length} questions correctly.`
               }
             </p>
           </CardContent>
         </Card>
       </div>
     )
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="p-8">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-text-brand" />
+            <p className="text-text-secondary">Loading game questions...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error && questions.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <X className="h-8 w-8 text-text-error" />
+            <h3 className="text-lg font-semibold text-text-primary">Error Loading Game</h3>
+            <p className="text-text-secondary">{error}</p>
+            <Button variant="primary" onClick={onClose}>Close</Button>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Check if we have questions
+  if (!currentQuestion) {
+    return null
   }
 
   return (
@@ -519,7 +446,7 @@ export function MillionaireGame({ lessonId, onClose, onComplete }: MillionaireGa
             {/* Question Info */}
             <div className="flex items-center justify-between mb-6">
               <Badge variant="secondary" className="text-sm">
-                Question {currentQuestionIndex + 1} of {aiQuestions.length}
+                Question {currentQuestionIndex + 1} of {questions.length}
               </Badge>
               
               {/* Lifelines */}

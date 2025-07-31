@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Layers, Lightbulb } from 'lucide-react'
+import { X, Layers, Lightbulb, Loader2 } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Input } from '@/components/atomic/input'
 import { Card, CardContent } from '@/components/card'
 import { Progress } from '@/components/progress'
 import { cn } from '@/lib/utils'
+import { gameContentAPI } from '@/app/lms/new_course_overview/api/course-api'
+import { useGameResults } from '@/lib/hooks/use-game-results'
 
 interface FlashcardGameProps {
   lessonId: string
@@ -16,9 +18,11 @@ interface FlashcardGameProps {
 
 interface Flashcard {
   id: string
-  question: string
-  answer: string
-  hint?: string
+  front: string
+  back: string
+  flipped?: boolean
+  mastered?: boolean
+  knowledgePointId?: number
 }
 
 interface FlashcardResult {
@@ -27,98 +31,6 @@ interface FlashcardResult {
   skipped: boolean
 }
 
-const aiFlashcards: Flashcard[] = [
-  {
-    id: '1',
-    question: 'Define: AI Definition',
-    answer: 'artificial intelligence',
-    hint: 'The simulation of human intelligence in machines'
-  },
-  {
-    id: '2',
-    question: 'Define: Types of AI',
-    answer: 'narrow ai, general ai, superintelligence',
-    hint: 'Three main categories based on capability levels'
-  },
-  {
-    id: '3',
-    question: 'Define: Machine Learning',
-    answer: 'machine learning',
-    hint: 'A subset of AI that learns from data without explicit programming'
-  },
-  {
-    id: '4',
-    question: 'Define: Neural Networks',
-    answer: 'neural networks',
-    hint: 'Computing systems inspired by biological neural networks'
-  },
-  {
-    id: '5',
-    question: 'Define: Deep Learning',
-    answer: 'deep learning',
-    hint: 'ML technique using multiple layers of neural networks'
-  },
-  {
-    id: '6',
-    question: 'Define: Computer Vision',
-    answer: 'computer vision',
-    hint: 'AI field that trains computers to interpret visual information'
-  },
-  {
-    id: '7',
-    question: 'Define: Natural Language Processing',
-    answer: 'natural language processing',
-    hint: 'AI that helps computers understand human language'
-  },
-  {
-    id: '8',
-    question: 'Define: Algorithm',
-    answer: 'algorithm',
-    hint: 'A set of rules or instructions for solving problems'
-  },
-  {
-    id: '9',
-    question: 'Define: Training Data',
-    answer: 'training data',
-    hint: 'Information used to teach machine learning models'
-  },
-  {
-    id: '10',
-    question: 'Define: Artificial General Intelligence',
-    answer: 'artificial general intelligence',
-    hint: 'AI that matches or exceeds human cognitive abilities'
-  },
-  {
-    id: '11',
-    question: 'Define: Supervised Learning',
-    answer: 'supervised learning',
-    hint: 'ML approach using labeled training data'
-  },
-  {
-    id: '12',
-    question: 'Define: Unsupervised Learning',
-    answer: 'unsupervised learning',
-    hint: 'ML approach that finds patterns in unlabeled data'
-  },
-  {
-    id: '13',
-    question: 'Define: Reinforcement Learning',
-    answer: 'reinforcement learning',
-    hint: 'ML approach where agents learn through rewards and penalties'
-  },
-  {
-    id: '14',
-    question: 'Define: Bias in AI',
-    answer: 'bias in ai',
-    hint: 'Unfair preferences or prejudices in AI systems'
-  },
-  {
-    id: '15',
-    question: 'Define: Turing Test',
-    answer: 'turing test',
-    hint: 'Test of AI ability to exhibit intelligent behavior equivalent to humans'
-  }
-]
 
 // Add custom styles for 3D effects
 const customStyles = {
@@ -145,7 +57,39 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
   const [isFlipping, setIsFlipping] = useState(false)
   const [cardResults, setCardResults] = useState<FlashcardResult[]>([])
   const [skippedCards, setSkippedCards] = useState<string[]>([])
-  const [gameCards, setGameCards] = useState<Flashcard[]>(aiFlashcards)
+  const [gameCards, setGameCards] = useState<Flashcard[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [startTime] = useState<number>(Date.now())
+  const { submitResult } = useGameResults()
+
+  // Load flashcards from API
+  useEffect(() => {
+    async function loadFlashcards() {
+      try {
+        setLoading(true)
+        setError(null)
+        const gameContent = await gameContentAPI.getGameContent(lessonId, 'flashcards')
+        
+        if (gameContent && gameContent.content && gameContent.content.cards) {
+          setGameCards(gameContent.content.cards)
+        } else {
+          // No flashcards available
+          setGameCards([])
+          setError('No flashcards available for this lesson')
+        }
+      } catch (err) {
+        console.error('Error loading flashcards:', err)
+        setError('Failed to load flashcards')
+        // No fallback - show error
+        setGameCards([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFlashcards()
+  }, [lessonId])
 
   // Handle body scroll lock
   useEffect(() => {
@@ -177,7 +121,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
   }, [])
 
   const currentCard = gameCards[currentCardIndex]
-  const totalCards = aiFlashcards.length
+  const totalCards = gameCards.length
   const progressPercentage = Math.round((completedCards.size / totalCards) * 100)
 
   const checkAnswer = () => {
@@ -187,7 +131,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
     
     setTimeout(() => {
       const normalizedAnswer = userAnswer.toLowerCase().trim()
-      const normalizedCorrectAnswer = currentCard.answer.toLowerCase().trim()
+      const normalizedCorrectAnswer = currentCard.back.toLowerCase().trim()
       
       const isAnswerCorrect = normalizedAnswer === normalizedCorrectAnswer ||
                              normalizedCorrectAnswer.includes(normalizedAnswer) ||
@@ -238,6 +182,17 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
       } else {
         // Game completed
         const finalScore = Math.round((correctAnswers / totalCards) * 100)
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000)
+        
+        // Submit result to backend
+        submitResult({
+          gameTypeId: 3, // Flashcards game
+          lessonId,
+          score: finalScore,
+          timeSpent,
+          completed: true
+        })
+        
         onComplete(finalScore)
       }
     }
@@ -268,6 +223,41 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
   }
 
   const remainingCards = totalCards - completedCards.size
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="p-8">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-text-brand" />
+            <p className="text-text-secondary">Loading flashcards...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error && gameCards.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <X className="h-8 w-8 text-text-error" />
+            <h3 className="text-lg font-semibold text-text-primary">Error Loading Flashcards</h3>
+            <p className="text-text-secondary">{error}</p>
+            <Button variant="primary" onClick={onClose}>Close</Button>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Check if we have flashcards
+  if (!currentCard) {
+    return null
+  }
 
   return (
     <div className="fixed inset-0 bg-bg-primary z-modal flex flex-col"> {/* #FFFFFF - Full screen */}
@@ -341,7 +331,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
                       "text-2xl font-semibold text-text-primary transition-all duration-500",
                       isAnswerChecked && "text-xl opacity-70"
                     )}>
-                      {currentCard.question}
+                      {currentCard.front}
                     </h3>
                   </div>
                   
@@ -382,7 +372,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
                       <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-200">
                         <p className="text-sm text-gray-600">The correct answer is:</p>
                         <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                          {currentCard.answer}
+                          {currentCard.back}
                         </p>
                         {!isCorrect && userAnswer.trim() && (
                           <p className="text-sm text-gray-500 mt-2">
@@ -436,29 +426,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
               )}
             </div>
 
-            {/* Hint */}
-            {!showHint && !isAnswerChecked && (
-              <div className="text-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowHint(true)}
-                  className="text-text-secondary hover:text-text-primary"
-                  disabled={isFlipping}
-                >
-                  <Lightbulb className="h-4 w-4 mr-1" />
-                  Need a hint?
-                </Button>
-              </div>
-            )}
-
-            {showHint && (
-              <div className="text-center p-3 bg-bg-warning-light rounded-lg">
-                <p className="text-text-secondary text-sm">
-                  💡 {currentCard.hint}
-                </p>
-              </div>
-            )}
+            {/* Hint feature removed - not available in backend API */}
           </div>
         </div>
 
@@ -470,7 +438,7 @@ export function FlashcardGame({ lessonId, onClose, onComplete }: FlashcardGamePr
           </div>
 
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {aiFlashcards.map((card, index) => {
+            {gameCards.map((card, index) => {
               const cardResult = cardResults.find(result => result.id === card.id)
               const isCurrentCard = gameCards[currentCardIndex]?.id === card.id
               

@@ -24,6 +24,7 @@ import { Button } from '@/components/atomic/button'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
 import { LearningActivitiesModal } from '@/components/learning-activities-modal'
+import { CourseRecommendations } from '@/components/lms/course-recommendations'
 import { cn } from '@/lib/utils'
 import type { Course, Lesson } from '@/lib/lms/new-course-types'
 
@@ -224,6 +225,12 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
 
         {/* Course Content */}
         <div>
+          {/* Course Recommendations */}
+          <CourseRecommendations 
+            currentCourseId={course.id} 
+            className="mb-8 border-border-subtle shadow-sm"
+          />
+          
           <h2 className="text-xl font-bold text-text-primary mb-6"> {/* #1D1D1F */}
             Course Content
           </h2>

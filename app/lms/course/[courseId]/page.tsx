@@ -1,14 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import { LMSHeader } from '@/components/lms-header'
 import { CourseOverviewNew } from '@/components/organism/course-overview-new'
-import { useCourseData } from './hooks/useCourseData'
+import { useCourseData } from '@/app/lms/new_course_overview/hooks/useCourseData'
 import { Loader2 } from 'lucide-react'
 
-export default function NewCourseOverviewPage() {
+export default function CourseOverviewPage() {
+  const params = useParams()
+  const courseId = params.courseId as string
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { course, loading, error, userProgress } = useCourseData('1')
+  const { course, loading, error, userProgress } = useCourseData(courseId)
 
   return (
     <div className="min-h-screen bg-bg-primary"> {/* #FFFFFF */}

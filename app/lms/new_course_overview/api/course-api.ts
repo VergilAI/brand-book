@@ -1,7 +1,12 @@
 import { Course, Chapter, Lesson, KnowledgePoint } from '@/lib/lms/new-course-types'
+import { gameAPI } from '@/lib/api/game-api'
+import { recommendationsAPI } from '@/lib/api/recommendations-api'
 
 // Base path for data files in public directory
 const DATA_BASE_PATH = '/lms-data'
+
+// Feature flag to use backend API
+const USE_BACKEND_API = process.env.NEXT_PUBLIC_USE_BACKEND_API === 'true'
 
 // Helper function to load JSON data
 async function loadJSON<T>(path: string): Promise<T | null> {
@@ -73,6 +78,70 @@ export const courseAPI = {
   async getCourse(courseId: string): Promise<Course> {
     console.log(`🏗️ Loading course ${courseId}...`)
     
+    // Use backend API if enabled
+    if (USE_BACKEND_API) {
+      try {
+        // Fetch from backend API
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/courses/${courseId}`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch course: ${response.status} ${response.statusText}`)
+        }
+        
+        const courseData = await response.json()
+        console.log('📥 Raw backend response:', courseData)
+        
+        // Transform backend response to match frontend Course type
+        const transformedCourse: Course = {
+          id: String(courseData.id),
+          title: courseData.title || courseData.name || '',
+          description: courseData.description || '',
+          category: courseData.category || 'technology',
+          difficulty: courseData.difficulty || 'intermediate',
+          duration: (courseData.totalLessons || courseData.total_lessons || 0) * 30, // Estimate based on lessons
+          progress: courseData.progress || 0,
+          totalLessons: courseData.totalLessons || courseData.total_lessons || 0,
+          completedLessons: courseData.completedLessons || courseData.completed_lessons || 0,
+          chapters: (courseData.chapters || []).map((chapter: any) => ({
+            id: String(chapter.id),
+            title: chapter.title || chapter.name || '',
+            description: chapter.description || '',
+            order: chapter.order || 0,
+            progress: chapter.progress || 0,
+            estimatedTime: chapter.estimatedTime || chapter.estimated_time || '2 hours',
+            testScore: chapter.testScore || chapter.test_score || undefined,
+            lessons: (chapter.lessons || []).map((lesson: any) => {
+              console.log(`📝 Processing lesson ${lesson.id}:`, lesson)
+              return {
+                id: String(lesson.id),
+                title: lesson.title || lesson.name || '',
+                description: lesson.description || '',
+                estimatedTime: lesson.estimatedTime || 30,
+                completed: lesson.completed || false,
+                availableGameTypes: lesson.availableGameTypes || ['millionaire', 'jeopardy', 'flashcards', 'connect-cards'],
+                knowledgePoints: (lesson.knowledgePoints || lesson.knowledge_points || []).map((kp: any) => ({
+                  id: String(kp.id),
+                  title: kp.title || kp.name || '',
+                  description: kp.description || '',
+                  proficiency: kp.proficiency || 0
+                }))
+              }
+            })
+          }))
+        }
+        
+        console.log(`✅ Course loaded from backend API for ${courseId}`)
+        return transformedCourse
+      } catch (error) {
+        console.error('Error loading course from backend:', error)
+        throw error
+      }
+    }
+    
     // First check if we have user progress that modifies the course data
     const userProgress = loadFromLocalStorage<any>(`user-progress-${courseId}`)
     console.log(`👤 User progress for ${courseId}:`, userProgress)
@@ -130,6 +199,43 @@ export const courseAPI = {
     updatedChapterProgress: number
     updatedCourseProgress: number
   }> {
+    // Use backend API if enabled
+    if (USE_BACKEND_API) {
+      try {
+        // Get current user ID (this would come from auth context in real app)
+        const userId = 'current-user' // Placeholder
+        
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/${userId}/courses/${courseId}/lessons/${lessonId}/progress`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              completed: data.completed,
+              knowledgePointUpdates: data.knowledgePointUpdates
+            })
+          }
+        )
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update lesson progress: ${response.status} ${response.statusText}`)
+        }
+        
+        const result = await response.json()
+        
+        return {
+          success: result.success,
+          updatedLesson: result.updatedLesson,
+          updatedChapterProgress: result.updatedChapterProgress,
+          updatedCourseProgress: result.updatedCourseProgress
+        }
+      } catch (error) {
+        console.error('Error updating lesson progress:', error)
+        throw error
+      }
+    }
     // Get current course data
     const course = await this.getCourse(courseId)
     
@@ -188,9 +294,57 @@ export const courseAPI = {
 }
 
 // Game Content APIs
-export const gameAPI = {
+export const gameContentAPI = {
   // Get game content for a lesson
   async getGameContent(lessonId: string, gameTypeId: string): Promise<any> {
+    // Use backend API if enabled
+    if (USE_BACKEND_API) {
+      try {
+        const gameTypeNumber = gameAPI.getGameTypeId(gameTypeId)
+        const content = await gameAPI.getGameContent(lessonId, gameTypeNumber)
+        
+        // Transform content based on game type
+        switch (gameTypeId) {
+          case 'millionaire':
+            return {
+              gameType: 'millionaire',
+              content: {
+                questions: gameAPI.transformMillionaireQuestions(
+                  (content as any).questions
+                )
+              }
+            }
+          case 'jeopardy':
+            return {
+              gameType: 'jeopardy',
+              content: gameAPI.transformJeopardyCategories(
+                (content as any).categories
+              )
+            }
+          case 'flashcards':
+            return {
+              gameType: 'flashcards',
+              content: gameAPI.transformFlashcards(
+                (content as any).cards
+              )
+            }
+          case 'connect-cards':
+            return {
+              gameType: 'connect-cards',
+              content: gameAPI.transformConnectCardPairs(
+                (content as any).pairs
+              )
+            }
+          default:
+            throw new Error(`Unknown game type: ${gameTypeId}`)
+        }
+      } catch (error) {
+        console.error('Error loading game content from backend:', error)
+        // Fall back to local data
+      }
+    }
+    
+    // Original local file loading logic
     try {
       // Try to load multiple versions and select one randomly
       const versions = ['', '-v2', '-v3', '-v4']
@@ -299,6 +453,18 @@ export const learningPathAPI = {
 export const contentAPI = {
   // Get lesson content
   async getLessonContent(lessonId: string, contentType: string): Promise<any> {
+    // Use backend API if enabled and content type is written material
+    if (USE_BACKEND_API && contentType === 'written-material') {
+      try {
+        const response = await gameAPI.getWrittenMaterial(lessonId)
+        return gameAPI.transformWrittenMaterial(response)
+      } catch (error) {
+        console.error('Error loading written material from backend:', error)
+        // Fall back to local data
+      }
+    }
+    
+    // Original local file loading logic
     try {
       // Try to load multiple versions and select one randomly
       const versions = ['', '-v2', '-v3', '-v4']

@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Shuffle, CheckCircle, RotateCcw, Trophy } from 'lucide-react'
+import { X, Shuffle, CheckCircle, RotateCcw, Trophy, Loader2 } from 'lucide-react'
 import { Button } from '@/components/atomic/button'
 import { Card, CardContent } from '@/components/card'
 import { Badge } from '@/components/atomic/badge'
 import { Progress } from '@/components/progress'
 import { cn } from '@/lib/utils'
+import { gameContentAPI } from '@/app/lms/new_course_overview/api/course-api'
+import { useGameResults } from '@/lib/hooks/use-game-results'
 
 interface ConnectCardsGameProps {
   lessonId: string
@@ -24,63 +26,12 @@ interface CardPair {
 interface GameCard {
   id: string
   content: string
-  type: 'term' | 'definition'
   pairId: string
-  category: string
+  knowledgePointId?: number
   isMatched: boolean
   isSelected: boolean
 }
 
-const cardPairs: CardPair[] = [
-  {
-    id: 'ai-definition',
-    term: 'Artificial Intelligence',
-    definition: 'The simulation of human intelligence in machines',
-    category: 'concept'
-  },
-  {
-    id: 'machine-learning',
-    term: 'Machine Learning',
-    definition: 'A subset of AI that learns from data without explicit programming',
-    category: 'technique'
-  },
-  {
-    id: 'neural-networks',
-    term: 'Neural Networks',
-    definition: 'Computing systems inspired by biological neural networks',
-    category: 'technique'
-  },
-  {
-    id: 'deep-learning',
-    term: 'Deep Learning',
-    definition: 'ML technique using neural networks with multiple layers',
-    category: 'technique'
-  },
-  {
-    id: 'supervised-learning',
-    term: 'Supervised Learning',
-    definition: 'Learning approach using labeled training data',
-    category: 'technique'
-  },
-  {
-    id: 'unsupervised-learning',
-    term: 'Unsupervised Learning',
-    definition: 'Learning approach that finds patterns in unlabeled data',
-    category: 'technique'
-  },
-  {
-    id: 'reinforcement-learning',
-    term: 'Reinforcement Learning',
-    definition: 'Learning through interaction with environment and feedback',
-    category: 'technique'
-  },
-  {
-    id: 'natural-language-processing',
-    term: 'Natural Language Processing',
-    definition: 'AI field focused on understanding and generating human language',
-    category: 'application'
-  }
-]
 
 export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCardsGameProps) {
   const [gameCards, setGameCards] = useState<GameCard[]>([])
@@ -94,6 +45,64 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
   const [feedbackMessage, setFeedbackMessage] = useState('')
   const [isCorrectMatch, setIsCorrectMatch] = useState(false)
   const [incorrectPair, setIncorrectPair] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [cardPairs, setCardPairs] = useState<CardPair[]>([])
+  const [startTime] = useState<number>(Date.now())
+  const { submitResult } = useGameResults()
+
+  // Load game content from API
+  useEffect(() => {
+    async function loadGameContent() {
+      try {
+        setLoading(true)
+        setError(null)
+        const gameContent = await gameContentAPI.getGameContent(lessonId, 'connect-cards')
+        
+        if (gameContent && gameContent.content && gameContent.content.cards) {
+          // Transform the API response to card pairs
+          const cards = gameContent.content.cards
+          const pairs: CardPair[] = []
+          
+          // Group cards by pairId
+          const pairMap = new Map<string, GameCard[]>()
+          cards.forEach((card: any) => {
+            if (!pairMap.has(card.pairId)) {
+              pairMap.set(card.pairId, [])
+            }
+            pairMap.get(card.pairId)?.push(card)
+          })
+
+          // Create pairs from grouped cards
+          pairMap.forEach((cardGroup, pairId) => {
+            if (cardGroup.length >= 2) {
+              pairs.push({
+                id: pairId,
+                term: cardGroup[0].content,
+                definition: cardGroup[1].content,
+                category: 'concept' // Default category
+              })
+            }
+          })
+
+          setCardPairs(pairs)
+        } else {
+          // No card pairs available
+          setCardPairs([])
+          setError('No card pairs available for this lesson')
+        }
+      } catch (err) {
+        console.error('Error loading connect cards game:', err)
+        setError('Failed to load game content')
+        // No fallback - show error
+        setCardPairs([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadGameContent()
+  }, [lessonId])
 
   // Handle body scroll lock
   useEffect(() => {
@@ -126,8 +135,10 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
 
   // Initialize game
   useEffect(() => {
-    initializeGame()
-  }, [currentRound])
+    if (cardPairs.length > 0) {
+      initializeGame()
+    }
+  }, [currentRound, cardPairs])
 
   const initializeGame = () => {
     // Take first 3 pairs for the game
@@ -141,18 +152,14 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
       terms.push({
         id: `term-${pair.id}`,
         content: pair.term,
-        type: 'term',
         pairId: pair.id,
-        category: pair.category,
         isMatched: false,
         isSelected: false
       })
       definitions.push({
         id: `def-${pair.id}`,
         content: pair.definition,
-        type: 'definition',
         pairId: pair.id,
-        category: pair.category,
         isMatched: false,
         isSelected: false
       })
@@ -265,6 +272,17 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
   const handleComplete = () => {
     const correctMatches = matchedPairs.size
     const finalScore = Math.round((correctMatches / attempts) * 100) || 0
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000)
+    
+    // Submit result to backend
+    submitResult({
+      gameTypeId: 4, // Connect Cards game
+      lessonId,
+      score: finalScore,
+      timeSpent,
+      completed: true
+    })
+    
     onComplete(finalScore)
   }
 
@@ -274,6 +292,36 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
 
   const totalPairs = 3
   const progressPercentage = Math.round((matchedPairs.size / totalPairs) * 100)
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="p-8">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-text-brand" />
+            <p className="text-text-secondary">Loading connect cards game...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error && cardPairs.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <X className="h-8 w-8 text-text-error" />
+            <h3 className="text-lg font-semibold text-text-primary">Error Loading Game</h3>
+            <p className="text-text-secondary">{error}</p>
+            <Button variant="primary" onClick={onClose}>Close</Button>
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 bg-bg-overlay backdrop-blur-sm z-modal"> {/* rgba(0, 0, 0, 0.5) */}
@@ -423,14 +471,6 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
                           </p>
                         </div>
                         
-                        <div className="mt-3">
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs capitalize"
-                          >
-                            {card.category}
-                          </Badge>
-                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -474,14 +514,6 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
                           </p>
                         </div>
                         
-                        <div className="mt-3">
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs capitalize"
-                          >
-                            {card.category}
-                          </Badge>
-                        </div>
                       </CardContent>
                     </Card>
                   ))}

@@ -30,6 +30,9 @@ export interface Course {
   id: string
   title: string
   description: string
+  category?: string
+  difficulty?: string
+  duration?: number // in minutes
   totalLessons: number
   completedLessons: number
   progress: number // 0-100 percentage
