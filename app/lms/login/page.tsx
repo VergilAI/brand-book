@@ -19,7 +19,7 @@ export default function LoginPage() {
       
       if (response.success) {
         // Login successful
-        console.log('Login successful:', response.data)
+        console.log('Login successful:', response.tokens)
         
         // Redirect to course overview page
         router.push('/lms/new_course_overview')
