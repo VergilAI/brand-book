@@ -65,7 +65,7 @@ export const Basic: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant="secondary">
           Open Menu
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
@@ -85,7 +85,7 @@ export const WithIcons: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="secondary" size="icon">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -121,7 +121,7 @@ export const WithShortcuts: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">File</Button>
+        <Button variant="secondary">File</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuItem>
@@ -159,7 +159,7 @@ export const NestedSubmenus: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Actions</Button>
+        <Button variant="secondary">Actions</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuGroup>
@@ -236,7 +236,7 @@ export const DifferentAlignments: Story = {
     <div className="flex gap-8">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">Align Start</Button>
+          <Button variant="secondary" size="sm">Align Start</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <DropdownMenuItem>Option 1</DropdownMenuItem>
@@ -247,7 +247,7 @@ export const DifferentAlignments: Story = {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">Align Center</Button>
+          <Button variant="secondary" size="sm">Align Center</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center">
           <DropdownMenuItem>Option 1</DropdownMenuItem>
@@ -258,7 +258,7 @@ export const DifferentAlignments: Story = {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">Align End</Button>
+          <Button variant="secondary" size="sm">Align End</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem>Option 1</DropdownMenuItem>
@@ -274,7 +274,7 @@ export const DisabledItems: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Options</Button>
+        <Button variant="secondary">Options</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>Active Item</DropdownMenuItem>
@@ -296,7 +296,7 @@ export const WithLabelsAndGroups: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant="secondary">
           <User className="mr-2 h-4 w-4" />
           Account
         </Button>
@@ -382,7 +382,7 @@ export const WithCheckboxes: Story = {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">View</Button>
+          <Button variant="secondary">View</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>Appearance</DropdownMenuLabel>
@@ -418,7 +418,7 @@ export const WithRadioGroup: Story = {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">Panel Position</Button>
+          <Button variant="secondary">Panel Position</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
@@ -512,7 +512,7 @@ export const ContextMenu: Story = {
         <p className="text-sm text-text-secondary mb-4">Right-click anywhere in this area</p>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">Or click here</Button>
+            <Button variant="secondary" size="sm">Or click here</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>
@@ -548,7 +548,7 @@ export const InsetItems: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Inset Example</Button>
+        <Button variant="secondary">Inset Example</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel inset>Account</DropdownMenuLabel>

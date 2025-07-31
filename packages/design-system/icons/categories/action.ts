@@ -14,7 +14,7 @@ import {
   Square,
   Settings,
   Filter,
-  Sort,
+  ArrowUpDown,
   Move,
   Maximize,
   Minimize,

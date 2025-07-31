@@ -72,7 +72,7 @@ export class ChatStorage {
    */
   getAllSessions(): ChatSession[] {
     try {
-      const stored = localStorage.getItem(this.options.storageKey)
+      const stored = localStorage.getItem(this.options.storageKey || DEFAULT_OPTIONS.storageKey!)
       if (!stored) return []
 
       const sessions: ChatSession[] = JSON.parse(stored)
@@ -128,8 +128,9 @@ export class ChatStorage {
       session.updatedAt = new Date()
 
       // Limit messages per session
-      if (session.messages.length > this.options.maxMessagesPerSession) {
-        session.messages = session.messages.slice(-this.options.maxMessagesPerSession)
+      const maxMessages = this.options.maxMessagesPerSession || DEFAULT_OPTIONS.maxMessagesPerSession!
+      if (session.messages.length > maxMessages) {
+        session.messages = session.messages.slice(-maxMessages)
       }
 
       if (existingIndex >= 0) {
@@ -139,11 +140,12 @@ export class ChatStorage {
       }
 
       // Limit total number of sessions
-      if (sessions.length > this.options.maxSessions) {
-        sessions.splice(this.options.maxSessions)
+      const maxSessions = this.options.maxSessions || DEFAULT_OPTIONS.maxSessions!
+      if (sessions.length > maxSessions) {
+        sessions.splice(maxSessions)
       }
 
-      localStorage.setItem(this.options.storageKey, JSON.stringify(sessions))
+      localStorage.setItem(this.options.storageKey || DEFAULT_OPTIONS.storageKey!, JSON.stringify(sessions))
     } catch (error) {
       console.error('Error saving chat session:', error)
     }
@@ -176,7 +178,7 @@ export class ChatStorage {
       const filteredSessions = sessions.filter(s => s.id !== sessionId)
       
       if (sessions.length !== filteredSessions.length) {
-        localStorage.setItem(this.options.storageKey, JSON.stringify(filteredSessions))
+        localStorage.setItem(this.options.storageKey || DEFAULT_OPTIONS.storageKey!, JSON.stringify(filteredSessions))
         
         // Clear current session if it was deleted
         if (this.currentSessionId === sessionId) {
@@ -196,7 +198,7 @@ export class ChatStorage {
    * Clear all sessions
    */
   clearAllSessions(): void {
-    localStorage.removeItem(this.options.storageKey)
+    localStorage.removeItem(this.options.storageKey || DEFAULT_OPTIONS.storageKey!)
     this.currentSessionId = null
   }
 
@@ -218,7 +220,7 @@ export class ChatStorage {
         throw new Error('Invalid session data format')
       }
 
-      localStorage.setItem(this.options.storageKey, JSON.stringify(sessions))
+      localStorage.setItem(this.options.storageKey || DEFAULT_OPTIONS.storageKey!, JSON.stringify(sessions))
       return true
     } catch (error) {
       console.error('Error importing sessions:', error)

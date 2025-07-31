@@ -6,7 +6,7 @@ import { Play, Pause, RotateCcw } from 'lucide-react'
 import React from 'react'
 
 // Wrapper component to demonstrate journey animations
-function JourneyAnimationDemo({ knowledgePoints, autoPlay = false }) {
+function JourneyAnimationDemo({ knowledgePoints, autoPlay = false }: { knowledgePoints: any; autoPlay?: boolean }) {
   const { 
     journey,
     isPlaying, 

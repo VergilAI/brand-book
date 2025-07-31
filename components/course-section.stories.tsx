@@ -447,6 +447,11 @@ export const SingleLessonSection: Story = {
 
 // Multiple sections example
 export const MultipleSections: Story = {
+  args: {
+    section: completedSection, // Required but not used in render
+    sectionNumber: 1,
+    isExpanded: true,
+  },
   render: () => {
     const [expandedSections, setExpandedSections] = useState<Set<string>>(
       new Set(['section-completed', 'section-progress'])

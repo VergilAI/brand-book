@@ -147,19 +147,19 @@ export function NodeDetailsPopover({
             />
             <div className="flex items-center gap-spacing-xs">
               {node.progress === 0 && (
-                <Badge variant="default" size="sm">Not Started</Badge>
+                <Badge variant="default">Not Started</Badge>
               )}
               {node.progress > 0 && node.progress < 40 && (
-                <Badge variant="error" size="sm">Beginning</Badge>
+                <Badge variant="error">Beginning</Badge>
               )}
               {node.progress >= 40 && node.progress < 70 && (
-                <Badge variant="warning" size="sm">In Progress</Badge>
+                <Badge variant="warning">In Progress</Badge>
               )}
               {node.progress >= 70 && node.progress < 100 && (
-                <Badge variant="success" size="sm">Proficient</Badge>
+                <Badge variant="success">Proficient</Badge>
               )}
               {node.progress === 100 && (
-                <Badge variant="success" size="sm">Mastered</Badge>
+                <Badge variant="success">Mastered</Badge>
               )}
             </div>
           </div>
@@ -192,7 +192,6 @@ export function NodeDetailsPopover({
                   <div className="flex items-center gap-spacing-xs">
                     <Badge 
                       variant={prereq.type === 'hard' ? 'error' : 'default'} 
-                      size="sm"
                     >
                       {prereq.type === 'hard' ? 'Required' : 'Recommended'}
                     </Badge>
@@ -226,7 +225,6 @@ export function NodeDetailsPopover({
                   <div className="flex items-center gap-spacing-xs">
                     <Badge 
                       variant={unlock.type === 'hard' ? 'error' : 'default'} 
-                      size="sm"
                     >
                       {unlock.type === 'hard' ? 'Required' : 'Recommended'}
                     </Badge>

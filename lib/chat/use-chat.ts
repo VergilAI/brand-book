@@ -120,7 +120,7 @@ export function useChat(options: UseChatOptions = {}) {
       
     } catch (err) {
       // Handle network errors or aborted requests
-      if (err.name === 'AbortError') {
+      if (err instanceof Error && err.name === 'AbortError') {
         // Request was cancelled, don't show error
         return null
       }

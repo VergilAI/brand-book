@@ -188,7 +188,7 @@ function generateCSSVariables() {
     css += `  border-radius: ${props.borderRadius};\n`;
     css += `  box-shadow: ${props.shadow};\n`;
     css += `  padding: ${props.padding};\n`;
-    if (props.transition) {
+    if ('transition' in props && props.transition) {
       css += `  transition: ${props.transition};\n`;
     }
     css += '}\n';
@@ -237,20 +237,20 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
     ${Object.entries(components.button.variant)
       .map(([variant, props]) => `
     '.btn-${variant}': {
-      backgroundColor: '${props.background}',
+      backgroundColor: '${'background' in props ? props.background : 'transparent'}',
       color: '${props.color}',
-      border: '${props.border}',
+      border: '${'border' in props ? props.border : 'none'}',
       fontWeight: '${components.button.fontWeight}',
       transition: '${components.button.transition}',
       cursor: '${components.button.cursor}',
       '&:hover': {
-        backgroundColor: '${props.hover?.background || props.background}',
+        backgroundColor: '${props.hover?.background || ('background' in props ? props.background : 'transparent')}',
       },
       '&:active': {
-        backgroundColor: '${props.pressed?.background || props.background}',
+        backgroundColor: '${props.pressed?.background || ('background' in props ? props.background : 'transparent')}',
       },
       '&:disabled': {
-        backgroundColor: '${props.disabled?.background || props.background}',
+        backgroundColor: '${'background' in props.disabled ? props.disabled.background : 'background' in props ? props.background : 'transparent'}',
         color: '${props.disabled?.color || props.color}',
         cursor: '${components.button.disabledCursor}',
       },
@@ -266,8 +266,8 @@ module.exports = plugin(function({ addBase, addComponents, addUtilities, theme }
       borderRadius: '${props.borderRadius}',
       boxShadow: '${props.shadow}',
       padding: '${props.padding}',
-      ${props.transition ? `transition: '${props.transition}',` : ''}
-      ${props.hover ? `
+      ${'transition' in props && props.transition ? `transition: '${props.transition}',` : ''}
+      ${'hover' in props && props.hover ? `
       '&:hover': {
         boxShadow: '${props.hover.shadow}',
         transform: '${props.hover.transform}',

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ProgressNode } from './progress-node'
+import * as React from 'react'
 
 const meta = {
   title: 'LMS/ProgressNode',
@@ -122,6 +123,11 @@ export const Selected: Story = {
 }
 
 export const AllStates: Story = {
+  args: {
+    title: 'Progress States',
+    progress: 50,
+    size: 48,
+  },
   render: () => (
     <div className="flex gap-8 items-center">
       <div className="text-center">
@@ -149,6 +155,11 @@ export const AllStates: Story = {
 }
 
 export const AnimatedProgress: Story = {
+  args: {
+    title: 'Animating',
+    progress: 0,
+    size: 64,
+  },
   render: () => {
     const [progress, setProgress] = React.useState(0)
     

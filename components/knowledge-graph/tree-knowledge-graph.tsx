@@ -112,7 +112,15 @@ export function TreeKnowledgeGraph({
   // Calculate positions for all nodes based on dependencies
   const { positions, connections, svgDimensions } = useMemo(() => {
     const positions: Record<string, { x: number, y: number }> = {}
-    const connections: Array<{ from: string, to: string }> = []
+    const connections: Array<{ 
+      from: string
+      to: string
+      type?: 'hard' | 'soft'
+      requiredElo?: number
+      isLocked?: boolean
+      isAchieved?: boolean
+      fromProgress?: number
+    }> = []
     
     // Build adjacency lists and find root nodes
     const childrenMap: Record<string, string[]> = {}
@@ -525,7 +533,7 @@ export function TreeKnowledgeGraph({
             // Check if the source node has reached 100% progress (unlocking the connection)
             const sourceProgress = showJourney && animatedProgress[connection.from] !== undefined 
               ? animatedProgress[connection.from] 
-              : connection.fromProgress
+              : connection.fromProgress || 0
             const isUnlocked = sourceProgress >= (connection.requiredElo || 80)
             
             // Get path data - show as locked only if not unlocked by animation
@@ -536,7 +544,7 @@ export function TreeKnowledgeGraph({
               <g key={`connection-${index}`}>
                 {/* Invisible wider path for better hover detection */}
                 <path
-                  d={typeof fullPath === 'string' ? fullPath : fullPath.fullPath || fullPath}
+                  d={typeof fullPath === 'string' ? fullPath : (fullPath as any).fullPath || ''}
                   fill="none"
                   stroke="transparent"
                   strokeWidth="12"
@@ -546,7 +554,7 @@ export function TreeKnowledgeGraph({
                 />
                 
                 {(connection.isLocked && !isUnlocked) && pathData && typeof pathData !== 'string' ? (
-                  pathData.tooShort ? (
+                  'tooShort' in pathData && pathData.tooShort ? (
                     /* Line too short for lock - show as thick dashed line */
                     <path
                       d={pathData.fullPath}
@@ -562,7 +570,7 @@ export function TreeKnowledgeGraph({
                     <>
                       {/* First half of the line */}
                       <path
-                        d={pathData.firstHalf}
+                        d={(pathData as any).firstHalf}
                         fill="none"
                         stroke={strokeColor}
                         strokeWidth={isRelatedToSelected ? "3" : "2"}
@@ -572,9 +580,9 @@ export function TreeKnowledgeGraph({
                       />
                       
                       {/* Lock icon in the middle */}
-                      <g transform={`translate(${pathData.midpoint.x - pathData.lockIconSize / 2}, ${pathData.midpoint.y - pathData.lockIconSize / 2})`} pointerEvents="none">
-                        <circle cx={pathData.lockIconSize / 2} cy={pathData.lockIconSize / 2} r={pathData.lockIconSize / 2 + 1} fill="white" stroke="#E5E7EB" strokeWidth="0.5" />
-                        <g transform={`translate(${pathData.lockIconSize / 2}, ${pathData.lockIconSize / 2})`}>
+                      <g transform={`translate(${(pathData as any).midpoint.x - (pathData as any).lockIconSize / 2}, ${(pathData as any).midpoint.y - (pathData as any).lockIconSize / 2})`} pointerEvents="none">
+                        <circle cx={(pathData as any).lockIconSize / 2} cy={(pathData as any).lockIconSize / 2} r={(pathData as any).lockIconSize / 2 + 1} fill="white" stroke="#E5E7EB" strokeWidth="0.5" />
+                        <g transform={`translate(${(pathData as any).lockIconSize / 2}, ${(pathData as any).lockIconSize / 2})`}>
                           {/* Minimalistic lock icon */}
                           <path
                             d="M-2.5 -1 L-2.5 -2.5 A2.5 2.5 0 0 1 2.5 -2.5 L2.5 -1 M-3 -1 L3 -1 L3 3 L-3 3 Z"
@@ -589,7 +597,7 @@ export function TreeKnowledgeGraph({
                       
                       {/* Second half of the line */}
                       <path
-                        d={pathData.secondHalf}
+                        d={(pathData as any).secondHalf}
                         fill="none"
                         stroke={strokeColor}
                         strokeWidth={isRelatedToSelected ? "3" : "2"}
@@ -603,7 +611,7 @@ export function TreeKnowledgeGraph({
                   <>
                     {/* Normal line without lock */}
                     <path
-                      d={typeof fullPath === 'string' ? fullPath : fullPath.fullPath || fullPath}
+                      d={typeof fullPath === 'string' ? fullPath : (fullPath as any).fullPath || ''}
                       fill="none"
                       stroke={strokeColor}
                       strokeWidth={isRelatedToSelected ? "3" : "2"}
@@ -633,7 +641,7 @@ export function TreeKnowledgeGraph({
                           </linearGradient>
                         </defs>
                         <path
-                          d={typeof fullPath === 'string' ? fullPath : fullPath.fullPath || fullPath}
+                          d={typeof fullPath === 'string' ? fullPath : (fullPath as any).fullPath || ''}
                           fill="none"
                           stroke={`url(#gradient-${connectionKey})`}
                           strokeWidth={isRelatedToSelected ? "3" : "2"}
@@ -649,7 +657,7 @@ export function TreeKnowledgeGraph({
                 
                 {/* Tooltip on hover */}
                 {isHovered && (
-                  <g transform={`translate(${pathData && typeof pathData !== 'string' && pathData.midpoint ? pathData.midpoint.x : (fromPos.x + toPos.x) / 2}, ${pathData && typeof pathData !== 'string' && pathData.midpoint ? pathData.midpoint.y - (pathData.lockIconSize ? pathData.lockIconSize / 2 + 20 : 20) : (fromPos.y + toPos.y) / 2 - 20})`}>
+                  <g transform={`translate(${pathData && typeof pathData !== 'string' && pathData.midpoint ? pathData.midpoint.x : (fromPos.x + toPos.x) / 2}, ${pathData && typeof pathData !== 'string' && pathData.midpoint ? pathData.midpoint.y - ((pathData as any).lockIconSize ? (pathData as any).lockIconSize / 2 + 20 : 20) : (fromPos.y + toPos.y) / 2 - 20})`}>
                     <rect
                       x="-40"
                       y="-12"
@@ -748,8 +756,8 @@ export function TreeKnowledgeGraph({
             >
               <foreignObject width={knowledgeNodeSize} height={knowledgeNodeSize}>
                 <NodeDetailsPopover
-                  node={kp}
-                  allNodes={knowledgePoints}
+                  node={kp as any}
+                  allNodes={knowledgePoints as any}
                   availableIn={availableLessons[kp.id] || []}
                   onLessonClick={onLessonClick}
                   open={selectedNodeId === kp.id}

@@ -34,7 +34,7 @@ export {
   // Action
   Plus, Trash, Edit, Copy, Download, Upload, Save,
   Shuffle, RefreshCw, RotateCw, Play, Pause, Square,
-  Settings, Filter, Sort, Move, Maximize, Minimize,
+  Settings, Filter, ArrowUpDown, Move, Maximize, Minimize,
   LogOut, LogIn, Share, Send,
   
   // Status

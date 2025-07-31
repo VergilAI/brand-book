@@ -61,7 +61,7 @@ export function GameTypeCard({
         <CardContent className="p-lg h-full flex flex-col">
         {/* Category Badge */}
         <Badge 
-          variant="secondary" 
+          variant="default" 
           className={cn(
             "absolute top-sm right-sm text-xs",
             categoryColors[gameType.category]

@@ -238,7 +238,7 @@ export function suggestFixes(result: ValidationResult): string[] {
   
   // Check for continents with low connectivity
   Object.entries(result.statistics.continentConnectivity).forEach(([continent, connections]) => {
-    const continentSize = Array.from(result.statistics.continentConnectivity).length
+    const continentSize = Object.keys(result.statistics.continentConnectivity).length
     if (connections < continentSize - 1) {
       suggestions.push(`${continent} may need more internal connections for better gameplay`)
     }

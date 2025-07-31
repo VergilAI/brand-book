@@ -54,7 +54,7 @@ export function MillionaireLifelines({
         >
           <Button
             variant="secondary"
-            size="default"
+            size="md"
             onClick={() => onUseLifeline(lifeline.id)}
             disabled={disabled || lifeline.used}
             className={cn(

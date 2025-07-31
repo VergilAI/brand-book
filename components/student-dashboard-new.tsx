@@ -308,7 +308,7 @@ export function StudentDashboard() {
                         <p className="font-medium text-gray-900">{course.title}</p>
                         <p className="text-sm text-gray-600 mt-1">{course.nextLesson}</p>
                       </div>
-                      <Badge variant="destructive">
+                      <Badge variant="error">
                         {formatDate(course.dueDate!)}
                       </Badge>
                     </div>

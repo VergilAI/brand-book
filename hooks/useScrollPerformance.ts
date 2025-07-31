@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 export function useScrollPerformance(elementRef: React.RefObject<HTMLElement>) {
   const [isScrolling, setIsScrolling] = useState(false)
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>()
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     const element = elementRef.current

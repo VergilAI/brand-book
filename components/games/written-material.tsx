@@ -209,7 +209,7 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
           
           <div className="flex items-center gap-4">
             {isCompleted && (
-              <Button variant="success" onClick={handleComplete}>
+              <Button variant="primary" onClick={handleComplete}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Mark as Completed
               </Button>
@@ -263,7 +263,7 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
             <div className="flex-1 p-6 overflow-y-auto">
               <div className="max-w-4xl mx-auto">
                 <div className="mb-6">
-                  <Badge variant="primary" className="mb-2">
+                  <Badge variant="brand" className="mb-2">
                     Section {currentSection + 1} of {totalSections}
                   </Badge>
                   <h1 className="text-3xl font-bold text-text-primary mb-4">
@@ -293,7 +293,7 @@ export function WrittenMaterial({ lessonId, onClose, onComplete }: WrittenMateri
               <div className="flex items-center gap-3">
                 {!completedSections.has(currentSection) && (
                   <Button
-                    variant="success"
+                    variant="primary"
                     onClick={markSectionComplete}
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />

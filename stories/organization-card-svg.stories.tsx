@@ -76,7 +76,7 @@ export const MultipleEmployeeCards: Story = {
           color: '#7B00FF',
           progress: 92,
           initials: 'MC',
-          status: 'ahead',
+          status: 'on_track',
           isSelected: false,
         }}
       />

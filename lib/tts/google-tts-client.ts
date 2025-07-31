@@ -195,7 +195,9 @@ export class ElevenLabsTTSClient {
     // Implement LRU cache behavior
     if (this.cache.size >= this.maxCacheSize) {
       const firstKey = this.cache.keys().next().value
-      this.cache.delete(firstKey)
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey)
+      }
     }
 
     this.cache.set(key, audioData)

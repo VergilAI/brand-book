@@ -294,12 +294,11 @@ export function AIQuestionGeneratorModal({
                           <Badge 
                             variant={
                               question.type === "question-answer" ? "success" : "info"
-                            } 
-                            size="sm"
+                            }
                           >
                             {question.type.replace('-', ' ')}
                           </Badge>
-                          <Badge variant="primary" size="sm">
+                          <Badge variant="brand">
                             {question.points} pts
                           </Badge>
                         </div>

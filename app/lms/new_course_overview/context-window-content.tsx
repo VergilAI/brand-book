@@ -16,9 +16,9 @@ export function CourseContextWindowContent({ course, progress }: ContextWindowCo
     const nodeMap = new Map<string, KnowledgeNode>()
 
     // Process all chapters and lessons to create nodes
-    course.chapters.forEach((chapter, chapterIndex) => {
-      chapter.lessons.forEach((lesson, lessonIndex) => {
-        lesson.knowledgePoints.forEach((kp) => {
+    course.chapters.forEach((chapter: any, chapterIndex: number) => {
+      chapter.lessons.forEach((lesson: any, lessonIndex: number) => {
+        lesson.knowledgePoints.forEach((kp: any) => {
           const nodeId = `${chapter.id}-${lesson.id}-${kp.id}`
           const userProgress = progress?.knowledgePoints?.[kp.id] || { proficiency: 0 }
           

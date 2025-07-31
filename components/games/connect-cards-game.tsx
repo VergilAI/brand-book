@@ -409,7 +409,7 @@ export function ConnectCardsGame({ lessonId, onClose, onComplete }: ConnectCards
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-3">
                             <Badge 
-                              variant="primary"
+                              variant="brand"
                               className="text-xs"
                             >
                               Term

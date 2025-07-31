@@ -171,6 +171,7 @@ export function AudioMaterialEnhanced({ lessonId, onClose, onComplete }: AudioMa
                   <TTSButtonEnhanced 
                     text={currentFile.transcript}
                     showTranscript={true}
+                    onPlayStart={() => {}}
                     onPlayEnd={handlePlayEnd}
                     className="w-full"
                   />

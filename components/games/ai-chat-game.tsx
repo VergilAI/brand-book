@@ -97,7 +97,9 @@ export function AIChatGame({
     
     if (currentSession) {
       currentSession.metadata = {
-        ...currentSession.metadata,
+        totalMessages: currentSession.metadata?.totalMessages || 0,
+        userMessages: currentSession.metadata?.userMessages || 0,
+        assistantMessages: currentSession.metadata?.assistantMessages || 0,
         context: chatMode
       }
       chatStorage.saveSession(currentSession)
@@ -135,7 +137,7 @@ export function AIChatGame({
           <div className="p-spacing-xl">
             <div className="mb-spacing-lg">
               <h3 className="text-lg font-semibold text-text-primary mb-2">Lesson Topic</h3>
-              <Badge variant="secondary" className="text-base px-4 py-2">
+              <Badge variant="default" className="text-base px-4 py-2">
                 {lessonTopic}
               </Badge>
             </div>

@@ -266,7 +266,7 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
           
           <div className="flex items-center gap-4">
             {completedVideos.size === totalVideos && (
-              <Button variant="success" onClick={handleComplete}>
+              <Button variant="primary" onClick={handleComplete}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Complete Course
               </Button>
@@ -324,7 +324,7 @@ export function VideoMaterial({ lessonId, onClose, onComplete }: VideoMaterialPr
                 <div className="p-6 border-b border-border-subtle">
                   <div className="max-w-4xl mx-auto">
                     <div className="mb-4">
-                      <Badge variant="primary" className="mb-2">
+                      <Badge variant="brand" className="mb-2">
                         Video {currentVideoIndex + 1} of {totalVideos}
                       </Badge>
                       <h1 className="text-2xl font-bold text-text-primary mb-2">

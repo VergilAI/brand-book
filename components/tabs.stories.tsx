@@ -87,7 +87,7 @@ export const Default: Story = {
             <p className="text-sm text-muted-foreground">
               Manage your team members and their permissions here.
             </p>
-            <Button variant="outline">Invite team member</Button>
+            <Button variant="secondary">Invite team member</Button>
           </div>
         </Card>
       </TabsContent>

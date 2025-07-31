@@ -88,6 +88,12 @@ const BasicConquest = () => {
 }
 
 export const Default: Story = {
+  args: {
+    graph: createTerritoryGraph(),
+    gameState: new Map(),
+    currentPlayer: 'player1',
+    onTerritoryClick: () => {},
+  },
   render: () => <BasicConquest />,
 }
 
@@ -157,6 +163,12 @@ const BorderConstraints = () => {
 }
 
 export const WithBorderConstraints: Story = {
+  args: {
+    graph: createTerritoryGraph(),
+    gameState: new Map(),
+    currentPlayer: 'player1',
+    onTerritoryClick: () => {},
+  },
   render: () => <BorderConstraints />,
 }
 
@@ -277,6 +289,12 @@ const TerritoryStatesDemo = () => {
 }
 
 export const TerritoryStates: Story = {
+  args: {
+    graph: createTerritoryGraph(),
+    gameState: new Map(),
+    currentPlayer: 'player1',
+    onTerritoryClick: () => {},
+  },
   render: () => <TerritoryStatesDemo />,
 }
 
@@ -327,5 +345,11 @@ const MultiSelectComponent = () => {
 }
 
 export const MultiSelectDemo: Story = {
+  args: {
+    graph: createTerritoryGraph(),
+    gameState: new Map(),
+    currentPlayer: 'player1',
+    onTerritoryClick: () => {},
+  },
   render: () => <MultiSelectComponent />,
 }

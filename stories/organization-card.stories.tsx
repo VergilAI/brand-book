@@ -36,7 +36,7 @@ export const EmployeeCardSelected: Story = {
     color: '#0087FF',
     progress: 92,
     initials: 'MC',
-    status: 'ahead',
+    status: 'on_track',
     isSelected: true,
   },
 }

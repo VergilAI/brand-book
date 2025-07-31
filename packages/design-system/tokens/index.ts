@@ -15,13 +15,13 @@ export * from './components';
 // Export icon system
 export * from '../icons';
 
-// Legacy exports for backwards compatibility
-export * from './colors';
-export * from './typography';
-export * from './spacing';
-export * from './animations';
-export * from './shadows';
-export * from './radii';
+// Legacy exports for backwards compatibility (excluding duplicates)
+export { colors } from './colors';
+export { typography } from './typography';
+export { spacing, semanticSpacing } from './spacing';
+export { animations } from './animations';
+export { shadows } from './shadows';
+export { radii } from './radii';
 
 // Re-export all tokens as a single object
 import * as primitives from './primitives';

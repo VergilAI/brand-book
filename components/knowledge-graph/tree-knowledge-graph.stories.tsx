@@ -3,6 +3,16 @@ import { TreeKnowledgeGraph } from './tree-knowledge-graph'
 import { JourneyProvider } from './journey-context'
 import { useState } from 'react'
 
+// Define KnowledgePoint type to match the component's expectation
+interface KnowledgePoint {
+  id: string
+  title: string
+  progress: number
+  dependencies?: string[]
+  hardDependencies?: string[]
+  dependencyDetails?: Record<string, { type: 'hard' | 'soft', requiredElo: number }>
+}
+
 const meta = {
   title: 'LMS/TreeKnowledgeGraph',
   component: TreeKnowledgeGraph,
@@ -30,7 +40,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Comprehensive knowledge points with complex dependencies
-const complexKnowledgePoints = [
+const complexKnowledgePoints: KnowledgePoint[] = [
   // Foundation level
   {
     id: 'kp-1',
@@ -210,13 +220,13 @@ export const CompletelyMastered: Story = {
 // Interactive example with state
 export const Interactive: Story = {
   render: (args) => {
-    const [selectedNode, setSelectedNode] = useState<string | null>(null)
+    const [selectedNode, setSelectedNode] = useState<string | undefined>(undefined)
     
     return (
       <TreeKnowledgeGraph
         {...args}
         selectedNodeId={selectedNode}
-        onNodeSelect={setSelectedNode}
+        onNodeSelect={(nodeId) => setSelectedNode(nodeId || undefined)}
         onLessonClick={(lessonId) => alert(`Opening lesson: ${lessonId}`)}
       />
     )

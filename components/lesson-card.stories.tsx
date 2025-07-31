@@ -69,8 +69,6 @@ const baseLessonData: ExtendedLesson = {
   knowledgePoints: mockKnowledgePoints,
   availableGameTypes: ['written-material', 'flashcards', 'millionaire', 'connect-cards'],
   estimatedTime: 15,
-  type: 'reading',
-  difficulty: 'beginner',
 }
 
 export const Default: Story = {
@@ -88,7 +86,6 @@ export const LockedLesson: Story = {
       ...baseLessonData,
       title: 'Advanced State Management',
       description: 'Deep dive into complex state management patterns using Redux and Context API.',
-      difficulty: 'advanced',
     },
     sectionNumber: 3,
     lessonNumber: 5,
@@ -106,7 +103,6 @@ export const CompletedLesson: Story = {
         ...kp,
         proficiency: 100,
       })),
-      difficulty: 'intermediate',
     },
     sectionNumber: 2,
     lessonNumber: 3,
@@ -140,7 +136,6 @@ export const VideoLesson: Story = {
       ...baseLessonData,
       title: 'React Performance Optimization',
       description: 'Watch expert tutorials on optimizing React applications for maximum performance.',
-      type: 'video',
       estimatedTime: 30,
       knowledgePoints: [
         { ...mockKnowledgePoints[0], proficiency: 75 },
@@ -159,9 +154,7 @@ export const QuizLesson: Story = {
       ...baseLessonData,
       title: 'React Fundamentals Quiz',
       description: 'Test your knowledge of React basics with interactive quizzes.',
-      type: 'quiz',
-      difficulty: 'beginner',
-      estimatedTime: 10,
+          estimatedTime: 10,
       availableGameTypes: ['flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
     },
     sectionNumber: 1,
@@ -176,8 +169,6 @@ export const InteractiveLesson: Story = {
       ...baseLessonData,
       title: 'Building a Todo App',
       description: 'Interactive coding exercise to build a fully functional Todo application.',
-      type: 'interactive',
-      difficulty: 'intermediate',
       estimatedTime: 45,
       knowledgePoints: [
         { ...mockKnowledgePoints[0], proficiency: 30 },
@@ -197,8 +188,7 @@ export const ReadingLesson: Story = {
       ...baseLessonData,
       title: 'React Documentation Deep Dive',
       description: 'Comprehensive reading material covering React documentation and best practices.',
-      type: 'reading',
-      estimatedTime: 25,
+          estimatedTime: 25,
       knowledgePoints: mockKnowledgePoints.map(kp => ({
         ...kp,
         proficiency: 50,
@@ -216,8 +206,7 @@ export const BeginnerDifficulty: Story = {
       ...baseLessonData,
       title: 'Getting Started with React',
       description: 'Perfect for beginners - learn React from scratch with simple examples.',
-      difficulty: 'beginner',
-      knowledgePoints: [
+          knowledgePoints: [
         { ...mockKnowledgePoints[0], proficiency: 20 },
         { ...mockKnowledgePoints[1], proficiency: 10 },
       ],
@@ -234,8 +223,6 @@ export const IntermediateDifficulty: Story = {
       ...baseLessonData,
       title: 'State Management Patterns',
       description: 'Intermediate concepts for managing application state effectively.',
-      difficulty: 'intermediate',
-      type: 'video',
       knowledgePoints: [
         { ...mockKnowledgePoints[0], proficiency: 65 },
         { ...mockKnowledgePoints[1], proficiency: 70 },
@@ -254,8 +241,6 @@ export const AdvancedDifficulty: Story = {
       ...baseLessonData,
       title: 'Advanced React Patterns',
       description: 'Master complex React patterns and architectural decisions.',
-      difficulty: 'advanced',
-      type: 'interactive',
       estimatedTime: 60,
       knowledgePoints: mockKnowledgePoints.map(kp => ({
         ...kp,
@@ -295,7 +280,6 @@ export const HighProficiency: Story = {
         ...kp,
         proficiency: 95,
       })),
-      difficulty: 'intermediate',
     },
     sectionNumber: 4,
     lessonNumber: 5,
@@ -319,7 +303,6 @@ export const ManyKnowledgePoints: Story = {
         { id: 'kp7', title: 'Forms', description: 'Form handling', proficiency: 50 },
       ],
       estimatedTime: 90,
-      difficulty: 'advanced',
     },
     sectionNumber: 6,
     lessonNumber: 1,
@@ -335,7 +318,6 @@ export const ShortLesson: Story = {
       description: 'Five-minute tips to improve your React code.',
       estimatedTime: 5,
       knowledgePoints: [mockKnowledgePoints[0]],
-      type: 'video',
     },
     sectionNumber: 1,
     lessonNumber: 3,
@@ -356,8 +338,6 @@ export const InteractiveStateChanges: Story = {
         { ...mockKnowledgePoints[2], proficiency: 40 },
       ],
       availableGameTypes: ['written-material', 'audio-material', 'video', 'flashcards', 'millionaire', 'jeopardy', 'connect-cards'],
-      type: 'interactive',
-      difficulty: 'intermediate',
     },
     sectionNumber: 2,
     lessonNumber: 5,
@@ -371,6 +351,12 @@ export const InteractiveStateChanges: Story = {
 
 // Grid layout example
 export const GridLayout: Story = {
+  args: {
+    lesson: baseLessonData,
+    sectionNumber: 1,
+    lessonNumber: 1,
+    isLocked: false,
+  },
   render: () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-md)]">
       <LessonCard
@@ -387,8 +373,7 @@ export const GridLayout: Story = {
         lesson={{
           ...baseLessonData,
           title: 'Component State',
-          type: 'video',
-          knowledgePoints: mockKnowledgePoints.map(kp => ({ ...kp, proficiency: 50 })),
+              knowledgePoints: mockKnowledgePoints.map(kp => ({ ...kp, proficiency: 50 })),
         }}
         sectionNumber={1}
         lessonNumber={2}
@@ -398,8 +383,7 @@ export const GridLayout: Story = {
         lesson={{
           ...baseLessonData,
           title: 'Advanced Patterns',
-          difficulty: 'advanced',
-          knowledgePoints: mockKnowledgePoints.map(kp => ({ ...kp, proficiency: 85 })),
+              knowledgePoints: mockKnowledgePoints.map(kp => ({ ...kp, proficiency: 85 })),
         }}
         sectionNumber={1}
         lessonNumber={3}
@@ -409,8 +393,7 @@ export const GridLayout: Story = {
         lesson={{
           ...baseLessonData,
           title: 'Performance Tips',
-          type: 'interactive',
-          knowledgePoints: mockKnowledgePoints.map(kp => ({ ...kp, proficiency: 100 })),
+              knowledgePoints: mockKnowledgePoints.map(kp => ({ ...kp, proficiency: 100 })),
         }}
         sectionNumber={1}
         lessonNumber={4}
@@ -420,8 +403,7 @@ export const GridLayout: Story = {
         lesson={{
           ...baseLessonData,
           title: 'Testing React Apps',
-          type: 'quiz',
-        }}
+            }}
         sectionNumber={1}
         lessonNumber={5}
         isLocked={true}
@@ -430,8 +412,7 @@ export const GridLayout: Story = {
         lesson={{
           ...baseLessonData,
           title: 'Deployment Guide',
-          difficulty: 'intermediate',
-        }}
+            }}
         sectionNumber={1}
         lessonNumber={6}
         isLocked={true}

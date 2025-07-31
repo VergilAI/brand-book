@@ -35,7 +35,6 @@ const mockLibraryQuestions: Question[] = [
     },
     points: 1,
     order: 0,
-    chapterIds: ["ch1"],
     isInLibrary: true
   },
   {
@@ -48,23 +47,23 @@ const mockLibraryQuestions: Question[] = [
     },
     points: 2,
     order: 1,
-    chapterIds: ["ch1", "ch2"],
     isInLibrary: true
   },
   {
     id: "lib-3",
-    type: "connect-cards",
-    title: "Match React concepts",
+    type: "multiple-choice",
+    title: "Which hook is used for managing state?",
     content: {
-      pairs: [
-        { id: "p1", left: "useState", right: "Hook for managing state" },
-        { id: "p2", left: "useEffect", right: "Hook for side effects" },
-        { id: "p3", left: "props", right: "Properties passed to components" }
+      question: "Which React hook is used for managing component state?",
+      options: [
+        { id: "1", text: "useState", isCorrect: true },
+        { id: "2", text: "useEffect", isCorrect: false },
+        { id: "3", text: "useContext", isCorrect: false },
+        { id: "4", text: "useReducer", isCorrect: false }
       ]
     },
-    points: 3,
+    points: 1,
     order: 2,
-    chapterIds: ["ch2"],
     isInLibrary: true
   }
 ]
@@ -85,8 +84,7 @@ export function QuestionLibraryModal({
       question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       JSON.stringify(question.content).toLowerCase().includes(searchQuery.toLowerCase())
     
-    const matchesChapter = !selectedChapter || 
-      question.chapterIds?.includes(selectedChapter)
+    const matchesChapter = true // Chapter filtering removed as Question type doesn't have chapterIds
     
     const matchesType = !selectedType || question.type === selectedType
 
@@ -205,15 +203,12 @@ export function QuestionLibraryModal({
                         </h4>
                         <Badge 
                           variant={
-                            question.type === "connect-cards" ? "warning" :
-                            question.type === "question-answer" ? "success" :
-                            "info"
-                          } 
-                          size="sm"
+                            question.type === "question-answer" ? "success" : "info"
+                          }
                         >
                           {question.type.replace('-', ' ')}
                         </Badge>
-                        <Badge variant="primary" size="sm">
+                        <Badge variant="default">
                           {question.points} pts
                         </Badge>
                       </div>
@@ -223,14 +218,7 @@ export function QuestionLibraryModal({
                       </p>
                       
                       <div className="flex gap-spacing-xs"> {/* 4px */}
-                        {question.chapterIds?.map(chapterId => {
-                          const chapter = chapters.find(c => c.id === chapterId)
-                          return chapter ? (
-                            <Badge key={chapterId} variant="outline" size="sm">
-                              {chapter.title}
-                            </Badge>
-                          ) : null
-                        })}
+                        {/* Chapter badges removed as Question type doesn't have chapterIds */}
                       </div>
                     </div>
                     
@@ -259,8 +247,6 @@ function getQuestionPreview(question: Question): string {
       return question.content.question
     case "question-answer":
       return question.content.question
-    case "connect-cards":
-      return `Match ${question.content.pairs.length} pairs`
     default:
       return ""
   }

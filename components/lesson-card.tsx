@@ -32,18 +32,6 @@ const getLessonIcon = (type: string) => {
   }
 }
 
-const getDifficultyColor = (difficulty: 'beginner' | 'intermediate' | 'advanced') => {
-  switch (difficulty) {
-    case 'beginner':
-      return 'text-[var(--text-success)]'
-    case 'intermediate':
-      return 'text-[var(--text-info)]'
-    case 'advanced':
-      return 'text-[var(--text-error)]'
-    default:
-      return 'text-[var(--text-secondary)]'
-  }
-}
 
 export function LessonCard({ 
   lesson, 
@@ -73,7 +61,7 @@ export function LessonCard({
   const isMastered = overallProficiency >= 80
   const isInProgress = overallProficiency > 0 && overallProficiency < 80
 
-  const LessonIcon = getLessonIcon(lesson.type || 'lesson')
+  const LessonIcon = BookOpen // Default icon since lesson doesn't have type
 
   return (
     <>
@@ -105,17 +93,6 @@ export function LessonCard({
                 <Badge variant="secondary" className="text-[var(--font-size-xs)] font-[var(--font-weight-medium)]">
                   {sectionNumber}.{lessonNumber}
                 </Badge>
-                {lesson.difficulty && (
-                  <Badge 
-                    variant="secondary" 
-                    className={cn(
-                      "text-[var(--font-size-xs)] capitalize",
-                      getDifficultyColor(lesson.difficulty)
-                    )}
-                  >
-                    {lesson.difficulty}
-                  </Badge>
-                )}
                 {isMastered && (
                   <Badge className="text-[var(--font-size-xs)] bg-[var(--bg-successLight)] text-[var(--text-success)] border-[var(--border-success)]">
                     <Trophy className="w-3 h-3 mr-[var(--spacing-xs)]" />
@@ -201,7 +178,7 @@ export function LessonCard({
               isInProgress && !isMastered && "bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)]",
               !isInProgress && !isMastered && !isLocked && "bg-[var(--bg-brand)] hover:opacity-90 text-[var(--text-inverse)]"
             )}
-            variant={isMastered ? "outline" : "default"}
+            variant={isMastered ? "secondary" : "primary"}
           >
             <Play className="w-4 h-4 mr-[var(--spacing-sm)]" />
             {isMastered ? 'Review Lesson' : isInProgress ? 'Continue Learning' : 'Start Learning'}

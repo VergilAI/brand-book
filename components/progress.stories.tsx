@@ -32,7 +32,7 @@ const meta = {
     },
     variant: {
       control: 'select',
-      options: ['default', 'success', 'warning', 'error', 'brand'],
+      options: ['default', 'success', 'warning', 'error'],
       description: 'Visual variant of the progress bar',
       table: {
         defaultValue: { summary: 'default' },
@@ -55,13 +55,6 @@ const meta = {
       description: 'Show percentage value',
       table: {
         defaultValue: { summary: 'false' },
-      },
-    },
-    animate: {
-      control: 'boolean',
-      description: 'Enable animations and hover effects',
-      table: {
-        defaultValue: { summary: 'true' },
       },
     },
     className: {
@@ -130,8 +123,8 @@ export const Variants: Story = {
         <div className="space-y-2">
           <Progress 
             value={85} 
-            variant="brand" 
-            label="Brand Progress"
+            variant="default" 
+            label="Primary Progress"
             showPercentage
           />
         </div>
@@ -202,7 +195,7 @@ export const AnimatedProgress: Story = {
       <div className="space-y-4 w-full max-w-md">
         <Progress 
           value={progress} 
-          variant="brand"
+          variant="default"
           size="lg"
           label="Loading Progress"
           showPercentage
@@ -239,15 +232,13 @@ export const WithoutAnimation: Story = {
           variant="default"
           label="Static Progress"
           showPercentage
-          animate={false}
         />
         
         <Progress 
           value={75} 
-          variant="brand"
+          variant="default"
           label="No Hover Effects"
           showPercentage
-          animate={false}
         />
       </div>
     </div>
@@ -265,7 +256,7 @@ export const AITrainingProgress: Story = {
         
         <Progress 
           value={70} 
-          variant="brand"
+          variant="default"
           size="lg"
           label="Training Progress"
           showPercentage
@@ -321,7 +312,7 @@ export const CourseProgress: Story = {
           <h4 className="font-semibold">Introduction to Machine Learning</h4>
           <span className="text-sm font-medium text-text-brand">78%</span>
         </div>
-        <Progress value={78} variant="brand" showPercentage={false} />
+        <Progress value={78} variant="default" showPercentage={false} />
         <p className="text-sm text-text-secondary">
           12 of 15 lessons completed
         </p>
@@ -392,7 +383,7 @@ export const CustomProgress: Story = {
           
           <Progress 
             value={Math.min(uploadProgress, 100)} 
-            variant="brand"
+            variant="default"
             label="Upload"
             showPercentage
           />

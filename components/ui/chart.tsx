@@ -312,27 +312,21 @@ const ChartAxisTick = ({ x, y, payload, ...props }: any) => {
 }
 
 // Wrapper for Recharts Tooltip to use our custom content
-const ChartTooltip = React.forwardRef<
-  any,
-  React.ComponentProps<typeof RechartsTooltip>
->(({ content, ...props }, ref) => {
+const ChartTooltip = ({ content, ...props }: React.ComponentProps<typeof RechartsTooltip>) => {
   // Use our custom tooltip content if no content prop is provided
   const tooltipContent = content || <ChartTooltipContent />
   
-  return <RechartsTooltip ref={ref} content={tooltipContent} {...props} />
-})
+  return <RechartsTooltip content={tooltipContent} {...props} />
+}
 ChartTooltip.displayName = "ChartTooltip"
 
 // Wrapper for Recharts Legend to use our custom content
-const ChartLegend = React.forwardRef<
-  any,
-  React.ComponentProps<typeof RechartsLegend>
->(({ content, ...props }, ref) => {
+const ChartLegend = ({ content, ...props }: React.ComponentProps<typeof RechartsLegend>) => {
   // Use our custom legend content if no content prop is provided
   const legendContent = content || <ChartLegendContent />
   
-  return <RechartsLegend ref={ref} content={legendContent} {...props} />
-})
+  return <RechartsLegend content={legendContent} {...props} />
+}
 ChartLegend.displayName = "ChartLegend"
 
 export {

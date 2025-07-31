@@ -192,20 +192,16 @@ export function KnowledgeGraph({
               })}
               
               {/* Render nodes */}
-              {console.log('Rendering nodes:', nodes.length)}
-              {nodes.map((node, index) => {
-                console.log(`Rendering node ${index}:`, node.title, 'at position:', node.position)
-                return (
-                  <GraphNode
-                    key={node.id}
-                    node={node}
-                    isSelected={selectedNode?.id === node.id}
-                    isHovered={hoveredNode === node.id}
-                    onSelect={handleNodeSelect}
-                    onHover={setHoveredNode}
-                  />
-                )
-              })}
+              {nodes.map((node, index) => (
+                <GraphNode
+                  key={node.id}
+                  node={node}
+                  isSelected={selectedNode?.id === node.id}
+                  isHovered={hoveredNode === node.id}
+                  onSelect={handleNodeSelect}
+                  onHover={setHoveredNode}
+                />
+              ))}
             </g>
           </svg>
 

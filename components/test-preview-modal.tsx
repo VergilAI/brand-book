@@ -151,7 +151,7 @@ export function TestPreviewModal({ test, open, onOpenChange }: TestPreviewModalP
           <div className="flex items-center gap-spacing-sm"> {/* 8px */}
             <Clock size={18} className="text-secondary" /> {/* #6C6C6D */}
             <Badge 
-              variant={getRemainingTime() && getRemainingTime() < 60 ? "error" : "secondary"}
+              variant={(getRemainingTime() ?? 0) < 60 ? "error" : "secondary"}
               className="flex items-center gap-spacing-xs" /* 4px */
             >
               <span className="font-medium">Time Remaining: {formatTime(getRemainingTime() || 0)}</span>

@@ -320,7 +320,7 @@ export function generateVoronoiTessellation(
   boundingBox: { width: number; height: number }
 ): { territories: VoronoiTerritory[]; seaRoutes: SeaRoute[] } {
   // Prepare points for Delaunay triangulation
-  const points = seeds.map(seed => [seed.point.x, seed.point.y])
+  const points: [number, number][] = seeds.map(seed => [seed.point.x, seed.point.y])
   
   // Generate Voronoi diagram using D3
   const delaunay = Delaunay.from(points)

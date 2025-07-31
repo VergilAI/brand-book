@@ -272,7 +272,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
           
           <div className="flex items-center gap-4">
             {completedAudios.size === totalAudios && (
-              <Button variant="success" onClick={handleComplete}>
+              <Button variant="primary" onClick={handleComplete}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Complete Course
               </Button>
@@ -341,7 +341,7 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
                               <h1 className="text-2xl font-bold text-text-primary">
                                 {currentAudio.title}
                               </h1>
-                              <Badge variant="primary">
+                              <Badge variant="brand">
                                 Lesson {currentAudioIndex + 1} of {totalAudios}
                               </Badge>
                             </div>
@@ -363,6 +363,8 @@ export function AudioMaterial({ lessonId, onClose, onComplete }: AudioMaterialPr
                           <TTSButtonStream
                             key={`audio-${currentAudio.id}`}
                             text={currentAudio.transcript.trim()}
+                            className=""
+                            onPlayStart={() => {}}
                             onPlayEnd={handleAudioEnd}
                           />
                         </div>

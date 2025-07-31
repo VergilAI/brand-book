@@ -42,12 +42,14 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     currentView: 'dashboard',
+    onMenuToggle: () => console.log('Menu toggled'),
   },
 };
 
 export const InCourse: Story = {
   args: {
     currentView: 'course',
+    onMenuToggle: () => console.log('Menu toggled'),
   },
   parameters: {
     docs: {
@@ -61,6 +63,7 @@ export const InCourse: Story = {
 export const InLesson: Story = {
   args: {
     currentView: 'lesson',
+    onMenuToggle: () => console.log('Menu toggled'),
   },
   parameters: {
     docs: {
@@ -74,6 +77,7 @@ export const InLesson: Story = {
 export const WithCustomBreadcrumbs: Story = {
   args: {
     currentView: 'lesson',
+    onMenuToggle: () => console.log('Menu toggled'),
     breadcrumbs: [
       { label: 'Home', href: '/lms' },
       { label: 'AI Fundamentals', href: '/lms/courses/ai-fundamentals' },
@@ -91,6 +95,10 @@ export const WithCustomBreadcrumbs: Story = {
 };
 
 export const WithContainer: Story = {
+  args: {
+    currentView: 'dashboard',
+    onMenuToggle: () => console.log('Menu toggled'),
+  },
   render: (args) => (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <LMSHeader {...args} />
@@ -124,14 +132,6 @@ export const WithContainer: Story = {
       </main>
     </div>
   ),
-  args: {
-    currentView: 'course',
-    breadcrumbs: [
-      { label: 'Dashboard', href: '/lms' },
-      { label: 'My Courses', href: '/lms/courses' },
-      { label: 'Advanced Machine Learning' }
-    ]
-  },
   parameters: {
     docs: {
       description: {

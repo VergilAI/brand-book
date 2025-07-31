@@ -49,7 +49,7 @@ export function KnowledgeTreeCard({
   onLessonClick,
   onCompact
 }: KnowledgeTreeCardProps) {
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined)
   const [popoverOpen, setPopoverOpen] = useState(false)
   const { journey, isJourneyVisible, toggleJourneyVisibility, setJourney } = useJourney()
   
@@ -121,18 +121,13 @@ export function KnowledgeTreeCard({
 
       {/* Tree Graph - Full Height */}
       <div className="bg-secondary rounded-lg p-spacing-xs overflow-hidden">
-        {console.log('[KnowledgeTreeCard] Rendering TreeKnowledgeGraph with:', {
-          showJourney: isJourneyVisible,
-          hasJourney: !!journey,
-          journeySteps: journey?.steps?.length || 0
-        })}
         <TreeKnowledgeGraph
           userName={userName}
           knowledgePoints={knowledgePoints}
           className="w-full"
           selectedNodeId={selectedNodeId}
           onNodeSelect={(nodeId) => {
-            setSelectedNodeId(nodeId)
+            setSelectedNodeId(nodeId || undefined)
             setPopoverOpen(!!nodeId)
           }}
           availableLessons={availableLessons}

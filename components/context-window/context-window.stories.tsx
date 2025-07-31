@@ -269,40 +269,65 @@ export const CustomWidth: Story = {
 
 export const DifferentSizes: Story = {
   render: () => {
-    const [size, setSize] = useState<'compact' | 'medium' | 'large'>('medium')
+    const [compactSize, setCompactSize] = useState<'small' | 'medium' | 'large'>('medium')
+    const [expandedSize, setExpandedSize] = useState<'default' | 'large' | 'xlarge'>('default')
     
     return (
       <>
         <div className="p-8">
           <h1 className="text-3xl font-bold mb-4">Context Window Size Demo</h1>
-          <div className="flex gap-2 mb-4">
-            <Button 
-              variant={size === 'compact' ? 'primary' : 'secondary'}
-              onClick={() => setSize('compact')}
-            >
-              Compact
-            </Button>
-            <Button 
-              variant={size === 'medium' ? 'primary' : 'secondary'}
-              onClick={() => setSize('medium')}
-            >
-              Medium
-            </Button>
-            <Button 
-              variant={size === 'large' ? 'primary' : 'secondary'}
-              onClick={() => setSize('large')}
-            >
-              Large
-            </Button>
+          <div className="mb-4">
+            <h3 className="text-sm font-medium mb-2">Compact Size:</h3>
+            <div className="flex gap-2 mb-4">
+              <Button 
+                variant={compactSize === 'small' ? 'primary' : 'secondary'}
+                onClick={() => setCompactSize('small')}
+              >
+                Small
+              </Button>
+              <Button 
+                variant={compactSize === 'medium' ? 'primary' : 'secondary'}
+                onClick={() => setCompactSize('medium')}
+              >
+                Medium
+              </Button>
+              <Button 
+                variant={compactSize === 'large' ? 'primary' : 'secondary'}
+                onClick={() => setCompactSize('large')}
+              >
+                Large
+              </Button>
+            </div>
+            <h3 className="text-sm font-medium mb-2">Expanded Size:</h3>
+            <div className="flex gap-2">
+              <Button 
+                variant={expandedSize === 'default' ? 'primary' : 'secondary'}
+                onClick={() => setExpandedSize('default')}
+              >
+                Default
+              </Button>
+              <Button 
+                variant={expandedSize === 'large' ? 'primary' : 'secondary'}
+                onClick={() => setExpandedSize('large')}
+              >
+                Large
+              </Button>
+              <Button 
+                variant={expandedSize === 'xlarge' ? 'primary' : 'secondary'}
+                onClick={() => setExpandedSize('xlarge')}
+              >
+                X-Large
+              </Button>
+            </div>
           </div>
-          <p>Current size: {size}</p>
+          <p>Compact: {compactSize}, Expanded: {expandedSize}</p>
         </div>
-        <ContextWindowLayout compactSize={size} expandedSize={size}>
+        <ContextWindowLayout compactSize={compactSize} expandedSize={expandedSize}>
           <ContextWindowTrigger />
           <ContextWindow>
             <div className="p-6">
-              <h3 className="text-lg font-semibold mb-2">Size: {size}</h3>
-              <p>This context window is set to {size} size.</p>
+              <h3 className="text-lg font-semibold mb-2">Context Window</h3>
+              <p>Compact: {compactSize}, Expanded: {expandedSize}</p>
             </div>
           </ContextWindow>
         </ContextWindowLayout>

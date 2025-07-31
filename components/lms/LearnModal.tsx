@@ -238,7 +238,7 @@ export function LearnModal({ lesson, isOpen, onClose, onStartLearning }: LearnMo
             </div>
             
             <div className="flex gap-3">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="secondary" onClick={onClose}>
                 Cancel
               </Button>
               <Button

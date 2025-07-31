@@ -2,6 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { KnowledgeTreeCard } from './knowledge-tree-card'
 import { JourneyProvider } from './knowledge-graph/journey-context'
 
+// Define KnowledgePoint type to match the component's expectation
+interface KnowledgePoint {
+  id: string
+  title: string
+  progress: number
+  dependencies?: string[]
+  hardDependencies?: string[]
+  dependencyDetails?: Record<string, { type: 'hard' | 'soft', requiredElo: number }>
+}
+
 const meta = {
   title: 'LMS/KnowledgeTreeCard',
   component: KnowledgeTreeCard,
@@ -22,7 +32,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Sample knowledge points with dependencies
-const sampleKnowledgePoints = [
+const sampleKnowledgePoints: KnowledgePoint[] = [
   {
     id: 'kp-1',
     title: 'ML Definition',

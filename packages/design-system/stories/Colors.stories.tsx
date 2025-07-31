@@ -134,25 +134,25 @@ export const PrimitiveColors: StoryObj = {
           <div className="space-y-2">
             <div 
               className="h-16 rounded-md text-white flex items-center justify-center"
-              style={{ backgroundColor: colors['vergil-purple'] }}
+              style={{ backgroundColor: colors.vergilPurple }}
             >
               Vergil Purple
             </div>
             <div className="text-sm">
               <div className="font-mono text-xs text-gray-500">--vergil-purple</div>
-              <div className="text-xs text-gray-600">{colors['vergil-purple']}</div>
+              <div className="text-xs text-gray-600">{colors.vergilPurple}</div>
             </div>
           </div>
           <div className="space-y-2">
             <div 
               className="h-16 rounded-md text-white flex items-center justify-center"
-              style={{ backgroundColor: colors['cosmic-purple'] }}
+              style={{ backgroundColor: colors.cosmicPurple }}
             >
               Cosmic Purple
             </div>
             <div className="text-sm">
               <div className="font-mono text-xs text-gray-500">--cosmic-purple</div>
-              <div className="text-xs text-gray-600">{colors['cosmic-purple']}</div>
+              <div className="text-xs text-gray-600">{colors.cosmicPurple}</div>
             </div>
           </div>
         </div>

@@ -362,7 +362,7 @@ export const RealWorldExamples: Story = {
           </div>
         </CardContent>
         <CardFooter className="justify-between">
-          <Badge variant="secondary">Arrays</Badge>
+          <Badge variant="default">Arrays</Badge>
           <Button size="sm">
             Solve Challenge
             <ArrowRight className="ml-2 h-4 w-4" />

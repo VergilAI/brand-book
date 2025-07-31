@@ -2,6 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { NodeDetailsPopover } from './node-details-popover'
 import { ProgressNode } from './progress-node'
 import { Button } from '@/components/button'
+import * as React from 'react'
+
+// Define KnowledgePoint type to match the component's expectation
+interface KnowledgePoint {
+  id: string
+  title: string
+  progress: number
+  dependencies?: string[]
+  hardDependencies?: string[]
+  dependencyDetails?: Record<string, { id: string; type: 'hard' | 'soft'; requiredElo: number }>
+}
 
 const meta = {
   title: 'LMS/NodeDetailsPopover',
@@ -28,7 +39,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Sample knowledge points
-const allNodes = [
+const allNodes: KnowledgePoint[] = [
   {
     id: 'kp-1',
     title: 'ML Definition',
@@ -54,8 +65,8 @@ const allNodes = [
     dependencies: ['kp-2', 'kp-3'],
     hardDependencies: ['kp-2'],
     dependencyDetails: {
-      'kp-2': { type: 'hard' as const, requiredElo: 80 },
-      'kp-3': { type: 'soft' as const, requiredElo: 60 },
+      'kp-2': { id: 'kp-2', type: 'hard' as const, requiredElo: 80 },
+      'kp-3': { id: 'kp-3', type: 'soft' as const, requiredElo: 60 },
     },
   },
   {
@@ -65,7 +76,7 @@ const allNodes = [
     dependencies: ['kp-4'],
     hardDependencies: ['kp-4'],
     dependencyDetails: {
-      'kp-4': { type: 'hard' as const, requiredElo: 80 },
+      'kp-4': { id: 'kp-4', type: 'hard' as const, requiredElo: 80 },
     },
   },
 ]
@@ -132,7 +143,7 @@ export const WithManyUnlocks: Story = {
         progress: 0,
         dependencies: ['kp-3'],
         dependencyDetails: {
-          'kp-3': { type: 'hard' as const, requiredElo: 90 },
+          'kp-3': { id: 'kp-3', type: 'hard' as const, requiredElo: 90 },
         },
       },
       {
@@ -141,7 +152,7 @@ export const WithManyUnlocks: Story = {
         progress: 0,
         dependencies: ['kp-3'],
         dependencyDetails: {
-          'kp-3': { type: 'soft' as const, requiredElo: 70 },
+          'kp-3': { id: 'kp-3', type: 'soft' as const, requiredElo: 70 },
         },
       },
     ],
@@ -159,7 +170,12 @@ export const CustomTrigger: Story = {
 }
 
 export const DifferentSides: Story = {
-  render: () => (
+  args: {
+    node: allNodes[3],
+    allNodes: allNodes,
+    children: <Button>Popover Trigger</Button>,
+  },
+  render: (args) => (
     <div className="grid grid-cols-2 gap-16">
       <NodeDetailsPopover
         node={allNodes[3]}
@@ -197,7 +213,13 @@ export const DifferentSides: Story = {
 }
 
 export const Interactive: Story = {
-  render: () => {
+  args: {
+    node: allNodes[3],
+    allNodes: allNodes,
+    availableIn: availableLessons,
+    children: <ProgressNode progress={45} size={48} title="Linear Regression" />,
+  },
+  render: (args) => {
     const [open, setOpen] = React.useState(false)
     
     return (

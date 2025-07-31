@@ -94,7 +94,7 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
     
     if (avg >= 80) return <Badge variant="success">Ready</Badge>
     if (avg >= 60) return <Badge variant="success">Almost Ready</Badge>
-    return <Badge variant="destructive">Not Ready</Badge>
+    return <Badge variant="error">Not Ready</Badge>
   }
 
   if (!course || !stats) {
@@ -328,12 +328,12 @@ export function CourseOverviewNew({ course }: CourseOverviewNewProps) {
                           
                           // Status determination
                           const getStatusBadge = () => {
-                            if (lesson.status === 'in-progress') {
-                              return <Badge variant="info" className="text-xs">In Progress</Badge>
-                            } else if (lesson.status === 'not-started') {
-                              return <Badge variant="secondary" className="text-xs">Not Started</Badge>
-                            } else {
+                            if (isCompleted) {
                               return <Badge variant="success" className="text-xs">Completed</Badge>
+                            } else if (hasProgress) {
+                              return <Badge variant="info" className="text-xs">In Progress</Badge>
+                            } else {
+                              return <Badge variant="secondary" className="text-xs">Not Started</Badge>
                             }
                           }
                           

@@ -87,7 +87,7 @@ export const WithDifferentTriggerStyles: Story = {
       {/* Button trigger */}
       <Collapsible>
         <CollapsibleTrigger asChild>
-          <Button variant="default" size="sm" className="w-full">
+          <Button variant="secondary" size="sm" className="w-full">
             Button Trigger
           </Button>
         </CollapsibleTrigger>

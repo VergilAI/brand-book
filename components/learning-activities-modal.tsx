@@ -326,7 +326,7 @@ export function LearningActivitiesModal({ lesson, isOpen, onClose, onSelectGame 
                         {gameType.category}
                       </Badge>
                       {gameType.recommended && (
-                        <Badge variant="primary" className="text-xs">
+                        <Badge variant="brand" className="text-xs">
                           Recommended
                         </Badge>
                       )}

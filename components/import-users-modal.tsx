@@ -346,7 +346,7 @@ Bob Johnson,bob.johnson@example.com,Instructor,+0987654321,Chicago,Sales,John Do
                               {user.role}
                             </td>
                             <td className="px-spacing-md py-spacing-sm">
-                              <Badge variant="success" size="sm">Valid</Badge>
+                              <Badge variant="success">Valid</Badge>
                             </td>
                           </tr>
                         ))}

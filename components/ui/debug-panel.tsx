@@ -10,7 +10,7 @@ interface DebugAction {
   label: string
   description: string
   action: () => Promise<void> | void
-  variant?: 'default' | 'destructive' | 'warning'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive'
   icon?: React.ReactNode
 }
 
@@ -134,7 +134,7 @@ export function DebugPanel() {
                 key={action.id}
                 onClick={() => runAction(action)}
                 disabled={isRunning !== null}
-                variant={action.variant || 'outline'}
+                variant={action.variant || 'secondary'}
                 size="sm"
                 className="w-full justify-start text-left font-mono text-xs transition-all duration-fast"
               >

@@ -8,6 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/dialog"
 import { cn } from "@/lib/utils"
 
@@ -75,7 +76,7 @@ export function Modal({
 }
 
 // Export subcomponents for flexibility
-export const ModalTrigger = Dialog.Trigger
+export const ModalTrigger = DialogTrigger
 export const ModalContent = DialogContent
 export const ModalHeader = DialogHeader
 export const ModalFooter = DialogFooter

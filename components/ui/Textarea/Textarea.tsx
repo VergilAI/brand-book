@@ -109,7 +109,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     defaultValue,
     ...props 
   }, ref) => {
-    const [internalValue, setInternalValue] = React.useState(defaultValue || "")
+    const [internalValue, setInternalValue] = React.useState(() => {
+      if (!defaultValue) return ""
+      if (typeof defaultValue === 'string') return defaultValue
+      if (typeof defaultValue === 'number') return String(defaultValue)
+      return Array.isArray(defaultValue) ? defaultValue.join('') : String(defaultValue)
+    })
     const textareaRef = React.useRef<HTMLTextAreaElement>(null)
     const combinedRef = React.useCallback(
       (node: HTMLTextAreaElement | null) => {
@@ -126,8 +131,20 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     )
     
     const computedVariant = error ? "error" : success ? "success" : variant
-    const currentValue = value !== undefined ? String(value) : internalValue
-    const currentLength = currentValue.length
+    let valueAsString: string
+    if (value !== undefined) {
+      if (typeof value === 'string') {
+        valueAsString = value
+      } else if (typeof value === 'number') {
+        valueAsString = String(value)
+      } else {
+        // Handle readonly string[] or any array
+        valueAsString = Array.isArray(value) ? value.join('') : String(value)
+      }
+    } else {
+      valueAsString = internalValue
+    }
+    const currentLength = valueAsString.length
     
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = e.target.value
@@ -150,7 +167,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     
     React.useEffect(() => {
       adjustHeight()
-    }, [currentValue, adjustHeight])
+    }, [valueAsString, adjustHeight])
     
     React.useEffect(() => {
       const handleResize = () => adjustHeight()

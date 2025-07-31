@@ -16,22 +16,6 @@ const meta = {
   },
   tags: ['autodocs'],
   argTypes: {
-    size: {
-      control: 'select',
-      options: ['sm', 'md', 'lg'],
-      description: 'Input size variant',
-      table: {
-        defaultValue: { summary: 'md' },
-      },
-    },
-    variant: {
-      control: 'select',
-      options: ['default', 'error', 'success'],
-      description: 'Input variant for different states',
-      table: {
-        defaultValue: { summary: 'default' },
-      },
-    },
     error: {
       control: 'boolean',
       description: 'Error state (overrides variant)',
@@ -79,7 +63,6 @@ export const Default: Story = {
   args: {
     type: 'text',
     placeholder: 'Enter text...',
-    size: 'md',
   },
 };
 
@@ -88,15 +71,15 @@ export const Sizes: Story = {
     <div className="space-y-4 w-full max-w-sm">
       <div className="space-y-1.5">
         <Label>Small Input</Label>
-        <Input size="sm" placeholder="Small size input" />
+        <Input placeholder="Small size input" />
       </div>
       <div className="space-y-1.5">
         <Label>Medium Input (Default)</Label>
-        <Input size="md" placeholder="Medium size input" />
+        <Input placeholder="Medium size input" />
       </div>
       <div className="space-y-1.5">
         <Label>Large Input</Label>
-        <Input size="lg" placeholder="Large size input" />
+        <Input placeholder="Large size input" />
       </div>
     </div>
   ),
@@ -121,14 +104,14 @@ export const Variants: Story = {
           <AlertCircle className="h-4 w-4 text-text-error" />
           Error Variant
         </Label>
-        <Input variant="error" placeholder="Error state input" />
+        <Input error placeholder="Error state input" />
       </div>
       <div className="space-y-1.5">
         <Label className="flex items-center gap-2">
           <Check className="h-4 w-4 text-text-success" />
           Success Variant
         </Label>
-        <Input variant="success" placeholder="Success state input" />
+        <Input success placeholder="Success state input" />
       </div>
     </div>
   ),
@@ -348,9 +331,9 @@ export const SemanticTokenShowcase: Story = {
       <div className="space-y-4">
         <h4 className="text-base font-medium text-text-emphasis">Size Scale with Spacing Tokens</h4>
         <div className="space-y-2">
-          <Input size="sm" placeholder="Small: px-sm py-xs" />
-          <Input size="md" placeholder="Medium: px-md py-sm" />
-          <Input size="lg" placeholder="Large: px-lg py-md" />
+          <Input placeholder="Small: px-sm py-xs" />
+          <Input placeholder="Medium: px-md py-sm" />
+          <Input placeholder="Large: px-lg py-md" />
         </div>
       </div>
     </div>
