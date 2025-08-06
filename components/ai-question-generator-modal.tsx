@@ -6,7 +6,7 @@ import { Modal } from "@/components/modal"
 import { Button } from "@/components/button"
 import { Card } from "@/components/card"
 import { Badge } from "@/components/badge"
-import { Sparkles, FileText, Loader2, Plus } from "lucide-react"
+import { Sparkles, FileText, Loader2, Plus, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Question, QuestionType } from "./test-creator"
 
@@ -14,12 +14,16 @@ interface AIQuestionGeneratorModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onGenerate: (questions: Question[]) => void
+  onBack?: () => void // Optional back callback for course generator context
+  backLabel?: string // Custom label for back button
 }
 
 export function AIQuestionGeneratorModal({
   open,
   onOpenChange,
-  onGenerate
+  onGenerate,
+  onBack,
+  backLabel = "Back to Course Generator"
 }: AIQuestionGeneratorModalProps) {
   const [prompt, setPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
@@ -155,9 +159,17 @@ export function AIQuestionGeneratorModal({
 
   const footerElement = generatedQuestions.length > 0 ? (
     <div className="flex justify-between w-full">
-      <span className="text-sm text-secondary">
-        {selectedQuestions.length} of {generatedQuestions.length} questions selected
-      </span>
+      <div className="flex items-center gap-spacing-sm">
+        {onBack && (
+          <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft size={16} className="mr-spacing-xs" />
+            {backLabel}
+          </Button>
+        )}
+        <span className="text-sm text-secondary">
+          {selectedQuestions.length} of {generatedQuestions.length} questions selected
+        </span>
+      </div>
       <div className="flex gap-spacing-sm">
         <Button variant="ghost" onClick={() => setGeneratedQuestions([])}>
           Generate New
@@ -172,27 +184,37 @@ export function AIQuestionGeneratorModal({
       </div>
     </div>
   ) : (
-    <div className="flex justify-end gap-spacing-sm w-full">
-      <Button variant="ghost" onClick={handleClose}>
-        Cancel
-      </Button>
-      <Button 
-        variant="primary" 
-        onClick={handleGenerate}
-        disabled={!prompt.trim() || isGenerating}
-      >
-        {isGenerating ? (
-          <>
-            <Loader2 size={16} className="mr-spacing-xs animate-spin" />
-            Generating...
-          </>
-        ) : (
-          <>
-            <Sparkles size={16} className="mr-spacing-xs" />
-            Generate Questions
-          </>
+    <div className="flex justify-between gap-spacing-sm w-full">
+      <div>
+        {onBack && (
+          <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft size={16} className="mr-spacing-xs" />
+            {backLabel}
+          </Button>
         )}
-      </Button>
+      </div>
+      <div className="flex gap-spacing-sm">
+        <Button variant="ghost" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button 
+          variant="primary" 
+          onClick={handleGenerate}
+          disabled={!prompt.trim() || isGenerating}
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 size={16} className="mr-spacing-xs animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles size={16} className="mr-spacing-xs" />
+              Generate Questions
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   )
 

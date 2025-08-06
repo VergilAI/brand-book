@@ -25,6 +25,7 @@ import { Button } from "@/components/button"
 import { Card } from "@/components/card"
 import { Badge } from "@/components/badge"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 import { 
   Plus, 
   Settings, 
@@ -35,7 +36,8 @@ import {
   GripVertical,
   Sparkles,
   FileQuestion,
-  ListChecks
+  ListChecks,
+  ArrowLeft
 } from "lucide-react"
 import { QuestionEditor } from "./question-editor"
 import { TestSettings } from "./test-settings"
@@ -94,7 +96,13 @@ const getQuestionTypeColor = (type: QuestionType) => {
   }
 }
 
-export function TestCreator() {
+interface TestCreatorProps {
+  fromCourseGenerator?: boolean
+  returnStep?: string
+}
+
+export function TestCreator({ fromCourseGenerator, returnStep }: TestCreatorProps = {}) {
+  const router = useRouter()
   const [test, setTest] = useState<Test>({
     title: "Untitled Test",
     description: "",
@@ -339,21 +347,34 @@ export function TestCreator() {
         {/* Header */}
         <header className="bg-primary border-b border-subtle px-spacing-lg py-spacing-md"> {/* #FFFFFF, rgba(0,0,0,0.05), 24px, 16px */}
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={test.title}
-                onChange={(e) => setTest(prev => ({ ...prev, title: e.target.value }))}
-                className="text-2xl font-semibold text-primary bg-transparent border-none outline-none w-full" // 30px, 600, #1D1D1F
-                placeholder="Enter test title..."
-              />
-              <input
-                type="text"
-                value={test.description}
-                onChange={(e) => setTest(prev => ({ ...prev, description: e.target.value }))}
-                className="text-base text-secondary bg-transparent border-none outline-none w-full" // 16px, #6C6C6D
-                placeholder="Add a description..."
-              />
+            <div className="flex items-center gap-spacing-md flex-1">
+              {fromCourseGenerator && (
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => router.push(`/lms/course-generator?step=${returnStep}`)}
+                  className="mr-spacing-md"
+                >
+                  <ArrowLeft size={20} className="mr-spacing-xs" />
+                  Back to Course Generator
+                </Button>
+              )}
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={test.title}
+                  onChange={(e) => setTest(prev => ({ ...prev, title: e.target.value }))}
+                  className="text-2xl font-semibold text-primary bg-transparent border-none outline-none w-full" // 30px, 600, #1D1D1F
+                  placeholder="Enter test title..."
+                />
+                <input
+                  type="text"
+                  value={test.description}
+                  onChange={(e) => setTest(prev => ({ ...prev, description: e.target.value }))}
+                  className="text-base text-secondary bg-transparent border-none outline-none w-full" // 16px, #6C6C6D
+                  placeholder="Add a description..."
+                />
+              </div>
             </div>
             <div className="flex items-center gap-spacing-sm"> {/* 8px */}
               <Button
