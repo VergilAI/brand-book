@@ -20,52 +20,59 @@ import { cn } from "@/lib/utils"
 import { ProcessingStep, CourseGeneratorState } from "./types"
 import { FileUploadStep } from "./components/steps/upload-step"
 import { ProcessingStep as ProcessingStepComponent } from "./components/steps/processing-step"
-import { PersonalizeStep } from "./components/steps/personalize-step"
+import { EnhanceStep } from "./components/steps/enhance-step"
 import { StructureStep } from "./components/steps/structure-step"
-import { ContentStep } from "./components/steps/content-step"
-import { PublishStep } from "./components/steps/publish-step"
+import { ActivitiesStep } from "./components/steps/activities-step"
+import { ReviewStep } from "./components/steps/review-step"
 
 const STEPS: Array<{
   id: ProcessingStep
   label: string
   description: string
   icon: React.ReactNode
+  section: 'content' | 'course'
 }> = [
   {
     id: 'upload',
-    label: 'Upload Materials',
-    description: 'Upload PDF or document files',
-    icon: <Upload className="w-5 h-5" />
+    label: 'Upload Knowledge Base',
+    description: 'Upload source documents',
+    icon: <Upload className="w-5 h-5" />,
+    section: 'content'
   },
   {
-    id: 'extracting',
-    label: 'Extract Content',
-    description: 'Processing your documents',
-    icon: <FileText className="w-5 h-5" />
+    id: 'extract',
+    label: 'Extract & Review',
+    description: 'Review extracted content',
+    icon: <FileText className="w-5 h-5" />,
+    section: 'content'
   },
   {
-    id: 'analyzing',
+    id: 'enhance',
     label: 'Personalize Content',
-    description: 'Configure AI settings',
-    icon: <Brain className="w-5 h-5" />
+    description: 'Customize tone & audience',
+    icon: <Brain className="w-5 h-5" />,
+    section: 'content'
   },
   {
-    id: 'structuring',
+    id: 'structure',
     label: 'Structure Course',
-    description: 'Organizing into modules',
-    icon: <BookOpen className="w-5 h-5" />
+    description: 'Organize chapters & lessons',
+    icon: <BookOpen className="w-5 h-5" />,
+    section: 'course'
   },
   {
-    id: 'generating',
-    label: 'Generate Activities',
-    description: 'Creating learning games',
-    icon: <Sparkles className="w-5 h-5" />
+    id: 'activities',
+    label: 'Create Activities',
+    description: 'Add games & assessments',
+    icon: <Sparkles className="w-5 h-5" />,
+    section: 'course'
   },
   {
-    id: 'complete',
+    id: 'review',
     label: 'Review & Publish',
     description: 'Finalize your course',
-    icon: <CheckCircle className="w-5 h-5" />
+    icon: <CheckCircle className="w-5 h-5" />,
+    section: 'course'
   }
 ]
 
@@ -87,6 +94,11 @@ export default function CourseGeneratorPage() {
       setState(prev => ({ ...prev, currentStep: step }))
     }
   }, [searchParams])
+
+  // Auto-scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [state.currentStep])
 
   const currentStepIndex = STEPS.findIndex(s => s.id === state.currentStep)
   const canGoBack = currentStepIndex > 0 && !state.isProcessing
@@ -129,24 +141,25 @@ export default function CourseGeneratorPage() {
             onNext={handleNext}
           />
         )
-      case 'extracting':
+      case 'extract':
         return (
           <ProcessingStepComponent
-            state={state}
-            onStateChange={setState}
-            onNext={handleNext}
-          />
-        )
-      case 'analyzing':
-        return (
-          <PersonalizeStep
             state={state}
             onStateChange={setState}
             onNext={handleNext}
             onBack={handleBack}
           />
         )
-      case 'structuring':
+      case 'enhance':
+        return (
+          <EnhanceStep
+            state={state}
+            onStateChange={setState}
+            onNext={handleNext}
+            onBack={handleBack}
+          />
+        )
+      case 'structure':
         return (
           <StructureStep
             state={state}
@@ -155,18 +168,18 @@ export default function CourseGeneratorPage() {
             onBack={handleBack}
           />
         )
-      case 'generating':
+      case 'activities':
         return (
-          <ContentStep
+          <ActivitiesStep
             state={state}
             onStateChange={setState}
             onNext={handleNext}
             onBack={handleBack}
           />
         )
-      case 'complete':
+      case 'review':
         return (
-          <PublishStep
+          <ReviewStep
             state={state}
             onStateChange={setState}
             onBack={handleBack}
@@ -178,17 +191,17 @@ export default function CourseGeneratorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-secondary">
+    <div className="h-screen flex flex-col bg-bg-secondary overflow-hidden">
      
-      <header className="bg-bg-primary border-b border-border-default">
-        <div className="max-w-7xl mx-auto px-spacing-lg py-spacing-lg">
+      <header className="bg-bg-primary border-b border-border-default flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-spacing-lg py-spacing-md">
           <div className="flex items-center gap-spacing-md">
             <BookOpen className="w-8 h-8 text-text-brand" />
             <div>
               <h1 className="text-2xl font-bold text-text-primary">
                 AI Course Generator
               </h1>
-              <p className="text-text-secondary">
+              <p className="text-text-secondary text-sm">
                 Transform your learning materials into interactive courses
               </p>
             </div>
@@ -197,46 +210,72 @@ export default function CourseGeneratorPage() {
       </header>
 
      
-      <div className="bg-bg-primary border-b border-border-subtle">
-        <div className="max-w-7xl mx-auto px-spacing-lg py-spacing-md">
+      <div className="bg-bg-primary border-b border-border-subtle flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-spacing-lg py-spacing-sm">
+          {/* Section Labels - Hidden on mobile */}
+          <div className="hidden md:flex items-center justify-between mb-spacing-sm">
+            <div className="flex-1">
+              <h3 className="text-xs font-semibold text-text-primary uppercase tracking-wide">Section 1: Content Management</h3>
+              <p className="text-xs text-text-secondary">Prepare and refine your source material</p>
+            </div>
+            <div className="w-px h-6 bg-border-default mx-spacing-md"></div>
+            <div className="flex-1">
+              <h3 className="text-xs font-semibold text-text-primary uppercase tracking-wide">Section 2: Course Development</h3>
+              <p className="text-xs text-text-secondary">Create the learning experience</p>
+            </div>
+          </div>
+          
+          {/* Steps */}
           <div className="flex items-center justify-between">
             {STEPS.map((step, index) => {
               const isActive = step.id === state.currentStep
               const isCompleted = index < currentStepIndex
               const isProcessing = state.isProcessing && isActive
-
               const isClickable = !state.isProcessing && (index <= currentStepIndex + 1)
+              
+              // Add section divider
+              const showSectionDivider = index === 3 // Before "structure" step (first step of section 2)
               
               return (
                 <React.Fragment key={step.id}>
+                  {showSectionDivider && (
+                    <div className="flex items-center mx-spacing-md">
+                      <div className="w-px h-12 bg-border-emphasis"></div>
+                    </div>
+                  )}
                   <div
                     className={cn(
-                      "flex items-center gap-spacing-sm", // 8px
-                      isActive && "text-text-brand", // #7B00FF
-                      isCompleted && "text-green-600", // darker green for better visibility
-                      !isActive && !isCompleted && "text-text-tertiary", // #71717A
+                      "flex items-center gap-spacing-xs md:gap-spacing-sm",
+                      isActive && "text-text-brand",
+                      isCompleted && "text-green-600",
+                      !isActive && !isCompleted && "text-text-tertiary",
                       isClickable && "cursor-pointer hover:opacity-80 transition-opacity"
                     )}
                     onClick={() => isClickable && handleStepClick(step.id, index)}
                   >
                     <div
                       className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-normal", // 200ms
-                        isActive && "bg-bg-brand text-text-inverse shadow-brand-md", // #7B00FF, #F5F5F7
-                        isCompleted && "bg-green-600 text-white", // darker green background, white for better contrast
-                        !isActive && !isCompleted && "bg-bg-emphasis text-text-tertiary" // #F0F0F2, #71717A
+                        "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-normal",
+                        "text-xs md:text-sm",
+                        isActive && "bg-bg-brand text-text-inverse shadow-brand-md",
+                        isCompleted && "bg-green-600 text-white",
+                        !isActive && !isCompleted && "bg-bg-emphasis text-text-tertiary"
                       )}
                     >
-                      {step.icon}
+                      <div className="w-4 h-4 md:w-5 md:h-5">
+                        {React.cloneElement(step.icon as React.ReactElement, { 
+                          className: "w-full h-full" 
+                        })}
+                      </div>
                     </div>
-                    <div className="hidden md:block">
-                      <p className="font-medium">{step.label}</p>
-                      <p className="text-sm text-text-secondary">
+                    <div className="hidden lg:block">
+                      <p className="text-sm font-medium">{step.label}</p>
+                      <p className="text-xs text-text-secondary">
                         {step.description}
                       </p>
                     </div>
                   </div>
-                  {index < STEPS.length - 1 && (
+                  {index < STEPS.length - 1 && index !== 2 && index !== 5 && (
                     <div
                       className={cn(
                         "flex-1 h-0.5 mx-spacing-sm transition-all duration-normal", // 8px, 200ms
@@ -252,10 +291,14 @@ export default function CourseGeneratorPage() {
       </div>
 
      
-      <main className="max-w-7xl mx-auto px-spacing-lg py-spacing-xl">
-        <Card className="p-spacing-xl">
-          {renderStepContent()}
-        </Card>
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full max-w-7xl mx-auto px-spacing-lg py-spacing-lg">
+          <Card className="h-full flex flex-col p-spacing-lg overflow-hidden">
+            <div className="h-full transition-all duration-300 ease-in-out">
+              {renderStepContent()}
+            </div>
+          </Card>
+        </div>
       </main>
     </div>
   )

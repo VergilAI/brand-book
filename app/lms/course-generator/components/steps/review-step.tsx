@@ -27,13 +27,13 @@ import { cn } from "@/lib/utils"
 import { CourseGeneratorState } from "../../types"
 import { useRouter } from "next/navigation"
 
-interface PublishStepProps {
+interface ReviewStepProps {
   state: CourseGeneratorState
   onStateChange: React.Dispatch<React.SetStateAction<CourseGeneratorState>>
   onBack: () => void
 }
 
-export function PublishStep({ state, onStateChange, onBack }: PublishStepProps) {
+export function ReviewStep({ state, onStateChange, onBack }: ReviewStepProps) {
   const router = useRouter()
   const [isPublishing, setIsPublishing] = useState(false)
   
@@ -83,19 +83,21 @@ export function PublishStep({ state, onStateChange, onBack }: PublishStepProps) 
   }
 
   return (
-    <div className="space-y-spacing-lg">
-     
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-spacing-md">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+    <div className="flex flex-col h-full">
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto space-y-spacing-lg pb-spacing-lg">
+        {/* Success Header */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-spacing-md">
+            <CheckCircle className="w-8 h-8 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-text-primary mb-spacing-sm">
+            Course Generated Successfully!
+          </h2>
+          <p className="text-text-secondary max-w-2xl mx-auto">
+            Your course is ready to publish. Review the details below and make it available to learners.
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-text-primary mb-spacing-sm">
-          Course Generated Successfully!
-        </h2>
-        <p className="text-text-secondary max-w-2xl mx-auto">
-          Your course is ready to publish. Review the details below and make it available to learners.
-        </p>
-      </div>
 
      
       <Card className="p-spacing-xl">
@@ -205,87 +207,90 @@ export function PublishStep({ state, onStateChange, onBack }: PublishStepProps) 
       </div>
 
      
-      <Card className="p-spacing-lg bg-bg-brand/5 border-border-brand/20">
-        <h3 className="text-lg font-medium text-text-primary mb-spacing-md">
-          Publishing Options
-        </h3>
-        <div className="space-y-spacing-sm">
-          <label className="flex items-center gap-spacing-sm cursor-pointer">
-            <input
-              type="checkbox"
-              defaultChecked
-              className="w-4 h-4 text-text-brand rounded border-border-default focus:ring-2 focus:ring-border-focus" // #7B00FF, rgba(0,0,0,0.1), #007AFF
-            />
-            <span className="text-sm text-text-primary">Make course publicly available</span>
-          </label>
-          <label className="flex items-center gap-spacing-sm cursor-pointer">
-            <input
-              type="checkbox"
-              defaultChecked
-              className="w-4 h-4 text-text-brand rounded border-border-default focus:ring-2 focus:ring-border-focus" // #7B00FF, rgba(0,0,0,0.1), #007AFF
-            />
-            <span className="text-sm text-text-primary">Allow learners to track progress</span>
-          </label>
-          <label className="flex items-center gap-spacing-sm cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-4 h-4 text-text-brand rounded border-border-default focus:ring-2 focus:ring-border-focus" // #7B00FF, rgba(0,0,0,0.1), #007AFF
-            />
-            <span className="text-sm text-text-primary">Require enrollment approval</span>
-          </label>
-        </div>
-      </Card>
+        <Card className="p-spacing-lg bg-bg-brand/5 border-border-brand/20">
+          <h3 className="text-lg font-medium text-text-primary mb-spacing-md">
+            Publishing Options
+          </h3>
+          <div className="space-y-spacing-sm">
+            <label className="flex items-center gap-spacing-sm cursor-pointer">
+              <input
+                type="checkbox"
+                defaultChecked
+                className="w-4 h-4 text-text-brand rounded border-border-default focus:ring-2 focus:ring-border-focus" // #7B00FF, rgba(0,0,0,0.1), #007AFF
+              />
+              <span className="text-sm text-text-primary">Make course publicly available</span>
+            </label>
+            <label className="flex items-center gap-spacing-sm cursor-pointer">
+              <input
+                type="checkbox"
+                defaultChecked
+                className="w-4 h-4 text-text-brand rounded border-border-default focus:ring-2 focus:ring-border-focus" // #7B00FF, rgba(0,0,0,0.1), #007AFF
+              />
+              <span className="text-sm text-text-primary">Allow learners to track progress</span>
+            </label>
+            <label className="flex items-center gap-spacing-sm cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-4 h-4 text-text-brand rounded border-border-default focus:ring-2 focus:ring-border-focus" // #7B00FF, rgba(0,0,0,0.1), #007AFF
+              />
+              <span className="text-sm text-text-primary">Require enrollment approval</span>
+            </label>
+          </div>
+        </Card>
+      </div>
 
-     
-      <div className="flex flex-col sm:flex-row gap-spacing-md justify-between">
-        <Button
-          variant="ghost"
-          size="lg"
-          onClick={onBack}
-          disabled={isPublishing}
-        >
-          <ArrowLeft className="w-5 h-5 mr-spacing-sm" />
-          Back to Edit
-        </Button>
-        
-        <div className="flex gap-spacing-sm">
+      {/* Sticky Footer with Navigation */}
+      <div className="sticky bottom-0 bg-bg-primary border-t border-border-subtle pt-spacing-md">
+        <div className="flex flex-col sm:flex-row gap-spacing-md justify-between">
           <Button
             variant="secondary"
             size="lg"
+            onClick={onBack}
             disabled={isPublishing}
           >
-            <Eye className="w-5 h-5 mr-spacing-sm" />
-            Preview
+            <ArrowLeft className="w-5 h-5 mr-spacing-sm" />
+            Back to Edit
           </Button>
           
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={isPublishing}
-          >
-            <Download className="w-5 h-5 mr-spacing-sm" />
-            Export
-          </Button>
-          
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handlePublish}
-            disabled={isPublishing}
-            className="min-w-[140px]"
-          >
-            {isPublishing ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-spacing-sm animate-spin" />
-                Publishing...
-              </>
-            ) : (
-              <>
-                <Share2 className="w-5 h-5 mr-spacing-sm" />
-                Publish Course
-              </>
-            )}
-          </Button>
+          <div className="flex gap-spacing-sm">
+            <Button
+              variant="secondary"
+              size="lg"
+              disabled={isPublishing}
+            >
+              <Eye className="w-5 h-5 mr-spacing-sm" />
+              Preview
+            </Button>
+            
+            <Button
+              variant="secondary"
+              size="lg"
+              disabled={isPublishing}
+            >
+              <Download className="w-5 h-5 mr-spacing-sm" />
+              Export
+            </Button>
+            
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className="min-w-[140px]"
+            >
+              {isPublishing ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-spacing-sm animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-5 h-5 mr-spacing-sm" />
+                  Publish Course
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

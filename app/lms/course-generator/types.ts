@@ -1,10 +1,10 @@
 export type ProcessingStep = 
-  | 'upload'
-  | 'extracting'
-  | 'analyzing'
-  | 'structuring'
-  | 'generating'
-  | 'complete'
+  | 'upload'           // Section 1: Upload Knowledge Base
+  | 'extract'          // Section 1: Extract & Review Content  
+  | 'enhance'          // Section 1: Enhance Content
+  | 'structure'        // Section 2: Structure Course
+  | 'activities'       // Section 2: Create Learning Activities
+  | 'review'           // Section 2: Review & Publish
 
 export type GameType = 
   | 'flashcards'

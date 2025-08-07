@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useState, useCallback } from "react"
+import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/button"
 import { Card } from "@/components/card"
 import { Badge } from "@/components/badge"
@@ -54,7 +55,8 @@ import {
   Link,
   Download,
   Info,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { 
@@ -90,7 +92,7 @@ const BLOOM_LEVELS: { value: BloomLevel; label: string; description: string }[] 
   { value: 'create', label: 'Create', description: 'Produce new or original work' }
 ]
 
-const SECTION_TYPES = [
+const LESSON_TYPES = [
   { value: 'reading', label: 'Reading', icon: <FileText className="w-4 h-4" /> },
   { value: 'video', label: 'Video', icon: <Video className="w-4 h-4" /> },
   { value: 'interactive', label: 'Interactive', icon: <Users className="w-4 h-4" /> },
@@ -195,6 +197,27 @@ function SortableChapter({
             
             <p className="text-sm text-text-secondary">{module.description}</p>
             
+            {/* Display Lessons */}
+            {module.sections.length > 0 && (
+              <div className="mt-spacing-md space-y-spacing-xs">
+                <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">Lessons:</p>
+                {module.sections.map((section, idx) => {
+                  const lessonType = LESSON_TYPES.find(t => t.value === section.type)
+                  return (
+                    <div key={section.id} className="flex items-center gap-spacing-sm p-spacing-xs bg-bg-secondary rounded">
+                      {lessonType && <span className="text-text-tertiary">{lessonType.icon}</span>}
+                      <span className="text-sm text-text-primary flex-1">
+                        {idx + 1}. {section.title}
+                      </span>
+                      <Badge variant="secondary" size="sm">
+                        {section.duration} min
+                      </Badge>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            
             {module.prerequisites.length > 0 && (
               <div className="flex items-center gap-spacing-xs mt-spacing-sm">
                 <GitBranch className="w-4 h-4 text-text-brand" />
@@ -217,7 +240,7 @@ function SortableChapter({
               </div>
               <div className="flex items-center gap-spacing-xs">
                 <FileText className="w-4 h-4" />
-                {module.sections.length} sections
+                {module.sections.length} lessons
               </div>
               <div className="flex items-center gap-spacing-xs">
                 <Clock className="w-4 h-4" />
@@ -253,7 +276,7 @@ function ChapterEditor({
   open: boolean
 }) {
   const [editedModule, setEditedModule] = useState<CourseModule>(module)
-  const [activeTab, setActiveTab] = useState<'general' | 'objectives' | 'sections' | 'resources'>('general')
+  const [activeTab, setActiveTab] = useState<'general' | 'objectives' | 'lessons' | 'resources'>('general')
 
   const handleAddObjective = () => {
     const newObjective: LearningObjective = {
@@ -287,7 +310,7 @@ function ChapterEditor({
       open={open}
       onOpenChange={onCancel}
       size="xl"
-      title="Edit Module"
+      title="Edit Chapter"
       footer={
         <div className="flex justify-end gap-spacing-sm">
           <Button variant="secondary" onClick={onCancel}>
@@ -300,9 +323,9 @@ function ChapterEditor({
         </div>
       }
     >
-      <div className="space-y-spacing-md">
-        <div className="flex gap-spacing-sm">
-          {(['general', 'objectives', 'sections', 'resources'] as const).map(tab => (
+      <div className="space-y-spacing-md" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
+        <div className="flex gap-spacing-sm flex-wrap">
+          {(['general', 'objectives', 'lessons', 'resources'] as const).map(tab => (
             <Button
               key={tab}
               variant={activeTab === tab ? 'primary' : 'ghost'}
@@ -313,24 +336,29 @@ function ChapterEditor({
             </Button>
           ))}
         </div>
+        <div className="w-full" style={{ overflow: 'hidden', boxSizing: 'border-box' }}>
           {activeTab === 'general' && (
-            <div className="space-y-spacing-md">
-              <div>
-                <Label>Chapter Title</Label>
+            <div className="space-y-spacing-md w-full">
+              <div className="w-full">
+                <Label className="block mb-spacing-xs">Chapter Title</Label>
                 <Input
                   value={editedModule.title}
                   onChange={e => setEditedModule(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter module title"
+                  placeholder="Enter chapter title"
+                  className="w-full"
+                  style={{ maxWidth: '100%', boxSizing: 'border-box' }}
                 />
               </div>
               
-              <div>
-                <Label>Description</Label>
+              <div className="w-full">
+                <Label className="block mb-spacing-xs">Description</Label>
                 <Textarea
                   value={editedModule.description}
                   onChange={e => setEditedModule(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe what this module covers"
+                  placeholder="Describe what this chapter covers"
                   rows={3}
+                  className="w-full resize-none"
+                  style={{ maxWidth: '100%', boxSizing: 'border-box' }}
                 />
               </div>
               
@@ -346,7 +374,10 @@ function ChapterEditor({
                         onClick={() => setEditedModule(prev => ({ ...prev, type: type.value }))}
                         className="justify-start"
                       >
-                        <span className={cn("mr-spacing-xs", type.color)}>{type.icon}</span>
+                        <span className={cn(
+                          "mr-spacing-xs",
+                          editedModule.type === type.value ? "text-white" : type.color
+                        )}>{type.icon}</span>
                         {type.label}
                       </Button>
                     ))}
@@ -356,14 +387,20 @@ function ChapterEditor({
                 <div>
                   <Label>Difficulty</Label>
                   <div className="grid grid-cols-3 gap-spacing-sm mt-spacing-sm">
-                    {(['beginner', 'intermediate', 'advanced'] as const).map(level => (
+                    {[
+                      { value: 'beginner', label: 'Beginner', color: 'text-green-600' },
+                      { value: 'intermediate', label: 'Intermediate', color: 'text-text-warning' },
+                      { value: 'advanced', label: 'Advanced', color: 'text-text-error' }
+                    ].map(level => (
                       <Button
-                        key={level}
-                        variant={editedModule.difficulty === level ? 'primary' : 'secondary'}
+                        key={level.value}
+                        variant={editedModule.difficulty === level.value ? 'primary' : 'secondary'}
                         size="sm"
-                        onClick={() => setEditedModule(prev => ({ ...prev, difficulty: level }))}
+                        onClick={() => setEditedModule(prev => ({ ...prev, difficulty: level.value }))}
                       >
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                        <span className={editedModule.difficulty === level.value ? 'text-white' : level.color}>
+                          {level.label}
+                        </span>
                       </Button>
                     ))}
                   </div>
@@ -373,9 +410,9 @@ function ChapterEditor({
               <div>
                 <Label>Prerequisites</Label>
                 <p className="text-sm text-text-secondary mb-spacing-sm">
-                  Select modules that must be completed before this one
+                  Select chapters that must be completed before this one
                 </p>
-                <div className="space-y-spacing-xs">
+                <div className="space-y-spacing-xs max-h-32 overflow-y-auto">
                   {modules.filter(m => m.id !== module.id).map(m => (
                     <label key={m.id} className="flex items-center gap-spacing-sm cursor-pointer">
                       <input
@@ -402,8 +439,8 @@ function ChapterEditor({
                 </div>
               </div>
               
-              <div>
-                <Label>Tags</Label>
+              <div className="w-full">
+                <Label className="block mb-spacing-xs">Tags</Label>
                 <Input
                   value={editedModule.tags.join(', ')}
                   onChange={e => setEditedModule(prev => ({ 
@@ -411,6 +448,8 @@ function ChapterEditor({
                     tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
                   }))}
                   placeholder="Enter tags separated by commas"
+                  className="w-full"
+                  style={{ maxWidth: '100%', boxSizing: 'border-box' }}
                 />
               </div>
             </div>
@@ -444,6 +483,7 @@ function ChapterEditor({
                             setEditedModule(prev => ({ ...prev, learningObjectives: updated }))
                           }}
                           placeholder="Enter learning objective"
+                          className="w-full"
                         />
                       </div>
                       <Button
@@ -463,7 +503,23 @@ function ChapterEditor({
                     
                     <div className="grid grid-cols-2 gap-spacing-sm">
                       <div>
-                        <Label className="text-xs mb-spacing-xs">Bloom's Level</Label>
+                        <Label className="text-xs mb-spacing-xs flex items-center gap-spacing-xs">
+                          Bloom's Level
+                          <div className="group relative inline-block">
+                            <Info className="w-3 h-3 text-text-tertiary cursor-help" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-spacing-sm bg-bg-primary border border-border-default rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                              <p className="text-xs font-medium text-text-primary mb-spacing-xs">Bloom's Taxonomy Levels:</p>
+                              <div className="space-y-1 text-xs text-text-secondary">
+                                <div><span className="font-medium">Remember:</span> Recall facts and basic concepts</div>
+                                <div><span className="font-medium">Understand:</span> Explain ideas or concepts</div>
+                                <div><span className="font-medium">Apply:</span> Use information in new situations</div>
+                                <div><span className="font-medium">Analyze:</span> Draw connections among ideas</div>
+                                <div><span className="font-medium">Evaluate:</span> Justify a stand or decision</div>
+                                <div><span className="font-medium">Create:</span> Produce new or original work</div>
+                              </div>
+                            </div>
+                          </div>
+                        </Label>
                         <select
                           value={objective.bloomLevel}
                           onChange={e => {
@@ -504,13 +560,13 @@ function ChapterEditor({
             </div>
           )}
           
-          {activeTab === 'sections' && (
+          {activeTab === 'lessons' && (
             <div className="space-y-spacing-md">
               <div className="flex items-center justify-between mb-spacing-md">
                 <div>
                   <h3 className="font-medium text-text-primary">Chapter Lessons</h3>
                   <p className="text-sm text-text-secondary">
-                    Break down the module into smaller learning sections
+                    Break down the chapter into smaller learning lessons
                   </p>
                 </div>
                 <Button variant="primary" size="sm" onClick={handleAddSection}>
@@ -521,7 +577,7 @@ function ChapterEditor({
               
               {editedModule.sections.map((section, index) => (
                 <Card key={section.id} className="p-spacing-md">
-                  <div className="space-y-spacing-sm">
+                  <div className="space-y-spacing-md">
                     <div className="flex items-center gap-spacing-sm">
                       <Input
                         value={section.title}
@@ -531,9 +587,9 @@ function ChapterEditor({
                           setEditedModule(prev => ({ ...prev, sections: updated }))
                         }}
                         placeholder="Lesson title"
-                        className="flex-1"
+                        className="flex-1 min-w-0"
                       />
-                      {SECTION_TYPES.map(type => (
+                      {LESSON_TYPES.map(type => (
                         <Button
                           key={type.value}
                           variant={section.type === type.value ? 'primary' : 'ghost'}
@@ -578,6 +634,16 @@ function ChapterEditor({
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
+                    
+                    {/* Upload area for lesson materials */}
+                    <div className="border-2 border-dashed border-border-subtle rounded-lg p-spacing-sm hover:border-border-brand transition-colors cursor-pointer">
+                      <div className="flex items-center justify-center gap-spacing-sm text-text-secondary">
+                        <Upload className="w-4 h-4" />
+                        <p className="text-xs">
+                          Click to upload supplementary materials for this lesson
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -602,6 +668,7 @@ function ChapterEditor({
                   }))}
                   placeholder="Enter one URL per line"
                   rows={4}
+                  className="w-full resize-none"
                 />
               </div>
               
@@ -621,10 +688,12 @@ function ChapterEditor({
                   }))}
                   placeholder="Enter one resource per line"
                   rows={4}
+                  className="w-full resize-none"
                 />
               </div>
             </div>
           )}
+        </div>
       </div>
     </Modal>
   )
@@ -958,7 +1027,7 @@ export function StructureStep({ state, onStateChange, onNext, onBack }: Structur
         },
         status: 'draft'
       },
-      currentStep: 'generating'
+      currentStep: 'activities'
     }))
     onNext()
   }
@@ -968,8 +1037,11 @@ export function StructureStep({ state, onStateChange, onNext, onBack }: Structur
   const totalSections = modules.reduce((acc, m) => acc + m.sections.length, 0)
 
   return (
-    <div className="space-y-spacing-lg">
-      <div>
+    <div className="flex flex-col h-full">
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto space-y-spacing-lg pb-spacing-lg">
+        {/* Header */}
+        <div>
         <h2 className="text-2xl font-bold text-text-primary mb-spacing-sm">
           Course Structure
         </h2>
@@ -1138,27 +1210,30 @@ export function StructureStep({ state, onStateChange, onNext, onBack }: Structur
           </div>
         </div>
       </Card>
+      </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center pt-spacing-lg">
-        <Button
-          variant="ghost"
-          size="lg"
-          onClick={onBack}
-        >
-          <ArrowLeft className="w-5 h-5 mr-spacing-sm" />
-          Back
-        </Button>
-        
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={handleNext}
-          disabled={modules.length === 0}
-        >
-          Generate Activities
-          <ArrowRight className="w-5 h-5 ml-spacing-sm" />
-        </Button>
+      {/* Sticky Footer with Navigation */}
+      <div className="sticky bottom-0 bg-bg-primary border-t border-border-subtle pt-spacing-md">
+        <div className="flex justify-between items-center">
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={onBack}
+          >
+            <ArrowLeft className="w-5 h-5 mr-spacing-sm" />
+            Back
+          </Button>
+          
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleNext}
+            disabled={modules.length === 0}
+          >
+            Generate Activities
+            <ArrowRight className="w-5 h-5 ml-spacing-sm" />
+          </Button>
+        </div>
       </div>
 
       {/* Chapter Editor Modal */}

@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'
 export default function CreateTestPage() {
   const searchParams = useSearchParams()
   const fromCourseGenerator = searchParams.get('from') === 'course-generator'
-  const returnStep = searchParams.get('step') || 'generating'
+  const returnStep = searchParams.get('return_step') || 'activities'
 
   return (
     <div className="min-h-screen bg-secondary"> {/* #F5F5F7 */}

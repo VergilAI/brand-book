@@ -10,7 +10,10 @@ import {
   Brain, 
   Sparkles,
   CheckCircle,
-  Loader2
+  Check,
+  Loader2,
+  Circle,
+  ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CourseGeneratorState } from "../../types"
@@ -19,6 +22,7 @@ interface ProcessingStepProps {
   state: CourseGeneratorState
   onStateChange: React.Dispatch<React.SetStateAction<CourseGeneratorState>>
   onNext: () => void
+  onBack: () => void
 }
 
 interface ProcessingTask {
@@ -28,7 +32,7 @@ interface ProcessingTask {
   progress: number
 }
 
-export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepProps) {
+export function ProcessingStep({ state, onStateChange, onNext, onBack }: ProcessingStepProps) {
   const [tasks, setTasks] = useState<ProcessingTask[]>([
     { id: 'extract', label: 'Extracting text from documents', status: 'pending', progress: 0 },
     { id: 'analyze', label: 'Analyzing content structure', status: 'pending', progress: 0 },
@@ -38,7 +42,7 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
   ])
 
   useEffect(() => {
-    if (state.currentStep === 'extracting') {
+    if (state.currentStep === 'extract') {
       // Simulate processing tasks
       const processNextTask = () => {
         setTasks(currentTasks => {
@@ -64,7 +68,7 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
               setTimeout(() => {
                 onStateChange(prev => ({ 
                   ...prev, 
-                  currentStep: 'analyzing',
+                  currentStep: 'enhance',
                   isProcessing: false,
                   extractedContent: {
                     raw: {
@@ -78,12 +82,12 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
                         {
                           id: 'ch1',
                           title: 'Introduction to Artificial Intelligence',
-                          content: 'Comprehensive introduction to AI concepts, history, and applications in modern technology.',
+                          content: 'This chapter covers the fundamental concepts of AI, including its definition, history, and applications.',
                           sections: [],
                           keyPoints: [
-                            'Define artificial intelligence and its core components',
-                            'Understand the history and evolution of AI technology',
-                            'Identify real-world AI applications across industries'
+                            'AI is the simulation of human intelligence by machines',
+                            'AI has evolved from simple rule-based systems to complex neural networks',
+                            'Applications include healthcare, finance, transportation, and education'
                           ],
                           suggestedQuestions: 5,
                           order: 0
@@ -91,44 +95,44 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
                         {
                           id: 'ch2',
                           title: 'Machine Learning Fundamentals',
-                          content: 'Core concepts of machine learning, including supervised, unsupervised, and reinforcement learning approaches.',
+                          content: 'Understanding the core concepts of machine learning, including supervised, unsupervised, and reinforcement learning.',
                           sections: [],
                           keyPoints: [
-                            'Distinguish between different types of machine learning',
-                            'Understand algorithms and their applications',
-                            'Recognize when to apply specific ML techniques'
+                            'Machine learning enables systems to learn from data',
+                            'Three main types: supervised, unsupervised, and reinforcement learning',
+                            'Common algorithms include decision trees, neural networks, and SVM'
                           ],
-                          suggestedQuestions: 6,
+                          suggestedQuestions: 7,
                           order: 1
                         },
                         {
                           id: 'ch3',
                           title: 'Neural Networks and Deep Learning',
-                          content: 'Deep dive into neural network architectures, deep learning principles, and practical implementations.',
+                          content: 'Exploring neural network architectures and deep learning techniques for complex problem solving.',
                           sections: [],
                           keyPoints: [
-                            'Understand neural network structure and components',
-                            'Learn about deep learning architectures',
-                            'Apply neural networks to solve complex problems'
+                            'Neural networks are inspired by biological neural systems',
+                            'Deep learning uses multiple layers for feature extraction',
+                            'Applications include computer vision, NLP, and speech recognition'
                           ],
-                          suggestedQuestions: 7,
+                          suggestedQuestions: 6,
                           order: 2
                         }
                       ],
                       glossary: [
-                        { term: 'Artificial Intelligence', definition: 'Computer systems that can perform tasks typically requiring human intelligence' },
-                        { term: 'Machine Learning', definition: 'A subset of AI that enables systems to learn from data without explicit programming' },
-                        { term: 'Neural Network', definition: 'A computing system modeled after the structure of biological neural networks' },
-                        { term: 'Deep Learning', definition: 'A subset of ML using neural networks with multiple layers for complex pattern recognition' },
-                        { term: 'Algorithm', definition: 'A set of rules or instructions for solving a problem or completing a task' }
+                        { term: 'Artificial Intelligence', definition: 'The simulation of human intelligence processes by machines' },
+                        { term: 'Machine Learning', definition: 'A subset of AI that enables systems to learn from data' },
+                        { term: 'Neural Network', definition: 'A computing system inspired by biological neural networks' },
+                        { term: 'Deep Learning', definition: 'Machine learning using artificial neural networks with multiple layers' },
+                        { term: 'Algorithm', definition: 'A step-by-step procedure for solving a problem or accomplishing a task' }
                       ],
                       learningObjectives: [
-                        'Define artificial intelligence and understand its core principles',
-                        'Differentiate between various types of machine learning approaches',
-                        'Analyze neural network architectures and deep learning concepts',
-                        'Identify appropriate AI solutions for business problems',
-                        'Evaluate the ethical implications of AI implementation',
-                        'Apply fundamental AI concepts to practical scenarios'
+                        'Understand the fundamental principles of artificial intelligence',
+                        'Learn the different approaches to machine learning',
+                        'Explore neural network architectures and their applications',
+                        'Apply AI concepts to real-world business problems',
+                        'Understand the ethical implications of AI systems',
+                        'Build basic AI models for practical applications'
                       ]
                     },
                     metadata: {
@@ -136,7 +140,7 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
                       wordCount: 18500,
                       estimatedReadingTime: 75,
                       difficulty: 'intermediate',
-                      topics: ['Artificial Intelligence', 'Machine Learning', 'Neural Networks', 'Deep Learning', 'AI Ethics'],
+                      topics: ['AI', 'Machine Learning', 'Neural Networks', 'Deep Learning', 'AI Ethics'],
                       language: 'en'
                     }
                   }
@@ -168,99 +172,108 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
     tasks.reduce((acc, task) => acc + task.progress, 0) / tasks.length
   )
 
+  const completedCount = tasks.filter(t => t.status === 'completed').length
+
   return (
-    <div className="space-y-spacing-lg">
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-bg-brand/10 mb-spacing-md">
-          <Brain className="w-8 h-8 text-text-brand animate-pulse" />
-        </div>
-        <h2 className="text-2xl font-bold text-text-primary mb-spacing-sm">
-          Processing Your Materials
-        </h2>
-        <p className="text-text-secondary max-w-2xl mx-auto">
-          Our AI is analyzing your content to create the best possible learning experience.
-          This may take a few moments.
-        </p>
-      </div>
-
-     
-      <Card className="p-spacing-lg">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 flex flex-col gap-spacing-sm overflow-hidden">
+        {/* Header with better spacing */}
         <div className="flex items-center justify-between mb-spacing-sm">
-          <span className="text-sm font-medium text-text-primary">Overall Progress</span>
-          <span className="text-sm font-semibold text-text-brand">{overallProgress}%</span>
+          <div className="flex items-center gap-spacing-md">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-bg-brand/20 to-bg-brand/10 flex items-center justify-center animate-pulse">
+              <Brain className="w-6 h-6 text-text-brand" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-text-primary">Extracting Content</h2>
+              <p className="text-sm text-text-secondary">Analyzing your documents to extract key information...</p>
+            </div>
+          </div>
+          {/* Progress Info */}
+          <div className="text-right">
+            <p className="text-3xl font-bold text-text-primary">{overallProgress}%</p>
+            <p className="text-sm text-text-secondary">{completedCount} / {tasks.length} complete</p>
+          </div>
         </div>
-        <Progress value={overallProgress} size="lg" variant="default" />
-      </Card>
 
-     
-      <div className="space-y-spacing-sm">
-        {tasks.map(task => (
-          <Card
-            key={task.id}
-            className={cn(
-              "p-spacing-md transition-all duration-normal", // 16px, 200ms
-              task.status === 'completed' && "bg-bg-success/5 border-border-success" // #F0FDF4, #86EFAC
-            )}
-          >
-            <div className="flex items-center gap-spacing-md">
-              {task.status === 'pending' && (
-                <div className="w-8 h-8 rounded-full bg-bg-emphasis flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-text-tertiary" />
+        {/* Progress Bar */}
+        <Progress value={overallProgress} size="lg" variant="default" className="h-3 mb-spacing-sm" />
+
+        {/* Compact Task List */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid gap-spacing-xs">
+            {tasks.map((task, index) => (
+              <div
+                key={task.id}
+                className={cn(
+                  "flex items-center gap-spacing-md p-spacing-md rounded-lg border transition-all",
+                  task.status === 'completed' && "bg-green-50 border-green-200",
+                  task.status === 'processing' && "bg-purple-50 border-purple-200",
+                  task.status === 'pending' && "bg-bg-primary border-border-subtle"
+                )}
+              >
+                {/* Status Icon */}
+                <div className="flex-shrink-0">
+                  {task.status === 'pending' && (
+                    <div className="w-8 h-8 rounded-full bg-bg-emphasis flex items-center justify-center">
+                      <Circle className="w-4 h-4 text-text-tertiary" />
+                    </div>
+                  )}
+                  {task.status === 'processing' && (
+                    <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    </div>
+                  )}
+                  {task.status === 'completed' && (
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white stroke-[3]" />
+                    </div>
+                  )}
                 </div>
-              )}
-              {task.status === 'processing' && (
-                <div className="w-8 h-8 rounded-full bg-bg-brand/10 flex items-center justify-center">
-                  <Loader2 className="w-4 h-4 text-text-brand animate-spin" />
-                </div>
-              )}
-              {task.status === 'completed' && (
-                <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-white fill-white" />
-                </div>
-              )}
-              
-              <div className="flex-1">
+                
+                {/* Task Label */}
                 <p className={cn(
-                  "font-medium",
-                  task.status === 'completed' ? "text-text-success" : "text-text-primary" // #0F8A0F, #1D1D1F
+                  "flex-1 text-base font-medium",
+                  task.status === 'completed' && "text-green-700",
+                  task.status === 'processing' && "text-purple-700",
+                  task.status === 'pending' && "text-text-secondary"
                 )}>
                   {task.label}
                 </p>
-                {task.status === 'processing' && (
-                  <Progress 
-                    value={task.progress} 
-                    size="sm" 
-                    className="mt-spacing-xs" // 4px
-                  />
-                )}
-              </div>
-              
-              {task.status === 'completed' && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 fill-green-600" />
-                  <span className="text-sm font-medium text-green-600">Complete</span>
+                
+                {/* Progress or Status */}
+                <div className="flex-shrink-0">
+                  {task.status === 'processing' && (
+                    <div className="flex items-center gap-spacing-xs">
+                      <Progress 
+                        value={task.progress} 
+                        size="sm" 
+                        variant="default"
+                        className="w-20 h-2"
+                      />
+                      <span className="text-sm font-semibold text-purple-600 w-10 text-right">
+                        {task.progress}%
+                      </span>
+                    </div>
+                  )}
+                  {task.status === 'completed' && (
+                    <Badge variant="success" size="sm">
+                      Done
+                    </Badge>
+                  )}
                 </div>
-              )}
-            </div>
-          </Card>
-        ))}
-      </div>
-
-     
-      <Card className="p-spacing-lg bg-bg-brand/5 border-border-brand/20">
-        <div className="flex items-start gap-spacing-md">
-          <Sparkles className="w-5 h-5 text-text-brand mt-0.5" />
-          <div>
-            <h3 className="font-medium text-text-primary mb-spacing-xs">
-              AI Insights Preview
-            </h3>
-            <p className="text-sm text-text-secondary">
-              Detected {state.uploadedFiles.length} document(s) with educational content.
-              Identifying key concepts and structuring course modules...
-            </p>
+              </div>
+            ))}
           </div>
         </div>
-      </Card>
+
+        {/* AI Status Bar */}
+        <div className="flex items-center gap-spacing-md p-spacing-md bg-gradient-to-r from-bg-brand/5 to-bg-brand/10 rounded-lg border border-border-brand/20">
+          <Sparkles className="w-5 h-5 text-text-brand flex-shrink-0" />
+          <p className="text-sm text-text-secondary">
+            Processing {state.uploadedFiles.length} document{state.uploadedFiles.length > 1 ? 's' : ''} to create your course structure...
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
