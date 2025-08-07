@@ -76,15 +76,38 @@ export interface Term {
   context?: string
 }
 
+export type ModuleType = 'theory' | 'practice' | 'assessment' | 'mixed'
+export type ObjectivePriority = 'required' | 'recommended' | 'optional'
+export type BloomLevel = 'remember' | 'understand' | 'apply' | 'analyze' | 'evaluate' | 'create'
+
+export interface LearningObjective {
+  id: string
+  text: string
+  bloomLevel: BloomLevel
+  priority: ObjectivePriority
+}
+
+export interface ModuleSection {
+  id: string
+  title: string
+  content: string
+  duration: number // in minutes
+  type: 'video' | 'reading' | 'interactive' | 'assessment'
+}
+
 export interface CourseModule {
   id: string
   title: string
   description: string
-  learningObjectives: string[]
+  type: ModuleType
+  learningObjectives: LearningObjective[]
+  prerequisites: string[] // IDs of prerequisite modules
+  sections: ModuleSection[]
   content: {
     material: string
     summary: string
     keyPoints: string[]
+    glossaryTerms: Term[]
   }
   activities: {
     flashcards?: FlashcardSet
@@ -95,7 +118,14 @@ export interface CourseModule {
     testQuestions?: any[] // Questions generated via AI modal
   }
   estimatedDuration: number // in minutes
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
   order: number
+  tags: string[]
+  resources: {
+    supplementary: string[]
+    externalLinks: string[]
+    downloadables: string[]
+  }
 }
 
 export interface FlashcardSet {

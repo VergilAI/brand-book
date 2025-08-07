@@ -73,43 +73,70 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
                       tables: []
                     },
                     structured: {
-                      title: "Introduction to Machine Learning",
+                      title: "AI Fundamentals Training Course",
                       chapters: [
                         {
                           id: 'ch1',
-                          title: 'Understanding AI Fundamentals',
-                          content: 'Chapter content...',
+                          title: 'Introduction to Artificial Intelligence',
+                          content: 'Comprehensive introduction to AI concepts, history, and applications in modern technology.',
                           sections: [],
-                          keyPoints: ['Key point 1', 'Key point 2'],
+                          keyPoints: [
+                            'Define artificial intelligence and its core components',
+                            'Understand the history and evolution of AI technology',
+                            'Identify real-world AI applications across industries'
+                          ],
                           suggestedQuestions: 5,
                           order: 0
                         },
                         {
                           id: 'ch2',
-                          title: 'Neural Networks Basics',
-                          content: 'Chapter content...',
+                          title: 'Machine Learning Fundamentals',
+                          content: 'Core concepts of machine learning, including supervised, unsupervised, and reinforcement learning approaches.',
                           sections: [],
-                          keyPoints: ['Key point 1', 'Key point 2'],
-                          suggestedQuestions: 7,
+                          keyPoints: [
+                            'Distinguish between different types of machine learning',
+                            'Understand algorithms and their applications',
+                            'Recognize when to apply specific ML techniques'
+                          ],
+                          suggestedQuestions: 6,
                           order: 1
+                        },
+                        {
+                          id: 'ch3',
+                          title: 'Neural Networks and Deep Learning',
+                          content: 'Deep dive into neural network architectures, deep learning principles, and practical implementations.',
+                          sections: [],
+                          keyPoints: [
+                            'Understand neural network structure and components',
+                            'Learn about deep learning architectures',
+                            'Apply neural networks to solve complex problems'
+                          ],
+                          suggestedQuestions: 7,
+                          order: 2
                         }
                       ],
                       glossary: [
-                        { term: 'Machine Learning', definition: 'A subset of AI that enables systems to learn from data' },
-                        { term: 'Neural Network', definition: 'A computing system inspired by biological neural networks' }
+                        { term: 'Artificial Intelligence', definition: 'Computer systems that can perform tasks typically requiring human intelligence' },
+                        { term: 'Machine Learning', definition: 'A subset of AI that enables systems to learn from data without explicit programming' },
+                        { term: 'Neural Network', definition: 'A computing system modeled after the structure of biological neural networks' },
+                        { term: 'Deep Learning', definition: 'A subset of ML using neural networks with multiple layers for complex pattern recognition' },
+                        { term: 'Algorithm', definition: 'A set of rules or instructions for solving a problem or completing a task' }
                       ],
                       learningObjectives: [
-                        'Understand the basics of machine learning',
-                        'Learn about different types of neural networks',
-                        'Apply ML concepts to real-world problems'
+                        'Define artificial intelligence and understand its core principles',
+                        'Differentiate between various types of machine learning approaches',
+                        'Analyze neural network architectures and deep learning concepts',
+                        'Identify appropriate AI solutions for business problems',
+                        'Evaluate the ethical implications of AI implementation',
+                        'Apply fundamental AI concepts to practical scenarios'
                       ]
                     },
                     metadata: {
-                      totalPages: 42,
-                      wordCount: 15000,
-                      estimatedReadingTime: 60,
+                      totalPages: 56,
+                      wordCount: 18500,
+                      estimatedReadingTime: 75,
                       difficulty: 'intermediate',
-                      topics: ['AI', 'Machine Learning', 'Neural Networks'],
+                      topics: ['Artificial Intelligence', 'Machine Learning', 'Neural Networks', 'Deep Learning', 'AI Ethics'],
                       language: 'en'
                     }
                   }
@@ -187,8 +214,8 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
                 </div>
               )}
               {task.status === 'completed' && (
-                <div className="w-8 h-8 rounded-full bg-bg-success flex items-center justify-center">
-                  <CheckCircle className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-white fill-white" />
                 </div>
               )}
               
@@ -209,10 +236,10 @@ export function ProcessingStep({ state, onStateChange, onNext }: ProcessingStepP
               </div>
               
               {task.status === 'completed' && (
-                <Badge variant="success" size="sm" className="bg-green-600 text-white">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Complete
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600 fill-green-600" />
+                  <span className="text-sm font-medium text-green-600">Complete</span>
+                </div>
               )}
             </div>
           </Card>
